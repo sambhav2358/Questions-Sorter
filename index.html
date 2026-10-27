@@ -98,7 +98,7 @@
     <!-- COMPACT TOP HEADER BAR                                              -->
     <!-- =================================================================== -->
     <header class="h-12 bg-panel border-b border-borderdark px-3 sm:px-4 flex items-center justify-between gap-2 shrink-0 z-30">
-        <!-- Left: Chapters Drawer Toggle + Brand + IndexedDB Status Pill -->
+        <!-- Left: Chapters Drawer Toggle + Brand + IndexedDB & Cloud Status Pills -->
         <div class="flex items-center gap-2 min-w-0">
             <button onclick="window.app.toggleDrawer()" class="h-8 px-2.5 rounded-xl bg-slate-800/90 hover:bg-slate-700 border border-slate-700/80 text-slate-200 text-xs font-semibold flex items-center gap-1.5 transition shrink-0">
                 <i class="ph-bold ph-tree-structure text-indigo-400 text-sm"></i>
@@ -110,12 +110,18 @@
                 <i class="ph-bold ph-scissors text-white text-sm"></i>
             </div>
 
-            <div class="min-w-0 flex items-center gap-2">
+            <div class="min-w-0 flex items-center gap-1.5">
                 <h1 class="font-bold text-xs sm:text-sm text-white truncate">JEE Sorter</h1>
-                <div id="dbStatusBadge" class="hidden sm:inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 shrink-0">
+                <!-- Local Offline IndexedDB Pill -->
+                <div id="dbStatusBadge" class="hidden sm:inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 shrink-0" title="100% Offline Local Storage (IndexedDB)">
                     <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
                     <span id="dbStatusText">IndexedDB: 0 Saved</span>
                 </div>
+                <!-- Cloud Sync Status Pill (Click to Sync Now or Open Cloud Settings) -->
+                <button id="cloudStatusBadge" onclick="window.app.handleCloudBadgeClick()" class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-slate-800 text-slate-400 border border-slate-700 hover:border-indigo-500/50 transition shrink-0" title="Click to Sync with GitHub Cloud or Configure">
+                    <i id="cloudStatusIcon" class="ph-bold ph-cloud-slash text-xs"></i>
+                    <span id="cloudStatusText" class="hidden md:inline">Cloud: Off</span>
+                </button>
             </div>
         </div>
 
@@ -130,7 +136,7 @@
                 <i id="fullscreenIcon" class="ph-bold ph-corners-out text-sm"></i>
             </button>
 
-            <button onclick="window.app.openSettingsModal()" id="apiSettingsBtn" class="h-8 w-8 rounded-xl bg-slate-800/90 hover:bg-slate-700 border border-slate-700/80 text-slate-200 flex items-center justify-center transition relative" title="Settings, Backup & Deduplicate">
+            <button onclick="window.app.openSettingsModal()" id="apiSettingsBtn" class="h-8 w-8 rounded-xl bg-slate-800/90 hover:bg-slate-700 border border-slate-700/80 text-slate-200 flex items-center justify-center transition relative" title="Settings, Cloud Sync & Backup">
                 <i class="ph-bold ph-gear text-sm"></i>
                 <span id="apiKeyDot" class="w-2 h-2 rounded-full bg-amber-400 absolute top-1 right-1"></span>
             </button>
@@ -236,7 +242,7 @@
                         <span id="popupAnsBtnText">Show Answer</span>
                     </button>
 
-                    <!-- Ask AI to Solve Button (if answer is missing or user wants fresh AI solve) -->
+                    <!-- Ask AI to Solve Button -->
                     <button id="popupAskAiBtn" onclick="window.app.solveSingleQuestionWithAI(window.app.getActivePopupId())" class="h-8 px-2.5 rounded-xl bg-indigo-600/20 hover:bg-indigo-600/30 border border-indigo-500/40 text-indigo-300 text-xs font-semibold flex items-center gap-1 transition" title="Ask Gemini AI to solve this question">
                         <i class="ph-bold ph-sparkle"></i>
                         <span class="hidden sm:inline">AI Solve</span>
@@ -278,18 +284,18 @@
     </div>
 
     <!-- =================================================================== -->
-    <!-- MODAL 1: GEMINI VISION API SETTINGS & DATA TOOLS MODAL              -->
+    <!-- MODAL 1: SETTINGS, GITHUB GIST CLOUD SYNC & VAULT TOOLS MODAL       -->
     <!-- =================================================================== -->
     <div id="settingsModal" class="fixed inset-0 bg-black/80 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-panel border border-borderdark rounded-2xl max-w-md w-full shadow-2xl overflow-hidden">
+        <div class="bg-panel border border-borderdark rounded-2xl max-w-lg w-full shadow-2xl overflow-hidden">
             <div class="px-5 py-3.5 border-b border-borderdark flex items-center justify-between">
                 <div class="flex items-center gap-2.5">
                     <div class="w-8 h-8 rounded-xl bg-indigo-500/20 border border-indigo-500/30 flex items-center justify-center text-indigo-400">
                         <i class="ph-bold ph-gear text-lg"></i>
                     </div>
                     <div>
-                        <h3 class="font-bold text-sm text-white">Settings & Vault Management</h3>
-                        <p class="text-[11px] text-slate-400">API Configuration, Backup & Deduplication</p>
+                        <h3 class="font-bold text-sm text-white">Settings, Cloud Sync & Vault Tools</h3>
+                        <p class="text-[11px] text-slate-400">Offline IndexedDB + GitHub Secret Gist Auto-Backup</p>
                     </div>
                 </div>
                 <button onclick="window.app.closeSettingsModal()" class="p-1.5 rounded-lg text-slate-400 hover:text-white">
@@ -298,9 +304,52 @@
             </div>
 
             <div class="p-4 space-y-4 max-h-[80vh] overflow-y-auto">
-                <!-- Vault Tools: Deduplicate, Export, Import, Bulk Answer Keys -->
+                <!-- GITHUB SECRET GIST CLOUD BACKUP PANEL -->
+                <div class="bg-indigo-950/25 border border-indigo-500/30 rounded-xl p-3.5 space-y-3">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-extrabold uppercase tracking-wider text-indigo-300 flex items-center gap-1.5">
+                            <i class="ph-bold ph-cloud-arrow-up text-base"></i>
+                            GitHub Secret Gist Cloud Backup
+                        </span>
+                        <label class="flex items-center gap-1.5 text-[11px] text-slate-300 font-semibold cursor-pointer">
+                            <input id="cloudAutoSyncCheckbox" type="checkbox" checked class="rounded border-slate-600 text-indigo-600 focus:ring-0">
+                            <span>Auto-Sync</span>
+                        </label>
+                    </div>
+
+                    <div class="space-y-2">
+                        <div>
+                            <label class="block text-[11px] font-bold text-slate-300 mb-1">GitHub Personal Access Token (`gist` scope only)</label>
+                            <div class="relative">
+                                <input id="githubTokenInput" type="password" placeholder="ghp_..." class="w-full h-8 bg-canvas border border-slate-700 rounded-lg pl-2.5 pr-9 text-xs text-white font-mono focus:outline-none focus:border-indigo-500">
+                                <button type="button" onclick="window.app.toggleGithubTokenVisibility()" class="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white">
+                                    <i id="githubTokenEyeIcon" class="ph-bold ph-eye text-sm"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-[11px] font-bold text-slate-300 mb-1">Secret Gist ID <span class="text-slate-500 font-normal">(Leave blank to auto-create on first Push)</span></label>
+                            <input id="githubGistIdInput" type="text" placeholder="Auto-filled on first Push..." class="w-full h-8 bg-canvas border border-slate-700 rounded-lg px-2.5 text-xs text-white font-mono focus:outline-none focus:border-indigo-500">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-2 pt-1">
+                        <button type="button" onclick="window.app.pushToCloudGist(true)" class="h-8 px-3 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold flex items-center justify-center gap-1.5 shadow transition">
+                            <i class="ph-bold ph-cloud-arrow-up"></i>
+                            <span>Push to Cloud</span>
+                        </button>
+                        <button type="button" onclick="window.app.pullFromCloudGist(true)" class="h-8 px-3 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-600 text-sky-300 text-xs font-bold flex items-center justify-center gap-1.5 transition">
+                            <i class="ph-bold ph-cloud-arrow-down"></i>
+                            <span>Pull from Cloud</span>
+                        </button>
+                    </div>
+                    <p id="cloudLastSyncInfo" class="text-[10px] text-slate-400 font-mono">Offline IndexedDB is always active. Cloud syncs in background when configured.</p>
+                </div>
+
+                <!-- Local Vault Tools: Deduplicate, Export, Import, Bulk Answer Keys -->
                 <div class="bg-slate-900/90 border border-borderdark rounded-xl p-3 space-y-2.5">
-                    <span class="block text-[11px] font-bold uppercase tracking-wider text-slate-400">Vault Tools & Backup</span>
+                    <span class="block text-[11px] font-bold uppercase tracking-wider text-slate-400">Local File Backup & Vault Tools</span>
                     <div class="grid grid-cols-3 gap-2">
                         <button onclick="window.app.runDeduplication(true)" class="h-9 px-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 text-xs font-semibold flex items-center justify-center gap-1.5 transition" title="Remove duplicate questions">
                             <i class="ph-bold ph-stack text-sky-400"></i>
@@ -309,12 +358,12 @@
 
                         <button onclick="window.app.exportBackupJson()" class="h-9 px-2 rounded-xl bg-emerald-600/20 hover:bg-emerald-600/30 border border-emerald-500/40 text-emerald-300 text-xs font-bold flex items-center justify-center gap-1.5 transition" title="Export Backup (.json)">
                             <i class="ph-bold ph-download-simple"></i>
-                            <span>Export</span>
+                            <span>Export JSON</span>
                         </button>
 
                         <label class="h-9 px-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-sky-300 text-xs font-bold flex items-center justify-center gap-1.5 cursor-pointer transition" title="Import Backup (.json)">
                             <i class="ph-bold ph-upload-simple"></i>
-                            <span>Import</span>
+                            <span>Import JSON</span>
                             <input type="file" accept=".json,application/json" class="hidden" onchange="window.app.importBackupJson(event)">
                         </label>
                     </div>
@@ -614,7 +663,7 @@
     <div id="toastBox" class="fixed bottom-4 right-4 z-50 flex flex-col gap-2 pointer-events-none"></div>
 
     <!-- =================================================================== -->
-    <!-- CORE APPLICATION LOGIC (PURE INDEXEDDB VIA DEXIE.JS + GEMINI API)   -->
+    <!-- CORE APPLICATION LOGIC (OFFLINE INDEXEDDB + GITHUB GIST CLOUD SYNC) -->
     <!-- =================================================================== -->
     <script>
         // 1. Initialize Pure Local IndexedDB Database via Dexie.js
@@ -661,7 +710,9 @@
             inkColor: '#f8fafc',
             isEraser: false,
             strokeWidth: 3.5,
-            isDrawing: false
+            isDrawing: false,
+            // Cloud Sync State
+            isSyncingCloud: false
         };
 
         // ===================================================================
@@ -682,7 +733,7 @@
         }
 
         // ===================================================================
-        // SETTINGS & API KEY STORAGE (localStorage)
+        // SETTINGS, API KEY & GITHUB CLOUD CONFIG (localStorage)
         // ===================================================================
         function getApiKey() {
             return (localStorage.getItem('jee_gemini_api_key') || '').trim();
@@ -696,6 +747,16 @@
                 padBottom: Number(localStorage.getItem('jee_pad_bottom') ?? 10)
             };
         }
+        function getGithubToken() {
+            return (localStorage.getItem('jee_github_pat') || '').trim();
+        }
+        function getGithubGistId() {
+            return (localStorage.getItem('jee_github_gist_id') || '').trim();
+        }
+        function isCloudAutoSyncEnabled() {
+            return localStorage.getItem('jee_cloud_autosync') !== 'false';
+        }
+
         function updateApiKeyIndicator() {
             const dot = document.getElementById('apiKeyDot');
             if (!dot) return;
@@ -706,13 +767,301 @@
             }
         }
 
+        function updateCloudStatusUI(status = 'idle', detail = '') {
+            const badge = document.getElementById('cloudStatusBadge');
+            const icon = document.getElementById('cloudStatusIcon');
+            const txt = document.getElementById('cloudStatusText');
+            const infoEl = document.getElementById('cloudLastSyncInfo');
+            if (!badge || !icon || !txt) return;
+
+            const hasToken = Boolean(getGithubToken());
+            const lastSync = localStorage.getItem('jee_cloud_last_sync') || '';
+
+            if (!hasToken) {
+                badge.className = 'inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-slate-800 text-slate-400 border border-slate-700 hover:border-indigo-500/50 transition shrink-0';
+                icon.className = 'ph-bold ph-cloud-slash text-xs';
+                txt.textContent = 'Cloud: Off';
+                if (infoEl) infoEl.textContent = 'Enter a GitHub Token above to enable automatic Secret Gist cloud backup.';
+                return;
+            }
+
+            if (status === 'syncing') {
+                badge.className = 'inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-indigo-500/20 text-indigo-300 border border-indigo-500/40 transition shrink-0';
+                icon.className = 'ph-bold ph-arrows-clockwise animate-spin text-xs';
+                txt.textContent = detail || 'Syncing...';
+            } else if (status === 'error') {
+                badge.className = 'inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-rose-500/20 text-rose-300 border border-rose-500/40 transition shrink-0';
+                icon.className = 'ph-bold ph-cloud-warning text-xs';
+                txt.textContent = 'Sync Error';
+                if (infoEl && detail) infoEl.textContent = `Last Cloud Error: ${detail}`;
+            } else {
+                badge.className = 'inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-sky-500/15 text-sky-300 border border-sky-500/30 hover:bg-sky-500/25 transition shrink-0';
+                icon.className = 'ph-bold ph-cloud-check text-xs';
+                txt.textContent = 'Cloud: Synced';
+                if (infoEl) {
+                    infoEl.textContent = lastSync
+                        ? `Last Cloud Sync: ${lastSync} • Gist ID: ${getGithubGistId() || 'Pending first push'}`
+                        : 'Cloud Ready! Click "Push to Cloud" or make any edit to auto-sync.';
+                }
+            }
+        }
+
+        // ===================================================================
+        // GITHUB SECRET GIST CLOUD SYNC ENGINE (SHARDED BY PAPER)
+        // ===================================================================
+        let cloudSyncTimer = null;
+        function scheduleCloudAutoSync() {
+            if (!getGithubToken() || !isCloudAutoSyncEnabled() || state.isExtracting) return;
+            clearTimeout(cloudSyncTimer);
+            cloudSyncTimer = setTimeout(() => {
+                pushToCloudGist(false);
+            }, 2800);
+        }
+
+        function sanitizePaperFilename(paperName) {
+            const clean = String(paperName || 'Default_Paper').replace(/[^a-zA-Z0-9_-]/g, '_').slice(0, 45);
+            return `jee_vault_paper_${clean || 'Default'}.json`;
+        }
+
+        async function pushToCloudGist(manualNotify = false) {
+            // Read inputs if Settings modal is currently open
+            const tokenInp = document.getElementById('githubTokenInput');
+            const gistInp = document.getElementById('githubGistIdInput');
+            if (tokenInp && tokenInp.value.trim()) {
+                localStorage.setItem('jee_github_pat', tokenInp.value.trim());
+            }
+            if (gistInp && gistInp.value.trim()) {
+                localStorage.setItem('jee_github_gist_id', gistInp.value.trim());
+            }
+
+            const token = getGithubToken();
+            let gistId = getGithubGistId();
+
+            if (!token) {
+                if (manualNotify) {
+                    window.app.openSettingsModal();
+                    toast('Paste your GitHub Personal Access Token (gist scope) first!', 'warn');
+                }
+                return;
+            }
+
+            if (state.isSyncingCloud) return;
+            state.isSyncingCloud = true;
+            updateCloudStatusUI('syncing', 'Pushing...');
+
+            try {
+                const allRecords = await db.questions.toArray();
+
+                // Group questions by paperName into separate JSON shard files so Gist handles large vaults
+                const paperGroups = {};
+                allRecords.forEach(q => {
+                    const pName = q.paperName || 'Default Paper';
+                    if (!paperGroups[pName]) paperGroups[pName] = [];
+                    paperGroups[pName].push(q);
+                });
+
+                const filesPayload = {
+                    'jee_vault_manifest.json': {
+                        content: JSON.stringify({
+                            app: 'JEE Sorter Cloud Vault',
+                            updatedAt: new Date().toISOString(),
+                            totalQuestions: allRecords.length,
+                            papers: Object.keys(paperGroups).map(p => ({
+                                paperName: p,
+                                fileName: sanitizePaperFilename(p),
+                                count: paperGroups[p].length
+                            }))
+                        }, null, 2)
+                    }
+                };
+
+                for (const [pName, qList] of Object.entries(paperGroups)) {
+                    const fName = sanitizePaperFilename(pName);
+                    filesPayload[fName] = {
+                        content: JSON.stringify(qList)
+                    };
+                }
+
+                // If Gist already exists, check existing files so deleted papers get cleaned up
+                if (gistId) {
+                    const checkRes = await fetch(`https://api.github.com/gists/${gistId}`, {
+                        headers: {
+                            'Authorization': `Bearer ${token}`,
+                            'Accept': 'application/vnd.github+json'
+                        }
+                    });
+                    if (checkRes.ok) {
+                        const existingGist = await checkRes.json();
+                        Object.keys(existingGist.files || {}).forEach(oldFile => {
+                            if (oldFile.startsWith('jee_vault_paper_') && !filesPayload[oldFile]) {
+                                filesPayload[oldFile] = null; // Delete removed paper shard from Gist
+                            }
+                        });
+                    } else if (checkRes.status === 404) {
+                        gistId = ''; // Recreate if Gist was deleted on GitHub
+                    }
+                }
+
+                const url = gistId ? `https://api.github.com/gists/${gistId}` : 'https://api.github.com/gists';
+                const method = gistId ? 'PATCH' : 'POST';
+
+                const res = await fetch(url, {
+                    method,
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Accept': 'application/vnd.github+json',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        description: 'JEE Sorter Question Vault Cloud Backup (Auto-Synced)',
+                        public: false,
+                        files: filesPayload
+                    })
+                });
+
+                if (!res.ok) {
+                    const errTxt = await res.text();
+                    throw new Error(`HTTP ${res.status}: ${errTxt.slice(0, 100)}`);
+                }
+
+                const data = await res.json();
+                if (data.id) {
+                    localStorage.setItem('jee_github_gist_id', data.id);
+                    const gistInputEl = document.getElementById('githubGistIdInput');
+                    if (gistInputEl) gistInputEl.value = data.id;
+                }
+
+                const nowStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                localStorage.setItem('jee_cloud_last_sync', nowStr);
+                updateCloudStatusUI('idle');
+                if (manualNotify) {
+                    toast(`Synced ${allRecords.length} questions to GitHub Secret Gist!`, 'success');
+                }
+            } catch (err) {
+                console.error('Cloud Push Error:', err);
+                updateCloudStatusUI('error', err.message);
+                if (manualNotify) toast(`Cloud Push failed: ${err.message}`, 'warn');
+            } finally {
+                state.isSyncingCloud = false;
+            }
+        }
+
+        async function pullFromCloudGist(manualNotify = false) {
+            const tokenInp = document.getElementById('githubTokenInput');
+            const gistInp = document.getElementById('githubGistIdInput');
+            if (tokenInp && tokenInp.value.trim()) {
+                localStorage.setItem('jee_github_pat', tokenInp.value.trim());
+            }
+            if (gistInp && gistInp.value.trim()) {
+                localStorage.setItem('jee_github_gist_id', gistInp.value.trim());
+            }
+
+            const token = getGithubToken();
+            let gistId = getGithubGistId();
+
+            if (!token) {
+                if (manualNotify) {
+                    window.app.openSettingsModal();
+                    toast('Paste your GitHub Personal Access Token first!', 'warn');
+                }
+                return;
+            }
+
+            if (state.isSyncingCloud) return;
+            state.isSyncingCloud = true;
+            updateCloudStatusUI('syncing', 'Pulling...');
+
+            try {
+                // If user only entered their token on a new device and left Gist ID blank, auto-discover their JEE Vault Gist!
+                if (!gistId) {
+                    const listRes = await fetch('https://api.github.com/gists?per_page=50', {
+                        headers: {
+                            'Authorization': `Bearer ${token}`,
+                            'Accept': 'application/vnd.github+json'
+                        }
+                    });
+                    if (listRes.ok) {
+                        const gists = await listRes.json();
+                        const found = gists.find(g => g.files && g.files['jee_vault_manifest.json']);
+                        if (found) {
+                            gistId = found.id;
+                            localStorage.setItem('jee_github_gist_id', gistId);
+                            if (gistInp) gistInp.value = gistId;
+                        }
+                    }
+                }
+
+                if (!gistId) {
+                    throw new Error('No Cloud Gist found yet. Click "Push to Cloud" first!');
+                }
+
+                const res = await fetch(`https://api.github.com/gists/${gistId}`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Accept': 'application/vnd.github+json'
+                    }
+                });
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+                const gistData = await res.json();
+                const files = gistData.files || {};
+                const restoredQuestions = [];
+
+                for (const [fName, fileObj] of Object.entries(files)) {
+                    if (!fName.startsWith('jee_vault_paper_')) continue;
+                    let rawJson = fileObj.content;
+                    // If file is truncated by GitHub API (>1MB), fetch the full raw_url stream
+                    if (fileObj.truncated && fileObj.raw_url) {
+                        const rawRes = await fetch(fileObj.raw_url);
+                        rawJson = await rawRes.text();
+                    }
+                    if (rawJson) {
+                        const parsed = JSON.parse(rawJson);
+                        if (Array.isArray(parsed)) {
+                            restoredQuestions.push(...parsed);
+                        }
+                    }
+                }
+
+                if (restoredQuestions.length === 0) {
+                    updateCloudStatusUI('idle');
+                    if (manualNotify) toast('Cloud Gist is currently empty (0 questions).', 'warn');
+                    return;
+                }
+
+                // Replace local IndexedDB with clean cloud state so offline & cloud match 100%
+                const sanitized = restoredQuestions.map(r => {
+                    const copy = { ...r };
+                    delete copy.id;
+                    return copy;
+                });
+
+                await db.questions.clear();
+                await db.questions.bulkAdd(sanitized);
+                await loadQuestionsFromDB();
+
+                const nowStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                localStorage.setItem('jee_cloud_last_sync', nowStr);
+                updateCloudStatusUI('idle');
+                if (manualNotify) {
+                    toast(`Pulled ${sanitized.length} questions from Cloud into Offline IndexedDB!`, 'success');
+                }
+            } catch (err) {
+                console.error('Cloud Pull Error:', err);
+                updateCloudStatusUI('error', err.message);
+                if (manualNotify) toast(`Cloud Pull failed: ${err.message}`, 'warn');
+            } finally {
+                state.isSyncingCloud = false;
+            }
+        }
+
         // ===================================================================
         // MEASURE IMAGE ASPECT RATIO FOR EVEN MASONRY COLUMNS
         // ===================================================================
         let aspectUpdateTimer = null;
         function ensureQuestionAspectRatio(q) {
             if (typeof q.aspectRatio === 'number' && q.aspectRatio > 0) return;
-            q.aspectRatio = 0.42; // temporary fallback while measuring
+            q.aspectRatio = 0.42;
             const img = new Image();
             img.onload = () => {
                 if (img.width > 0) {
@@ -726,7 +1075,7 @@
         }
 
         // ===================================================================
-        // INDEXEDDB CRUD OPERATIONS
+        // INDEXEDDB CRUD OPERATIONS (WITH AUTOMATIC CLOUD SYNC HOOK)
         // ===================================================================
         async function loadQuestionsFromDB() {
             try {
@@ -756,6 +1105,7 @@
                     qObj.id = newId;
                 }
                 await loadQuestionsFromDB();
+                scheduleCloudAutoSync();
                 return qObj;
             } catch (err) {
                 console.error('IndexedDB write error:', err);
@@ -766,6 +1116,7 @@
             try {
                 await db.questions.delete(Number(id));
                 await loadQuestionsFromDB();
+                scheduleCloudAutoSync();
             } catch (err) {
                 console.error('IndexedDB delete error:', err);
             }
@@ -818,6 +1169,7 @@
                 });
                 await db.questions.bulkAdd(sanitized);
                 await loadQuestionsFromDB();
+                scheduleCloudAutoSync();
                 toast(`Restored ${sanitized.length} questions into IndexedDB!`, 'success');
             } catch (err) {
                 toast('Failed to import JSON: ' + err.message, 'warn');
@@ -974,7 +1326,7 @@ Analyze this page image and return a strict JSON object with a "questions" array
             return { questions: [] };
         }
 
-        // On-demand single question AI solver (for already-saved questions or stitched questions)
+        // On-demand single question AI solver
         async function solveSingleQuestionWithAI(id) {
             const q = state.questions.find(i => i.id === Number(id));
             if (!q) return;
@@ -1185,6 +1537,7 @@ Analyze this page image and return a strict JSON object with a "questions" array
                 setTimeout(() => {
                     state.isExtracting = false;
                     window.app.closeUploadModal();
+                    scheduleCloudAutoSync();
                 }, 700);
             } catch (err) {
                 console.error(err);
@@ -1291,6 +1644,7 @@ Analyze this page image and return a strict JSON object with a "questions" array
                 });
             }
             await loadQuestionsFromDB();
+            scheduleCloudAutoSync();
             toast("Saved 3 sample JEE questions to IndexedDB!", "success");
         }
 
@@ -1437,7 +1791,7 @@ Analyze this page image and return a strict JSON object with a "questions" array
             document.getElementById('drawerProgressText').textContent = `Solved: ${solvedTotal} / ${all.length}`;
         }
 
-        // Card HTML Builder (Key completely hidden from cards; Stitch moved cleanly to top bar)
+        // Card HTML Builder (Key completely hidden from cards; Stitch in top bar)
         function buildCardHtml(q) {
             const chapList = JEE_CHAPTERS[q.subject] || JEE_CHAPTERS.Physics;
             const chapOpts = chapList.map(c => `<option value="${c}" ${c === q.chapter ? 'selected' : ''}>${c}</option>`).join('');
@@ -1523,11 +1877,11 @@ Analyze this page image and return a strict JSON object with a "questions" array
                             <i class="ph-bold ph-scissors text-3xl"></i>
                         </div>
                         <h2 class="text-lg font-bold text-white">
-                            ${state.questions.length === 0 ? 'IndexedDB Question Vault Ready!' : 'No Questions Match Current Filter'}
+                            ${state.questions.length === 0 ? 'Offline IndexedDB + Cloud Vault Ready!' : 'No Questions Match Current Filter'}
                         </h2>
                         <p class="text-xs sm:text-sm text-slate-400 leading-relaxed">
                             ${state.questions.length === 0
-                                ? 'Tap "+ Add Test PDF" to extract questions with 100% full-width crops, automatic multi-page stitching, and AI-solved Answer Keys. Everything is saved locally in your browser via IndexedDB!'
+                                ? 'Tap "+ Add Test PDF" to extract questions with 100% full-width crops, automatic multi-page stitching, and AI-solved Answer Keys. Saved offline in IndexedDB and synced to your GitHub Secret Gist!'
                                 : 'Try switching Status to "All Status" or selecting "All Subjects & Chapters" inside the Chapters drawer.'}
                         </p>
                         <div class="flex flex-wrap items-center justify-center gap-3 pt-2">
@@ -1544,7 +1898,6 @@ Analyze this page image and return a strict JSON object with a "questions" array
             }
 
             // SHORTEST-COLUMN-FIRST HEIGHT BALANCED MASONRY
-            // Places each card into whichever column currently has less total vertical height!
             const isTwoCol = window.innerWidth >= 900;
             if (!isTwoCol) {
                 container.innerHTML = `<div class="flex flex-col gap-3.5 pb-10">${list.map(buildCardHtml).join('')}</div>`;
@@ -1555,7 +1908,6 @@ Analyze this page image and return a strict JSON object with a "questions" array
                 let rightHeight = 0;
 
                 list.forEach((q) => {
-                    // Header + padding overhead (~0.11 of column width) + image aspectRatio (height / width)
                     const estimatedCardHeight = 0.11 + (typeof q.aspectRatio === 'number' ? q.aspectRatio : 0.42);
                     if (leftHeight <= rightHeight) {
                         colLeft.push(buildCardHtml(q));
@@ -1663,7 +2015,29 @@ Analyze this page image and return a strict JSON object with a "questions" array
                 }
             },
 
-            // Individual Question Image Popup Lightbox (with Show Answer option)
+            // Cloud Sync Handlers
+            pushToCloudGist,
+            pullFromCloudGist,
+            handleCloudBadgeClick() {
+                if (!getGithubToken()) {
+                    this.openSettingsModal();
+                } else {
+                    pushToCloudGist(true);
+                }
+            },
+            toggleGithubTokenVisibility() {
+                const inp = document.getElementById('githubTokenInput');
+                const icon = document.getElementById('githubTokenEyeIcon');
+                if (inp.type === 'password') {
+                    inp.type = 'text';
+                    icon.className = 'ph-bold ph-eye-slash text-sm';
+                } else {
+                    inp.type = 'password';
+                    icon.className = 'ph-bold ph-eye text-sm';
+                }
+            },
+
+            // Individual Question Image Popup Lightbox
             getActivePopupId() {
                 return state.activePopupId;
             },
@@ -1697,7 +2071,7 @@ Analyze this page image and return a strict JSON object with a "questions" array
                 state.activePopupId = null;
             },
 
-            // On-Demand AI Solver for any individual question
+            // On-Demand AI Solver
             solveSingleQuestionWithAI,
 
             // Settings Modal
@@ -1707,7 +2081,11 @@ Analyze this page image and return a strict JSON object with a "questions" array
                 const pads = getVerticalPads();
                 document.getElementById('padTopInput').value = pads.padTop;
                 document.getElementById('padBottomInput').value = pads.padBottom;
+                document.getElementById('githubTokenInput').value = getGithubToken();
+                document.getElementById('githubGistIdInput').value = getGithubGistId();
+                document.getElementById('cloudAutoSyncCheckbox').checked = isCloudAutoSyncEnabled();
                 document.getElementById('apiKeyMissingAlert').classList.toggle('hidden', !showMissingAlert);
+                updateCloudStatusUI('idle');
                 document.getElementById('settingsModal').classList.remove('hidden');
             },
             closeSettingsModal() {
@@ -1729,15 +2107,26 @@ Analyze this page image and return a strict JSON object with a "questions" array
                 const model = document.getElementById('geminiModelSelect').value;
                 const padTop = Math.max(0, Number(document.getElementById('padTopInput').value) || 8);
                 const padBottom = Math.max(0, Number(document.getElementById('padBottomInput').value) || 10);
+                const ghToken = document.getElementById('githubTokenInput').value.trim();
+                const ghGistId = document.getElementById('githubGistIdInput').value.trim();
+                const autoSync = document.getElementById('cloudAutoSyncCheckbox').checked;
 
                 localStorage.setItem('jee_gemini_api_key', key);
                 localStorage.setItem('jee_gemini_model', model);
                 localStorage.setItem('jee_pad_top', String(padTop));
                 localStorage.setItem('jee_pad_bottom', String(padBottom));
+                localStorage.setItem('jee_github_pat', ghToken);
+                localStorage.setItem('jee_github_gist_id', ghGistId);
+                localStorage.setItem('jee_cloud_autosync', String(autoSync));
 
                 updateApiKeyIndicator();
+                updateCloudStatusUI('idle');
                 this.closeSettingsModal();
-                toast(`Saved API Settings (${model})!`, 'success');
+                toast(`Saved Settings!`, 'success');
+
+                if (ghToken && autoSync && state.questions.length > 0) {
+                    scheduleCloudAutoSync();
+                }
             },
 
             // IndexedDB Card Actions
@@ -1779,6 +2168,7 @@ Analyze this page image and return a strict JSON object with a "questions" array
             async confirmClearVault() {
                 await db.questions.clear();
                 await loadQuestionsFromDB();
+                scheduleCloudAutoSync();
                 this.toggleDrawer(false);
                 toast('Cleared all questions from IndexedDB');
             },
@@ -1813,6 +2203,7 @@ Analyze this page image and return a strict JSON object with a "questions" array
                     }
                 }
                 await loadQuestionsFromDB();
+                scheduleCloudAutoSync();
                 this.closeAnswerKeyModal();
                 toast(`Mapped Answer Keys to ${updated} questions in IndexedDB!`, 'success');
             },
@@ -1831,6 +2222,7 @@ Analyze this page image and return a strict JSON object with a "questions" array
                     }
                 }
                 await loadQuestionsFromDB();
+                if (removed > 0) scheduleCloudAutoSync();
                 if (notify) toast(removed > 0 ? `Removed ${removed} duplicate questions!` : 'No duplicate questions found ✓', 'success');
             },
 
@@ -1932,6 +2324,7 @@ Analyze this page image and return a strict JSON object with a "questions" array
                     delete secondCard.id;
                     await db.questions.add(secondCard);
                     await loadQuestionsFromDB();
+                    scheduleCloudAutoSync();
                     toast(`Split into Q.${baseNum}a & Q.${baseNum}b in IndexedDB!`, 'success');
                 } else {
                     const t = Number(document.getElementById('trimTopSlider').value) / 100;
@@ -1964,6 +2357,7 @@ Analyze this page image and return a strict JSON object with a "questions" array
                 await db.questions.put(curr);
                 await db.questions.delete(next.id);
                 await loadQuestionsFromDB();
+                scheduleCloudAutoSync();
                 toast(`Stitched Q.${curr.questionNumber} & Q.${next.questionNumber}!`, 'success');
             },
 
@@ -2071,9 +2465,14 @@ Analyze this page image and return a strict JSON object with a "questions" array
             resizeTimer = setTimeout(() => renderFeed(), 150);
         });
 
-        window.addEventListener('DOMContentLoaded', () => {
+        window.addEventListener('DOMContentLoaded', async () => {
             updateApiKeyIndicator();
-            loadQuestionsFromDB();
+            updateCloudStatusUI('idle');
+            await loadQuestionsFromDB();
+            // If offline IndexedDB is empty on startup and GitHub Cloud is configured, auto-pull from Cloud!
+            if (state.questions.length === 0 && getGithubToken()) {
+                pullFromCloudGist(true);
+            }
         });
     </script>
 </body>
