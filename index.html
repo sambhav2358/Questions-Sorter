@@ -373,11 +373,11 @@
                 <div class="grid grid-cols-2 gap-3 pt-1">
                     <div>
                         <label class="block text-[11px] font-semibold text-slate-400 mb-1">Top Safe Margin (0-30)</label>
-                        <input id="padTopInput" type="number" min="0" max="40" value="6" class="w-full h-8 bg-canvas border border-slate-700 rounded-lg px-2.5 text-xs text-white">
+                        <input id="padTopInput" type="number" min="0" max="40" value="4" class="w-full h-8 bg-canvas border border-slate-700 rounded-lg px-2.5 text-xs text-white">
                     </div>
                     <div>
                         <label class="block text-[11px] font-semibold text-slate-400 mb-1">Bottom Safe Margin (0-30)</label>
-                        <input id="padBottomInput" type="number" min="0" max="40" value="8" class="w-full h-8 bg-canvas border border-slate-700 rounded-lg px-2.5 text-xs text-white">
+                        <input id="padBottomInput" type="number" min="0" max="40" value="6" class="w-full h-8 bg-canvas border border-slate-700 rounded-lg px-2.5 text-xs text-white">
                     </div>
                 </div>
             </div>
@@ -404,7 +404,7 @@
                     </div>
                     <div>
                         <h3 class="font-bold text-base text-white">Add Test Paper PDF (Precision Scanner)</h3>
-                        <p class="text-xs text-slate-400">100% Full-Width Crops • Strict Anti-Clubbing • Smart Multi-Page Stitching</p>
+                        <p class="text-xs text-slate-400">100% Full-Width Crops • Whitespace Gap Snapper • Smart Multi-Page Stitching</p>
                     </div>
                 </div>
                 <button onclick="window.app.closeUploadModal()" class="p-2 rounded-lg text-slate-400 hover:text-white">
@@ -421,7 +421,7 @@
                             <i class="ph-duotone ph-cloud-arrow-up text-2xl"></i>
                         </div>
                         <p id="selectedFileLabel" class="text-sm sm:text-base font-bold text-white">Tap to Select Your JEE Question Paper PDF</p>
-                        <p class="text-xs text-slate-400 mt-1">100% of AI attention is dedicated to exact question boundaries & cross-page stitching!</p>
+                        <p class="text-xs text-slate-400 mt-1">Hybrid AI + Pixel Whitespace Gap Detection prevents cutting diagrams or clubbing questions!</p>
                     </label>
 
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-slate-900/80 p-3.5 rounded-xl border border-borderdark">
@@ -587,6 +587,7 @@
         // Wipe any leftover local IndexedDB question database so old cached questions never cause sync conflicts
         try { indexedDB.deleteDatabase('JEEQuestionVaultDB'); } catch (_) {}
 
+        // Conic Sections split into Circles, Parabola, Ellipse, Hyperbola
         const JEE_CHAPTERS = {
             Physics: [
                 "Basic Mathematics", "Units and Measurements, Errors and Experiments", "Vectors", "Rectilinear Motion", "Projectile Motion", "Relative Motion", "Circular Kinematics", "Newton's Laws of Motion", "Work, Power and Energy", "COM, Momentum and Collision", "Rigid Body Mechanics", "Mechanical properties of Solids (Elasticity)", "Thermometry", "Thermal Expansion", "Calorimetry", "Heat Transfer", "Kinetic Theory of Gases", "Thermodynamics", "Fluid Mechanics", "Simple Harmonic Motion", "Transverse waves (String Waves)", "Longitudinal Waves (Sound Waves)", "Gravitation",
@@ -597,8 +598,8 @@
                 "Mole Concept & Stoichiometry", "Chemical & Ionic Equilibrium", "Thermodynamics & Thermochemistry", "Electrochemistry & Kinetics", "Solutions & Colligative Properties", "Coordination Compounds", "p, d & f-Block Elements", "General Organic Chemistry (GOC)", "Hydrocarbons & Haloalkanes", "Carbonyl Compounds, Alcohols & Acids", "Amines & Biomolecules"
             ],
             Mathematics: [
-                "Basic Maths", "Sets", "Relations", "Introduction to Functions (PU)", "Linear Inequalities PU", "Fundamentals-1 & 2", "Quadratic Equations and Expressions", "Sequence and Series", "Binomial Theorem for any index", "Permutations and Combinations", "Trigonometric Ratios and Identities", "Trigonometric Equations and Inequalities", "Properties of Triangles", "Introduction to Co-ordinate Geometry", "Straight Lines", "Introduction to 3D Geometry PU", "Pair of Lines", "Circles", "Conic Sections PU", "Statistics", "Limits PU", "Methods of Differentiation", "Functions", "Probability PU",
-                "Quadratic Equations & Complex Numbers", "Sequences & Series", "Permutations & Combinations", "Matrices & Determinants", "Straight Lines & Circles", "Conic Sections", "Limits, Continuity & Differentiability", "Application of Derivatives (AOD)", "Indefinite & Definite Integration", "Differential Equations & Area", "Vectors & 3D Geometry", "Probability & Trigonometry"
+                "Basic Maths", "Sets", "Relations", "Introduction to Functions (PU)", "Linear Inequalities PU", "Fundamentals-1 & 2", "Quadratic Equations and Expressions", "Sequence and Series", "Binomial Theorem for any index", "Permutations and Combinations", "Trigonometric Ratios and Identities", "Trigonometric Equations and Inequalities", "Properties of Triangles", "Introduction to Co-ordinate Geometry", "Straight Lines", "Pair of Lines", "Circles", "Parabola", "Ellipse", "Hyperbola", "Introduction to 3D Geometry PU", "Statistics", "Limits PU", "Methods of Differentiation", "Functions", "Probability PU",
+                "Quadratic Equations & Complex Numbers", "Sequences & Series", "Permutations & Combinations", "Matrices & Determinants", "Limits, Continuity & Differentiability", "Application of Derivatives (AOD)", "Indefinite & Definite Integration", "Differential Equations & Area", "Vectors & 3D Geometry", "Probability & Trigonometry"
             ]
         };
 
@@ -662,8 +663,8 @@
         }
         function getVerticalPads() {
             return {
-                padTop: Number(localStorage.getItem('jee_pad_top') ?? 6),
-                padBottom: Number(localStorage.getItem('jee_pad_bottom') ?? 8)
+                padTop: Number(localStorage.getItem('jee_pad_top') ?? 4),
+                padBottom: Number(localStorage.getItem('jee_pad_bottom') ?? 6)
             };
         }
         function getGithubToken() {
@@ -1074,8 +1075,61 @@
         }
 
         // ===================================================================
-        // SMART WHITESPACE AUTO-TRIMMER & 100% FULL-WIDTH CROPPING
+        // PIXEL WHITESPACE GAP SNAPPER & SMART AUTO-TRIMMER
         // ===================================================================
+        // Scans the rendered canvas near targetNormY (0..1000) to find the cleanest horizontal white gap
+        // so cuts NEVER slice through text or a pulley/circuit diagram!
+        function findCleanHorizontalWhitespaceNormY(sourceCanvas, targetNormY, searchUpNorm = 45, searchDownNorm = 15) {
+            const w = sourceCanvas.width;
+            const h = sourceCanvas.height;
+            const centerPx = Math.floor((targetNormY / 1000) * h);
+            const minPx = Math.max(10, Math.floor(((targetNormY - searchUpNorm) / 1000) * h));
+            const maxPx = Math.min(h - 10, Math.floor(((targetNormY + searchDownNorm) / 1000) * h));
+            if (maxPx <= minPx) return targetNormY;
+
+            const ctx = sourceCanvas.getContext('2d');
+            const sliceH = maxPx - minPx + 1;
+            const imgData = ctx.getImageData(0, minPx, w, sliceH).data;
+
+            // Compute whether each row is pure white across the page width
+            const isRowWhite = new Array(sliceH).fill(true);
+            for (let r = 0; r < sliceH; r++) {
+                let darkPixels = 0;
+                for (let x = 20; x < w - 20; x += 3) {
+                    const idx = (r * w + x) * 4;
+                    if (imgData[idx] < 235 || imgData[idx + 1] < 235 || imgData[idx + 2] < 235) {
+                        darkPixels++;
+                        if (darkPixels > 2) {
+                            isRowWhite[r] = false;
+                            break;
+                        }
+                    }
+                }
+            }
+
+            // Find the best contiguous band of white rows closest to centerPx (preferring slightly above targetNormY)
+            let bestRowPx = centerPx;
+            let bestScore = -999999;
+
+            for (let r = 0; r < sliceH; r++) {
+                if (!isRowWhite[r]) continue;
+                // Measure how many consecutive white rows surround r
+                let band = 1;
+                for (let u = r - 1; u >= 0 && isRowWhite[u]; u--) band++;
+                for (let d = r + 1; d < sliceH && isRowWhite[d]; d++) band++;
+
+                const absY = minPx + r;
+                const dist = Math.abs(absY - centerPx);
+                const score = band * 4 - dist;
+                if (score > bestScore) {
+                    bestScore = score;
+                    bestRowPx = absY;
+                }
+            }
+
+            return Math.round((bestRowPx / h) * 1000);
+        }
+
         function autoTrimVerticalWhitespace(canvas) {
             const ctx = canvas.getContext('2d');
             const w = canvas.width;
@@ -1129,7 +1183,7 @@
             return trimmed;
         }
 
-        function cropFullWidthSlice(sourceCanvas, yminNorm, ymaxNorm, padTop = 6, padBottom = 8) {
+        function cropFullWidthSlice(sourceCanvas, yminNorm, ymaxNorm, padTop = 4, padBottom = 6) {
             const w = sourceCanvas.width;
             const h = sourceCanvas.height;
 
@@ -1200,31 +1254,32 @@ CRITICAL RULES FOR ZERO CLUBBING & EXACT STITCHING:
 1. NEVER CLUB TWO QUESTIONS TOGETHER:
    - Scan down the left margin for question numbers like \`1)\`, \`2)\`, \`3)\`, \`Q.1\`, \`Q.2\`, \`1.\`, \`2.\`.
    - Every single numbered question MUST be its own separate object in the \`questions\` array.
-   - Its \`ymin\` MUST start right at the top of its question number/first line (or top diagram if above the text), and its \`ymax\` MUST end strictly ABOVE the next question number!
+   - Its \`ymin\` MUST start right at the top of its question number/first line, and its \`ymax\` MUST end in the white space strictly ABOVE the next question number!
+   - NEVER let a question's \`ymax\` extend into the next question's text or diagram!
 2. STRICT TOP-OF-PAGE CONTINUATION SEPARATION:
    - Look at the very top of the page (below any page header). If there is text, a diagram, or options \`(A)\`, \`(B)\`, \`(C)\`, \`(D)\` that DO NOT start with a question number (because they are the leftover continuation of a split question from the bottom of the previous page), you MUST output that top fragment as its OWN separate first entry with:
      \`questionNumber: "CONT"\` and \`isContinuationFromPrevPage: true\`.
-   - Its \`ymax\` MUST stop immediately after that fragment's last line/option, strictly BEFORE the next numbered question (e.g. \`2)\`) begins! NEVER merge a top continuation fragment with the next numbered question below it!
+   - Its \`ymax\` MUST stop immediately after that fragment's last line/diagram/option, strictly BEFORE the next numbered question (e.g. \`2)\`) begins! NEVER merge a top continuation fragment with the next numbered question below it!
 3. STRICT BOTTOM-OF-PAGE CUTOFF DETECTION (\`continuesToNextPage\`):
    - Set \`continuesToNextPage: true\` ONLY if the final question at the bottom of the page is genuinely incomplete (e.g., sentence cuts off mid-way, or a multiple-choice question is missing its options, or states "as shown in figure" and the figure/options are on the next page).
-   - If a numerical/subjective question at the bottom of the page ends with a complete sentence/question mark and has all its diagrams, set \`continuesToNextPage: false\`.
+   - If a numerical/subjective question at the bottom of the page ends with a complete sentence/question mark and has all its diagrams on this page, set \`continuesToNextPage: false\`.
 4. ANCHOR VERIFICATION:
-   - For each block, transcribe the first 4-6 words into \`firstLineSnippet\` and the last 4-6 words/labels into \`lastLineSnippet\` BEFORE setting \`ymin\` and \`ymax\`. Verify that \`ymin\` to \`ymax\` encloses ONLY the content between \`firstLineSnippet\` and \`lastLineSnippet\` (including any diagrams/options belonging to that single block).
+   - For each block, transcribe the first 4-6 words into \`firstLineSnippet\` and the last 4-6 words/labels into \`lastLineSnippet\` BEFORE setting \`ymin\` and \`ymax\`.
 5. CURRICULUM CLASSIFICATION:
    - Classify \`subject\` into "Physics", "Chemistry", or "Mathematics".
-   - Classify \`chapter\` STRICTLY from the allowed enum list. If a question combines multiple topics (e.g., Center of Mass + Rotation), assign it to the chapter taught LATER in the curriculum (e.g., "Rigid Body Mechanics").`;
+   - Classify \`chapter\` STRICTLY from the allowed enum list. Note that Conic Sections are split into "Circles", "Parabola", "Ellipse", and "Hyperbola". If a question combines multiple topics (e.g., Center of Mass + Rotation), assign it to the chapter taught LATER in the curriculum (e.g., "Rigid Body Mechanics").`;
 
             const payload = {
                 contents: [{
                     role: "user",
                     parts: [
-                        { text: `Analyze Page ${pageNum}. Strictly separate any top-of-page continuation fragment ("CONT") from numbered questions (1, 2, 3...). Never merge two questions into one box.` },
+                        { text: `Analyze Page ${pageNum}. Strictly separate any top-of-page continuation fragment ("CONT") from numbered questions (1, 2, 3...). Ensure each question's ymax stops in the whitespace strictly above the next question's ymin.` },
                         { inlineData: { mimeType: "image/jpeg", data: base64Jpeg } }
                     ]
                 }],
                 systemInstruction: { parts: [{ text: systemPrompt }] },
                 generationConfig: {
-                    temperature: 0.1,
+                    temperature: 0.0,
                     responseMimeType: "application/json",
                     responseSchema: {
                         type: "OBJECT",
@@ -1243,7 +1298,7 @@ CRITICAL RULES FOR ZERO CLUBBING & EXACT STITCHING:
                                             enum: [
                                                 "Basic Mathematics", "Units and Measurements, Errors and Experiments", "Vectors", "Rectilinear Motion", "Projectile Motion", "Relative Motion", "Circular Kinematics", "Newton's Laws of Motion", "Work, Power and Energy", "COM, Momentum and Collision", "Rigid Body Mechanics", "Mechanical properties of Solids (Elasticity)", "Thermometry", "Thermal Expansion", "Calorimetry", "Heat Transfer", "Kinetic Theory of Gases", "Thermodynamics", "Fluid Mechanics", "Simple Harmonic Motion", "Transverse waves (String Waves)", "Longitudinal Waves (Sound Waves)", "Gravitation",
                                                 "Some Basic Concepts of Chemistry (Mole Concept)", "Atomic Structure", "Periodic Classification", "Chemical Bonding", "Gaseous States", "Thermodynamics", "Chemical Equilibrium", "Ionic Equilibrium", "Redox Reactions", "Equivalent Concept and Volumetric Analysis", "IUPAC Nomenclature", "GOC-I", "GOC-II", "Stereochemistry", "Hydrocarbons", "Hydrogen", "s-Block Elements", "Environmental Chemistry", "p-Block Elements",
-                                                "Basic Maths", "Sets", "Relations", "Introduction to Functions (PU)", "Linear Inequalities PU", "Fundamentals-1 & 2", "Quadratic Equations and Expressions", "Sequence and Series", "Binomial Theorem for any index", "Permutations and Combinations", "Trigonometric Ratios and Identities", "Trigonometric Equations and Inequalities", "Properties of Triangles", "Introduction to Co-ordinate Geometry", "Straight Lines", "Introduction to 3D Geometry PU", "Pair of Lines", "Circles", "Conic Sections PU", "Statistics", "Limits PU", "Methods of Differentiation", "Functions", "Probability PU"
+                                                "Basic Maths", "Sets", "Relations", "Introduction to Functions (PU)", "Linear Inequalities PU", "Fundamentals-1 & 2", "Quadratic Equations and Expressions", "Sequence and Series", "Binomial Theorem for any index", "Permutations and Combinations", "Trigonometric Ratios and Identities", "Trigonometric Equations and Inequalities", "Properties of Triangles", "Introduction to Co-ordinate Geometry", "Straight Lines", "Pair of Lines", "Circles", "Parabola", "Ellipse", "Hyperbola", "Introduction to 3D Geometry PU", "Statistics", "Limits PU", "Methods of Differentiation", "Functions", "Probability PU"
                                             ]
                                         },
                                         difficulty: { type: "STRING", enum: ["Easy", "Medium", "Hard"] },
@@ -1367,11 +1422,22 @@ CRITICAL RULES FOR ZERO CLUBBING & EXACT STITCHING:
 
                     blocks.sort((a, b) => (a.ymin || 0) - (b.ymin || 0));
 
+                    // SMART WHITESPACE GAP BOUNDARY SNAPPING:
+                    // Never average overlapping boxes (which slices diagrams in half!).
+                    // Instead, snap the cut line to the clean horizontal white space right above blocks[i + 1].ymin!
+                    for (let i = 0; i < blocks.length; i++) {
+                        blocks[i].ymin = findCleanHorizontalWhitespaceNormY(canvas, Number(blocks[i].ymin) || 0, 28, 10);
+                    }
                     for (let i = 0; i < blocks.length - 1; i++) {
-                        if (blocks[i].ymax > blocks[i + 1].ymin) {
-                            const mid = Math.floor((blocks[i].ymax + blocks[i + 1].ymin) / 2);
-                            blocks[i].ymax = mid;
-                            blocks[i + 1].ymin = mid;
+                        const nextYMin = blocks[i + 1].ymin;
+                        if (blocks[i].ymax >= nextYMin - 4) {
+                            // Clamp blocks[i].ymax strictly to the whitespace gap right above nextYMin
+                            blocks[i].ymax = Math.max(blocks[i].ymin + 25, nextYMin - 2);
+                        } else {
+                            blocks[i].ymax = findCleanHorizontalWhitespaceNormY(canvas, Number(blocks[i].ymax) || nextYMin, 15, 25);
+                            if (blocks[i].ymax >= nextYMin) {
+                                blocks[i].ymax = Math.max(blocks[i].ymin + 25, nextYMin - 2);
+                            }
                         }
                     }
 
@@ -1442,96 +1508,6 @@ CRITICAL RULES FOR ZERO CLUBBING & EXACT STITCHING:
                 state.isExtracting = false;
                 document.getElementById('startExtractBtn').disabled = false;
             }
-        }
-
-        // ===================================================================
-        // SAMPLE JEE PAPER GENERATOR
-        // ===================================================================
-        async function loadSampleQuestions() {
-            const samples = [
-                {
-                    questionNumber: "1",
-                    subject: "Physics",
-                    chapter: "Rigid Body Mechanics",
-                    difficulty: "Hard",
-                    paperName: "Allen Score Advanced Paper 1",
-                    page: 1,
-                    starred: true,
-                    solved: false,
-                    isStitched: true,
-                    lines: [
-                        "Q.1  A uniform solid cylinder of mass M = 4 kg and radius R = 0.5 m is placed on a rough horizontal",
-                        "     plank of mass m = 2 kg resting on a smooth horizontal floor. A constant horizontal force F = 24 N",
-                        "     is applied to the plank. Assuming no slipping between cylinder and plank (take g = 10 m/s²):",
-                        "     (A) Acceleration of the plank is 6 m/s²          (B) Angular acceleration of cylinder is 8 rad/s²",
-                        "     (C) Friction force acting on cylinder is 8 N     (D) Maximum force before slipping starts is 36 N"
-                    ]
-                },
-                {
-                    questionNumber: "2",
-                    subject: "Chemistry",
-                    chapter: "Ionic Equilibrium",
-                    difficulty: "Medium",
-                    paperName: "Allen Score Advanced Paper 1",
-                    page: 2,
-                    starred: false,
-                    solved: false,
-                    isStitched: false,
-                    lines: [
-                        "Q.2  What volume of 0.20 M NaOH solution must be added to 100 mL of 0.15 M CH₃COOH (pKa = 4.74) in order",
-                        "     to prepare an acidic buffer solution having pH exactly equal to 5.04? (Take log 2 = 0.30)",
-                        "     (A) 25 mL                 (B) 50 mL                 (C) 75 mL                 (D) 60 mL"
-                    ]
-                },
-                {
-                    questionNumber: "3",
-                    subject: "Mathematics",
-                    chapter: "Indefinite & Definite Integration",
-                    difficulty: "Hard",
-                    paperName: "Allen Score Advanced Paper 1",
-                    page: 3,
-                    starred: true,
-                    solved: true,
-                    isStitched: true,
-                    lines: [
-                        "Q.3  Evaluate the definite integral  I = ∫ [from 0 to π/2]  ln(1 + tan x) / (1 + sin 2x) dx  and",
-                        "     choose the correct value of I from the options given below:",
-                        "     (A) π ln(2) / 8           (B) π ln(2) / 4           (C) ln(2) / 2             (D) π² / 16"
-                    ]
-                }
-            ];
-
-            for (const s of samples) {
-                const c = document.createElement('canvas');
-                c.width = 1120;
-                c.height = s.lines.length * 36 + 40;
-                const ctx = c.getContext('2d');
-                ctx.fillStyle = '#FFFFFF';
-                ctx.fillRect(0, 0, c.width, c.height);
-                s.lines.forEach((line, idx) => {
-                    ctx.font = idx === 0 ? '700 20px Inter, sans-serif' : '500 19px Inter, sans-serif';
-                    ctx.fillStyle = idx === 0 ? '#0f172a' : '#1e293b';
-                    ctx.fillText(line, 26, 40 + idx * 34);
-                });
-
-                state.questions.push({
-                    id: generateUniqueId(),
-                    questionNumber: s.questionNumber,
-                    subject: s.subject,
-                    chapter: s.chapter,
-                    difficulty: s.difficulty,
-                    paperName: s.paperName,
-                    page: s.page,
-                    imageDataUrl: c.toDataURL('image/jpeg', 0.88),
-                    aspectRatio: c.height / c.width,
-                    solved: s.solved,
-                    starred: s.starred,
-                    isStitched: s.isStitched,
-                    createdAt: Date.now() + Number(s.questionNumber)
-                });
-            }
-            scheduleCloudAutoSync();
-            toast("Loaded 3 sample JEE questions & syncing to Cloud!", "success");
         }
 
         // ===================================================================
@@ -1776,8 +1752,8 @@ CRITICAL RULES FOR ZERO CLUBBING & EXACT STITCHING:
                             <button onclick="window.app.openUploadModal()" class="h-10 px-5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs sm:text-sm font-bold flex items-center gap-2 shadow-lg shadow-indigo-600/30">
                                 <i class="ph-bold ph-file-pdf"></i> Upload Test Paper PDF
                             </button>
-                            <button onclick="window.app.loadSampleQuestions()" class="h-10 px-4 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-amber-300 text-xs sm:text-sm font-semibold flex items-center gap-2">
-                                <i class="ph-fill ph-sparkle"></i> Load Sample JEE Questions
+                            <button onclick="window.app.pullFromCloudGist(true)" class="h-10 px-4 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-sky-300 text-xs sm:text-sm font-semibold flex items-center gap-2">
+                                <i class="ph-bold ph-cloud-arrow-down"></i> Pull from Cloud
                             </button>
                         </div>
                     </div>
@@ -1926,8 +1902,8 @@ CRITICAL RULES FOR ZERO CLUBBING & EXACT STITCHING:
             async saveSettings() {
                 const key = document.getElementById('apiKeyInput').value.trim();
                 const model = document.getElementById('geminiModelSelect').value;
-                const padTop = Math.max(0, Number(document.getElementById('padTopInput').value) || 6);
-                const padBottom = Math.max(0, Number(document.getElementById('padBottomInput').value) || 8);
+                const padTop = Math.max(0, Number(document.getElementById('padTopInput').value) ?? 4);
+                const padBottom = Math.max(0, Number(document.getElementById('padBottomInput').value) ?? 6);
                 const ghToken = document.getElementById('githubTokenInput').value.trim();
                 const ghGistId = document.getElementById('githubGistIdInput').value.trim();
                 const autoSync = document.getElementById('cloudAutoSyncCheckbox').checked;
@@ -2035,7 +2011,6 @@ CRITICAL RULES FOR ZERO CLUBBING & EXACT STITCHING:
             },
             onPdfSelected,
             startPdfExtraction,
-            loadSampleQuestions,
 
             // Split / Vertical Trim Modal
             openSplitModal(id) {
