@@ -1,0 +1,2080 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>JEE Sorter + Multi-Page Stitching</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+                    },
+                    colors: {
+                        canvas: '#090d16',
+                        panel: '#111726',
+                        card: '#151c2e',
+                        borderdark: '#222b40'
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Google Fonts: Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Phosphor Icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <!-- Dexie.js (IndexedDB Wrapper for 100% Local Persistence) -->
+    <script src="https://unpkg.com/dexie/dist/dexie.js"></script>
+    <!-- PDF.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script>
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    </script>
+    <style>
+        * {
+            -webkit-tap-highlight-color: transparent;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #090d16;
+            color: #f1f5f9;
+            overscroll-behavior: none;
+        }
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(148, 163, 184, 0.25);
+            border-radius: 9999px;
+        }
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        .question-slice-img {
+            width: 100%;
+            height: auto;
+            display: block;
+            image-rendering: -webkit-optimize-contrast;
+        }
+        input[type=range].split-slider {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 100%;
+            background: transparent;
+        }
+        input[type=range].split-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            height: 26px;
+            width: 26px;
+            border-radius: 50%;
+            background: #f59e0b;
+            cursor: pointer;
+            border: 3px solid #ffffff;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.6);
+        }
+        #stylusCanvas {
+            touch-action: none;
+        }
+    </style>
+</head>
+<body class="h-screen w-screen overflow-hidden flex flex-col select-none bg-canvas">
+
+    <!-- =================================================================== -->
+    <!-- COMPACT TOP HEADER BAR                                              -->
+    <!-- =================================================================== -->
+    <header class="h-12 bg-panel border-b border-borderdark px-3 sm:px-4 flex items-center justify-between gap-2 shrink-0 z-30">
+        <!-- Left: Chapters Drawer Toggle + Brand + IndexedDB Status Pill -->
+        <div class="flex items-center gap-2 min-w-0">
+            <button onclick="window.app.toggleDrawer()" class="h-8 px-2.5 rounded-xl bg-slate-800/90 hover:bg-slate-700 border border-slate-700/80 text-slate-200 text-xs font-semibold flex items-center gap-1.5 transition shrink-0">
+                <i class="ph-bold ph-tree-structure text-indigo-400 text-sm"></i>
+                <span>Chapters</span>
+                <span id="activeChapterIndicator" class="px-1.5 py-0.5 text-[10px] rounded bg-indigo-500/20 text-indigo-300 font-bold max-w-[110px] truncate">All</span>
+            </button>
+
+            <div class="w-7 h-7 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-md shadow-indigo-500/20 shrink-0">
+                <i class="ph-bold ph-scissors text-white text-sm"></i>
+            </div>
+
+            <div class="min-w-0 flex items-center gap-2">
+                <h1 class="font-bold text-xs sm:text-sm text-white truncate">JEE Sorter</h1>
+                <div id="dbStatusBadge" class="hidden sm:inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 shrink-0">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+                    <span id="dbStatusText">IndexedDB: 0 Saved</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right: Action Buttons (+ Add Test PDF, Fullscreen, Settings) -->
+        <div class="flex items-center gap-1.5 shrink-0">
+            <button onclick="window.app.openUploadModal()" class="h-8 px-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 text-white text-xs font-bold flex items-center gap-1.5 shadow-lg shadow-indigo-600/30 transition">
+                <i class="ph-bold ph-file-plus text-sm"></i>
+                <span>+ Add Test PDF</span>
+            </button>
+
+            <button onclick="window.app.toggleFullscreen()" class="h-8 w-8 rounded-xl bg-slate-800/90 hover:bg-slate-700 border border-slate-700/80 text-slate-200 flex items-center justify-center transition" title="Toggle Fullscreen">
+                <i id="fullscreenIcon" class="ph-bold ph-corners-out text-sm"></i>
+            </button>
+
+            <button onclick="window.app.openSettingsModal()" id="apiSettingsBtn" class="h-8 w-8 rounded-xl bg-slate-800/90 hover:bg-slate-700 border border-slate-700/80 text-slate-200 flex items-center justify-center transition relative" title="Settings, Backup & Deduplicate">
+                <i class="ph-bold ph-gear text-sm"></i>
+                <span id="apiKeyDot" class="w-2 h-2 rounded-full bg-amber-400 absolute top-1 right-1"></span>
+            </button>
+        </div>
+    </header>
+
+    <!-- =================================================================== -->
+    <!-- SINGLE-ROW FILTER BAR (Status, Starred, Search, Paper, Difficulty)  -->
+    <!-- =================================================================== -->
+    <div class="bg-panel/90 border-b border-borderdark px-3 sm:px-4 py-1.5 flex items-center justify-between gap-2 overflow-x-auto no-scrollbar shrink-0 z-20">
+        <!-- Left: Easy-Access Status & ★ Starred Filter Pills -->
+        <div class="flex items-center gap-1.5 shrink-0">
+            <button onclick="window.app.setStatus('ALL')" data-status="ALL" class="status-btn h-7 px-2.5 rounded-lg text-xs font-bold transition flex items-center gap-1 bg-indigo-600 text-white">
+                <span>All Status</span>
+            </button>
+            <button onclick="window.app.setStatus('UNSOLVED')" data-status="UNSOLVED" class="status-btn h-7 px-2.5 rounded-lg text-xs font-semibold transition flex items-center gap-1.5 bg-slate-800/90 text-slate-300 border border-slate-700/80">
+                <i class="ph-bold ph-circle text-amber-400"></i>
+                <span>Unsolved</span>
+                <span id="status-count-UNSOLVED" class="text-[11px] text-amber-300 font-bold">0</span>
+            </button>
+            <button onclick="window.app.setStatus('SOLVED')" data-status="SOLVED" class="status-btn h-7 px-2.5 rounded-lg text-xs font-semibold transition flex items-center gap-1.5 bg-slate-800/90 text-slate-300 border border-slate-700/80">
+                <i class="ph-fill ph-check-circle text-emerald-400"></i>
+                <span>Solved</span>
+                <span id="status-count-SOLVED" class="text-[11px] text-emerald-300 font-bold">0</span>
+            </button>
+            <button onclick="window.app.setStatus('STARRED')" data-status="STARRED" class="status-btn h-7 px-2.5 rounded-lg text-xs font-semibold transition flex items-center gap-1.5 bg-slate-800/90 text-slate-300 border border-yellow-500/40">
+                <i class="ph-fill ph-star text-yellow-400"></i>
+                <span>★ Starred</span>
+                <span id="status-count-STARRED" class="text-[11px] text-yellow-300 font-bold">0</span>
+            </button>
+        </div>
+
+        <!-- Right: Search, Paper & Difficulty Dropdowns -->
+        <div class="flex items-center gap-1.5 shrink-0 ml-auto">
+            <div class="relative">
+                <i class="ph ph-magnifying-glass absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+                <input id="searchBox" oninput="window.app.setSearch(this.value)" type="text" placeholder="Search chapter, Q#..." class="h-7 w-36 sm:w-44 bg-slate-900 border border-slate-700/80 rounded-lg pl-7 pr-2.5 text-xs text-white placeholder-slate-400 focus:outline-none focus:border-indigo-500">
+            </div>
+            <select id="paperDropdown" onchange="window.app.setPaper(this.value)" class="h-7 bg-slate-900 border border-slate-700/80 rounded-lg px-2 text-xs text-slate-200 focus:outline-none focus:border-indigo-500 max-w-[130px] truncate">
+                <option value="ALL">All Papers (0)</option>
+            </select>
+            <select id="difficultyDropdown" onchange="window.app.setDifficulty(this.value)" class="h-7 bg-slate-900 border border-slate-700/80 rounded-lg px-2 text-xs text-slate-200 focus:outline-none focus:border-indigo-500">
+                <option value="ALL">All Difficulty</option>
+                <option value="Easy">Easy</option>
+                <option value="Medium">Medium</option>
+                <option value="Hard">Hard</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- =================================================================== -->
+    <!-- SLIDE-OUT CHAPTERS DRAWER (Subjects & Nested Chapters)              -->
+    <!-- =================================================================== -->
+    <div id="drawerBackdrop" onclick="window.app.toggleDrawer(false)" class="fixed inset-0 bg-black/60 backdrop-blur-xs z-40 hidden"></div>
+    <aside id="chaptersDrawer" class="fixed inset-y-0 left-0 w-80 bg-panel border-r border-borderdark z-50 -translate-x-full transition-transform duration-200 ease-out flex flex-col shadow-2xl">
+        <div class="p-3.5 border-b border-borderdark flex items-center justify-between">
+            <div class="flex items-center gap-2">
+                <i class="ph-bold ph-folders text-indigo-400 text-lg"></i>
+                <h2 class="font-bold text-xs text-white uppercase tracking-wider">Subjects & Chapters</h2>
+            </div>
+            <button onclick="window.app.toggleDrawer(false)" class="p-1 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800">
+                <i class="ph-bold ph-x text-base"></i>
+            </button>
+        </div>
+
+        <div class="p-2.5 border-b border-borderdark">
+            <input id="drawerChapterSearch" oninput="window.app.renderDrawerChapters()" type="text" placeholder="Filter chapters..." class="w-full h-8 bg-slate-900 border border-slate-700 rounded-xl px-3 text-xs text-white placeholder-slate-400 focus:outline-none focus:border-indigo-500">
+        </div>
+
+        <div id="drawerChapterList" class="flex-1 overflow-y-auto p-2.5 space-y-2"></div>
+
+        <div class="p-3 border-t border-borderdark bg-canvas/60 flex items-center justify-between text-xs">
+            <span id="drawerProgressText" class="text-slate-400 font-medium">Solved: 0 / 0</span>
+            <button onclick="window.app.confirmClearVault()" class="text-rose-400 hover:text-rose-300 font-semibold flex items-center gap-1">
+                <i class="ph-bold ph-trash"></i> Clear All
+            </button>
+        </div>
+    </aside>
+
+    <!-- =================================================================== -->
+    <!-- MAIN QUESTION FEED WORKSPACE (HEIGHT-BALANCED 2-COLUMN MASONRY)     -->
+    <!-- =================================================================== -->
+    <main id="mainFeedContainer" class="flex-1 overflow-y-auto px-3 sm:px-5 py-3">
+        <!-- Populated dynamically by renderFeed() with height-balanced columns -->
+    </main>
+
+    <!-- =================================================================== -->
+    <!-- IMAGE POPUP LIGHTBOX MODAL (WITH SHOW / SOLVE ANSWER BAR)           -->
+    <!-- =================================================================== -->
+    <div id="imagePopupModal" onclick="if(event.target === this) window.app.closeImagePopup()" class="fixed inset-0 bg-black/85 backdrop-blur-sm z-50 hidden flex items-center justify-center p-3 sm:p-5">
+        <div class="relative max-w-5xl w-full max-h-[94vh] bg-panel border border-borderdark rounded-2xl shadow-2xl flex flex-col overflow-hidden">
+            <!-- Top Bar inside Popup -->
+            <div class="px-4 py-2.5 bg-panel border-b border-borderdark flex items-center justify-between gap-2 shrink-0">
+                <div class="flex items-center gap-2 min-w-0">
+                    <span id="popupQBadge" class="px-2 py-0.5 rounded bg-indigo-600 text-white font-extrabold text-xs">Q.1</span>
+                    <span id="popupSubjChap" class="text-xs text-slate-300 font-semibold truncate">Physics</span>
+                </div>
+
+                <div class="flex items-center gap-2 shrink-0">
+                    <!-- Show Answer Button -->
+                    <button id="popupToggleAnsBtn" onclick="window.app.togglePopupAnswer()" class="h-8 px-3 rounded-xl bg-emerald-600/20 hover:bg-emerald-600/30 border border-emerald-500/40 text-emerald-300 text-xs font-bold flex items-center gap-1.5 transition">
+                        <i id="popupAnsEyeIcon" class="ph-bold ph-eye"></i>
+                        <span id="popupAnsBtnText">Show Answer</span>
+                    </button>
+
+                    <!-- Ask AI to Solve Button (if answer is missing or user wants fresh AI solve) -->
+                    <button id="popupAskAiBtn" onclick="window.app.solveSingleQuestionWithAI(window.app.getActivePopupId())" class="h-8 px-2.5 rounded-xl bg-indigo-600/20 hover:bg-indigo-600/30 border border-indigo-500/40 text-indigo-300 text-xs font-semibold flex items-center gap-1 transition" title="Ask Gemini AI to solve this question">
+                        <i class="ph-bold ph-sparkle"></i>
+                        <span class="hidden sm:inline">AI Solve</span>
+                    </button>
+
+                    <!-- Open in Scratchpad -->
+                    <button onclick="const id = window.app.getActivePopupId(); window.app.closeImagePopup(); window.app.openScratchpad(id);" class="h-8 px-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 text-xs font-semibold flex items-center gap-1 transition" title="Open Rough Work Pad">
+                        <i class="ph-bold ph-pencil-line"></i>
+                        <span class="hidden sm:inline">Solve Pad</span>
+                    </button>
+
+                    <!-- Close Popup Button -->
+                    <button onclick="window.app.closeImagePopup()" class="w-8 h-8 rounded-xl bg-slate-800 hover:bg-rose-600 text-slate-300 hover:text-white flex items-center justify-center transition" title="Close (Esc)">
+                        <i class="ph-bold ph-x text-base"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Collapsible Answer & Solution Drawer inside Popup -->
+            <div id="popupAnswerDrawer" class="hidden px-4 py-3 bg-slate-900/95 border-b border-borderdark space-y-2 shrink-0">
+                <div class="flex flex-wrap items-center justify-between gap-2">
+                    <div class="flex items-center gap-2">
+                        <span class="text-xs font-bold text-slate-400">Answer Key:</span>
+                        <span id="popupAnsValue" class="px-2.5 py-0.5 rounded-lg bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 font-extrabold text-sm">A</span>
+                    </div>
+                    <div class="flex items-center gap-1.5">
+                        <input id="popupManualKeyInput" type="text" placeholder="Set Key (e.g. B or 4.5)" class="h-7 w-36 bg-canvas border border-slate-700 rounded-lg px-2 text-xs text-white font-mono focus:outline-none focus:border-indigo-500">
+                        <button onclick="window.app.saveManualKeyFromPopup()" class="h-7 px-2.5 rounded-lg bg-slate-800 hover:bg-emerald-600 text-slate-200 hover:text-white text-xs font-bold transition">Update Key</button>
+                    </div>
+                </div>
+                <p id="popupSolutionText" class="text-xs text-slate-300 font-mono leading-relaxed bg-canvas/80 p-2.5 rounded-xl border border-slate-800 whitespace-pre-wrap hidden"></p>
+            </div>
+
+            <!-- Question Image Viewport -->
+            <div class="w-full flex-1 overflow-y-auto bg-white flex items-center justify-center p-3 sm:p-5">
+                <img id="popupImageEl" src="" alt="Full Question View" class="max-w-full h-auto object-contain rounded">
+            </div>
+        </div>
+    </div>
+
+    <!-- =================================================================== -->
+    <!-- MODAL 1: GEMINI VISION API SETTINGS & DATA TOOLS MODAL              -->
+    <!-- =================================================================== -->
+    <div id="settingsModal" class="fixed inset-0 bg-black/80 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-panel border border-borderdark rounded-2xl max-w-md w-full shadow-2xl overflow-hidden">
+            <div class="px-5 py-3.5 border-b border-borderdark flex items-center justify-between">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-8 h-8 rounded-xl bg-indigo-500/20 border border-indigo-500/30 flex items-center justify-center text-indigo-400">
+                        <i class="ph-bold ph-gear text-lg"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-sm text-white">Settings & Vault Management</h3>
+                        <p class="text-[11px] text-slate-400">API Configuration, Backup & Deduplication</p>
+                    </div>
+                </div>
+                <button onclick="window.app.closeSettingsModal()" class="p-1.5 rounded-lg text-slate-400 hover:text-white">
+                    <i class="ph-bold ph-x text-lg"></i>
+                </button>
+            </div>
+
+            <div class="p-4 space-y-4 max-h-[80vh] overflow-y-auto">
+                <!-- Vault Tools: Deduplicate, Export, Import, Bulk Answer Keys -->
+                <div class="bg-slate-900/90 border border-borderdark rounded-xl p-3 space-y-2.5">
+                    <span class="block text-[11px] font-bold uppercase tracking-wider text-slate-400">Vault Tools & Backup</span>
+                    <div class="grid grid-cols-3 gap-2">
+                        <button onclick="window.app.runDeduplication(true)" class="h-9 px-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 text-xs font-semibold flex items-center justify-center gap-1.5 transition" title="Remove duplicate questions">
+                            <i class="ph-bold ph-stack text-sky-400"></i>
+                            <span>Deduplicate</span>
+                        </button>
+
+                        <button onclick="window.app.exportBackupJson()" class="h-9 px-2 rounded-xl bg-emerald-600/20 hover:bg-emerald-600/30 border border-emerald-500/40 text-emerald-300 text-xs font-bold flex items-center justify-center gap-1.5 transition" title="Export Backup (.json)">
+                            <i class="ph-bold ph-download-simple"></i>
+                            <span>Export</span>
+                        </button>
+
+                        <label class="h-9 px-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-sky-300 text-xs font-bold flex items-center justify-center gap-1.5 cursor-pointer transition" title="Import Backup (.json)">
+                            <i class="ph-bold ph-upload-simple"></i>
+                            <span>Import</span>
+                            <input type="file" accept=".json,application/json" class="hidden" onchange="window.app.importBackupJson(event)">
+                        </label>
+                    </div>
+                    <button onclick="window.app.closeSettingsModal(); window.app.openAnswerKeyModal();" class="w-full h-8 rounded-lg bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/30 text-amber-300 text-xs font-semibold flex items-center justify-center gap-1.5 transition">
+                        <i class="ph-bold ph-key"></i>
+                        <span>Bulk Answer Key Mapper (<span id="mappedKeyCountBadge">0</span> With Keys)</span>
+                    </button>
+                </div>
+
+                <div id="apiKeyMissingAlert" class="hidden p-3 rounded-xl bg-amber-500/15 border border-amber-500/40 text-amber-200 text-xs leading-relaxed">
+                    <strong class="font-bold block text-amber-300 mb-0.5">API Key Required for PDF Scanning:</strong>
+                    Please enter your Google AI Studio API Key below to extract and AI-solve questions from PDF files.
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-300 mb-1.5">Google AI Studio API Key</label>
+                    <div class="relative">
+                        <input id="apiKeyInput" type="password" placeholder="AIzaSy..." class="w-full h-9 bg-canvas border border-slate-700 rounded-xl pl-3 pr-10 text-xs text-white font-mono focus:outline-none focus:border-indigo-500">
+                        <button type="button" onclick="window.app.toggleApiKeyVisibility()" class="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white">
+                            <i id="apiKeyEyeIcon" class="ph-bold ph-eye text-base"></i>
+                        </button>
+                    </div>
+                    <p class="text-[11px] text-slate-400 mt-1">Get a free key from <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer" class="text-indigo-400 underline">Google AI Studio</a>. Never leaves your device.</p>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-300 mb-1.5">Gemini Vision Model</label>
+                    <select id="geminiModelSelect" class="w-full h-9 bg-canvas border border-slate-700 rounded-xl px-3 text-xs text-white font-semibold focus:outline-none focus:border-indigo-500">
+                        <option value="gemini-3.5-flash-lite">gemini-3.5-flash-lite (Default • Fast & Accurate)</option>
+                        <option value="gemini-2.5-pro">gemini-2.5-pro (Highest Precision JEE Solver & Layout)</option>
+                        <option value="gemini-2.5-flash">gemini-2.5-flash (Balanced Speed & Math Reasoning)</option>
+                    </select>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3 pt-1">
+                    <div>
+                        <label class="block text-[11px] font-semibold text-slate-400 mb-1">Top Safe Margin (0-30)</label>
+                        <input id="padTopInput" type="number" min="0" max="40" value="8" class="w-full h-8 bg-canvas border border-slate-700 rounded-lg px-2.5 text-xs text-white">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-semibold text-slate-400 mb-1">Bottom Safe Margin (0-30)</label>
+                        <input id="padBottomInput" type="number" min="0" max="40" value="10" class="w-full h-8 bg-canvas border border-slate-700 rounded-lg px-2.5 text-xs text-white">
+                    </div>
+                </div>
+            </div>
+
+            <div class="px-5 py-3 border-t border-borderdark bg-canvas flex items-center justify-between">
+                <button onclick="window.app.closeSettingsModal()" class="h-8 px-4 rounded-xl bg-slate-800 text-slate-300 text-xs font-semibold">Cancel</button>
+                <button onclick="window.app.saveSettings()" class="h-8 px-5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold flex items-center gap-1.5 shadow-lg">
+                    <i class="ph-bold ph-floppy-disk"></i>
+                    <span>Save Settings</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- =================================================================== -->
+    <!-- MODAL 2: UPLOAD TEST PDF + AI QUESTION SOLVER                       -->
+    <!-- =================================================================== -->
+    <div id="uploadModal" class="fixed inset-0 bg-black/75 backdrop-blur-xs z-50 hidden flex items-center justify-center p-3 sm:p-6">
+        <div class="bg-panel border border-borderdark rounded-2xl max-w-2xl w-full max-h-[90vh] flex flex-col shadow-2xl overflow-hidden">
+            <div class="px-5 py-3.5 border-b border-borderdark flex items-center justify-between">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-9 h-9 rounded-xl bg-indigo-500/20 border border-indigo-500/30 flex items-center justify-center text-indigo-400">
+                        <i class="ph-bold ph-file-pdf text-xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-base text-white">Add Test Paper PDF + AI Auto-Solver</h3>
+                        <p class="text-xs text-slate-400">100% Full-Width Crops • Multi-Page Stitching • Gemini Solves Every Question</p>
+                    </div>
+                </div>
+                <button onclick="window.app.closeUploadModal()" class="p-2 rounded-lg text-slate-400 hover:text-white">
+                    <i class="ph-bold ph-x text-lg"></i>
+                </button>
+            </div>
+
+            <div class="p-5 overflow-y-auto space-y-4 flex-1">
+                <!-- Setup Section -->
+                <div id="uploadSetupView" class="space-y-4">
+                    <label for="pdfFileInput" class="block border-2 border-dashed border-indigo-500/40 hover:border-indigo-400 bg-indigo-950/15 hover:bg-indigo-950/25 transition rounded-2xl p-6 text-center cursor-pointer">
+                        <input type="file" id="pdfFileInput" accept="application/pdf" class="hidden" onchange="window.app.onPdfSelected(event)">
+                        <div class="w-12 h-12 rounded-2xl bg-indigo-500/20 text-indigo-400 flex items-center justify-center mx-auto mb-2.5">
+                            <i class="ph-duotone ph-cloud-arrow-up text-2xl"></i>
+                        </div>
+                        <p id="selectedFileLabel" class="text-sm sm:text-base font-bold text-white">Tap to Select Your JEE Question Paper PDF</p>
+                        <p class="text-xs text-slate-400 mt-1">Gemini Vision extracts each question and computes its Answer Key + step-by-step solution!</p>
+                    </label>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-slate-900/80 p-3.5 rounded-xl border border-borderdark">
+                        <div>
+                            <label class="block text-[11px] font-semibold text-slate-400 mb-1">Test Paper Name</label>
+                            <input id="paperTitleInput" type="text" placeholder="e.g. Allen Score Test 3" class="w-full h-9 bg-canvas border border-slate-700 rounded-lg px-2.5 text-xs text-white focus:outline-none focus:border-indigo-500">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-semibold text-slate-400 mb-1">Pages Range to Extract</label>
+                            <div class="flex items-center gap-1.5">
+                                <input id="startPageInput" type="number" min="1" value="1" class="w-full h-9 bg-canvas border border-slate-700 rounded-lg px-2 text-xs text-white text-center">
+                                <span class="text-slate-500 text-xs">to</span>
+                                <input id="endPageInput" type="number" min="1" value="10" class="w-full h-9 bg-canvas border border-slate-700 rounded-lg px-2 text-xs text-white text-center">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Live Progress View -->
+                <div id="uploadProgressView" class="hidden space-y-3">
+                    <div class="bg-canvas border border-borderdark rounded-xl p-3.5 space-y-2">
+                        <div class="flex items-center justify-between text-xs">
+                            <span id="extractStepTitle" class="font-bold text-white flex items-center gap-2">
+                                <span class="w-2.5 h-2.5 rounded-full bg-indigo-500 animate-ping"></span>
+                                Extracting & Solving Questions with AI...
+                            </span>
+                            <span id="extractPageBadge" class="px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-300 font-bold">Page 1/1</span>
+                        </div>
+                        <div class="w-full h-2 bg-slate-800 rounded-full overflow-hidden">
+                            <div id="extractProgressBar" class="h-full bg-gradient-to-r from-indigo-500 to-emerald-400 transition-all duration-300" style="width: 8%"></div>
+                        </div>
+                        <p id="extractSubText" class="text-[11px] text-slate-400 font-mono">Preparing 2.0x high-resolution full-width renderer...</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div class="bg-canvas border border-borderdark rounded-xl p-2 flex flex-col items-center justify-center h-44 overflow-hidden">
+                            <canvas id="pdfWorkCanvas" class="max-h-full max-w-full object-contain"></canvas>
+                        </div>
+                        <div id="extractLiveLog" class="bg-canvas border border-borderdark rounded-xl p-2.5 h-44 overflow-y-auto font-mono text-[11px] space-y-1 text-slate-300"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="px-5 py-3 border-t border-borderdark bg-canvas flex items-center justify-between">
+                <button onclick="window.app.closeUploadModal()" class="h-9 px-4 rounded-xl bg-slate-800 text-slate-300 text-xs font-semibold">Cancel</button>
+                <button id="startExtractBtn" onclick="window.app.startPdfExtraction()" disabled class="h-9 px-5 rounded-xl bg-indigo-600 hover:bg-indigo-500 disabled:opacity-40 text-white text-xs sm:text-sm font-bold flex items-center gap-1.5 shadow-lg">
+                    <i class="ph-bold ph-magic-wand"></i>
+                    <span>Extract & AI-Solve Questions</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- =================================================================== -->
+    <!-- MODAL 3: SPLIT CLUBBED QUESTION / VERTICAL TRIM TOOL                -->
+    <!-- =================================================================== -->
+    <div id="splitModal" class="fixed inset-0 bg-black/80 backdrop-blur-xs z-50 hidden flex items-center justify-center p-3 sm:p-6">
+        <div class="bg-panel border border-borderdark rounded-2xl max-w-4xl w-full max-h-[92vh] flex flex-col shadow-2xl overflow-hidden">
+            <div class="px-5 py-3 border-b border-borderdark flex items-center justify-between">
+                <div>
+                    <h3 class="font-bold text-sm sm:text-base text-white flex items-center gap-2">
+                        <i class="ph-bold ph-scissors text-amber-400"></i>
+                        <span>Split Clubbed Questions or Trim Vertical Height</span>
+                    </h3>
+                    <p class="text-[11px] text-slate-400">Horizontal width is locked to 100% full page width so alignment never breaks.</p>
+                </div>
+                <button onclick="window.app.closeSplitModal()" class="p-1.5 rounded-lg text-slate-400 hover:text-white">
+                    <i class="ph-bold ph-x text-lg"></i>
+                </button>
+            </div>
+
+            <div class="p-4 overflow-y-auto flex-1 space-y-3">
+                <div class="flex flex-wrap items-center justify-between gap-2 bg-slate-900 p-2.5 rounded-xl border border-borderdark">
+                    <div class="flex items-center gap-1.5">
+                        <button id="modeSplitBtn" onclick="window.app.setSplitMode('SPLIT')" class="h-8 px-3 rounded-lg text-xs font-bold bg-amber-500 text-slate-950">Split into 2 Questions (Q#a & Q#b)</button>
+                        <button id="modeTrimBtn" onclick="window.app.setSplitMode('TRIM')" class="h-8 px-3 rounded-lg text-xs font-semibold bg-slate-800 text-slate-300">Vertical Trim</button>
+                    </div>
+
+                    <div id="splitRangeWrap" class="flex items-center gap-2.5">
+                        <span class="text-xs text-amber-300 font-semibold">Cut Line:</span>
+                        <input id="splitCutSlider" type="range" min="10" max="90" value="50" oninput="window.app.updateSplitPreview()" class="split-slider w-44">
+                        <span id="splitCutVal" class="text-xs font-mono text-white w-9">50%</span>
+                    </div>
+
+                    <div id="trimRangeWrap" class="hidden items-center gap-3">
+                        <label class="text-xs text-sky-300 flex items-center gap-1">Top <input id="trimTopSlider" type="range" min="0" max="45" value="0" oninput="window.app.updateSplitPreview()" class="w-24"></label>
+                        <label class="text-xs text-rose-300 flex items-center gap-1">Bottom <input id="trimBotSlider" type="range" min="55" max="100" value="100" oninput="window.app.updateSplitPreview()" class="w-24"></label>
+                    </div>
+                </div>
+
+                <div class="relative bg-white rounded-xl overflow-hidden border border-slate-700 mx-auto max-w-3xl">
+                    <img id="splitPreviewImg" src="" alt="Preview" class="w-full h-auto block">
+                    <div id="splitDividerLine" class="absolute left-0 right-0 border-t-4 border-dashed border-amber-500 pointer-events-none flex items-center justify-between px-3" style="top: 50%;">
+                        <span class="-mt-6 bg-amber-500 text-slate-950 font-extrabold text-[10px] px-2 py-0.5 rounded">▲ Card 1 (Top Half)</span>
+                        <span class="mt-6 bg-indigo-600 text-white font-extrabold text-[10px] px-2 py-0.5 rounded">▼ Card 2 (Bottom Half)</span>
+                    </div>
+                    <div id="trimTopMask" class="hidden absolute top-0 left-0 right-0 bg-rose-900/50 border-b-2 border-rose-500 pointer-events-none" style="height:0%"></div>
+                    <div id="trimBotMask" class="hidden absolute bottom-0 left-0 right-0 bg-rose-900/50 border-t-2 border-rose-500 pointer-events-none" style="height:0%"></div>
+                </div>
+            </div>
+
+            <div class="px-5 py-3 border-t border-borderdark bg-canvas flex items-center justify-between">
+                <button onclick="window.app.closeSplitModal()" class="h-9 px-4 rounded-xl bg-slate-800 text-slate-300 text-xs font-semibold">Cancel</button>
+                <button onclick="window.app.confirmSplitOrTrim()" class="h-9 px-5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs sm:text-sm font-bold flex items-center gap-1.5">
+                    <i class="ph-bold ph-check"></i>
+                    <span id="splitConfirmLabel">Split Question Now</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- =================================================================== -->
+    <!-- MODAL 4: ANSWER KEY MANAGER (Bulk Edit Override)                    -->
+    <!-- =================================================================== -->
+    <div id="answerKeyModal" class="fixed inset-0 bg-black/75 backdrop-blur-xs z-50 hidden flex items-center justify-center p-3 sm:p-6">
+        <div class="bg-panel border border-borderdark rounded-2xl max-w-xl w-full max-h-[88vh] flex flex-col shadow-2xl overflow-hidden">
+            <div class="px-5 py-3.5 border-b border-borderdark flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <i class="ph-bold ph-key text-amber-400 text-xl"></i>
+                    <div>
+                        <h3 class="font-bold text-base text-white">Bulk Answer Key Override</h3>
+                        <p class="text-[11px] text-slate-400">View or bulk-edit answers (`1: A, 2: C, 3: 4.5`)</p>
+                    </div>
+                </div>
+                <button onclick="window.app.closeAnswerKeyModal()" class="p-1.5 rounded-lg text-slate-400 hover:text-white">
+                    <i class="ph-bold ph-x text-lg"></i>
+                </button>
+            </div>
+
+            <div class="p-4 overflow-y-auto space-y-4 flex-1">
+                <div class="space-y-1.5">
+                    <label class="block text-xs font-semibold text-slate-300">Paste / Edit Answer Key Mapping (`Q# : Answer`):</label>
+                    <textarea id="bulkAnswerTextarea" rows="8" placeholder="1: A&#10;2: B&#10;3: A,C&#10;4: 4.5" class="w-full bg-canvas border border-slate-700 rounded-xl p-3 text-xs font-mono text-white focus:outline-none focus:border-indigo-500"></textarea>
+                </div>
+            </div>
+
+            <div class="px-5 py-3 border-t border-borderdark bg-canvas flex items-center justify-between">
+                <button onclick="window.app.closeAnswerKeyModal()" class="h-9 px-4 rounded-xl bg-slate-800 text-slate-300 text-xs font-semibold">Close</button>
+                <button onclick="window.app.applyBulkAnswerKeys()" class="h-9 px-5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold flex items-center gap-1.5">
+                    <i class="ph-bold ph-check-circle"></i> Save Answer Keys to IndexedDB
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- =================================================================== -->
+    <!-- MODAL 5: FULLSCREEN TABLET STYLUS SCRATCHPAD (WITH SHOW ANSWER)     -->
+    <!-- =================================================================== -->
+    <div id="scratchpadModal" class="fixed inset-0 bg-canvas z-50 hidden flex flex-col">
+        <div class="h-12 bg-panel border-b border-borderdark px-3 sm:px-4 flex items-center justify-between gap-2 shrink-0 overflow-x-auto no-scrollbar">
+            <div class="flex items-center gap-2 min-w-0 shrink-0">
+                <button onclick="window.app.closeScratchpad()" class="h-8 px-3 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold flex items-center gap-1.5 shrink-0">
+                    <i class="ph-bold ph-arrow-left"></i> Back
+                </button>
+                <span id="padQTitle" class="font-bold text-xs sm:text-sm text-white truncate max-w-[180px] sm:max-w-xs">Q.1</span>
+
+                <!-- Show Answer Toggle inside Scratchpad -->
+                <button onclick="window.app.togglePadAnswer()" class="h-8 px-2.5 rounded-lg bg-emerald-600/20 hover:bg-emerald-600/30 border border-emerald-500/40 text-emerald-300 text-xs font-bold flex items-center gap-1.5 shrink-0 transition">
+                    <i id="padAnsEyeIcon" class="ph-bold ph-eye"></i>
+                    <span id="padAnsBtnText">Show Answer</span>
+                </button>
+
+                <!-- AI Solve Button inside Scratchpad -->
+                <button onclick="window.app.solveSingleQuestionWithAI(window.app.getActivePadId())" class="h-8 px-2.5 rounded-lg bg-indigo-600/20 hover:bg-indigo-600/30 border border-indigo-500/40 text-indigo-300 text-xs font-semibold flex items-center gap-1 shrink-0 transition" title="Ask Gemini AI to solve this question">
+                    <i class="ph-bold ph-sparkle"></i>
+                    <span class="hidden md:inline">AI Solve</span>
+                </button>
+            </div>
+
+            <div class="flex items-center gap-2 shrink-0">
+                <button onclick="window.app.setInk('#f8fafc', false)" class="w-6 h-6 rounded-full bg-white border-2 border-indigo-500" title="White Pen"></button>
+                <button onclick="window.app.setInk('#38bdf8', false)" class="w-6 h-6 rounded-full bg-sky-400" title="Blue Pen"></button>
+                <button onclick="window.app.setInk('#fbbf24', false)" class="w-6 h-6 rounded-full bg-amber-400" title="Yellow Pen"></button>
+                <button onclick="window.app.setInk('#4ade80', false)" class="w-6 h-6 rounded-full bg-emerald-400" title="Green Pen"></button>
+                <select onchange="window.app.setStrokeWidth(this.value)" class="h-8 bg-slate-800 border border-slate-700 rounded-lg px-2 text-xs text-slate-200">
+                    <option value="2.2">Fine</option>
+                    <option value="3.5" selected>Medium</option>
+                    <option value="6">Bold</option>
+                </select>
+                <button onclick="window.app.setInk('#090d16', true)" id="eraserBtn" class="h-8 px-2.5 rounded-lg bg-slate-800 border border-slate-700 text-slate-300 text-xs font-semibold flex items-center gap-1">
+                    <i class="ph-bold ph-eraser"></i> <span class="hidden sm:inline">Eraser</span>
+                </button>
+                <button onclick="window.app.clearInk()" class="h-8 px-2.5 rounded-lg bg-rose-950/60 border border-rose-500/30 text-rose-300 text-xs font-semibold">Clear</button>
+            </div>
+        </div>
+
+        <div class="flex-1 flex flex-col lg:flex-row overflow-hidden">
+            <div class="w-full lg:w-1/2 h-2/5 lg:h-full overflow-y-auto p-3 bg-canvas border-b lg:border-b-0 lg:border-r border-borderdark space-y-3">
+                <!-- Collapsible Answer Box inside Scratchpad -->
+                <div id="padAnswerBox" class="hidden p-3 rounded-xl bg-slate-900 border border-emerald-500/40 space-y-1.5">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-bold text-emerald-300">Answer Key: <strong id="padAnsValue" class="text-sm font-extrabold ml-1">A</strong></span>
+                    </div>
+                    <p id="padSolutionText" class="text-xs text-slate-300 font-mono whitespace-pre-wrap leading-relaxed"></p>
+                </div>
+
+                <div class="bg-white rounded-xl p-2 shadow">
+                    <img id="padQuestionImg" src="" alt="Question" class="w-full h-auto block">
+                </div>
+            </div>
+            <div id="padCanvasWrap" class="w-full lg:w-1/2 h-3/5 lg:h-full bg-[#070a12] relative overflow-hidden">
+                <div class="absolute top-2.5 left-3 pointer-events-none text-[11px] text-slate-500 font-medium">
+                    Stylus / Touch Rough Work Pad (Zero-scroll interference)
+                </div>
+                <canvas id="stylusCanvas" class="w-full h-full cursor-crosshair"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- TOAST NOTIFICATIONS -->
+    <div id="toastBox" class="fixed bottom-4 right-4 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+    <!-- =================================================================== -->
+    <!-- CORE APPLICATION LOGIC (PURE INDEXEDDB VIA DEXIE.JS + GEMINI API)   -->
+    <!-- =================================================================== -->
+    <script>
+        // 1. Initialize Pure Local IndexedDB Database via Dexie.js
+        const db = new Dexie('JEEQuestionVaultDB');
+        db.version(1).stores({
+            questions: '++id, questionNumber, subject, chapter, paperName, page, imageDataUrl, solved, starred, isStitched, answerKey, userAnswer, difficulty, createdAt'
+        });
+
+        const JEE_CHAPTERS = {
+            Physics: [
+                "Basic Mathematics", "Units and Measurements, Errors and Experiments", "Vectors", "Rectilinear Motion", "Projectile Motion", "Relative Motion", "Circular Kinematics", "Newton's Laws of Motion", "Work, Power and Energy", "COM, Momentum and Collision", "Rigid Body Mechanics", "Mechanical properties of Solids (Elasticity)", "Thermometry", "Thermal Expansion", "Calorimetry", "Heat Transfer", "Kinetic Theory of Gases", "Thermodynamics", "Fluid Mechanics", "Simple Harmonic Motion", "Transverse waves (String Waves)", "Longitudinal Waves (Sound Waves)", "Gravitation",
+                "Kinematics", "Laws of Motion & Friction", "Work, Energy & Power", "Center of Mass & Collisions", "Rotational Mechanics", "Fluids & Properties of Matter", "Thermodynamics & KTG", "Oscillations & Waves", "Electrostatics & Capacitors", "Current Electricity", "Moving Charges & Magnetism", "EMI & Alternating Current", "Ray & Wave Optics", "Modern Physics & Semiconductors"
+            ],
+            Chemistry: [
+                "Some Basic Concepts of Chemistry (Mole Concept)", "Atomic Structure", "Periodic Classification", "Chemical Bonding", "Gaseous States", "Thermodynamics", "Chemical Equilibrium", "Ionic Equilibrium", "Redox Reactions", "Equivalent Concept and Volumetric Analysis", "IUPAC Nomenclature", "GOC-I", "GOC-II", "Stereochemistry", "Hydrocarbons", "Hydrogen", "s-Block Elements", "Environmental Chemistry", "p-Block Elements",
+                "Mole Concept & Stoichiometry", "Chemical & Ionic Equilibrium", "Thermodynamics & Thermochemistry", "Electrochemistry & Kinetics", "Solutions & Colligative Properties", "Coordination Compounds", "p, d & f-Block Elements", "General Organic Chemistry (GOC)", "Hydrocarbons & Haloalkanes", "Carbonyl Compounds, Alcohols & Acids", "Amines & Biomolecules"
+            ],
+            Mathematics: [
+                "Basic Maths", "Sets", "Relations", "Introduction to Functions (PU)", "Linear Inequalities PU", "Fundamentals-1 & 2", "Quadratic Equations and Expressions", "Sequence and Series", "Binomial Theorem for any index", "Permutations and Combinations", "Trigonometric Ratios and Identities", "Trigonometric Equations and Inequalities", "Properties of Triangles", "Introduction to Co-ordinate Geometry", "Straight Lines", "Introduction to 3D Geometry PU", "Pair of Lines", "Circles", "Conic Sections PU", "Statistics", "Limits PU", "Methods of Differentiation", "Functions", "Probability PU",
+                "Quadratic Equations & Complex Numbers", "Sequences & Series", "Permutations & Combinations", "Matrices & Determinants", "Straight Lines & Circles", "Conic Sections", "Limits, Continuity & Differentiability", "Application of Derivatives (AOD)", "Indefinite & Definite Integration", "Differential Equations & Area", "Vectors & 3D Geometry", "Probability & Trigonometry"
+            ]
+        };
+
+        const state = {
+            questions: [],
+            subject: 'ALL',
+            chapter: 'ALL',
+            status: 'ALL', // ALL | UNSOLVED | SOLVED | STARRED
+            paper: 'ALL',
+            difficulty: 'ALL',
+            search: '',
+            // Popup Lightbox State
+            activePopupId: null,
+            popupAnswerVisible: false,
+            // PDF State
+            pdfDoc: null,
+            isExtracting: false,
+            // Split / Trim Modal State
+            activeSplitId: null,
+            splitMode: 'SPLIT',
+            // Scratchpad State
+            activePadId: null,
+            padAnswerVisible: false,
+            inkColor: '#f8fafc',
+            isEraser: false,
+            strokeWidth: 3.5,
+            isDrawing: false
+        };
+
+        // ===================================================================
+        // TOAST HELPER
+        // ===================================================================
+        function toast(msg, type = 'info') {
+            const box = document.getElementById('toastBox');
+            const el = document.createElement('div');
+            const bg = type === 'success' ? 'bg-emerald-600 border-emerald-400' :
+                       type === 'warn' ? 'bg-amber-600 border-amber-400' : 'bg-indigo-600 border-indigo-400';
+            el.className = `${bg} border text-white px-3.5 py-2.5 rounded-xl shadow-xl text-xs font-bold flex items-center gap-2 transition-all duration-300`;
+            el.innerHTML = `<i class="ph-bold ph-check-circle text-sm"></i><span>${msg}</span>`;
+            box.appendChild(el);
+            setTimeout(() => {
+                el.style.opacity = '0';
+                setTimeout(() => el.remove(), 250);
+            }, 3000);
+        }
+
+        // ===================================================================
+        // SETTINGS & API KEY STORAGE (localStorage)
+        // ===================================================================
+        function getApiKey() {
+            return (localStorage.getItem('jee_gemini_api_key') || '').trim();
+        }
+        function getSelectedModel() {
+            return localStorage.getItem('jee_gemini_model') || 'gemini-3.5-flash-lite';
+        }
+        function getVerticalPads() {
+            return {
+                padTop: Number(localStorage.getItem('jee_pad_top') ?? 8),
+                padBottom: Number(localStorage.getItem('jee_pad_bottom') ?? 10)
+            };
+        }
+        function updateApiKeyIndicator() {
+            const dot = document.getElementById('apiKeyDot');
+            if (!dot) return;
+            if (getApiKey()) {
+                dot.className = 'w-2 h-2 rounded-full bg-emerald-400 absolute top-1 right-1';
+            } else {
+                dot.className = 'w-2 h-2 rounded-full bg-amber-400 animate-ping absolute top-1 right-1';
+            }
+        }
+
+        // ===================================================================
+        // MEASURE IMAGE ASPECT RATIO FOR EVEN MASONRY COLUMNS
+        // ===================================================================
+        let aspectUpdateTimer = null;
+        function ensureQuestionAspectRatio(q) {
+            if (typeof q.aspectRatio === 'number' && q.aspectRatio > 0) return;
+            q.aspectRatio = 0.42; // temporary fallback while measuring
+            const img = new Image();
+            img.onload = () => {
+                if (img.width > 0) {
+                    q.aspectRatio = img.height / img.width;
+                    db.questions.put(q).catch(() => {});
+                    clearTimeout(aspectUpdateTimer);
+                    aspectUpdateTimer = setTimeout(() => renderFeed(), 80);
+                }
+            };
+            img.src = q.imageDataUrl;
+        }
+
+        // ===================================================================
+        // INDEXEDDB CRUD OPERATIONS
+        // ===================================================================
+        async function loadQuestionsFromDB() {
+            try {
+                const items = await db.questions.toArray();
+                items.forEach(ensureQuestionAspectRatio);
+                items.sort((a, b) => {
+                    const nA = parseFloat(String(a.questionNumber).replace(/[^\d.]/g, '')) || 9999;
+                    const nB = parseFloat(String(b.questionNumber).replace(/[^\d.]/g, '')) || 9999;
+                    if (nA !== nB) return nA - nB;
+                    return String(a.questionNumber).localeCompare(String(b.questionNumber));
+                });
+                state.questions = items;
+                const badge = document.getElementById('dbStatusText');
+                if (badge) badge.textContent = `IndexedDB: ${items.length} Saved`;
+                renderAll();
+            } catch (err) {
+                console.error('Failed to read IndexedDB:', err);
+            }
+        }
+
+        async function saveQuestionToDB(qObj) {
+            try {
+                if (qObj.id !== undefined) {
+                    await db.questions.put(qObj);
+                } else {
+                    const newId = await db.questions.add(qObj);
+                    qObj.id = newId;
+                }
+                await loadQuestionsFromDB();
+                return qObj;
+            } catch (err) {
+                console.error('IndexedDB write error:', err);
+            }
+        }
+
+        async function deleteQuestionFromDB(id) {
+            try {
+                await db.questions.delete(Number(id));
+                await loadQuestionsFromDB();
+            } catch (err) {
+                console.error('IndexedDB delete error:', err);
+            }
+        }
+
+        // ===================================================================
+        // BACKUP EXPORT & IMPORT (.JSON)
+        // ===================================================================
+        async function exportBackupJson() {
+            try {
+                const allRecords = await db.questions.toArray();
+                if (allRecords.length === 0) {
+                    return toast('No questions in IndexedDB to export yet!', 'warn');
+                }
+                const payload = {
+                    app: 'JEE Sorter + Multi-Page Stitching',
+                    exportedAt: new Date().toISOString(),
+                    count: allRecords.length,
+                    questions: allRecords
+                };
+                const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `jee-questions-backup-${new Date().toISOString().slice(0, 10)}.json`;
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                URL.revokeObjectURL(url);
+                toast(`Exported ${allRecords.length} questions to JSON backup!`, 'success');
+            } catch (err) {
+                toast('Export failed: ' + err.message, 'warn');
+            }
+        }
+
+        async function importBackupJson(event) {
+            const file = event.target.files?.[0];
+            if (!file) return;
+            try {
+                const text = await file.text();
+                const parsed = JSON.parse(text);
+                const records = Array.isArray(parsed) ? parsed : (parsed.questions || []);
+                if (!Array.isArray(records) || records.length === 0) {
+                    return toast('Invalid or empty backup JSON file', 'warn');
+                }
+                const sanitized = records.map(r => {
+                    const copy = { ...r };
+                    delete copy.id;
+                    return copy;
+                });
+                await db.questions.bulkAdd(sanitized);
+                await loadQuestionsFromDB();
+                toast(`Restored ${sanitized.length} questions into IndexedDB!`, 'success');
+            } catch (err) {
+                toast('Failed to import JSON: ' + err.message, 'warn');
+            } finally {
+                event.target.value = '';
+            }
+        }
+
+        // ===================================================================
+        // 100% FULL HORIZONTAL WIDTH CROPPING & MULTI-PAGE STITCHING
+        // ===================================================================
+        function cropFullWidthSlice(sourceCanvas, yminNorm, ymaxNorm, padTop = 8, padBottom = 10) {
+            const w = sourceCanvas.width;
+            const h = sourceCanvas.height;
+
+            const safeYMin = Math.max(0, yminNorm - padTop);
+            const safeYMax = Math.min(1000, ymaxNorm + padBottom);
+
+            const cropY = Math.floor((safeYMin / 1000) * h);
+            const cropH = Math.max(40, Math.floor(((safeYMax - safeYMin) / 1000) * h));
+
+            const outW = Math.min(1200, w);
+            const scale = outW / w;
+            const outH = Math.floor(cropH * scale);
+
+            const c = document.createElement('canvas');
+            c.width = outW;
+            c.height = outH;
+            const ctx = c.getContext('2d');
+            ctx.fillStyle = '#FFFFFF';
+            ctx.fillRect(0, 0, outW, outH);
+            ctx.drawImage(sourceCanvas, 0, cropY, w, cropH, 0, 0, outW, outH);
+
+            return {
+                dataUrl: c.toDataURL('image/jpeg', 0.86),
+                aspectRatio: outH / outW
+            };
+        }
+
+        async function stitchCanvasesVertically(topDataUrl, botDataUrl) {
+            const loadImg = (src) => new Promise((res, rej) => {
+                const img = new Image();
+                img.onload = () => res(img);
+                img.onerror = rej;
+                img.src = src;
+            });
+            const [topImg, botImg] = await Promise.all([loadImg(topDataUrl), loadImg(botDataUrl)]);
+            const targetW = Math.max(topImg.width, botImg.width);
+            const topH = Math.round(topImg.height * (targetW / topImg.width));
+            const botH = Math.round(botImg.height * (targetW / botImg.width));
+
+            const c = document.createElement('canvas');
+            c.width = targetW;
+            c.height = topH + botH + 4;
+            const ctx = c.getContext('2d');
+            ctx.fillStyle = '#FFFFFF';
+            ctx.fillRect(0, 0, c.width, c.height);
+            ctx.drawImage(topImg, 0, 0, targetW, topH);
+            ctx.drawImage(botImg, 0, topH + 4, targetW, botH);
+            return {
+                dataUrl: c.toDataURL('image/jpeg', 0.86),
+                aspectRatio: c.height / c.width
+            };
+        }
+
+        // ===================================================================
+        // GEMINI VISION API CALL (EXTRACTS & AI-SOLVES EVERY QUESTION)
+        // ===================================================================
+        async function analyzePageAndSolveWithGemini(base64Jpeg, pageNum) {
+            const apiKey = getApiKey();
+            const selectedModel = getSelectedModel();
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${selectedModel}:generateContent?key=${apiKey}`;
+
+            const systemPrompt = `You are a precision JEE Advanced Question Paper Extractor AND Expert Solver.
+Analyze this page image and return a strict JSON object with a "questions" array:
+1. ANTI-CLUBBING RULE: NEVER club multiple questions into a single bounding box! Every distinct numbered question (1, 2, 3...) MUST have its own separate entry with vertical coordinates \`ymin\` and \`ymax\` (normalized 0 to 1000).
+2. Include all options (A), (B), (C), (D) and diagrams belonging to that question inside its \`ymin\` to \`ymax\` span.
+3. If a block at the very top of the page is the remaining part or options of a split question from the previous page, set \`isContinuationFromPrevPage: true\` and \`questionNumber: "CONT"\`.
+4. If a question at the bottom of the page is cut off or missing its options, set \`continuesToNextPage: true\`.
+5. Classify \`subject\` into "Physics", "Chemistry", or "Mathematics".
+6. Classify \`chapter\` STRICTLY from the official curriculum list for that subject. If a question spans multiple topics (e.g., Center of Mass + Rotation), assign it to the chapter taught LATER in the curriculum (e.g., "Rigid Body Mechanics" over COM).
+7. Estimate \`difficulty\` ("Easy", "Medium", "Hard").
+8. SOLVE EVERY QUESTION YOURSELF:
+   - First write a concise step-by-step derivation in \`briefSolution\` (equations used, key substitution, and final value) so your math is 100% verified.
+   - Then provide the final \`answerKey\` (e.g., "A", "B", "C", "D", "A,C" for multiple choice, or the exact numerical value like "4.5" for integer/numerical questions).`;
+
+            const payload = {
+                contents: [{
+                    role: "user",
+                    parts: [
+                        { text: `Analyze Page ${pageNum}. Strictly separate every numbered question, solve each question step-by-step, and output its exact answerKey.` },
+                        { inlineData: { mimeType: "image/jpeg", data: base64Jpeg } }
+                    ]
+                }],
+                systemInstruction: { parts: [{ text: systemPrompt }] },
+                generationConfig: {
+                    responseMimeType: "application/json",
+                    responseSchema: {
+                        type: "OBJECT",
+                        properties: {
+                            questions: {
+                                type: "ARRAY",
+                                items: {
+                                    type: "OBJECT",
+                                    properties: {
+                                        questionNumber: { type: "STRING" },
+                                        subject: { type: "STRING", enum: ["Physics", "Chemistry", "Mathematics"] },
+                                        chapter: {
+                                            type: "STRING",
+                                            enum: [
+                                                "Basic Mathematics", "Units and Measurements, Errors and Experiments", "Vectors", "Rectilinear Motion", "Projectile Motion", "Relative Motion", "Circular Kinematics", "Newton's Laws of Motion", "Work, Power and Energy", "COM, Momentum and Collision", "Rigid Body Mechanics", "Mechanical properties of Solids (Elasticity)", "Thermometry", "Thermal Expansion", "Calorimetry", "Heat Transfer", "Kinetic Theory of Gases", "Thermodynamics", "Fluid Mechanics", "Simple Harmonic Motion", "Transverse waves (String Waves)", "Longitudinal Waves (Sound Waves)", "Gravitation",
+                                                "Some Basic Concepts of Chemistry (Mole Concept)", "Atomic Structure", "Periodic Classification", "Chemical Bonding", "Gaseous States", "Thermodynamics", "Chemical Equilibrium", "Ionic Equilibrium", "Redox Reactions", "Equivalent Concept and Volumetric Analysis", "IUPAC Nomenclature", "GOC-I", "GOC-II", "Stereochemistry", "Hydrocarbons", "Hydrogen", "s-Block Elements", "Environmental Chemistry", "p-Block Elements",
+                                                "Basic Maths", "Sets", "Relations", "Introduction to Functions (PU)", "Linear Inequalities PU", "Fundamentals-1 & 2", "Quadratic Equations and Expressions", "Sequence and Series", "Binomial Theorem for any index", "Permutations and Combinations", "Trigonometric Ratios and Identities", "Trigonometric Equations and Inequalities", "Properties of Triangles", "Introduction to Co-ordinate Geometry", "Straight Lines", "Introduction to 3D Geometry PU", "Pair of Lines", "Circles", "Conic Sections PU", "Statistics", "Limits PU", "Methods of Differentiation", "Functions", "Probability PU"
+                                            ]
+                                        },
+                                        difficulty: { type: "STRING", enum: ["Easy", "Medium", "Hard"] },
+                                        ymin: { type: "INTEGER" },
+                                        ymax: { type: "INTEGER" },
+                                        isContinuationFromPrevPage: { type: "BOOLEAN" },
+                                        continuesToNextPage: { type: "BOOLEAN" },
+                                        briefSolution: { type: "STRING" },
+                                        answerKey: { type: "STRING" }
+                                    },
+                                    required: ["questionNumber", "subject", "chapter", "difficulty", "ymin", "ymax", "isContinuationFromPrevPage", "continuesToNextPage", "briefSolution", "answerKey"]
+                                }
+                            }
+                        },
+                        required: ["questions"]
+                    }
+                }
+            };
+
+            let delay = 1200;
+            for (let attempt = 0; attempt < 3; attempt++) {
+                try {
+                    const res = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                    if (!res.ok) {
+                        const errText = await res.text();
+                        throw new Error(`HTTP ${res.status}: ${errText.slice(0, 120)}`);
+                    }
+                    const data = await res.json();
+                    const txt = data.candidates?.[0]?.content?.parts?.[0]?.text;
+                    return txt ? JSON.parse(txt) : { questions: [] };
+                } catch (e) {
+                    if (attempt === 2) throw e;
+                    await new Promise(r => setTimeout(r, delay));
+                    delay *= 2;
+                }
+            }
+            return { questions: [] };
+        }
+
+        // On-demand single question AI solver (for already-saved questions or stitched questions)
+        async function solveSingleQuestionWithAI(id) {
+            const q = state.questions.find(i => i.id === Number(id));
+            if (!q) return;
+            if (!getApiKey()) {
+                window.app.openSettingsModal(true);
+                return toast('Please enter your Gemini API Key first!', 'warn');
+            }
+
+            toast(`Solving Q.${q.questionNumber} with ${getSelectedModel()}...`, 'info');
+            const apiKey = getApiKey();
+            const selectedModel = getSelectedModel();
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${selectedModel}:generateContent?key=${apiKey}`;
+            const base64Jpeg = q.imageDataUrl.split(',')[1];
+
+            const payload = {
+                contents: [{
+                    role: "user",
+                    parts: [
+                        { text: "Solve this JEE question carefully step-by-step. Return JSON with `briefSolution` (concise step-by-step derivation) and `answerKey` (final option letter(s) like A, B, C, D or numerical value)." },
+                        { inlineData: { mimeType: "image/jpeg", data: base64Jpeg } }
+                    ]
+                }],
+                generationConfig: {
+                    responseMimeType: "application/json",
+                    responseSchema: {
+                        type: "OBJECT",
+                        properties: {
+                            briefSolution: { type: "STRING" },
+                            answerKey: { type: "STRING" }
+                        },
+                        required: ["briefSolution", "answerKey"]
+                    }
+                }
+            };
+
+            try {
+                const res = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                const data = await res.json();
+                const parsed = JSON.parse(data.candidates?.[0]?.content?.parts?.[0]?.text || '{}');
+                if (parsed.answerKey) {
+                    q.answerKey = String(parsed.answerKey).trim();
+                    q.briefSolution = String(parsed.briefSolution || '').trim();
+                    await saveQuestionToDB(q);
+                    state.popupAnswerVisible = true;
+                    state.padAnswerVisible = true;
+                    refreshPopupAnswerUI();
+                    refreshPadAnswerUI();
+                    toast(`AI Solved Q.${q.questionNumber} → Ans: ${q.answerKey}`, 'success');
+                }
+            } catch (err) {
+                toast(`AI Solve failed: ${err.message}`, 'warn');
+            }
+        }
+
+        function appendExtractLog(msg, cls = 'text-slate-300') {
+            const box = document.getElementById('extractLiveLog');
+            const d = document.createElement('div');
+            d.className = cls;
+            d.textContent = `• ${msg}`;
+            box.appendChild(d);
+            box.scrollTop = box.scrollHeight;
+        }
+
+        // ===================================================================
+        // PDF UPLOAD & EXTRACTION WORKFLOW
+        // ===================================================================
+        async function onPdfSelected(e) {
+            const file = e.target.files?.[0];
+            if (!file) return;
+            document.getElementById('selectedFileLabel').textContent = file.name;
+            const titleEl = document.getElementById('paperTitleInput');
+            if (!titleEl.value.trim()) titleEl.value = file.name.replace(/\.pdf$/i, '');
+
+            try {
+                const buf = await file.arrayBuffer();
+                state.pdfDoc = await pdfjsLib.getDocument({ data: buf }).promise;
+                document.getElementById('startPageInput').value = 1;
+                document.getElementById('endPageInput').value = state.pdfDoc.numPages;
+                document.getElementById('startExtractBtn').disabled = false;
+                toast(`Loaded PDF (${state.pdfDoc.numPages} pages)`, 'success');
+            } catch (err) {
+                toast('Could not read PDF file', 'warn');
+            }
+        }
+
+        async function startPdfExtraction() {
+            if (!state.pdfDoc || state.isExtracting) return;
+
+            if (!getApiKey()) {
+                window.app.closeUploadModal();
+                window.app.openSettingsModal(true);
+                toast('Please save your Gemini API Key first!', 'warn');
+                return;
+            }
+
+            state.isExtracting = true;
+            const paperName = document.getElementById('paperTitleInput').value.trim() || 'Test Paper';
+            const startP = Math.max(1, parseInt(document.getElementById('startPageInput').value, 10) || 1);
+            const endP = Math.min(state.pdfDoc.numPages, parseInt(document.getElementById('endPageInput').value, 10) || state.pdfDoc.numPages);
+            const { padTop, padBottom } = getVerticalPads();
+
+            document.getElementById('uploadSetupView').classList.add('hidden');
+            document.getElementById('uploadProgressView').classList.remove('hidden');
+            document.getElementById('startExtractBtn').disabled = true;
+            document.getElementById('extractLiveLog').innerHTML = '';
+
+            const canvas = document.getElementById('pdfWorkCanvas');
+            const ctx = canvas.getContext('2d');
+
+            let prevQuestion = null;
+            let extractedCount = 0;
+
+            try {
+                const countPages = Math.max(1, endP - startP + 1);
+                for (let pageNum = startP; pageNum <= endP; pageNum++) {
+                    const pct = Math.round(((pageNum - startP + 1) / countPages) * 100);
+                    document.getElementById('extractPageBadge').textContent = `Page ${pageNum}/${endP}`;
+                    document.getElementById('extractProgressBar').style.width = `${pct}%`;
+                    document.getElementById('extractSubText').textContent = `Rendering Page ${pageNum} at 2.0x scale & AI-solving questions...`;
+
+                    const page = await state.pdfDoc.getPage(pageNum);
+                    const vp = page.getViewport({ scale: 2.0 });
+                    canvas.width = vp.width;
+                    canvas.height = vp.height;
+                    ctx.fillStyle = '#FFFFFF';
+                    ctx.fillRect(0, 0, canvas.width, canvas.height);
+                    await page.render({ canvasContext: ctx, viewport: vp }).promise;
+
+                    const base64Jpeg = canvas.toDataURL('image/jpeg', 0.80).split(',')[1];
+                    appendExtractLog(`Extracting & solving Page ${pageNum} with ${getSelectedModel()}...`, 'text-indigo-300');
+
+                    const aiResult = await analyzePageAndSolveWithGemini(base64Jpeg, pageNum);
+                    const blocks = aiResult.questions || [];
+
+                    blocks.sort((a, b) => (a.ymin || 0) - (b.ymin || 0));
+
+                    for (let i = 0; i < blocks.length - 1; i++) {
+                        if (blocks[i].ymax > blocks[i + 1].ymin) {
+                            const mid = Math.floor((blocks[i].ymax + blocks[i + 1].ymin) / 2);
+                            blocks[i].ymax = mid;
+                            blocks[i + 1].ymin = mid;
+                        }
+                    }
+
+                    for (let i = 0; i < blocks.length; i++) {
+                        const b = blocks[i];
+                        const ymin = Math.max(0, Math.min(990, Number(b.ymin) || 0));
+                        const ymax = Math.max(ymin + 25, Math.min(1000, Number(b.ymax) || 1000));
+                        const cropRes = cropFullWidthSlice(canvas, ymin, ymax, padTop, padBottom);
+                        const rawQNum = String(b.questionNumber || '').replace(/[^0-9a-zA-Z]/g, '') || `${extractedCount + 1}`;
+
+                        const isStitch = prevQuestion && i === 0 && (
+                            b.isContinuationFromPrevPage === true ||
+                            rawQNum.toUpperCase() === 'CONT' ||
+                            prevQuestion.continuesToNextPage === true
+                        );
+
+                        if (isStitch) {
+                            appendExtractLog(`🔗 Stitched split Q.${prevQuestion.questionNumber} across Page ${prevQuestion.page} → ${pageNum}`, 'text-emerald-300 font-bold');
+                            const stitchRes = await stitchCanvasesVertically(prevQuestion.imageDataUrl, cropRes.dataUrl);
+                            prevQuestion.imageDataUrl = stitchRes.dataUrl;
+                            prevQuestion.aspectRatio = stitchRes.aspectRatio;
+                            prevQuestion.isStitched = true;
+                            prevQuestion.continuesToNextPage = Boolean(b.continuesToNextPage);
+                            if (b.answerKey) prevQuestion.answerKey = String(b.answerKey).trim();
+                            if (b.briefSolution) prevQuestion.briefSolution = String(b.briefSolution).trim();
+                            await saveQuestionToDB(prevQuestion);
+                            continue;
+                        }
+
+                        const cleanNum = rawQNum.replace(/\D/g, '') || `${extractedCount + 1}`;
+                        const aiKey = b.answerKey ? String(b.answerKey).trim() : '';
+                        const aiSol = b.briefSolution ? String(b.briefSolution).trim() : '';
+
+                        const qObj = {
+                            questionNumber: rawQNum === 'CONT' ? cleanNum : rawQNum,
+                            subject: ['Physics', 'Chemistry', 'Mathematics'].includes(b.subject) ? b.subject : 'Physics',
+                            chapter: b.chapter || 'General Practice',
+                            difficulty: ['Easy', 'Medium', 'Hard'].includes(b.difficulty) ? b.difficulty : 'Medium',
+                            paperName,
+                            page: pageNum,
+                            imageDataUrl: cropRes.dataUrl,
+                            aspectRatio: cropRes.aspectRatio,
+                            solved: false,
+                            starred: false,
+                            isStitched: false,
+                            continuesToNextPage: Boolean(b.continuesToNextPage),
+                            answerKey: aiKey,
+                            briefSolution: aiSol,
+                            userAnswer: '',
+                            createdAt: Date.now() + i
+                        };
+
+                        const saved = await saveQuestionToDB(qObj);
+                        extractedCount++;
+                        prevQuestion = saved;
+                        appendExtractLog(`✓ Q.${saved.questionNumber} (${saved.subject}) • AI Ans: ${aiKey || 'Solved'}`, 'text-emerald-400');
+                    }
+                }
+
+                await loadQuestionsFromDB();
+                toast(`Extracted & AI-solved ${extractedCount} questions!`, 'success');
+                setTimeout(() => {
+                    state.isExtracting = false;
+                    window.app.closeUploadModal();
+                }, 700);
+            } catch (err) {
+                console.error(err);
+                appendExtractLog(`⚠ Error: ${err.message}`, 'text-rose-400');
+                toast('Extraction error: ' + err.message, 'warn');
+            } finally {
+                state.isExtracting = false;
+                document.getElementById('startExtractBtn').disabled = false;
+            }
+        }
+
+        // ===================================================================
+        // SAMPLE JEE PAPER GENERATOR (SAVES DIRECTLY INTO INDEXEDDB)
+        // ===================================================================
+        async function loadSampleQuestions() {
+            const samples = [
+                {
+                    questionNumber: "1",
+                    subject: "Physics",
+                    chapter: "Rigid Body Mechanics",
+                    difficulty: "Hard",
+                    paperName: "Allen Score Advanced Paper 1",
+                    page: 1,
+                    starred: true,
+                    solved: false,
+                    isStitched: true,
+                    answerKey: "A, C",
+                    briefSolution: "For no slipping: a_plank = F / (m + M/3) = 24 / (2 + 2) = 6 m/s². Friction f = M*a_c = 8 N.",
+                    lines: [
+                        "Q.1  A uniform solid cylinder of mass M = 4 kg and radius R = 0.5 m is placed on a rough horizontal",
+                        "     plank of mass m = 2 kg resting on a smooth horizontal floor. A constant horizontal force F = 24 N",
+                        "     is applied to the plank. Assuming no slipping between cylinder and plank (take g = 10 m/s²):",
+                        "     (A) Acceleration of the plank is 6 m/s²          (B) Angular acceleration of cylinder is 8 rad/s²",
+                        "     (C) Friction force acting on cylinder is 8 N     (D) Maximum force before slipping starts is 36 N"
+                    ]
+                },
+                {
+                    questionNumber: "2",
+                    subject: "Chemistry",
+                    chapter: "Ionic Equilibrium",
+                    difficulty: "Medium",
+                    paperName: "Allen Score Advanced Paper 1",
+                    page: 2,
+                    starred: false,
+                    solved: false,
+                    isStitched: false,
+                    answerKey: "B",
+                    briefSolution: "pH = pKa + log([Salt]/[Acid]) => 5.04 = 4.74 + log(n_NaOH / (15 - n_NaOH)) => Salt/Acid = 2 => V = 50 mL.",
+                    lines: [
+                        "Q.2  What volume of 0.20 M NaOH solution must be added to 100 mL of 0.15 M CH₃COOH (pKa = 4.74) in order",
+                        "     to prepare an acidic buffer solution having pH exactly equal to 5.04? (Take log 2 = 0.30)",
+                        "     (A) 25 mL                 (B) 50 mL                 (C) 75 mL                 (D) 60 mL"
+                    ]
+                },
+                {
+                    questionNumber: "3",
+                    subject: "Mathematics",
+                    chapter: "Indefinite & Definite Integration",
+                    difficulty: "Hard",
+                    paperName: "Allen Score Advanced Paper 1",
+                    page: 3,
+                    starred: true,
+                    solved: true,
+                    isStitched: true,
+                    answerKey: "A",
+                    briefSolution: "Using King's property x -> π/2 - x and substituting t = tan x gives I = π ln(2) / 8.",
+                    lines: [
+                        "Q.3  Evaluate the definite integral  I = ∫ [from 0 to π/2]  ln(1 + tan x) / (1 + sin 2x) dx  and",
+                        "     choose the correct value of I from the options given below:",
+                        "     (A) π ln(2) / 8           (B) π ln(2) / 4           (C) ln(2) / 2             (D) π² / 16"
+                    ]
+                }
+            ];
+
+            for (const s of samples) {
+                const c = document.createElement('canvas');
+                c.width = 1120;
+                c.height = s.lines.length * 36 + 40;
+                const ctx = c.getContext('2d');
+                ctx.fillStyle = '#FFFFFF';
+                ctx.fillRect(0, 0, c.width, c.height);
+                s.lines.forEach((line, idx) => {
+                    ctx.font = idx === 0 ? '700 20px Inter, sans-serif' : '500 19px Inter, sans-serif';
+                    ctx.fillStyle = idx === 0 ? '#0f172a' : '#1e293b';
+                    ctx.fillText(line, 26, 40 + idx * 34);
+                });
+
+                await db.questions.add({
+                    questionNumber: s.questionNumber,
+                    subject: s.subject,
+                    chapter: s.chapter,
+                    difficulty: s.difficulty,
+                    paperName: s.paperName,
+                    page: s.page,
+                    imageDataUrl: c.toDataURL('image/jpeg', 0.88),
+                    aspectRatio: c.height / c.width,
+                    solved: s.solved,
+                    starred: s.starred,
+                    isStitched: s.isStitched,
+                    answerKey: s.answerKey,
+                    briefSolution: s.briefSolution,
+                    userAnswer: s.solved ? s.answerKey : '',
+                    createdAt: Date.now() + Number(s.questionNumber)
+                });
+            }
+            await loadQuestionsFromDB();
+            toast("Saved 3 sample JEE questions to IndexedDB!", "success");
+        }
+
+        // ===================================================================
+        // FILTERING & UI RENDERING
+        // ===================================================================
+        function getFiltered() {
+            return state.questions.filter(q => {
+                if (state.subject !== 'ALL' && q.subject !== state.subject) return false;
+                if (state.chapter !== 'ALL' && q.chapter !== state.chapter) return false;
+                if (state.paper !== 'ALL' && q.paperName !== state.paper) return false;
+                if (state.difficulty !== 'ALL' && (q.difficulty || 'Medium') !== state.difficulty) return false;
+                if (state.status === 'UNSOLVED' && q.solved) return false;
+                if (state.status === 'SOLVED' && !q.solved) return false;
+                if (state.status === 'STARRED' && !q.starred) return false;
+                if (state.search) {
+                    const s = state.search.toLowerCase();
+                    const hit = String(q.questionNumber).toLowerCase().includes(s) ||
+                                (q.chapter || '').toLowerCase().includes(s) ||
+                                (q.subject || '').toLowerCase().includes(s) ||
+                                (q.paperName || '').toLowerCase().includes(s);
+                    if (!hit) return false;
+                }
+                return true;
+            });
+        }
+
+        function renderAll() {
+            const all = state.questions;
+
+            const mappedCount = all.filter(q => q.answerKey && String(q.answerKey).trim() !== '').length;
+            const keyBadge = document.getElementById('mappedKeyCountBadge');
+            if (keyBadge) keyBadge.textContent = mappedCount;
+
+            const scoped = all.filter(q => (state.subject === 'ALL' || q.subject === state.subject) && (state.chapter === 'ALL' || q.chapter === state.chapter));
+            document.getElementById('status-count-UNSOLVED').textContent = scoped.filter(q => !q.solved).length;
+            document.getElementById('status-count-SOLVED').textContent = scoped.filter(q => q.solved).length;
+            document.getElementById('status-count-STARRED').textContent = scoped.filter(q => q.starred).length;
+
+            document.querySelectorAll('.status-btn').forEach(btn => {
+                const st = btn.getAttribute('data-status');
+                const active = st === state.status;
+                if (active) {
+                    btn.className = st === 'STARRED'
+                        ? "status-btn h-7 px-2.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 bg-yellow-400 text-slate-950 shadow"
+                        : "status-btn h-7 px-2.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 bg-indigo-600 text-white shadow";
+                } else {
+                    btn.className = "status-btn h-7 px-2.5 rounded-lg text-xs font-semibold transition flex items-center gap-1.5 bg-slate-800/90 text-slate-300 border border-slate-700/80";
+                }
+            });
+
+            const indicator = document.getElementById('activeChapterIndicator');
+            if (state.chapter !== 'ALL') {
+                indicator.textContent = state.chapter;
+            } else if (state.subject !== 'ALL') {
+                indicator.textContent = state.subject;
+            } else {
+                indicator.textContent = 'All';
+            }
+
+            const pSel = document.getElementById('paperDropdown');
+            const papers = Array.from(new Set(all.map(q => q.paperName).filter(Boolean)));
+            pSel.innerHTML = `<option value="ALL">All Papers (${papers.length})</option>` +
+                papers.map(p => `<option value="${p}" ${p === state.paper ? 'selected' : ''}>${p}</option>`).join('');
+
+            renderDrawerChapters();
+            renderFeed();
+        }
+
+        function renderDrawerChapters() {
+            const list = document.getElementById('drawerChapterList');
+            const qFilter = (document.getElementById('drawerChapterSearch')?.value || '').toLowerCase();
+            const all = state.questions;
+
+            const subjectsMeta = [
+                { name: 'Physics', dot: 'bg-sky-400', text: 'text-sky-300' },
+                { name: 'Chemistry', dot: 'bg-amber-400', text: 'text-amber-300' },
+                { name: 'Mathematics', dot: 'bg-rose-400', text: 'text-rose-300' }
+            ];
+
+            let html = `
+                <button onclick="window.app.selectSubjectChapter('ALL', 'ALL')" class="w-full px-3 py-2 rounded-xl flex items-center justify-between text-xs font-bold transition ${state.subject === 'ALL' && state.chapter === 'ALL' ? 'bg-indigo-600 text-white shadow' : 'bg-slate-800/70 text-slate-200 hover:bg-slate-800'}">
+                    <span>All Subjects & Chapters</span>
+                    <span class="px-2 py-0.5 rounded bg-black/25 text-[11px]">${all.length}</span>
+                </button>
+            `;
+
+            subjectsMeta.forEach(sMeta => {
+                const subjQuestions = all.filter(q => q.subject === sMeta.name);
+                const chapMap = new Map();
+                subjQuestions.forEach(q => {
+                    const c = q.chapter || 'General';
+                    if (!chapMap.has(c)) chapMap.set(c, { total: 0, solved: 0, starred: 0 });
+                    const item = chapMap.get(c);
+                    item.total++;
+                    if (q.solved) item.solved++;
+                    if (q.starred) item.starred++;
+                });
+
+                const rows = Array.from(chapMap.entries())
+                    .filter(([cName]) => cName.toLowerCase().includes(qFilter))
+                    .sort((a, b) => b[1].total - a[1].total);
+
+                if (qFilter && rows.length === 0) return;
+
+                const isSubjAllActive = state.subject === sMeta.name && state.chapter === 'ALL';
+
+                html += `
+                    <div class="pt-2">
+                        <button onclick="window.app.selectSubjectChapter('${sMeta.name}', 'ALL')" class="w-full px-3 py-2 rounded-xl flex items-center justify-between text-xs font-extrabold uppercase tracking-wider transition ${isSubjAllActive ? 'bg-indigo-600 text-white shadow' : 'bg-slate-900/90 text-slate-200 hover:bg-slate-800 border border-slate-800'}">
+                            <div class="flex items-center gap-2">
+                                <span class="w-2 h-2 rounded-full ${sMeta.dot}"></span>
+                                <span>${sMeta.name}</span>
+                            </div>
+                            <span class="px-1.5 py-0.5 rounded bg-black/30 text-[11px] font-bold">${subjQuestions.length}</span>
+                        </button>
+                        <div class="mt-1 pl-2.5 border-l-2 border-slate-800 space-y-1">
+                `;
+
+                if (rows.length === 0) {
+                    html += `<div class="px-3 py-1.5 text-[11px] text-slate-500 italic">No questions yet</div>`;
+                } else {
+                    rows.forEach(([cName, st]) => {
+                        const active = state.subject === sMeta.name && state.chapter === cName;
+                        const safeName = cName.replace(/'/g, "\\'");
+                        html += `
+                            <button onclick="window.app.selectSubjectChapter('${sMeta.name}', '${safeName}')" class="w-full px-2.5 py-1.5 rounded-lg flex items-center justify-between text-xs font-medium transition ${active ? 'bg-indigo-600/90 text-white font-bold' : 'text-slate-300 hover:bg-slate-800/80'}">
+                                <span class="truncate pr-2">${cName}</span>
+                                <div class="flex items-center gap-1 shrink-0 text-[11px]">
+                                    ${st.starred > 0 ? `<span class="text-yellow-400 font-bold">★${st.starred}</span>` : ''}
+                                    <span class="px-1.5 py-0.2 rounded bg-slate-800 text-slate-300">${st.solved}/${st.total}</span>
+                                </div>
+                            </button>
+                        `;
+                    });
+                }
+
+                html += `</div></div>`;
+            });
+
+            list.innerHTML = html;
+
+            const solvedTotal = all.filter(q => q.solved).length;
+            document.getElementById('drawerProgressText').textContent = `Solved: ${solvedTotal} / ${all.length}`;
+        }
+
+        // Card HTML Builder (Key completely hidden from cards; Stitch moved cleanly to top bar)
+        function buildCardHtml(q) {
+            const chapList = JEE_CHAPTERS[q.subject] || JEE_CHAPTERS.Physics;
+            const chapOpts = chapList.map(c => `<option value="${c}" ${c === q.chapter ? 'selected' : ''}>${c}</option>`).join('');
+            const diff = q.difficulty || 'Medium';
+
+            const borderCls = q.starred
+                ? 'border-yellow-500/60'
+                : q.solved
+                ? 'border-emerald-500/40'
+                : 'border-borderdark';
+
+            return `
+            <article class="w-full bg-card border ${borderCls} rounded-2xl overflow-hidden shadow-lg flex flex-col min-w-0">
+                <!-- Single-Row Compact Card Header -->
+                <div class="px-2.5 py-1.5 bg-panel border-b border-borderdark flex items-center justify-between gap-1 flex-nowrap overflow-x-auto no-scrollbar">
+                    <div class="flex items-center gap-1 min-w-0 flex-nowrap">
+                        <span class="px-1.5 py-0.5 rounded bg-slate-800 text-white font-extrabold text-[11px] border border-slate-700 shrink-0">Q.${q.questionNumber}</span>
+
+                        <select onchange="window.app.changeSubj(${q.id}, this.value)" class="h-6 px-1 rounded text-[11px] font-bold bg-slate-900 text-indigo-300 border border-slate-700 focus:outline-none shrink-0">
+                            <option value="Physics" ${q.subject === 'Physics' ? 'selected' : ''}>Physics</option>
+                            <option value="Chemistry" ${q.subject === 'Chemistry' ? 'selected' : ''}>Chemistry</option>
+                            <option value="Mathematics" ${q.subject === 'Mathematics' ? 'selected' : ''}>Maths</option>
+                        </select>
+
+                        <select onchange="window.app.changeChap(${q.id}, this.value)" class="h-6 px-1 rounded text-[11px] font-medium bg-slate-900 text-slate-200 border border-slate-700 max-w-[100px] sm:max-w-[130px] truncate focus:outline-none shrink-0">
+                            <option value="${q.chapter}">${q.chapter}</option>
+                            ${chapOpts}
+                        </select>
+
+                        <select onchange="window.app.changeDifficulty(${q.id}, this.value)" class="h-6 px-1 rounded text-[10px] font-bold bg-slate-900 text-slate-300 border border-slate-700 focus:outline-none shrink-0">
+                            <option value="Easy" ${diff === 'Easy' ? 'selected' : ''}>Easy</option>
+                            <option value="Medium" ${diff === 'Medium' ? 'selected' : ''}>Med</option>
+                            <option value="Hard" ${diff === 'Hard' ? 'selected' : ''}>Hard</option>
+                        </select>
+
+                        ${q.isStitched ? `<span class="px-1 py-0.5 rounded bg-purple-500/20 text-purple-300 text-[9px] font-bold border border-purple-500/30 shrink-0" title="Stitched">🔗</span>` : ''}
+                    </div>
+
+                    <!-- Single-Row 1-Tap Controls -->
+                    <div class="flex items-center gap-1 shrink-0 ml-auto">
+                        <button onclick="window.app.toggleStar(${q.id})" class="h-6 w-6 rounded text-xs font-bold flex items-center justify-center border transition ${q.starred ? 'bg-yellow-400/20 border-yellow-400 text-yellow-300' : 'bg-slate-800 border-slate-700 text-slate-300'}" title="Star">
+                            <i class="${q.starred ? 'ph-fill ph-star text-yellow-400' : 'ph-bold ph-star'}"></i>
+                        </button>
+
+                        <button onclick="window.app.toggleSolved(${q.id})" class="h-6 w-6 rounded text-xs font-bold flex items-center justify-center border transition ${q.solved ? 'bg-emerald-500/20 border-emerald-500 text-emerald-300' : 'bg-amber-500/15 border-amber-500/40 text-amber-300'}" title="${q.solved ? 'Solved' : 'Unsolved'}">
+                            <i class="${q.solved ? 'ph-fill ph-check-circle text-emerald-400' : 'ph-bold ph-circle'}"></i>
+                        </button>
+
+                        <button onclick="window.app.stitchWithNext(${q.id})" class="h-6 w-6 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 text-xs flex items-center justify-center" title="Stitch with Next Card">
+                            <i class="ph-bold ph-arrows-in-line-vertical text-sky-400"></i>
+                        </button>
+
+                        <button onclick="window.app.openSplitModal(${q.id})" class="h-6 w-6 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 text-xs flex items-center justify-center" title="Split or Trim">
+                            <i class="ph-bold ph-scissors text-amber-400"></i>
+                        </button>
+
+                        <button onclick="window.app.openScratchpad(${q.id})" class="h-6 w-6 rounded bg-indigo-600/20 hover:bg-indigo-600 text-indigo-300 hover:text-white border border-indigo-500/30 text-xs flex items-center justify-center" title="Solve Pad (View Answer & Rough Work)">
+                            <i class="ph-bold ph-pencil-line"></i>
+                        </button>
+
+                        <button onclick="window.app.deleteQ(${q.id})" class="h-6 w-6 rounded bg-slate-800 hover:bg-rose-950 text-slate-400 hover:text-rose-400 flex items-center justify-center text-xs" title="Delete">
+                            <i class="ph-bold ph-trash"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Question Image Container (Click Image to Open Individual Question Popup & Answer) -->
+                <div class="p-2 bg-white flex items-center justify-center min-w-0">
+                    <img src="${q.imageDataUrl}" onclick="event.stopPropagation(); window.app.openImagePopup(${q.id})" alt="Q.${q.questionNumber}" class="question-slice-img rounded w-full h-auto object-contain cursor-zoom-in" loading="lazy" title="Click image to view full question & answer">
+                </div>
+            </article>
+            `;
+        }
+
+        function renderFeed() {
+            const container = document.getElementById('mainFeedContainer');
+            const list = getFiltered();
+
+            if (list.length === 0) {
+                container.innerHTML = `
+                    <div class="max-w-lg mx-auto my-12 bg-panel border border-borderdark rounded-3xl p-8 text-center space-y-4 shadow-2xl">
+                        <div class="w-14 h-14 rounded-2xl bg-indigo-500/15 border border-indigo-500/30 text-indigo-400 flex items-center justify-center mx-auto">
+                            <i class="ph-bold ph-scissors text-3xl"></i>
+                        </div>
+                        <h2 class="text-lg font-bold text-white">
+                            ${state.questions.length === 0 ? 'IndexedDB Question Vault Ready!' : 'No Questions Match Current Filter'}
+                        </h2>
+                        <p class="text-xs sm:text-sm text-slate-400 leading-relaxed">
+                            ${state.questions.length === 0
+                                ? 'Tap "+ Add Test PDF" to extract questions with 100% full-width crops, automatic multi-page stitching, and AI-solved Answer Keys. Everything is saved locally in your browser via IndexedDB!'
+                                : 'Try switching Status to "All Status" or selecting "All Subjects & Chapters" inside the Chapters drawer.'}
+                        </p>
+                        <div class="flex flex-wrap items-center justify-center gap-3 pt-2">
+                            <button onclick="window.app.openUploadModal()" class="h-10 px-5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs sm:text-sm font-bold flex items-center gap-2 shadow-lg shadow-indigo-600/30">
+                                <i class="ph-bold ph-file-pdf"></i> Upload Test Paper PDF
+                            </button>
+                            <button onclick="window.app.loadSampleQuestions()" class="h-10 px-4 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-amber-300 text-xs sm:text-sm font-semibold flex items-center gap-2">
+                                <i class="ph-fill ph-sparkle"></i> Load Sample JEE Questions
+                            </button>
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+
+            // SHORTEST-COLUMN-FIRST HEIGHT BALANCED MASONRY
+            // Places each card into whichever column currently has less total vertical height!
+            const isTwoCol = window.innerWidth >= 900;
+            if (!isTwoCol) {
+                container.innerHTML = `<div class="flex flex-col gap-3.5 pb-10">${list.map(buildCardHtml).join('')}</div>`;
+            } else {
+                const colLeft = [];
+                const colRight = [];
+                let leftHeight = 0;
+                let rightHeight = 0;
+
+                list.forEach((q) => {
+                    // Header + padding overhead (~0.11 of column width) + image aspectRatio (height / width)
+                    const estimatedCardHeight = 0.11 + (typeof q.aspectRatio === 'number' ? q.aspectRatio : 0.42);
+                    if (leftHeight <= rightHeight) {
+                        colLeft.push(buildCardHtml(q));
+                        leftHeight += estimatedCardHeight;
+                    } else {
+                        colRight.push(buildCardHtml(q));
+                        rightHeight += estimatedCardHeight;
+                    }
+                });
+
+                container.innerHTML = `
+                    <div class="grid grid-cols-2 gap-4 items-start pb-10">
+                        <div class="flex flex-col gap-4 min-w-0">${colLeft.join('')}</div>
+                        <div class="flex flex-col gap-4 min-w-0">${colRight.join('')}</div>
+                    </div>
+                `;
+            }
+        }
+
+        // ===================================================================
+        // POPUP & SCRATCHPAD ANSWER UI HELPERS
+        // ===================================================================
+        function refreshPopupAnswerUI() {
+            const q = state.questions.find(i => i.id === Number(state.activePopupId));
+            if (!q) return;
+
+            const drawer = document.getElementById('popupAnswerDrawer');
+            const eyeIcon = document.getElementById('popupAnsEyeIcon');
+            const btnText = document.getElementById('popupAnsBtnText');
+            const ansVal = document.getElementById('popupAnsValue');
+            const solText = document.getElementById('popupSolutionText');
+            const manualInput = document.getElementById('popupManualKeyInput');
+
+            drawer.classList.toggle('hidden', !state.popupAnswerVisible);
+            eyeIcon.className = state.popupAnswerVisible ? 'ph-bold ph-eye-slash' : 'ph-bold ph-eye';
+            btnText.textContent = state.popupAnswerVisible ? 'Hide Answer' : 'Show Answer';
+
+            const hasKey = Boolean(q.answerKey && String(q.answerKey).trim());
+            ansVal.textContent = hasKey ? q.answerKey : 'Not set yet (Tap AI Solve or type right →)';
+            manualInput.value = q.answerKey || '';
+
+            if (q.briefSolution && String(q.briefSolution).trim()) {
+                solText.textContent = `AI Step-by-Step Solution:\n${q.briefSolution}`;
+                solText.classList.remove('hidden');
+            } else {
+                solText.classList.add('hidden');
+            }
+        }
+
+        function refreshPadAnswerUI() {
+            const q = state.questions.find(i => i.id === Number(state.activePadId));
+            if (!q) return;
+
+            const box = document.getElementById('padAnswerBox');
+            const eyeIcon = document.getElementById('padAnsEyeIcon');
+            const btnText = document.getElementById('padAnsBtnText');
+            const ansVal = document.getElementById('padAnsValue');
+            const solText = document.getElementById('padSolutionText');
+
+            box.classList.toggle('hidden', !state.padAnswerVisible);
+            eyeIcon.className = state.padAnswerVisible ? 'ph-bold ph-eye-slash' : 'ph-bold ph-eye';
+            btnText.textContent = state.padAnswerVisible ? 'Hide Answer' : 'Show Answer';
+
+            const hasKey = Boolean(q.answerKey && String(q.answerKey).trim());
+            ansVal.textContent = hasKey ? q.answerKey : 'Not solved yet (Tap AI Solve above)';
+            solText.textContent = q.briefSolution ? q.briefSolution : '';
+        }
+
+        // ===================================================================
+        // GLOBAL APP CONTROLLER
+        // ===================================================================
+        window.app = {
+            toggleDrawer(force) {
+                const d = document.getElementById('chaptersDrawer');
+                const b = document.getElementById('drawerBackdrop');
+                const open = typeof force === 'boolean' ? force : d.classList.contains('-translate-x-full');
+                d.classList.toggle('-translate-x-full', !open);
+                b.classList.toggle('hidden', !open);
+            },
+            selectSubjectChapter(subj, chap) {
+                state.subject = subj;
+                state.chapter = chap;
+                this.toggleDrawer(false);
+                renderAll();
+            },
+            setSubject(s) { state.subject = s; state.chapter = 'ALL'; renderAll(); },
+            setChapter(c) { state.chapter = c; this.toggleDrawer(false); renderAll(); },
+            setStatus(st) { state.status = st; renderAll(); },
+            setPaper(p) { state.paper = p; renderAll(); },
+            setDifficulty(d) { state.difficulty = d; renderAll(); },
+            setSearch(v) { state.search = v.trim(); renderFeed(); },
+            renderDrawerChapters,
+
+            // Fullscreen Toggle
+            toggleFullscreen() {
+                const icon = document.getElementById('fullscreenIcon');
+                if (!document.fullscreenElement) {
+                    document.documentElement.requestFullscreen().catch(err => {
+                        toast(`Fullscreen error: ${err.message}`, 'warn');
+                    });
+                    if (icon) icon.className = 'ph-bold ph-corners-in text-sm';
+                } else {
+                    document.exitFullscreen().catch(() => {});
+                    if (icon) icon.className = 'ph-bold ph-corners-out text-sm';
+                }
+            },
+
+            // Individual Question Image Popup Lightbox (with Show Answer option)
+            getActivePopupId() {
+                return state.activePopupId;
+            },
+            openImagePopup(id) {
+                const q = state.questions.find(i => i.id === Number(id));
+                if (!q) return;
+                state.activePopupId = q.id;
+                state.popupAnswerVisible = false;
+                document.getElementById('popupQBadge').textContent = `Q.${q.questionNumber}`;
+                document.getElementById('popupSubjChap').textContent = `${q.subject} • ${q.chapter}`;
+                document.getElementById('popupImageEl').src = q.imageDataUrl;
+                refreshPopupAnswerUI();
+                document.getElementById('imagePopupModal').classList.remove('hidden');
+            },
+            togglePopupAnswer() {
+                state.popupAnswerVisible = !state.popupAnswerVisible;
+                refreshPopupAnswerUI();
+            },
+            async saveManualKeyFromPopup() {
+                const q = state.questions.find(i => i.id === Number(state.activePopupId));
+                if (!q) return;
+                const val = document.getElementById('popupManualKeyInput').value.trim().toUpperCase();
+                q.answerKey = val;
+                await saveQuestionToDB(q);
+                refreshPopupAnswerUI();
+                toast(`Updated Answer Key for Q.${q.questionNumber} to "${val}"`, 'success');
+            },
+            closeImagePopup() {
+                document.getElementById('imagePopupModal').classList.add('hidden');
+                document.getElementById('popupImageEl').src = '';
+                state.activePopupId = null;
+            },
+
+            // On-Demand AI Solver for any individual question
+            solveSingleQuestionWithAI,
+
+            // Settings Modal
+            openSettingsModal(showMissingAlert = false) {
+                document.getElementById('apiKeyInput').value = getApiKey();
+                document.getElementById('geminiModelSelect').value = getSelectedModel();
+                const pads = getVerticalPads();
+                document.getElementById('padTopInput').value = pads.padTop;
+                document.getElementById('padBottomInput').value = pads.padBottom;
+                document.getElementById('apiKeyMissingAlert').classList.toggle('hidden', !showMissingAlert);
+                document.getElementById('settingsModal').classList.remove('hidden');
+            },
+            closeSettingsModal() {
+                document.getElementById('settingsModal').classList.add('hidden');
+            },
+            toggleApiKeyVisibility() {
+                const inp = document.getElementById('apiKeyInput');
+                const icon = document.getElementById('apiKeyEyeIcon');
+                if (inp.type === 'password') {
+                    inp.type = 'text';
+                    icon.className = 'ph-bold ph-eye-slash text-base';
+                } else {
+                    inp.type = 'password';
+                    icon.className = 'ph-bold ph-eye text-base';
+                }
+            },
+            saveSettings() {
+                const key = document.getElementById('apiKeyInput').value.trim();
+                const model = document.getElementById('geminiModelSelect').value;
+                const padTop = Math.max(0, Number(document.getElementById('padTopInput').value) || 8);
+                const padBottom = Math.max(0, Number(document.getElementById('padBottomInput').value) || 10);
+
+                localStorage.setItem('jee_gemini_api_key', key);
+                localStorage.setItem('jee_gemini_model', model);
+                localStorage.setItem('jee_pad_top', String(padTop));
+                localStorage.setItem('jee_pad_bottom', String(padBottom));
+
+                updateApiKeyIndicator();
+                this.closeSettingsModal();
+                toast(`Saved API Settings (${model})!`, 'success');
+            },
+
+            // IndexedDB Card Actions
+            async toggleStar(id) {
+                const q = state.questions.find(i => i.id === Number(id));
+                if (!q) return;
+                q.starred = !q.starred;
+                await saveQuestionToDB(q);
+            },
+            async toggleSolved(id) {
+                const q = state.questions.find(i => i.id === Number(id));
+                if (!q) return;
+                q.solved = !q.solved;
+                await saveQuestionToDB(q);
+            },
+            async changeSubj(id, s) {
+                const q = state.questions.find(i => i.id === Number(id));
+                if (!q) return;
+                q.subject = s;
+                q.chapter = JEE_CHAPTERS[s]?.[0] || 'General';
+                await saveQuestionToDB(q);
+            },
+            async changeChap(id, c) {
+                const q = state.questions.find(i => i.id === Number(id));
+                if (!q) return;
+                q.chapter = c;
+                await saveQuestionToDB(q);
+            },
+            async changeDifficulty(id, d) {
+                const q = state.questions.find(i => i.id === Number(id));
+                if (!q) return;
+                q.difficulty = d;
+                await saveQuestionToDB(q);
+            },
+            async deleteQ(id) {
+                await deleteQuestionFromDB(id);
+                toast('Question deleted from IndexedDB');
+            },
+            async confirmClearVault() {
+                await db.questions.clear();
+                await loadQuestionsFromDB();
+                this.toggleDrawer(false);
+                toast('Cleared all questions from IndexedDB');
+            },
+
+            // Answer Key Bulk Override Modal
+            openAnswerKeyModal() {
+                const lines = state.questions
+                    .filter(q => q.answerKey)
+                    .map(q => `${q.questionNumber}: ${q.answerKey}`);
+                document.getElementById('bulkAnswerTextarea').value = lines.join('\n');
+                document.getElementById('answerKeyModal').classList.remove('hidden');
+            },
+            closeAnswerKeyModal() {
+                document.getElementById('answerKeyModal').classList.add('hidden');
+            },
+            async applyBulkAnswerKeys() {
+                const raw = document.getElementById('bulkAnswerTextarea').value;
+                const map = {};
+                raw.split(/[\n;]+/).forEach(line => {
+                    const m = line.match(/([0-9a-zA-Z]+)\s*[\:\-\=\s]\s*([A-Za-z0-9\.,]+)/);
+                    if (m) map[m[1].trim()] = m[2].trim().toUpperCase();
+                });
+                let updated = 0;
+                for (const q of state.questions) {
+                    const num = String(q.questionNumber).trim();
+                    const cleanDigits = num.replace(/\D/g, '');
+                    const matchedAns = map[num] || map[cleanDigits];
+                    if (matchedAns) {
+                        q.answerKey = matchedAns;
+                        await db.questions.put(q);
+                        updated++;
+                    }
+                }
+                await loadQuestionsFromDB();
+                this.closeAnswerKeyModal();
+                toast(`Mapped Answer Keys to ${updated} questions in IndexedDB!`, 'success');
+            },
+
+            // Deduplication
+            async runDeduplication(notify = false) {
+                const seen = new Set();
+                let removed = 0;
+                for (const q of [...state.questions]) {
+                    const key = `${(q.paperName || '').toLowerCase()}::${q.subject}::${String(q.questionNumber).trim()}`;
+                    if (seen.has(key)) {
+                        await db.questions.delete(q.id);
+                        removed++;
+                    } else {
+                        seen.add(key);
+                    }
+                }
+                await loadQuestionsFromDB();
+                if (notify) toast(removed > 0 ? `Removed ${removed} duplicate questions!` : 'No duplicate questions found ✓', 'success');
+            },
+
+            // Backup Export / Import
+            exportBackupJson,
+            importBackupJson,
+
+            // Upload Modal
+            openUploadModal() {
+                document.getElementById('uploadSetupView').classList.remove('hidden');
+                document.getElementById('uploadProgressView').classList.add('hidden');
+                document.getElementById('uploadModal').classList.remove('hidden');
+            },
+            closeUploadModal() {
+                if (state.isExtracting) return;
+                document.getElementById('uploadModal').classList.add('hidden');
+            },
+            onPdfSelected,
+            startPdfExtraction,
+            loadSampleQuestions,
+
+            // Split / Vertical Trim Modal
+            openSplitModal(id) {
+                const q = state.questions.find(i => i.id === Number(id));
+                if (!q) return;
+                state.activeSplitId = Number(id);
+                document.getElementById('splitPreviewImg').src = q.imageDataUrl;
+                document.getElementById('splitCutSlider').value = 50;
+                document.getElementById('trimTopSlider').value = 0;
+                document.getElementById('trimBotSlider').value = 100;
+                this.setSplitMode('SPLIT');
+                document.getElementById('splitModal').classList.remove('hidden');
+            },
+            closeSplitModal() {
+                document.getElementById('splitModal').classList.add('hidden');
+                state.activeSplitId = null;
+            },
+            setSplitMode(m) {
+                state.splitMode = m;
+                const isSplit = m === 'SPLIT';
+                document.getElementById('modeSplitBtn').className = isSplit ? "h-8 px-3 rounded-lg text-xs font-bold bg-amber-500 text-slate-950" : "h-8 px-3 rounded-lg text-xs font-semibold bg-slate-800 text-slate-300";
+                document.getElementById('modeTrimBtn').className = !isSplit ? "h-8 px-3 rounded-lg text-xs font-bold bg-amber-500 text-slate-950" : "h-8 px-3 rounded-lg text-xs font-semibold bg-slate-800 text-slate-300";
+                document.getElementById('splitRangeWrap').classList.toggle('hidden', !isSplit);
+                document.getElementById('trimRangeWrap').classList.toggle('hidden', isSplit);
+                document.getElementById('trimRangeWrap').classList.toggle('flex', !isSplit);
+                document.getElementById('splitDividerLine').classList.toggle('hidden', !isSplit);
+                document.getElementById('trimTopMask').classList.toggle('hidden', isSplit);
+                document.getElementById('trimBotMask').classList.toggle('hidden', isSplit);
+                document.getElementById('splitConfirmLabel').textContent = isSplit ? 'Split into 2 Questions Now' : 'Save Trimmed Crop';
+                this.updateSplitPreview();
+            },
+            updateSplitPreview() {
+                if (state.splitMode === 'SPLIT') {
+                    const v = document.getElementById('splitCutSlider').value;
+                    document.getElementById('splitCutVal').textContent = `${v}%`;
+                    document.getElementById('splitDividerLine').style.top = `${v}%`;
+                } else {
+                    const t = document.getElementById('trimTopSlider').value;
+                    const b = document.getElementById('trimBotSlider').value;
+                    document.getElementById('trimTopMask').style.height = `${t}%`;
+                    document.getElementById('trimBotMask').style.height = `${100 - b}%`;
+                }
+            },
+            async confirmSplitOrTrim() {
+                const q = state.questions.find(i => i.id === state.activeSplitId);
+                if (!q) return;
+                const img = new Image();
+                await new Promise(r => { img.onload = r; img.src = q.imageDataUrl; });
+
+                if (state.splitMode === 'SPLIT') {
+                    const ratio = Number(document.getElementById('splitCutSlider').value) / 100;
+                    const cutY = Math.floor(img.height * ratio);
+
+                    const c1 = document.createElement('canvas');
+                    c1.width = img.width;
+                    c1.height = cutY;
+                    c1.getContext('2d').drawImage(img, 0, 0, img.width, cutY, 0, 0, img.width, cutY);
+
+                    const c2 = document.createElement('canvas');
+                    c2.width = img.width;
+                    c2.height = Math.max(20, img.height - cutY);
+                    c2.getContext('2d').drawImage(img, 0, cutY, img.width, img.height - cutY, 0, 0, img.width, img.height - cutY);
+
+                    const baseNum = String(q.questionNumber).replace(/[ab]$/i, '');
+                    q.questionNumber = `${baseNum}a`;
+                    q.imageDataUrl = c1.toDataURL('image/jpeg', 0.86);
+                    q.aspectRatio = c1.height / c1.width;
+                    await db.questions.put(q);
+
+                    const secondCard = {
+                        ...q,
+                        questionNumber: `${baseNum}b`,
+                        imageDataUrl: c2.toDataURL('image/jpeg', 0.86),
+                        aspectRatio: c2.height / c2.width,
+                        solved: false,
+                        userAnswer: '',
+                        createdAt: (q.createdAt || Date.now()) + 1
+                    };
+                    delete secondCard.id;
+                    await db.questions.add(secondCard);
+                    await loadQuestionsFromDB();
+                    toast(`Split into Q.${baseNum}a & Q.${baseNum}b in IndexedDB!`, 'success');
+                } else {
+                    const t = Number(document.getElementById('trimTopSlider').value) / 100;
+                    const b = Number(document.getElementById('trimBotSlider').value) / 100;
+                    const sy = Math.floor(img.height * t);
+                    const sh = Math.max(30, Math.floor(img.height * (b - t)));
+                    const c = document.createElement('canvas');
+                    c.width = img.width;
+                    c.height = sh;
+                    c.getContext('2d').drawImage(img, 0, sy, img.width, sh, 0, 0, img.width, sh);
+                    q.imageDataUrl = c.toDataURL('image/jpeg', 0.86);
+                    q.aspectRatio = c.height / c.width;
+                    await saveQuestionToDB(q);
+                    toast('Saved trimmed vertical crop to IndexedDB!', 'success');
+                }
+                this.closeSplitModal();
+            },
+            async stitchWithNext(id) {
+                const list = getFiltered();
+                const idx = list.findIndex(q => q.id === Number(id));
+                if (idx < 0 || idx === list.length - 1) return toast('No card below to stitch with', 'warn');
+                const curr = list[idx];
+                const next = list[idx + 1];
+                const stitchRes = await stitchCanvasesVertically(curr.imageDataUrl, next.imageDataUrl);
+                curr.imageDataUrl = stitchRes.dataUrl;
+                curr.aspectRatio = stitchRes.aspectRatio;
+                curr.isStitched = true;
+                if (!curr.answerKey && next.answerKey) curr.answerKey = next.answerKey;
+                if (!curr.briefSolution && next.briefSolution) curr.briefSolution = next.briefSolution;
+                await db.questions.put(curr);
+                await db.questions.delete(next.id);
+                await loadQuestionsFromDB();
+                toast(`Stitched Q.${curr.questionNumber} & Q.${next.questionNumber}!`, 'success');
+            },
+
+            // Fullscreen Tablet Stylus Scratchpad
+            getActivePadId() {
+                return state.activePadId;
+            },
+            openScratchpad(id) {
+                const q = state.questions.find(i => i.id === Number(id));
+                if (!q) return;
+                state.activePadId = Number(id);
+                state.padAnswerVisible = false;
+                document.getElementById('padQTitle').textContent = `Q.${q.questionNumber} • ${q.subject} (${q.chapter})`;
+                document.getElementById('padQuestionImg').src = q.imageDataUrl;
+                refreshPadAnswerUI();
+                document.getElementById('scratchpadModal').classList.remove('hidden');
+                setTimeout(() => initStylusCanvas(), 50);
+            },
+            togglePadAnswer() {
+                state.padAnswerVisible = !state.padAnswerVisible;
+                refreshPadAnswerUI();
+            },
+            closeScratchpad() {
+                document.getElementById('scratchpadModal').classList.add('hidden');
+            },
+            setInk(color, isEraser = false) {
+                state.inkColor = color;
+                state.isEraser = isEraser;
+                const erBtn = document.getElementById('eraserBtn');
+                if (erBtn) {
+                    erBtn.className = isEraser
+                        ? "h-8 px-2.5 rounded-lg bg-amber-500 text-slate-950 text-xs font-bold flex items-center gap-1"
+                        : "h-8 px-2.5 rounded-lg bg-slate-800 border border-slate-700 text-slate-300 text-xs font-semibold flex items-center gap-1";
+                }
+            },
+            setStrokeWidth(w) {
+                state.strokeWidth = Number(w) || 3.5;
+            },
+            clearInk() {
+                const c = document.getElementById('stylusCanvas');
+                c.getContext('2d').clearRect(0, 0, c.width, c.height);
+            }
+        };
+
+        // ===================================================================
+        // TABLET STYLUS SCRATCHPAD POINTER EVENTS
+        // ===================================================================
+        function initStylusCanvas() {
+            const wrap = document.getElementById('padCanvasWrap');
+            const canvas = document.getElementById('stylusCanvas');
+            canvas.width = wrap.clientWidth;
+            canvas.height = wrap.clientHeight;
+            const ctx = canvas.getContext('2d');
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+            let lx = 0, ly = 0;
+
+            const getPos = (e) => {
+                const r = canvas.getBoundingClientRect();
+                return { x: e.clientX - r.left, y: e.clientY - r.top };
+            };
+
+            canvas.onpointerdown = (e) => {
+                e.preventDefault();
+                canvas.setPointerCapture(e.pointerId);
+                state.isDrawing = true;
+                const p = getPos(e);
+                lx = p.x;
+                ly = p.y;
+            };
+
+            canvas.onpointermove = (e) => {
+                if (!state.isDrawing) return;
+                e.preventDefault();
+                const p = getPos(e);
+                ctx.beginPath();
+                ctx.moveTo(lx, ly);
+                ctx.lineTo(p.x, p.y);
+                ctx.strokeStyle = state.inkColor;
+                ctx.lineWidth = state.isEraser ? 22 : state.strokeWidth;
+                ctx.stroke();
+                lx = p.x;
+                ly = p.y;
+            };
+
+            const stopDraw = (e) => {
+                if (!state.isDrawing) return;
+                state.isDrawing = false;
+                try { canvas.releasePointerCapture(e.pointerId); } catch (_) {}
+            };
+
+            canvas.onpointerup = stopDraw;
+            canvas.onpointercancel = stopDraw;
+        }
+
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                window.app.closeImagePopup();
+            }
+        });
+
+        let resizeTimer = null;
+        window.addEventListener('resize', () => {
+            clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(() => renderFeed(), 150);
+        });
+
+        window.addEventListener('DOMContentLoaded', () => {
+            updateApiKeyIndicator();
+            loadQuestionsFromDB();
+        });
+    </script>
+</body>
+</html>
