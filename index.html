@@ -28,11 +28,13 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <!-- Phosphor Icons -->
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
-    <!-- PDF.js -->
+    <!-- PDF.js (Local PDF Rendering & Native Text Layer Extraction) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
     <script>
         pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
     </script>
+    <!-- Tesseract.js (100% Local Browser OCR Engine for Full-Question Search) -->
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
     <style>
         * {
             -webkit-tap-highlight-color: transparent;
@@ -96,7 +98,7 @@
     <!-- COMPACT TOP HEADER BAR                                              -->
     <!-- =================================================================== -->
     <header class="h-12 bg-panel border-b border-borderdark px-3 sm:px-4 flex items-center justify-between gap-2 shrink-0 z-30">
-        <!-- Left: Chapters Drawer Toggle + Brand + Cloud Status Pill -->
+        <!-- Left: Chapters Drawer Toggle + Brand + Cloud Status Pill + Local OCR Pill -->
         <div class="flex items-center gap-2 min-w-0">
             <button onclick="window.app.toggleDrawer()" class="h-8 px-2.5 rounded-xl bg-slate-800/90 hover:bg-slate-700 border border-slate-700/80 text-slate-200 text-xs font-semibold flex items-center gap-1.5 transition shrink-0">
                 <i class="ph-bold ph-tree-structure text-indigo-400 text-sm"></i>
@@ -110,11 +112,16 @@
 
             <div class="min-w-0 flex items-center gap-1.5">
                 <h1 class="font-bold text-xs sm:text-sm text-white truncate">JEE Sorter</h1>
-                <!-- Cloud Sync Status Pill (Click to Sync Now or Open Cloud Settings) -->
+                <!-- Cloud Sync Status Pill -->
                 <button id="cloudStatusBadge" onclick="window.app.handleCloudBadgeClick()" class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-slate-800 text-slate-400 border border-slate-700 hover:border-indigo-500/50 transition shrink-0" title="Click to Sync with GitHub Cloud or Configure">
                     <i id="cloudStatusIcon" class="ph-bold ph-cloud-slash text-xs"></i>
                     <span id="cloudStatusText">Cloud: Off</span>
                 </button>
+                <!-- Live Local OCR Indexing Pill (Shown while indexing question text locally) -->
+                <div id="ocrStatusBadge" class="hidden items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-500/15 text-amber-300 border border-amber-500/30 shrink-0" title="Local Tesseract OCR indexing questions for instant multi-word search">
+                    <i class="ph-bold ph-text-T animate-pulse text-xs"></i>
+                    <span id="ocrStatusText">OCR: 0/0</span>
+                </div>
             </div>
         </div>
 
@@ -166,11 +173,14 @@
             </button>
         </div>
 
-        <!-- Right: Search, Paper & Difficulty Dropdowns -->
+        <!-- Right: Multi-Word Full-Text OCR Search, Paper & Difficulty Dropdowns -->
         <div class="flex items-center gap-1.5 shrink-0 ml-auto">
-            <div class="relative">
-                <i class="ph ph-magnifying-glass absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
-                <input id="searchBox" oninput="window.app.setSearch(this.value)" type="text" placeholder="Search chapter, Q#..." class="h-7 w-36 sm:w-44 bg-slate-900 border border-slate-700/80 rounded-lg pl-7 pr-2.5 text-xs text-white placeholder-slate-400 focus:outline-none focus:border-indigo-500">
+            <div class="relative flex items-center">
+                <i class="ph ph-magnifying-glass absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs pointer-events-none"></i>
+                <input id="searchBox" oninput="window.app.setSearch(this.value)" type="text" placeholder="Search words in question, chapter, Q#..." class="h-7 w-44 sm:w-64 bg-slate-900 border border-slate-700/80 rounded-lg pl-7 pr-6 text-xs text-white placeholder-slate-400 focus:outline-none focus:border-indigo-500">
+                <button id="clearSearchBtn" onclick="window.app.clearSearch()" class="hidden absolute right-1.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white p-0.5" title="Clear search">
+                    <i class="ph-bold ph-x text-[11px]"></i>
+                </button>
             </div>
             <select id="paperDropdown" onchange="window.app.setPaper(this.value)" class="h-7 bg-slate-900 border border-slate-700/80 rounded-lg px-2 text-xs text-slate-200 focus:outline-none focus:border-indigo-500 max-w-[130px] truncate">
                 <option value="ALL">All Papers (0)</option>
@@ -270,8 +280,8 @@
                         <i class="ph-bold ph-gear text-lg"></i>
                     </div>
                     <div>
-                        <h3 class="font-bold text-sm text-white">Settings, Cloud Sync & Vault Tools</h3>
-                        <p class="text-[11px] text-slate-400">Keys saved locally • Questions stored 100% in GitHub Cloud Gist</p>
+                        <h3 class="font-bold text-sm text-white">Settings, Cloud Sync & Local OCR Tools</h3>
+                        <p class="text-[11px] text-slate-400">Keys saved locally • Questions & OCR stored in GitHub Cloud Gist</p>
                     </div>
                 </div>
                 <button onclick="window.app.closeSettingsModal()" class="p-1.5 rounded-lg text-slate-400 hover:text-white">
@@ -323,9 +333,9 @@
                     <p id="cloudLastSyncInfo" class="text-[10px] text-slate-400 font-mono">Questions are stored exclusively in your Cloud Gist so all devices stay in sync.</p>
                 </div>
 
-                <!-- Vault Tools: Deduplicate, Export, Import -->
+                <!-- Vault Tools: Deduplicate, Export, Import, Local OCR Re-Index -->
                 <div class="bg-slate-900/90 border border-borderdark rounded-xl p-3 space-y-2.5">
-                    <span class="block text-[11px] font-bold uppercase tracking-wider text-slate-400">File Backup & Vault Tools</span>
+                    <span class="block text-[11px] font-bold uppercase tracking-wider text-slate-400">File Backup, Deduplicate & Local OCR Search Index</span>
                     <div class="grid grid-cols-3 gap-2">
                         <button onclick="window.app.runDeduplication(true)" class="h-9 px-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 text-xs font-semibold flex items-center justify-center gap-1.5 transition" title="Remove duplicate questions">
                             <i class="ph-bold ph-stack text-sky-400"></i>
@@ -343,6 +353,10 @@
                             <input type="file" accept=".json,application/json" class="hidden" onchange="window.app.importBackupJson(event)">
                         </label>
                     </div>
+                    <button type="button" onclick="window.app.runBackgroundLocalOcrForExistingQuestions(true)" class="w-full h-8 rounded-lg bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/30 text-amber-300 text-xs font-semibold flex items-center justify-center gap-1.5 transition" title="Run local Tesseract.js OCR on any questions missing full-text search index">
+                        <i class="ph-bold ph-text-T"></i>
+                        <span id="settingsOcrBtnLabel">Run Local OCR Indexer on Unindexed Questions</span>
+                    </button>
                 </div>
 
                 <div id="apiKeyMissingAlert" class="hidden p-3 rounded-xl bg-amber-500/15 border border-amber-500/40 text-amber-200 text-xs leading-relaxed">
@@ -403,8 +417,8 @@
                         <i class="ph-bold ph-file-pdf text-xl"></i>
                     </div>
                     <div>
-                        <h3 class="font-bold text-base text-white">Add Test Paper PDF (Precision Scanner)</h3>
-                        <p class="text-xs text-slate-400">100% Full-Width Crops • Whitespace Gap Snapper • Smart Multi-Page Stitching</p>
+                        <h3 class="font-bold text-base text-white">Add Test Paper PDF (Precision Scanner + Local OCR)</h3>
+                        <p class="text-xs text-slate-400">100% Full-Width Crops • Whitespace Gap Snapper • Full-Question Local OCR</p>
                     </div>
                 </div>
                 <button onclick="window.app.closeUploadModal()" class="p-2 rounded-lg text-slate-400 hover:text-white">
@@ -421,7 +435,7 @@
                             <i class="ph-duotone ph-cloud-arrow-up text-2xl"></i>
                         </div>
                         <p id="selectedFileLabel" class="text-sm sm:text-base font-bold text-white">Tap to Select Your JEE Question Paper PDF</p>
-                        <p class="text-xs text-slate-400 mt-1">Hybrid AI + Pixel Whitespace Gap Detection prevents cutting diagrams or clubbing questions!</p>
+                        <p class="text-xs text-slate-400 mt-1">Full question text is extracted locally (PDF.js + Tesseract.js) so crop quality stays 100% untouched!</p>
                     </label>
 
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-slate-900/80 p-3.5 rounded-xl border border-borderdark">
@@ -446,7 +460,7 @@
                         <div class="flex items-center justify-between text-xs">
                             <span id="extractStepTitle" class="font-bold text-white flex items-center gap-2">
                                 <span class="w-2.5 h-2.5 rounded-full bg-indigo-500 animate-ping"></span>
-                                Detecting Question Boundaries & Stitching...
+                                Detecting Question Boundaries & Local OCR...
                             </span>
                             <span id="extractPageBadge" class="px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-300 font-bold">Page 1/1</span>
                         </div>
@@ -581,7 +595,7 @@
     <div id="toastBox" class="fixed bottom-4 right-4 z-50 flex flex-col gap-2 pointer-events-none"></div>
 
     <!-- =================================================================== -->
-    <!-- CORE APPLICATION LOGIC (LOCAL KEYS ONLY + 100% CLOUD QUESTIONS)     -->
+    <!-- CORE APPLICATION LOGIC (LOCAL KEYS + CLOUD QUESTIONS + LOCAL OCR)   -->
     <!-- =================================================================== -->
     <script>
         // Wipe any leftover local IndexedDB question database so old cached questions never cause sync conflicts
@@ -628,7 +642,10 @@
             isDrawing: false,
             // Cloud Sync State
             isSyncingCloud: false,
-            hasPendingCloudPush: false
+            hasPendingCloudPush: false,
+            // Local Tesseract OCR Worker State
+            ocrWorker: null,
+            isRunningBackgroundOcr: false
         };
 
         function generateUniqueId() {
@@ -650,6 +667,113 @@
                 el.style.opacity = '0';
                 setTimeout(() => el.remove(), 250);
             }, 3000);
+        }
+
+        // ===================================================================
+        // 100% LOCAL OCR ENGINE (PDF.JS TEXT LAYER + TESSERACT.JS V5)
+        // ===================================================================
+        async function getLocalTesseractWorker() {
+            if (state.ocrWorker) return state.ocrWorker;
+            state.ocrWorker = await Tesseract.createWorker('eng');
+            return state.ocrWorker;
+        }
+
+        async function recognizeImageTextWithTesseract(imageSource) {
+            try {
+                const worker = await getLocalTesseractWorker();
+                const ret = await worker.recognize(imageSource);
+                return (ret?.data?.text || '').replace(/\s+/g, ' ').trim();
+            } catch (err) {
+                console.warn('Local Tesseract OCR warning:', err);
+                return '';
+            }
+        }
+
+        // Extracts embedded vector text from a PDF.js page within [yminNorm, ymaxNorm] (0..1000) in 1ms
+        async function extractPdfNativeTextInSlice(page, yminNorm, ymaxNorm) {
+            try {
+                const vp = page.getViewport({ scale: 1.0 });
+                const pageH = vp.height || 1;
+                const textContent = await page.getTextContent();
+                const matched = [];
+
+                for (const item of (textContent.items || [])) {
+                    if (!item.str || !item.transform) continue;
+                    // PDF coordinate system has y=0 at bottom, y=pageH at top
+                    const pdfY = item.transform[5];
+                    const topDownNormY = ((pageH - pdfY) / pageH) * 1000;
+                    if (topDownNormY >= yminNorm - 18 && topDownNormY <= ymaxNorm + 18) {
+                        matched.push(item.str);
+                    }
+                }
+                return matched.join(' ').replace(/\s+/g, ' ').trim();
+            } catch (e) {
+                return '';
+            }
+        }
+
+        // Automatically indexes any existing questions in Cloud Vault that don't have full `ocrText` yet
+        async function runBackgroundLocalOcrForExistingQuestions(manualNotify = false) {
+            if (state.isRunningBackgroundOcr) {
+                if (manualNotify) toast('Local OCR indexing is already running!', 'info');
+                return;
+            }
+
+            const unindexed = state.questions.filter(q => !q.ocrText || String(q.ocrText).trim().length < 15);
+            if (unindexed.length === 0) {
+                if (manualNotify) toast('All questions already have full OCR text indexed ✓', 'success');
+                return;
+            }
+
+            state.isRunningBackgroundOcr = true;
+            const badge = document.getElementById('ocrStatusBadge');
+            const badgeTxt = document.getElementById('ocrStatusText');
+            const settingsBtnLbl = document.getElementById('settingsOcrBtnLabel');
+            if (badge) {
+                badge.classList.remove('hidden');
+                badge.classList.add('inline-flex');
+            }
+
+            if (manualNotify) {
+                toast(`Running local Tesseract OCR on ${unindexed.length} questions...`, 'info');
+            }
+
+            let completed = 0;
+            let updatedAny = false;
+
+            try {
+                for (const q of unindexed) {
+                    // Check if question still exists in state
+                    if (!state.questions.some(item => item.id === q.id)) continue;
+                    completed++;
+                    if (badgeTxt) badgeTxt.textContent = `OCR: ${completed}/${unindexed.length}`;
+                    if (settingsBtnLbl) settingsBtnLbl.textContent = `Indexing Question ${completed} of ${unindexed.length}...`;
+
+                    const extracted = await recognizeImageTextWithTesseract(q.imageDataUrl);
+                    const fallback = `${q.firstLineSnippet || ''} ${q.lastLineSnippet || ''}`.trim();
+                    q.ocrText = (extracted || fallback || `Q.${q.questionNumber}`).trim();
+                    updatedAny = true;
+
+                    // If user is actively typing in search bar, live-refresh feed as OCR finishes
+                    if (state.search) renderFeed();
+                }
+
+                if (updatedAny) {
+                    scheduleCloudAutoSync();
+                    if (manualNotify) toast(`Indexed full OCR text for ${completed} questions!`, 'success');
+                }
+            } catch (err) {
+                console.warn('Background OCR error:', err);
+            } finally {
+                state.isRunningBackgroundOcr = false;
+                if (badge) {
+                    badge.classList.add('hidden');
+                    badge.classList.remove('inline-flex');
+                }
+                if (settingsBtnLbl) {
+                    settingsBtnLbl.textContent = 'Run Local OCR Indexer on Unindexed Questions';
+                }
+            }
         }
 
         // ===================================================================
@@ -1017,6 +1141,9 @@
                 if (manualNotify) {
                     toast(`Pulled ${state.questions.length} questions from GitHub Cloud!`, 'success');
                 }
+
+                // Automatically index any loaded questions that don't have full local OCR text yet
+                runBackgroundLocalOcrForExistingQuestions(false);
             } catch (err) {
                 console.error('Cloud Pull Error:', err);
                 state.isSyncingCloud = false;
@@ -1067,6 +1194,7 @@
                 state.questions.push(...sanitized);
                 scheduleCloudAutoSync();
                 toast(`Imported ${sanitized.length} questions & syncing to Cloud!`, 'success');
+                runBackgroundLocalOcrForExistingQuestions(false);
             } catch (err) {
                 toast('Failed to import JSON: ' + err.message, 'warn');
             } finally {
@@ -1077,8 +1205,6 @@
         // ===================================================================
         // PIXEL WHITESPACE GAP SNAPPER & SMART AUTO-TRIMMER
         // ===================================================================
-        // Scans the rendered canvas near targetNormY (0..1000) to find the cleanest horizontal white gap
-        // so cuts NEVER slice through text or a pulley/circuit diagram!
         function findCleanHorizontalWhitespaceNormY(sourceCanvas, targetNormY, searchUpNorm = 45, searchDownNorm = 15) {
             const w = sourceCanvas.width;
             const h = sourceCanvas.height;
@@ -1091,7 +1217,6 @@
             const sliceH = maxPx - minPx + 1;
             const imgData = ctx.getImageData(0, minPx, w, sliceH).data;
 
-            // Compute whether each row is pure white across the page width
             const isRowWhite = new Array(sliceH).fill(true);
             for (let r = 0; r < sliceH; r++) {
                 let darkPixels = 0;
@@ -1107,13 +1232,11 @@
                 }
             }
 
-            // Find the best contiguous band of white rows closest to centerPx (preferring slightly above targetNormY)
             let bestRowPx = centerPx;
             let bestScore = -999999;
 
             for (let r = 0; r < sliceH; r++) {
                 if (!isRowWhite[r]) continue;
-                // Measure how many consecutive white rows surround r
                 let band = 1;
                 for (let u = r - 1; u >= 0 && isRowWhite[u]; u--) band++;
                 for (let d = r + 1; d < sliceH && isRowWhite[d]; d++) band++;
@@ -1208,6 +1331,7 @@
             const finalCanvas = autoTrimVerticalWhitespace(rawCanvas);
 
             return {
+                canvas: finalCanvas,
                 dataUrl: finalCanvas.toDataURL('image/jpeg', 0.88),
                 aspectRatio: finalCanvas.height / finalCanvas.width
             };
@@ -1350,7 +1474,7 @@ CRITICAL RULES FOR ZERO CLUBBING & EXACT STITCHING:
         }
 
         // ===================================================================
-        // PDF UPLOAD & EXTRACTION WORKFLOW (DIRECT TO CLOUD)
+        // PDF UPLOAD & EXTRACTION WORKFLOW (WITH LOCAL FULL-QUESTION OCR)
         // ===================================================================
         async function onPdfSelected(e) {
             const file = e.target.files?.[0];
@@ -1422,16 +1546,13 @@ CRITICAL RULES FOR ZERO CLUBBING & EXACT STITCHING:
 
                     blocks.sort((a, b) => (a.ymin || 0) - (b.ymin || 0));
 
-                    // SMART WHITESPACE GAP BOUNDARY SNAPPING:
-                    // Never average overlapping boxes (which slices diagrams in half!).
-                    // Instead, snap the cut line to the clean horizontal white space right above blocks[i + 1].ymin!
+                    // SMART WHITESPACE GAP BOUNDARY SNAPPING
                     for (let i = 0; i < blocks.length; i++) {
                         blocks[i].ymin = findCleanHorizontalWhitespaceNormY(canvas, Number(blocks[i].ymin) || 0, 28, 10);
                     }
                     for (let i = 0; i < blocks.length - 1; i++) {
                         const nextYMin = blocks[i + 1].ymin;
                         if (blocks[i].ymax >= nextYMin - 4) {
-                            // Clamp blocks[i].ymax strictly to the whitespace gap right above nextYMin
                             blocks[i].ymax = Math.max(blocks[i].ymin + 25, nextYMin - 2);
                         } else {
                             blocks[i].ymax = findCleanHorizontalWhitespaceNormY(canvas, Number(blocks[i].ymax) || nextYMin, 15, 25);
@@ -1446,6 +1567,18 @@ CRITICAL RULES FOR ZERO CLUBBING & EXACT STITCHING:
                         const ymin = Math.max(0, Math.min(990, Number(b.ymin) || 0));
                         const ymax = Math.max(ymin + 25, Math.min(1000, Number(b.ymax) || 1000));
                         const cropRes = cropFullWidthSlice(canvas, ymin, ymax, padTop, padBottom);
+
+                        // 100% LOCAL FULL-QUESTION OCR (PDF.js native text layer first, then local Tesseract.js OCR)
+                        let fullQuestionText = await extractPdfNativeTextInSlice(page, ymin, ymax);
+                        if (fullQuestionText.length < 25) {
+                            document.getElementById('extractSubText').textContent = `Running local Tesseract OCR on Page ${pageNum} slice ${i + 1}/${blocks.length}...`;
+                            const tessText = await recognizeImageTextWithTesseract(cropRes.canvas);
+                            if (tessText.length > fullQuestionText.length) {
+                                fullQuestionText = tessText;
+                            }
+                        }
+                        const combinedOcrText = `${fullQuestionText} ${b.firstLineSnippet || ''} ${b.lastLineSnippet || ''}`.replace(/\s+/g, ' ').trim();
+
                         const rawQNum = String(b.questionNumber || '').replace(/[^0-9a-zA-Z]/g, '') || `${extractedCount + 1}`;
                         const isExplicitCont = rawQNum.toUpperCase() === 'CONT' || b.isContinuationFromPrevPage === true;
                         const startsWithNewNum = /^\s*(?:Q\.?\s*)?\d+[\.\)\:]/.test(String(b.firstLineSnippet || '')) && !isExplicitCont;
@@ -1463,6 +1596,7 @@ CRITICAL RULES FOR ZERO CLUBBING & EXACT STITCHING:
                             prevQuestion.aspectRatio = stitchRes.aspectRatio;
                             prevQuestion.isStitched = true;
                             prevQuestion.continuesToNextPage = Boolean(b.continuesToNextPage);
+                            prevQuestion.ocrText = `${prevQuestion.ocrText || ''} ${combinedOcrText}`.replace(/\s+/g, ' ').trim();
                             sortAndRefreshQuestions();
                             continue;
                         }
@@ -1479,6 +1613,9 @@ CRITICAL RULES FOR ZERO CLUBBING & EXACT STITCHING:
                             page: pageNum,
                             imageDataUrl: cropRes.dataUrl,
                             aspectRatio: cropRes.aspectRatio,
+                            ocrText: combinedOcrText,
+                            firstLineSnippet: b.firstLineSnippet || '',
+                            lastLineSnippet: b.lastLineSnippet || '',
                             solved: false,
                             starred: false,
                             isStitched: false,
@@ -1490,12 +1627,12 @@ CRITICAL RULES FOR ZERO CLUBBING & EXACT STITCHING:
                         sortAndRefreshQuestions();
                         extractedCount++;
                         prevQuestion = qObj;
-                        appendExtractLog(`✓ Q.${qObj.questionNumber} (${qObj.subject} • ${qObj.chapter})`, 'text-emerald-400');
+                        appendExtractLog(`✓ Q.${qObj.questionNumber} (${qObj.subject} • ${qObj.chapter}) [OCR: ${combinedOcrText.split(' ').length} words]`, 'text-emerald-400');
                     }
                 }
 
                 state.isExtracting = false;
-                toast(`Extracted ${extractedCount} questions! Syncing to Cloud...`, 'success');
+                toast(`Extracted ${extractedCount} questions with full local OCR! Syncing...`, 'success');
                 await pushToCloudGist(false);
                 setTimeout(() => {
                     window.app.closeUploadModal();
@@ -1511,9 +1648,19 @@ CRITICAL RULES FOR ZERO CLUBBING & EXACT STITCHING:
         }
 
         // ===================================================================
-        // FILTERING & UI RENDERING
+        // CASE-INSENSITIVE MULTI-WORD FULL-QUESTION SEARCH & FILTERING
         // ===================================================================
+        function normalizeForSearch(str) {
+            return String(str || '')
+                .toLowerCase()
+                .replace(/[^\w\s.]/g, ' ')
+                .replace(/\s+/g, ' ')
+                .trim();
+        }
+
         function getFiltered() {
+            const queryTokens = normalizeForSearch(state.search).split(' ').filter(Boolean);
+
             return state.questions.filter(q => {
                 if (state.subject !== 'ALL' && q.subject !== state.subject) return false;
                 if (state.chapter !== 'ALL' && q.chapter !== state.chapter) return false;
@@ -1522,13 +1669,15 @@ CRITICAL RULES FOR ZERO CLUBBING & EXACT STITCHING:
                 if (state.status === 'UNSOLVED' && q.solved) return false;
                 if (state.status === 'SOLVED' && !q.solved) return false;
                 if (state.status === 'STARRED' && !q.starred) return false;
-                if (state.search) {
-                    const s = state.search.toLowerCase();
-                    const hit = String(q.questionNumber).toLowerCase().includes(s) ||
-                                (q.chapter || '').toLowerCase().includes(s) ||
-                                (q.subject || '').toLowerCase().includes(s) ||
-                                (q.paperName || '').toLowerCase().includes(s);
-                    if (!hit) return false;
+
+                if (queryTokens.length > 0) {
+                    const haystack = normalizeForSearch(
+                        `q.${q.questionNumber} ${q.questionNumber} ${q.subject || ''} ${q.chapter || ''} ${q.paperName || ''} ${q.difficulty || ''} ${q.ocrText || ''} ${q.firstLineSnippet || ''} ${q.lastLineSnippet || ''}`
+                    );
+                    // Every word typed in the search bar must appear in the question's OCR text or metadata (in any order, case-insensitive)
+                    for (const token of queryTokens) {
+                        if (!haystack.includes(token)) return false;
+                    }
                 }
                 return true;
             });
@@ -1739,16 +1888,23 @@ CRITICAL RULES FOR ZERO CLUBBING & EXACT STITCHING:
                                 ? 'Syncing Questions from GitHub Cloud...'
                                 : state.questions.length === 0
                                 ? 'Cloud Question Vault Ready!'
-                                : 'No Questions Match Current Filter'}
+                                : 'No Questions Match Current Search / Filter'}
                         </h2>
                         <p class="text-xs sm:text-sm text-slate-400 leading-relaxed">
                             ${state.isSyncingCloud
                                 ? 'Fetching your latest question bank from your GitHub Secret Gist...'
                                 : state.questions.length === 0
-                                ? 'Tap "+ Add Test PDF" to extract questions with 100% full-width crops and precision multi-page stitching. Questions are stored exclusively in your GitHub Secret Gist while your API keys stay saved locally!'
-                                : 'Try switching Status to "All Status" or selecting "All Subjects & Chapters" inside the Chapters drawer.'}
+                                ? 'Tap "+ Add Test PDF" to extract questions with 100% full-width crops, precision multi-page stitching, and local full-question OCR search!'
+                                : (state.isRunningBackgroundOcr
+                                    ? 'Local Tesseract OCR is currently indexing your questions in the background—results will appear automatically as they finish!'
+                                    : 'Try clearing the search box, switching Status to "All Status", or selecting "All Subjects & Chapters" inside the Chapters drawer.')}
                         </p>
                         <div class="flex flex-wrap items-center justify-center gap-3 pt-2">
+                            ${state.search ? `
+                                <button onclick="window.app.clearSearch()" class="h-10 px-5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-600 text-white text-xs sm:text-sm font-bold flex items-center gap-2">
+                                    <i class="ph-bold ph-x"></i> Clear Search Filter
+                                </button>
+                            ` : ''}
                             <button onclick="window.app.openUploadModal()" class="h-10 px-5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs sm:text-sm font-bold flex items-center gap-2 shadow-lg shadow-indigo-600/30">
                                 <i class="ph-bold ph-file-pdf"></i> Upload Test Paper PDF
                             </button>
@@ -1813,8 +1969,22 @@ CRITICAL RULES FOR ZERO CLUBBING & EXACT STITCHING:
             setStatus(st) { state.status = st; renderAll(); },
             setPaper(p) { state.paper = p; renderAll(); },
             setDifficulty(d) { state.difficulty = d; renderAll(); },
-            setSearch(v) { state.search = v.trim(); renderFeed(); },
+            setSearch(v) {
+                state.search = v || '';
+                const clearBtn = document.getElementById('clearSearchBtn');
+                if (clearBtn) clearBtn.classList.toggle('hidden', !state.search.trim());
+                renderFeed();
+            },
+            clearSearch() {
+                state.search = '';
+                const inp = document.getElementById('searchBox');
+                if (inp) inp.value = '';
+                const clearBtn = document.getElementById('clearSearchBtn');
+                if (clearBtn) clearBtn.classList.add('hidden');
+                renderFeed();
+            },
             renderDrawerChapters,
+            runBackgroundLocalOcrForExistingQuestions,
 
             // Fullscreen Toggle
             toggleFullscreen() {
@@ -2080,6 +2250,7 @@ CRITICAL RULES FOR ZERO CLUBBING & EXACT STITCHING:
                     q.questionNumber = `${baseNum}a`;
                     q.imageDataUrl = c1.toDataURL('image/jpeg', 0.88);
                     q.aspectRatio = c1.height / c1.width;
+                    q.ocrText = ''; // Clear so background local OCR re-indexes the exact split half
 
                     const secondCard = {
                         ...q,
@@ -2087,12 +2258,14 @@ CRITICAL RULES FOR ZERO CLUBBING & EXACT STITCHING:
                         questionNumber: `${baseNum}b`,
                         imageDataUrl: c2.toDataURL('image/jpeg', 0.88),
                         aspectRatio: c2.height / c2.width,
+                        ocrText: '',
                         solved: false,
                         createdAt: (q.createdAt || Date.now()) + 1
                     };
                     state.questions.push(secondCard);
                     scheduleCloudAutoSync();
                     toast(`Split into Q.${baseNum}a & Q.${baseNum}b!`, 'success');
+                    runBackgroundLocalOcrForExistingQuestions(false);
                 } else {
                     const t = Number(document.getElementById('trimTopSlider').value) / 100;
                     const b = Number(document.getElementById('trimBotSlider').value) / 100;
@@ -2119,6 +2292,7 @@ CRITICAL RULES FOR ZERO CLUBBING & EXACT STITCHING:
                 curr.imageDataUrl = stitchRes.dataUrl;
                 curr.aspectRatio = stitchRes.aspectRatio;
                 curr.isStitched = true;
+                curr.ocrText = `${curr.ocrText || ''} ${next.ocrText || ''}`.replace(/\s+/g, ' ').trim();
                 state.questions = state.questions.filter(q => q.id !== next.id);
                 scheduleCloudAutoSync();
                 toast(`Stitched Q.${curr.questionNumber} & Q.${next.questionNumber}!`, 'success');
