@@ -67,141 +67,151 @@
         .m3-spin-slow { animation: m3Spin 16s linear infinite; }
         @keyframes m3Spin { to { transform: rotate(360deg); } }
 
-        /* M3 Expressive Segmented Button Group with Continuous Corner Radius */
+        /* Normal Scale M3 Expressive Segmented Button Group */
         .m3-segmented-group {
             display: inline-flex;
             align-items: center;
             background-color: var(--md-surface-high);
             border: 1.5px solid var(--md-outline-variant);
-            border-radius: 20px;
-            padding: 3px;
-            gap: 2px;
+            border-radius: 9999px;
+            padding: 3.5px;
+            gap: 3px;
             touch-action: pan-y;
             user-select: none;
         }
         .m3-seg-btn {
-            height: 30px;
-            padding: 0 11px;
-            font-size: 11px;
+            height: 32px;
+            padding: 0 13px;
+            font-size: 11.5px;
             font-weight: 700;
             display: inline-flex;
             align-items: center;
-            gap: 5px;
+            gap: 6px;
             color: var(--md-on-surface-variant);
             background-color: transparent;
-            border-radius: 12px;
-            transition: all 0.28s var(--m3-spring);
+            border-radius: 14px;
+            transition: all 0.32s var(--m3-spring);
             white-space: nowrap;
             cursor: pointer;
         }
-        .m3-seg-btn:first-child { border-top-left-radius: 16px; border-bottom-left-radius: 16px; }
-        .m3-seg-btn:last-child { border-top-right-radius: 16px; border-bottom-right-radius: 16px; }
+        .m3-seg-btn:first-child { border-top-left-radius: 9999px; border-bottom-left-radius: 9999px; }
+        .m3-seg-btn:last-child { border-top-right-radius: 9999px; border-bottom-right-radius: 9999px; }
         .m3-seg-btn:hover:not(.active) {
             background-color: var(--md-surface-highest);
             color: var(--md-on-surface);
+            border-radius: 18px;
         }
-        .m3-seg-btn:active { transform: scale(0.95); }
+        .m3-seg-btn:active { transform: scale(0.94); }
         .m3-seg-btn.active {
             background-color: var(--md-primary);
             color: var(--md-on-primary);
-            border-radius: 16px;
+            border-radius: 9999px;
             font-weight: 800;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.18);
+            padding: 0 16px;
+            box-shadow: 0 3px 12px rgba(0,0,0,0.22);
         }
 
-        /* M3 Expressive Connected Icon Button Group with Continuous Radius */
+        /* Normal Scale Connected Icon Button Group */
         .m3-icon-group {
             display: inline-flex;
             align-items: center;
-            gap: 2px;
+            gap: 3px;
             background-color: var(--md-surface-low);
-            padding: 2px;
-            border-radius: 18px;
+            padding: 3px;
+            border-radius: 9999px;
             border: 1.5px solid var(--md-outline-variant);
         }
         .m3-icon-group-btn {
-            height: 28px;
-            min-width: 28px;
-            padding: 0 7px;
-            border-radius: 12px;
+            height: 30px;
+            min-width: 30px;
+            padding: 0 8px;
+            border-radius: 14px;
             background-color: var(--md-surface-high);
             color: var(--md-on-surface-variant);
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            font-size: 12px;
-            transition: all 0.24s var(--m3-spring);
+            font-size: 13px;
+            transition: all 0.28s var(--m3-spring);
             position: relative;
         }
-        .m3-icon-group-btn:first-child { border-top-left-radius: 16px; border-bottom-left-radius: 16px; padding-left: 9px; }
-        .m3-icon-group-btn:last-child { border-top-right-radius: 16px; border-bottom-right-radius: 16px; padding-right: 9px; }
+        .m3-icon-group-btn:first-child { border-top-left-radius: 9999px; border-bottom-left-radius: 9999px; padding-left: 11px; }
+        .m3-icon-group-btn:last-child { border-top-right-radius: 9999px; border-bottom-right-radius: 9999px; padding-right: 11px; }
         .m3-icon-group-btn:hover {
             background-color: var(--md-primary-container);
             color: var(--md-on-primary-container);
-            transform: scale(1.04);
+            border-radius: 9999px;
+            transform: scale(1.06);
         }
-        .m3-icon-group-btn:active { transform: scale(0.92); }
+        .m3-icon-group-btn:active {
+            transform: scale(0.9);
+            border-radius: 9999px;
+        }
         .m3-icon-group-btn.active-state {
             background-color: var(--md-primary);
             color: var(--md-on-primary);
+            border-radius: 9999px;
             font-weight: 800;
         }
 
-        /* M3 Expressive Grouped List (Settings menu items with continuous smooth corners) */
-        .m3-group-list { display: flex; flex-direction: column; gap: 3px; }
+        /* Normal Scale Grouped List */
+        .m3-group-list { display: flex; flex-direction: column; gap: 4px; }
         .m3-group-item {
             background-color: var(--md-surface-high);
             border: 1.5px solid var(--md-outline-variant);
             border-radius: 14px;
-            transition: all 0.24s var(--m3-spring);
+            transition: all 0.28s var(--m3-spring);
         }
-        .m3-group-item:first-child { border-top-left-radius: 22px; border-top-right-radius: 22px; }
-        .m3-group-item:last-child { border-bottom-left-radius: 22px; border-bottom-right-radius: 22px; }
-        .m3-group-item:only-child { border-radius: 22px; }
+        .m3-group-item:first-child { border-top-left-radius: 28px; border-top-right-radius: 28px; }
+        .m3-group-item:last-child { border-bottom-left-radius: 28px; border-bottom-right-radius: 28px; }
+        .m3-group-item:only-child { border-radius: 28px; }
         .m3-group-item:hover {
             background-color: var(--md-surface-highest);
             border-color: var(--md-outline);
+            transform: scale(1.006);
         }
-        .m3-group-item:active { transform: scale(0.99); }
+        .m3-group-item:active { transform: scale(0.985); border-radius: 22px; }
 
         .m3-btn-filled {
             background-color: var(--md-primary);
             color: var(--md-on-primary);
-            border-radius: 18px;
+            border-radius: 9999px;
             font-weight: 800;
-            transition: all 0.28s var(--m3-spring);
+            transition: all 0.3s var(--m3-spring);
         }
         .m3-btn-filled:hover:not(:disabled) {
             filter: brightness(1.06);
+            border-radius: 18px;
             transform: translateY(-1px) scale(1.02);
-            box-shadow: 0 6px 16px -4px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 8px 20px -4px rgba(0, 0, 0, 0.35);
         }
-        .m3-btn-filled:active:not(:disabled) { transform: scale(0.95); }
+        .m3-btn-filled:active:not(:disabled) { transform: scale(0.94); border-radius: 16px; }
 
         .m3-btn-tonal {
             background-color: var(--md-secondary-container);
             color: var(--md-on-secondary-container);
-            border-radius: 18px;
+            border-radius: 9999px;
             font-weight: 700;
-            transition: all 0.28s var(--m3-spring);
+            transition: all 0.3s var(--m3-spring);
         }
         .m3-btn-tonal:hover:not(:disabled) {
             background-color: var(--md-primary-container);
             color: var(--md-on-primary-container);
-            transform: scale(1.02);
+            border-radius: 18px;
+            transform: scale(1.03);
         }
-        .m3-btn-tonal:active:not(:disabled) { transform: scale(0.95); }
+        .m3-btn-tonal:active:not(:disabled) { transform: scale(0.93); border-radius: 14px; }
 
         .m3-extended-fab {
             background-color: var(--md-primary);
             color: var(--md-on-primary);
-            border-radius: 22px;
-            box-shadow: 0 12px 28px -4px rgba(0, 0, 0, 0.4);
-            transition: transform 0.35s var(--m3-spring), opacity 0.25s ease, border-radius 0.28s var(--m3-spring);
+            border-radius: 24px;
+            box-shadow: 0 14px 30px -4px rgba(0, 0, 0, 0.45);
+            transition: transform 0.38s var(--m3-spring), opacity 0.28s ease, border-radius 0.3s var(--m3-spring);
         }
         .m3-extended-fab:hover {
-            border-radius: 26px;
-            transform: translateY(-2px) scale(1.03);
+            border-radius: 9999px;
+            transform: translateY(-3px) scale(1.04);
         }
         .m3-extended-fab:active { transform: scale(0.94); }
         .m3-extended-fab.fab-hidden {
@@ -210,78 +220,80 @@
             pointer-events: none;
         }
 
+        /* Normal Scale Cards */
         @keyframes m3CardPop {
-            from { opacity: 0; transform: translateY(14px) scale(0.97); }
+            from { opacity: 0; transform: translateY(16px) scale(0.97); }
             to { opacity: 1; transform: translateY(0) scale(1); }
         }
         .m3-card {
             background-color: var(--md-surface-container);
             border: 1.5px solid var(--md-outline-variant);
-            border-radius: 24px;
-            padding: 5px;
+            border-radius: 30px;
+            padding: 6px;
             display: flex;
             flex-direction: column;
-            gap: 4px;
-            animation: m3CardPop 0.35s var(--m3-spring) backwards;
-            transition: transform 0.24s var(--m3-spring), border-color 0.22s ease, box-shadow 0.24s ease;
+            gap: 5px;
+            animation: m3CardPop 0.38s var(--m3-spring) backwards;
+            transition: transform 0.28s var(--m3-spring), border-color 0.25s ease, box-shadow 0.28s ease;
         }
         .m3-card:hover {
             border-color: var(--md-primary);
-            box-shadow: 0 10px 24px -6px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 12px 28px -8px rgba(0, 0, 0, 0.35);
         }
         .m3-card-top-segment {
             background-color: var(--md-surface-high);
-            border-radius: 18px 18px 12px 12px;
+            border-radius: 24px 24px 14px 14px;
         }
         .m3-card-img-segment {
             background-color: #ffffff;
-            border-radius: 12px 12px 18px 18px;
+            border-radius: 14px 14px 24px 24px;
         }
 
         @keyframes m3DialogIn {
-            from { opacity: 0; transform: scale(0.92) translateY(14px); }
+            from { opacity: 0; transform: scale(0.9) translateY(18px); }
             to { opacity: 1; transform: scale(1) translateY(0); }
         }
         .m3-dialog {
             background-color: var(--md-surface-container);
             border: 1.5px solid var(--md-outline);
-            border-radius: 28px;
-            box-shadow: 0 24px 50px rgba(0, 0, 0, 0.5);
-            animation: m3DialogIn 0.3s var(--m3-spring);
+            border-radius: 34px;
+            box-shadow: 0 28px 60px rgba(0, 0, 0, 0.55);
+            animation: m3DialogIn 0.34s var(--m3-spring);
         }
 
         .m3-input {
             background-color: var(--md-surface-low);
             border: 1.5px solid var(--md-outline);
             color: var(--md-on-surface);
-            border-radius: 14px;
-            transition: all 0.2s var(--m3-spring);
+            border-radius: 18px;
+            transition: all 0.22s var(--m3-spring);
         }
         .m3-input:focus {
             outline: none;
             border-color: var(--md-primary);
+            border-radius: 14px;
             box-shadow: 0 0 0 3px var(--md-primary-container);
         }
 
         /* Material 3 Custom Dropdown Styling */
         .m3-select {
             appearance: none;
-            background-color: var(--md-surface-low);
+            background-color: var(--md-surface-high);
             border: 1.5px solid var(--md-outline-variant);
             color: var(--md-on-surface);
-            border-radius: 14px;
-            padding: 0 28px 0 12px;
+            border-radius: 9999px;
+            padding: 0 32px 0 16px;
             font-size: 11.5px;
             font-weight: 700;
             cursor: pointer;
             background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' width='16' height='16' fill='%23a78bfa'%3E%3Cpath d='M12 15l-5-5h10l-5 5z'/%3E%3C/svg%3E");
             background-repeat: no-repeat;
-            background-position: right 8px center;
-            transition: all 0.2s var(--m3-spring);
+            background-position: right 12px center;
+            transition: all 0.28s var(--m3-spring);
         }
         .m3-select:hover {
             border-color: var(--md-primary);
-            background-color: var(--md-surface-high);
+            background-color: var(--md-surface-highest);
         }
         .m3-select:focus {
             outline: none;
@@ -295,24 +307,24 @@
             to { background-position-x: 44px; }
         }
         .m3-wavy-active {
-            height: 12px;
+            height: 14px;
             background-repeat: repeat-x;
             background-position: 0 center;
-            background-size: 44px 12px;
-            animation: m3WaveFlow 3.8s linear infinite; /* Slower wave velocity */
+            background-size: 44px 14px;
+            animation: m3WaveFlow 2.6s linear infinite;
             clip-path: inset(0 round 999px);
-            transition: width 0.5s var(--m3-emphasized);
+            transition: width 0.55s var(--m3-emphasized);
         }
         .m3-wavy-track {
             height: 6px;
             background-color: var(--md-secondary-container);
             border-radius: 9999px;
-            margin-left: 2px; /* 2px gap at intersection point */
-            transition: width 0.5s var(--m3-emphasized), opacity 0.25s ease;
-            clip-path: inset(0 round 999px); /* Circular empty bar radius */
+            margin-left: 2px;
+            transition: width 0.55s var(--m3-emphasized), opacity 0.3s ease;
+            clip-path: inset(0 round 9999px);
         }
 
-        ::-webkit-scrollbar { width: 5px; height: 5px; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: var(--md-outline); border-radius: 9999px; }
         .no-scrollbar::-webkit-scrollbar { display: none; }
@@ -321,14 +333,14 @@
         input[type=range].split-slider { -webkit-appearance: none; appearance: none; width: 100%; background: transparent; }
         input[type=range].split-slider::-webkit-slider-thumb {
             -webkit-appearance: none; appearance: none;
-            height: 24px; width: 24px; border-radius: 10px;
+            height: 28px; width: 28px; border-radius: 12px;
             background: var(--md-primary); cursor: pointer;
-            border: 2.5px solid var(--md-on-primary);
-            box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+            border: 3px solid var(--md-on-primary);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.45);
             transition: transform 0.2s var(--m3-spring), border-radius 0.2s var(--m3-spring);
         }
         input[type=range].split-slider::-webkit-slider-thumb:active {
-            transform: scale(1.15);
+            transform: scale(1.2);
             border-radius: 50%;
         }
         #stylusCanvas { touch-action: none; }
@@ -347,7 +359,7 @@
         </defs>
     </svg>
 
-    <!-- UNIFIED MAIN BAR (Slightly decreased length/padding to prevent horizontal scroll) -->
+    <!-- UNIFIED MAIN BAR (Slightly reduced length/padding ONLY on this bar as requested) -->
     <header class="m3-surface-low border-b m3-border px-2.5 sm:px-3.5 py-1.5 flex items-center gap-1.5 overflow-x-auto no-scrollbar shrink-0 z-30">
         <div class="w-8 h-8 m3-cookie-12 flex items-center justify-center shrink-0 shadow-sm" style="background: var(--md-primary-container); color: var(--md-primary);" title="Material 3 Expressive Vault">
             <i class="ph-bold ph-scissors text-sm"></i>
@@ -361,43 +373,43 @@
 
         <div id="statusSegmentedBar" class="m3-segmented-group shrink-0" role="group" aria-label="Swipeable Question Status Filter" title="Tap or swipe across to switch views">
             <button onclick="window.app.setStatus('ALL')" data-status="ALL" class="status-btn m3-seg-btn active">
-                <i class="ph-fill ph-squares-four text-[11px]"></i>
+                <i class="ph-fill ph-squares-four text-xs"></i>
                 <span>All</span>
             </button>
             <button onclick="window.app.setStatus('UNSOLVED')" data-status="UNSOLVED" class="status-btn m3-seg-btn">
-                <i class="ph-bold ph-circle text-[11px]"></i>
+                <i class="ph-bold ph-circle text-xs"></i>
                 <span>Unsolved</span>
                 <span id="status-count-UNSOLVED" class="text-[10px] font-extrabold opacity-85">0</span>
             </button>
             <button onclick="window.app.setStatus('SOLVED')" data-status="SOLVED" class="status-btn m3-seg-btn">
-                <i class="ph-fill ph-check-circle text-[11px]"></i>
+                <i class="ph-fill ph-check-circle text-xs"></i>
                 <span>Solved</span>
                 <span id="status-count-SOLVED" class="text-[10px] font-extrabold opacity-85">0</span>
             </button>
             <button onclick="window.app.setStatus('STARRED')" data-status="STARRED" class="status-btn m3-seg-btn">
-                <i class="ph-fill ph-star text-[11px]"></i>
+                <i class="ph-fill ph-star text-xs"></i>
                 <span>Starred</span>
                 <span id="status-count-STARRED" class="text-[10px] font-extrabold opacity-85">0</span>
             </button>
         </div>
 
         <div class="flex-1 min-w-[4px] flex items-center justify-center">
-            <div id="ocrStatusBadge" class="hidden items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-extrabold m3-primary-pill shrink-0">
+            <div id="ocrStatusBadge" class="hidden items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-extrabold m3-primary-pill shrink-0">
                 <i class="ph-bold ph-text-T animate-bounce text-xs"></i>
                 <span id="ocrStatusText">OCR: 0/0</span>
             </div>
         </div>
 
         <div class="relative flex items-center shrink-0">
-            <i class="ph-bold ph-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 m3-text-muted text-xs pointer-events-none"></i>
-            <input id="searchBox" oninput="window.app.setSearch(this.value)" type="text" placeholder="Search questions..." class="h-8 w-36 sm:w-52 m3-input rounded-full pl-8 pr-7 text-xs placeholder-slate-400">
-            <button id="clearSearchBtn" onclick="window.app.clearSearch()" class="hidden absolute right-2 top-1/2 -translate-y-1/2 m3-text-muted hover:opacity-100 p-0.5" title="Clear search">
+            <i class="ph-bold ph-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 m3-text-muted text-xs pointer-events-none"></i>
+            <input id="searchBox" oninput="window.app.setSearch(this.value)" type="text" placeholder="Search question text, chapter, Q#..." class="h-9 w-44 sm:w-64 m3-input rounded-full pl-9 pr-8 text-xs placeholder-slate-400">
+            <button id="clearSearchBtn" onclick="window.app.clearSearch()" class="hidden absolute right-2.5 top-1/2 -translate-y-1/2 m3-text-muted hover:opacity-100 p-0.5" title="Clear search">
                 <i class="ph-bold ph-x text-xs"></i>
             </button>
         </div>
 
-        <!-- Custom Dropdown for Papers -->
-        <select id="paperDropdown" onchange="window.app.setPaper(this.value)" class="h-8 m3-select max-w-[130px] truncate shrink-0">
+        <!-- Custom Dropdown for Papers (Normal Scale) -->
+        <select id="paperDropdown" onchange="window.app.setPaper(this.value)" class="h-9 m3-select max-w-[150px] truncate shrink-0" style="color: var(--md-on-surface);">
             <option value="ALL">All Papers (0)</option>
         </select>
 
@@ -405,8 +417,7 @@
             <button onclick="window.app.toggleFullscreen()" class="m3-icon-group-btn !h-8 !px-2.5" title="Toggle Fullscreen">
                 <i id="fullscreenIcon" class="ph-bold ph-corners-out text-xs"></i>
             </button>
-            <button id="syncHeaderBtn" onclick="window.app.handleCloudBadgeClick()" class="m3-icon-group-btn !h-8 !px-2.5 gap-1 relative overflow-hidden" title="Click to Sync with GitHub Cloud">
-                <!-- SVG Sector Progress Loader inside Sync Button -->
+            <button id="syncHeaderBtn" onclick="window.app.handleCloudBadgeClick()" class="m3-icon-group-btn !h-8 !px-2.5 gap-1.5 relative overflow-hidden" title="Click to Sync with GitHub Cloud">
                 <svg id="syncProgressSvg" class="absolute inset-0 w-full h-full pointer-events-none hidden" viewBox="0 0 28 28">
                     <path id="syncProgressSector" d="M 14 14 L 14 2 A 12 12 0 0 1 26 14 Z" fill="var(--md-primary)" opacity="0.38"></path>
                 </svg>
@@ -421,209 +432,209 @@
     </header>
 
     <!-- SECONDARY BACKGROUND TASK STATUS BAR -->
-    <div id="minimizedUploadBar" onclick="window.app.restoreUploadModal()" class="hidden m3-surface-high border-b m3-border px-3.5 py-1.5 items-center justify-between gap-3 cursor-pointer hover:brightness-105 transition shrink-0 z-20" title="Click to reopen PDF Extraction Dialog">
-        <div class="flex items-center gap-2 min-w-0 shrink-0">
-            <span class="w-5 h-5 m3-cookie-12 m3-spin-slow flex items-center justify-center shrink-0" style="background: var(--md-primary); color: var(--md-on-primary);">
-                <i class="ph-bold ph-file-pdf text-[10px]"></i>
+    <div id="minimizedUploadBar" onclick="window.app.restoreUploadModal()" class="hidden m3-surface-high border-b m3-border px-4 py-2 items-center justify-between gap-4 cursor-pointer hover:brightness-105 transition shrink-0 z-20" title="Click to reopen PDF Extraction Dialog">
+        <div class="flex items-center gap-2.5 min-w-0 shrink-0">
+            <span class="w-6 h-6 m3-cookie-12 m3-spin-slow flex items-center justify-center shrink-0" style="background: var(--md-primary); color: var(--md-on-primary);">
+                <i class="ph-bold ph-file-pdf text-xs"></i>
             </span>
-            <span id="minBarStatusText" class="text-xs font-extrabold truncate max-w-[180px] sm:max-w-xs">Extracting...</span>
-            <span id="minBarPageBadge" class="px-2 py-0.2 rounded-full text-[10px] font-extrabold m3-primary-pill truncate max-w-[100px]">Page 1/1</span>
+            <span id="minBarStatusText" class="text-xs font-extrabold truncate max-w-[200px] sm:max-w-md">Extracting PDF in background...</span>
+            <span id="minBarPageBadge" class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold m3-primary-pill truncate">Page 1/1</span>
         </div>
 
-        <div id="minBarWaveWrap" class="flex-1 max-w-xs"></div>
+        <div id="minBarWaveWrap" class="flex-1 max-w-md"></div>
 
         <div class="flex items-center gap-2 shrink-0">
-            <span class="text-[10px] font-bold m3-text-muted hidden sm:inline">Tap to expand</span>
-            <button type="button" onclick="event.stopPropagation(); window.app.restoreUploadModal()" class="w-6 h-6 rounded-full m3-btn-tonal flex items-center justify-center" title="Expand Dialog">
-                <i class="ph-bold ph-arrows-out-simple text-[10px]"></i>
+            <span class="text-[11px] font-bold m3-text-muted hidden sm:inline">Tap to expand</span>
+            <button type="button" onclick="event.stopPropagation(); window.app.restoreUploadModal()" class="w-7 h-7 rounded-full m3-btn-tonal flex items-center justify-center" title="Expand Dialog">
+                <i class="ph-bold ph-arrows-out-simple text-xs"></i>
             </button>
         </div>
     </div>
 
     <!-- NAVIGATION DRAWER -->
     <div id="drawerBackdrop" onclick="window.app.toggleDrawer(false)" class="fixed inset-0 bg-black/55 backdrop-blur-xs z-40 hidden"></div>
-    <aside id="chaptersDrawer" class="fixed inset-y-0 left-0 w-80 m3-surface-container border-r m3-border rounded-r-[28px] z-50 -translate-x-full transition-transform duration-300 ease-out flex flex-col shadow-2xl overflow-hidden">
-        <div class="p-3.5 border-b m3-border flex items-center justify-between">
-            <div class="flex items-center gap-2">
-                <div class="w-8 h-8 m3-cookie-12 flex items-center justify-center" style="background: var(--md-primary-container); color: var(--md-primary);">
-                    <i class="ph-bold ph-folders text-sm"></i>
+    <aside id="chaptersDrawer" class="fixed inset-y-0 left-0 w-80 m3-surface-container border-r m3-border rounded-r-[32px] z-50 -translate-x-full transition-transform duration-300 ease-out flex flex-col shadow-2xl overflow-hidden">
+        <div class="p-4 border-b m3-border flex items-center justify-between">
+            <div class="flex items-center gap-2.5">
+                <div class="w-9 h-9 m3-cookie-12 flex items-center justify-center" style="background: var(--md-primary-container); color: var(--md-primary);">
+                    <i class="ph-bold ph-folders text-base"></i>
                 </div>
                 <h2 class="font-extrabold text-xs uppercase tracking-wider">Subjects & Chapters</h2>
             </div>
-            <button onclick="window.app.toggleDrawer(false)" class="h-7 w-7 m3-btn-tonal flex items-center justify-center" title="Close Drawer">
+            <button onclick="window.app.toggleDrawer(false)" class="h-8 w-8 m3-btn-tonal flex items-center justify-center" title="Close Drawer">
                 <i class="ph-bold ph-x text-xs"></i>
             </button>
         </div>
 
-        <div class="p-2.5 border-b m3-border">
-            <input id="drawerChapterSearch" oninput="window.app.renderDrawerChapters()" type="text" placeholder="Filter chapters..." class="w-full h-8 m3-input rounded-full px-3 text-xs placeholder-slate-400">
+        <div class="p-3 border-b m3-border">
+            <input id="drawerChapterSearch" oninput="window.app.renderDrawerChapters()" type="text" placeholder="Filter chapters..." class="w-full h-9 m3-input rounded-full px-3.5 text-xs placeholder-slate-400">
         </div>
 
-        <div id="drawerChapterList" class="flex-1 overflow-y-auto p-2.5 space-y-2.5"></div>
+        <div id="drawerChapterList" class="flex-1 overflow-y-auto p-3 space-y-3"></div>
 
-        <div class="p-3 border-t m3-border m3-surface-low flex items-center justify-between text-xs">
-            <span id="drawerProgressText" class="px-2.5 py-0.5 rounded-full m3-primary-pill font-extrabold text-[10.5px]">Solved: 0 / 0</span>
-            <button onclick="window.app.confirmClearVault()" class="px-2.5 py-0.5 rounded-full bg-rose-500/15 text-rose-400 hover:bg-rose-500/25 font-bold flex items-center gap-1 transition text-[10.5px]">
+        <div class="p-3.5 border-t m3-border m3-surface-low flex items-center justify-between text-xs">
+            <span id="drawerProgressText" class="px-3 py-1 rounded-full m3-primary-pill font-extrabold text-[11px]">Solved: 0 / 0</span>
+            <button onclick="window.app.confirmClearVault()" class="px-3 py-1 rounded-full bg-rose-500/15 text-rose-400 hover:bg-rose-500/25 font-bold flex items-center gap-1 transition">
                 <i class="ph-bold ph-trash"></i> Clear All
             </button>
         </div>
     </aside>
 
-    <!-- MAIN QUESTION FEED -->
-    <main id="mainFeedContainer" onscroll="window.app.handleFeedScroll(this)" class="flex-1 min-h-0 overflow-y-auto px-2.5 sm:px-4 pt-3 pb-32"></main>
+    <!-- MAIN QUESTION FEED (Centered initial screen workspace) -->
+    <main id="mainFeedContainer" onscroll="window.app.handleFeedScroll(this)" class="flex-1 min-h-0 overflow-y-auto px-3 sm:px-5 pt-4 pb-36 flex flex-col justify-center"></main>
 
     <!-- SCROLL-REACTIVE EXTENDED FAB -->
-    <button id="extendedAddPdfFab" onclick="window.app.openUploadModal()" class="fixed bottom-5 right-5 z-30 h-12 px-5 m3-extended-fab flex items-center gap-2.5 font-extrabold text-xs">
-        <i class="ph-bold ph-plus text-base"></i>
+    <button id="extendedAddPdfFab" onclick="window.app.openUploadModal()" class="fixed bottom-6 right-6 z-30 h-14 px-6 m3-extended-fab flex items-center gap-3 font-extrabold text-sm">
+        <i class="ph-bold ph-plus text-lg"></i>
         <span>Add Test PDF</span>
     </button>
 
     <!-- IMAGE POPUP LIGHTBOX DIALOG -->
-    <div id="imagePopupModal" onclick="if(event.target === this) window.app.closeImagePopup()" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-2.5 sm:p-4">
+    <div id="imagePopupModal" onclick="if(event.target === this) window.app.closeImagePopup()" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-3 sm:p-5">
         <div class="relative max-w-5xl w-full max-h-[92vh] m3-dialog flex flex-col overflow-hidden">
-            <div class="px-3.5 py-2.5 m3-surface-low border-b m3-border flex items-center justify-between gap-2 shrink-0">
-                <div class="flex items-center gap-2 min-w-0">
-                    <span id="popupQBadge" class="w-8 h-8 m3-cookie-12 font-extrabold text-xs flex items-center justify-center shrink-0" style="background: var(--md-primary); color: var(--md-on-primary);">Q.1</span>
+            <div class="px-4 py-3 m3-surface-low border-b m3-border flex items-center justify-between gap-2 shrink-0">
+                <div class="flex items-center gap-2.5 min-w-0">
+                    <span id="popupQBadge" class="w-9 h-9 m3-cookie-12 font-extrabold text-xs flex items-center justify-center shrink-0" style="background: var(--md-primary); color: var(--md-on-primary);">Q.1</span>
                     <span id="popupSubjChap" class="text-xs sm:text-sm font-bold truncate">Physics</span>
                 </div>
 
                 <div class="m3-icon-group shrink-0">
-                    <button type="button" onclick="const id = window.app.getActivePopupId(); window.app.closeImagePopup(); window.app.openSplitModal(id);" class="m3-icon-group-btn !h-8 !px-3 gap-1 text-xs font-bold">
+                    <button type="button" onclick="const id = window.app.getActivePopupId(); window.app.closeImagePopup(); window.app.openSplitModal(id);" class="m3-icon-group-btn !h-9 !px-3.5 gap-1.5 text-xs font-bold">
                         <i class="ph-bold ph-scissors"></i>
                         <span class="hidden sm:inline">Split / Trim</span>
                     </button>
-                    <button type="button" onclick="const id = window.app.getActivePopupId(); window.app.closeImagePopup(); window.app.openScratchpad(id);" class="m3-icon-group-btn !h-8 !px-3 gap-1 text-xs font-bold">
+                    <button type="button" onclick="const id = window.app.getActivePopupId(); window.app.closeImagePopup(); window.app.openScratchpad(id);" class="m3-icon-group-btn !h-9 !px-3.5 gap-1.5 text-xs font-bold">
                         <i class="ph-bold ph-pencil-line"></i>
                         <span class="hidden sm:inline">Solve Pad</span>
                     </button>
-                    <button type="button" onclick="window.app.closeImagePopup()" class="m3-icon-group-btn !h-8 !px-3.5 gap-1 text-xs font-extrabold active-state">
+                    <button type="button" onclick="window.app.closeImagePopup()" class="m3-icon-group-btn !h-9 !px-4 gap-1.5 text-xs font-extrabold active-state">
                         <i class="ph-bold ph-x"></i>
                         <span>Close</span>
                     </button>
                 </div>
             </div>
 
-            <div class="w-full flex-1 overflow-y-auto bg-white flex items-center justify-center p-2.5 sm:p-5">
-                <img id="popupImageEl" src="" alt="Full Question View" class="max-w-full h-auto object-contain rounded-lg">
+            <div class="w-full flex-1 overflow-y-auto bg-white flex items-center justify-center p-3 sm:p-6">
+                <img id="popupImageEl" src="" alt="Full Question View" class="max-w-full h-auto object-contain rounded-xl">
             </div>
         </div>
     </div>
 
     <!-- SETTINGS MODAL -->
-    <div id="settingsModal" onclick="if(event.target === this) window.app.closeSettingsModal()" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-2.5 sm:p-4">
+    <div id="settingsModal" onclick="if(event.target === this) window.app.closeSettingsModal()" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-3 sm:p-5">
         <div class="m3-dialog max-w-lg w-full max-h-[90vh] flex flex-col overflow-hidden">
-            <div class="px-4 py-3 m3-surface-low border-b m3-border flex items-center justify-between gap-2 shrink-0">
-                <div class="flex items-center gap-2 min-w-0">
-                    <button type="button" id="settingsBackBtn" onclick="window.app.openSettingsPage('HOME')" class="hidden h-8 w-8 rounded-xl m3-surface-high hover:brightness-110 items-center justify-center transition shrink-0" title="Back">
-                        <i class="ph-bold ph-arrow-left text-sm"></i>
+            <div class="px-5 py-3.5 m3-surface-low border-b m3-border flex items-center justify-between gap-2 shrink-0">
+                <div class="flex items-center gap-2.5 min-w-0">
+                    <button type="button" id="settingsBackBtn" onclick="window.app.openSettingsPage('HOME')" class="hidden h-9 w-9 rounded-2xl m3-surface-high hover:brightness-110 items-center justify-center transition shrink-0" title="Back">
+                        <i class="ph-bold ph-arrow-left text-base"></i>
                     </button>
-                    <div id="settingsHeaderIcon" class="w-9 h-9 m3-cookie-12 flex items-center justify-center shrink-0" style="background: var(--md-primary-container); color: var(--md-primary);">
-                        <i class="ph-bold ph-gear text-base"></i>
+                    <div id="settingsHeaderIcon" class="w-10 h-10 m3-cookie-12 flex items-center justify-center shrink-0" style="background: var(--md-primary-container); color: var(--md-primary);">
+                        <i class="ph-bold ph-gear text-lg"></i>
                     </div>
-                    <h3 id="settingsHeaderTitle" class="font-extrabold text-sm truncate">Settings</h3>
+                    <h3 id="settingsHeaderTitle" class="font-extrabold text-base truncate">Settings</h3>
                 </div>
 
-                <button type="button" onclick="window.app.closeSettingsModal()" class="h-8 w-8 m3-btn-tonal flex items-center justify-center shrink-0" title="Close Settings">
-                    <i class="ph-bold ph-x text-xs"></i>
+                <button type="button" onclick="window.app.closeSettingsModal()" class="h-9 w-9 m3-btn-tonal flex items-center justify-center shrink-0" title="Close Settings">
+                    <i class="ph-bold ph-x text-sm"></i>
                 </button>
             </div>
 
-            <div class="p-3.5 overflow-y-auto flex-1 space-y-2.5">
-                <div id="apiKeyMissingAlert" class="hidden p-3 rounded-2xl m3-primary-pill text-xs leading-relaxed">
+            <div class="p-4 overflow-y-auto flex-1 space-y-3">
+                <div id="apiKeyMissingAlert" class="hidden p-3.5 rounded-3xl m3-primary-pill text-xs leading-relaxed">
                     <strong class="font-extrabold block mb-0.5">API Key Required for PDF Scanning:</strong>
                     Please enter your Google AI Studio API Key below to extract and stitch questions from PDF files.
                 </div>
 
                 <div id="settingsPage_HOME" class="m3-group-list">
-                    <button type="button" onclick="window.app.openSettingsPage('KEYS')" class="w-full p-3.5 m3-group-item flex items-center justify-between gap-3 text-left">
-                        <div class="flex items-center gap-3 min-w-0">
-                            <div class="w-10 h-10 rounded-full flex items-center justify-center shrink-0" style="background: var(--md-primary-container); color: var(--md-primary);">
-                                <i class="ph-bold ph-key text-base"></i>
+                    <button type="button" onclick="window.app.openSettingsPage('KEYS')" class="w-full p-4 m3-group-item flex items-center justify-between gap-3.5 text-left">
+                        <div class="flex items-center gap-3.5 min-w-0">
+                            <div class="w-12 h-12 rounded-full flex items-center justify-center shrink-0" style="background: var(--md-primary-container); color: var(--md-primary);">
+                                <i class="ph-bold ph-key text-xl"></i>
                             </div>
                             <div class="min-w-0">
-                                <div class="font-extrabold text-xs">API Keys & Cloud Credentials</div>
-                                <div class="text-[11px] m3-text-muted truncate">Gemini Vision API Key, GitHub PAT & Gist ID</div>
+                                <div class="font-extrabold text-sm">API Keys & Cloud Credentials</div>
+                                <div class="text-xs m3-text-muted truncate">Gemini Vision API Key, GitHub PAT & Gist ID</div>
                             </div>
                         </div>
-                        <i class="ph-bold ph-caret-right m3-text-muted text-sm shrink-0"></i>
+                        <i class="ph-bold ph-caret-right m3-text-muted text-base shrink-0"></i>
                     </button>
 
-                    <button type="button" onclick="window.app.openSettingsPage('THEME')" class="w-full p-3.5 m3-group-item flex items-center justify-between gap-3 text-left">
-                        <div class="flex items-center gap-3 min-w-0">
-                            <div class="w-10 h-10 m3-cookie-12 flex items-center justify-center shrink-0" style="background: var(--md-secondary-container); color: var(--md-on-secondary-container);">
-                                <i class="ph-bold ph-palette text-base"></i>
+                    <button type="button" onclick="window.app.openSettingsPage('THEME')" class="w-full p-4 m3-group-item flex items-center justify-between gap-3.5 text-left">
+                        <div class="flex items-center gap-3.5 min-w-0">
+                            <div class="w-12 h-12 m3-cookie-12 flex items-center justify-center shrink-0" style="background: var(--md-secondary-container); color: var(--md-on-secondary-container);">
+                                <i class="ph-bold ph-palette text-xl"></i>
                             </div>
                             <div class="min-w-0">
-                                <div class="font-extrabold text-xs">Appearance & Theme</div>
-                                <div class="text-[11px] m3-text-muted truncate">Dark/Light mode & Color Seeds</div>
+                                <div class="font-extrabold text-sm">Appearance & Theme</div>
+                                <div class="text-xs m3-text-muted truncate">Dark/Light mode & Color Seeds</div>
                             </div>
                         </div>
-                        <i class="ph-bold ph-caret-right m3-text-muted text-sm shrink-0"></i>
+                        <i class="ph-bold ph-caret-right m3-text-muted text-base shrink-0"></i>
                     </button>
 
-                    <button type="button" onclick="window.app.openSettingsPage('BACKUP')" class="w-full p-3.5 m3-group-item flex items-center justify-between gap-3 text-left">
-                        <div class="flex items-center gap-3 min-w-0">
-                            <div class="w-10 h-10 m3-clover-8 flex items-center justify-center shrink-0" style="background: var(--md-tertiary-container); color: var(--md-on-tertiary-container);">
-                                <i class="ph-bold ph-cloud-arrow-up text-base"></i>
+                    <button type="button" onclick="window.app.openSettingsPage('BACKUP')" class="w-full p-4 m3-group-item flex items-center justify-between gap-3.5 text-left">
+                        <div class="flex items-center gap-3.5 min-w-0">
+                            <div class="w-12 h-12 m3-clover-8 flex items-center justify-center shrink-0" style="background: var(--md-tertiary-container); color: var(--md-on-tertiary-container);">
+                                <i class="ph-bold ph-cloud-arrow-up text-xl"></i>
                             </div>
                             <div class="min-w-0">
-                                <div class="font-extrabold text-xs">Cloud Sync, Export & Vault Tools</div>
-                                <div class="text-[11px] m3-text-muted truncate">Push/Pull Cloud, JSON Export/Import & Deduplicate</div>
+                                <div class="font-extrabold text-sm">Cloud Sync, Export & Vault Tools</div>
+                                <div class="text-xs m3-text-muted truncate">Push/Pull Cloud, JSON Export/Import & Deduplicate</div>
                             </div>
                         </div>
-                        <i class="ph-bold ph-caret-right m3-text-muted text-sm shrink-0"></i>
+                        <i class="ph-bold ph-caret-right m3-text-muted text-base shrink-0"></i>
                     </button>
 
-                    <button type="button" onclick="window.app.openSettingsPage('SCANNER')" class="w-full p-3.5 m3-group-item flex items-center justify-between gap-3 text-left">
-                        <div class="flex items-center gap-3 min-w-0">
-                            <div class="w-10 h-10 m3-leaf-shape flex items-center justify-center shrink-0" style="background: var(--md-primary-container); color: var(--md-primary);">
-                                <i class="ph-bold ph-sliders-horizontal text-base"></i>
+                    <button type="button" onclick="window.app.openSettingsPage('SCANNER')" class="w-full p-4 m3-group-item flex items-center justify-between gap-3.5 text-left">
+                        <div class="flex items-center gap-3.5 min-w-0">
+                            <div class="w-12 h-12 m3-leaf-shape flex items-center justify-center shrink-0" style="background: var(--md-primary-container); color: var(--md-primary);">
+                                <i class="ph-bold ph-sliders-horizontal text-xl"></i>
                             </div>
                             <div class="min-w-0">
-                                <div class="font-extrabold text-xs">AI Scanner & Crop Margins</div>
-                                <div class="text-[11px] m3-text-muted truncate">Gemini Vision model & vertical crop padding</div>
+                                <div class="font-extrabold text-sm">AI Scanner & Crop Margins</div>
+                                <div class="text-xs m3-text-muted truncate">Gemini Vision model & vertical crop padding</div>
                             </div>
                         </div>
-                        <i class="ph-bold ph-caret-right m3-text-muted text-sm shrink-0"></i>
+                        <i class="ph-bold ph-caret-right m3-text-muted text-base shrink-0"></i>
                     </button>
                 </div>
 
-                <div id="settingsPage_KEYS" class="hidden space-y-2.5">
+                <div id="settingsPage_KEYS" class="hidden space-y-3">
                     <div class="m3-group-list">
-                        <div class="p-3.5 m3-group-item space-y-1.5">
+                        <div class="p-4 m3-group-item space-y-1.5">
                             <label class="block text-xs font-bold">Google AI Studio API Key (Gemini Vision)</label>
                             <div class="relative">
-                                <input id="apiKeyInput" type="password" placeholder="AIzaSy..." class="w-full h-9 m3-input pl-3 pr-9 text-xs font-mono">
-                                <button type="button" onclick="window.app.toggleVisibility('apiKeyInput', 'apiKeyEyeIcon')" class="absolute right-2.5 top-1/2 -translate-y-1/2 m3-text-muted">
-                                    <i id="apiKeyEyeIcon" class="ph-bold ph-eye text-sm"></i>
+                                <input id="apiKeyInput" type="password" placeholder="AIzaSy..." class="w-full h-10 m3-input pl-3.5 pr-10 text-xs font-mono">
+                                <button type="button" onclick="window.app.toggleVisibility('apiKeyInput', 'apiKeyEyeIcon')" class="absolute right-3 top-1/2 -translate-y-1/2 m3-text-muted">
+                                    <i id="apiKeyEyeIcon" class="ph-bold ph-eye text-base"></i>
                                 </button>
                             </div>
-                            <p class="text-[10.5px] m3-text-muted">Get a free key from <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer" class="underline" style="color: var(--md-primary)">Google AI Studio</a>.</p>
+                            <p class="text-[11px] m3-text-muted">Get a free key from <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer" class="underline" style="color: var(--md-primary)">Google AI Studio</a>.</p>
                         </div>
 
-                        <div class="p-3.5 m3-group-item space-y-1.5">
+                        <div class="p-4 m3-group-item space-y-1.5">
                             <label class="block text-xs font-bold">GitHub Personal Access Token (`gist` scope)</label>
                             <div class="relative">
-                                <input id="githubTokenInput" type="password" placeholder="ghp_..." class="w-full h-9 m3-input pl-3 pr-9 text-xs font-mono">
-                                <button type="button" onclick="window.app.toggleVisibility('githubTokenInput', 'githubTokenEyeIcon')" class="absolute right-2.5 top-1/2 -translate-y-1/2 m3-text-muted">
-                                    <i id="githubTokenEyeIcon" class="ph-bold ph-eye text-sm"></i>
+                                <input id="githubTokenInput" type="password" placeholder="ghp_..." class="w-full h-10 m3-input pl-3.5 pr-10 text-xs font-mono">
+                                <button type="button" onclick="window.app.toggleVisibility('githubTokenInput', 'githubTokenEyeIcon')" class="absolute right-3 top-1/2 -translate-y-1/2 m3-text-muted">
+                                    <i id="githubTokenEyeIcon" class="ph-bold ph-eye text-base"></i>
                                 </button>
                             </div>
                         </div>
 
-                        <div class="p-3.5 m3-group-item space-y-1.5">
+                        <div class="p-4 m3-group-item space-y-1.5">
                             <label class="block text-xs font-bold">Secret Gist ID <span class="m3-text-muted font-normal">(Auto-filled)</span></label>
-                            <input id="githubGistIdInput" type="text" placeholder="Auto-discover or create..." class="w-full h-9 m3-input px-3 text-xs font-mono">
+                            <input id="githubGistIdInput" type="text" placeholder="Auto-discover or create..." class="w-full h-10 m3-input px-3.5 text-xs font-mono">
                         </div>
                     </div>
                 </div>
 
-                <div id="settingsPage_THEME" class="hidden space-y-2.5">
+                <div id="settingsPage_THEME" class="hidden space-y-3">
                     <div class="m3-group-list">
-                        <div class="p-3.5 m3-group-item flex items-center justify-between gap-3">
+                        <div class="p-4 m3-group-item flex items-center justify-between gap-3">
                             <div>
                                 <div class="text-xs font-extrabold uppercase tracking-wider">Color Mode</div>
-                                <div class="text-[10.5px] m3-text-muted">Material 3 Expressive Dark & Light palettes</div>
+                                <div class="text-[11px] m3-text-muted">Material 3 Expressive Dark & Light palettes</div>
                             </div>
                             <div class="m3-segmented-group">
                                 <button type="button" id="themeModeDarkBtn" onclick="window.app.setThemeMode('dark')" class="m3-seg-btn active">
@@ -637,53 +648,53 @@
                             </div>
                         </div>
 
-                        <div class="p-3.5 m3-group-item space-y-2.5">
+                        <div class="p-4 m3-group-item space-y-3">
                             <div>
-                                <h4 class="text-xs font-extrabold uppercase tracking-wider mb-0.5">Material 3 Color Seeds</h4>
-                                <p class="text-[10.5px] m3-text-muted">Tap a swatch to re-tint all surfaces and UI elements.</p>
+                                <h4 class="text-xs font-extrabold uppercase tracking-wider mb-1">Material 3 Color Seeds</h4>
+                                <p class="text-[11px] m3-text-muted">Tap a swatch to re-tint all surfaces and UI elements.</p>
                             </div>
 
-                            <div class="grid grid-cols-3 sm:grid-cols-6 gap-2 pt-1">
-                                <button type="button" onclick="window.app.setMaterialTheme('#7c3aed')" class="p-2 rounded-xl m3-surface-low border m3-border hover:scale-105 transition flex flex-col items-center gap-1">
-                                    <span class="w-7 h-7 m3-cookie-12 bg-[#7c3aed] block"></span>
+                            <div class="grid grid-cols-3 sm:grid-cols-6 gap-2.5 pt-1">
+                                <button type="button" onclick="window.app.setMaterialTheme('#7c3aed')" class="p-2.5 rounded-2xl m3-surface-low border m3-border hover:scale-105 transition flex flex-col items-center gap-1.5">
+                                    <span class="w-9 h-9 m3-cookie-12 bg-[#7c3aed] block"></span>
                                     <span class="text-[10px] font-bold">Violet</span>
                                 </button>
-                                <button type="button" onclick="window.app.setMaterialTheme('#0284c7')" class="p-2 rounded-xl m3-surface-low border m3-border hover:scale-105 transition flex flex-col items-center gap-1">
-                                    <span class="w-7 h-7 m3-cookie-12 bg-[#0284c7] block"></span>
+                                <button type="button" onclick="window.app.setMaterialTheme('#0284c7')" class="p-2.5 rounded-2xl m3-surface-low border m3-border hover:scale-105 transition flex flex-col items-center gap-1.5">
+                                    <span class="w-9 h-9 m3-cookie-12 bg-[#0284c7] block"></span>
                                     <span class="text-[10px] font-bold">Ocean</span>
                                 </button>
-                                <button type="button" onclick="window.app.setMaterialTheme('#059669')" class="p-2 rounded-xl m3-surface-low border m3-border hover:scale-105 transition flex flex-col items-center gap-1">
-                                    <span class="w-7 h-7 m3-cookie-12 bg-[#059669] block"></span>
+                                <button type="button" onclick="window.app.setMaterialTheme('#059669')" class="p-2.5 rounded-2xl m3-surface-low border m3-border hover:scale-105 transition flex flex-col items-center gap-1.5">
+                                    <span class="w-9 h-9 m3-cookie-12 bg-[#059669] block"></span>
                                     <span class="text-[10px] font-bold">Emerald</span>
                                 </button>
-                                <button type="button" onclick="window.app.setMaterialTheme('#e11d48')" class="p-2 rounded-xl m3-surface-low border m3-border hover:scale-105 transition flex flex-col items-center gap-1">
-                                    <span class="w-7 h-7 m3-cookie-12 bg-[#e11d48] block"></span>
+                                <button type="button" onclick="window.app.setMaterialTheme('#e11d48')" class="p-2.5 rounded-2xl m3-surface-low border m3-border hover:scale-105 transition flex flex-col items-center gap-1.5">
+                                    <span class="w-9 h-9 m3-cookie-12 bg-[#e11d48] block"></span>
                                     <span class="text-[10px] font-bold">Sakura</span>
                                 </button>
-                                <button type="button" onclick="window.app.setMaterialTheme('#d97706')" class="p-2 rounded-xl m3-surface-low border m3-border hover:scale-105 transition flex flex-col items-center gap-1">
-                                    <span class="w-7 h-7 m3-cookie-12 bg-[#d97706] block"></span>
+                                <button type="button" onclick="window.app.setMaterialTheme('#d97706')" class="p-2.5 rounded-2xl m3-surface-low border m3-border hover:scale-105 transition flex flex-col items-center gap-1.5">
+                                    <span class="w-9 h-9 m3-cookie-12 bg-[#d97706] block"></span>
                                     <span class="text-[10px] font-bold">Amber</span>
                                 </button>
-                                <button type="button" onclick="window.app.setMaterialTheme('#0d9488')" class="p-2 rounded-xl m3-surface-low border m3-border hover:scale-105 transition flex flex-col items-center gap-1">
-                                    <span class="w-7 h-7 m3-cookie-12 bg-[#0d9488] block"></span>
+                                <button type="button" onclick="window.app.setMaterialTheme('#0d9488')" class="p-2.5 rounded-2xl m3-surface-low border m3-border hover:scale-105 transition flex flex-col items-center gap-1.5">
+                                    <span class="w-9 h-9 m3-cookie-12 bg-[#0d9488] block"></span>
                                     <span class="text-[10px] font-bold">Mint</span>
                                 </button>
                             </div>
                         </div>
 
-                        <div class="p-3.5 m3-group-item flex items-center justify-between gap-3">
+                        <div class="p-4 m3-group-item flex items-center justify-between gap-3">
                             <div>
                                 <div class="text-xs font-bold">Custom Primary Seed Color</div>
-                                <div class="text-[10.5px] m3-text-muted">Generate palette from any hex color</div>
+                                <div class="text-[11px] m3-text-muted">Generate palette from any hex color</div>
                             </div>
-                            <input id="customThemeColorPicker" type="color" value="#7c3aed" oninput="window.app.setMaterialTheme(this.value)" class="w-10 h-9 rounded-lg cursor-pointer bg-transparent border-0">
+                            <input id="customThemeColorPicker" type="color" value="#7c3aed" oninput="window.app.setMaterialTheme(this.value)" class="w-12 h-10 rounded-xl cursor-pointer bg-transparent border-0">
                         </div>
                     </div>
                 </div>
 
-                <div id="settingsPage_BACKUP" class="hidden space-y-2.5">
+                <div id="settingsPage_BACKUP" class="hidden space-y-3">
                     <div class="m3-group-list">
-                        <div class="p-3.5 m3-group-item space-y-2.5">
+                        <div class="p-4 m3-group-item space-y-3">
                             <div class="flex items-center justify-between">
                                 <span class="text-xs font-extrabold uppercase tracking-wider" style="color: var(--md-primary)">GitHub Cloud Synchronization</span>
                                 <label class="flex items-center gap-2 text-xs font-bold cursor-pointer">
@@ -691,32 +702,32 @@
                                     <span>Auto-Sync</span>
                                 </label>
                             </div>
-                            <div class="grid grid-cols-2 gap-2">
-                                <button type="button" onclick="window.app.pushToCloudGist(true)" class="h-9 px-3 m3-btn-filled text-xs flex items-center justify-center gap-1 shadow">
+                            <div class="grid grid-cols-2 gap-2.5">
+                                <button type="button" onclick="window.app.pushToCloudGist(true)" class="h-10 px-4 m3-btn-filled text-xs flex items-center justify-center gap-1.5 shadow">
                                     <i class="ph-bold ph-cloud-arrow-up text-sm"></i>
                                     <span>Push to Cloud</span>
                                 </button>
-                                <button type="button" onclick="window.app.pullFromCloudGist(true)" class="h-9 px-3 m3-btn-tonal text-xs flex items-center justify-center gap-1">
+                                <button type="button" onclick="window.app.pullFromCloudGist(true)" class="h-10 px-4 m3-btn-tonal text-xs flex items-center justify-center gap-1.5">
                                     <i class="ph-bold ph-cloud-arrow-down text-sm"></i>
                                     <span>Pull from Cloud</span>
                                 </button>
                             </div>
                             <div id="settingsCloudWavyBar" class="hidden pt-1"></div>
-                            <p id="cloudLastSyncInfo" class="text-[10.5px] m3-text-muted font-mono">Questions are stored 100% in your Cloud Gist.</p>
+                            <p id="cloudLastSyncInfo" class="text-[11px] m3-text-muted font-mono">Questions are stored 100% in your Cloud Gist.</p>
                         </div>
 
-                        <div class="p-3.5 m3-group-item space-y-2.5">
+                        <div class="p-4 m3-group-item space-y-3">
                             <span class="block text-xs font-extrabold uppercase tracking-wider m3-text-muted">JSON Export, Import & Deduplication</span>
                             <div class="grid grid-cols-3 gap-2">
-                                <button type="button" onclick="window.app.runDeduplication(true)" class="h-9 px-2 m3-btn-tonal text-xs flex items-center justify-center gap-1">
+                                <button type="button" onclick="window.app.runDeduplication(true)" class="h-10 px-2 m3-btn-tonal text-xs flex items-center justify-center gap-1.5">
                                     <i class="ph-bold ph-stack"></i>
                                     <span>Deduplicate</span>
                                 </button>
-                                <button type="button" onclick="window.app.exportBackupJson()" class="h-9 px-2 m3-btn-filled text-xs flex items-center justify-center gap-1">
+                                <button type="button" onclick="window.app.exportBackupJson()" class="h-10 px-2 m3-btn-filled text-xs flex items-center justify-center gap-1.5">
                                     <i class="ph-bold ph-download-simple"></i>
                                     <span>Export JSON</span>
                                 </button>
-                                <label class="h-9 px-2 m3-btn-tonal text-xs flex items-center justify-center gap-1 cursor-pointer">
+                                <label class="h-10 px-2 m3-btn-tonal text-xs flex items-center justify-center gap-1.5 cursor-pointer">
                                     <i class="ph-bold ph-upload-simple"></i>
                                     <span>Import JSON</span>
                                     <input type="file" accept=".json,application/json" class="hidden" onchange="window.app.importBackupJson(event)">
@@ -724,8 +735,8 @@
                             </div>
                         </div>
 
-                        <div class="p-3.5 m3-group-item space-y-2">
-                            <button type="button" onclick="window.app.runBackgroundLocalOcrForExistingQuestions(true)" class="w-full h-9 m3-btn-tonal text-xs flex items-center justify-center gap-1.5">
+                        <div class="p-4 m3-group-item space-y-2">
+                            <button type="button" onclick="window.app.runBackgroundLocalOcrForExistingQuestions(true)" class="w-full h-10 m3-btn-tonal text-xs flex items-center justify-center gap-2">
                                 <i class="ph-bold ph-text-T text-sm"></i>
                                 <span id="settingsOcrBtnLabel">Re-Index Clean Question Text OCR</span>
                             </button>
@@ -734,32 +745,32 @@
                     </div>
                 </div>
 
-                <div id="settingsPage_SCANNER" class="hidden space-y-2.5">
+                <div id="settingsPage_SCANNER" class="hidden space-y-3">
                     <div class="m3-group-list">
-                        <div class="p-3.5 m3-group-item space-y-1.5">
+                        <div class="p-4 m3-group-item space-y-1.5">
                             <label class="block text-xs font-bold">Gemini Vision Model</label>
-                            <select id="geminiModelSelect" class="w-full h-9 m3-select px-3 text-xs font-semibold">
+                            <select id="geminiModelSelect" class="w-full h-10 m3-input px-3.5 text-xs font-semibold">
                                 <option value="gemini-3.5-flash-lite">gemini-3.5-flash-lite (Default • Fast & Accurate)</option>
                                 <option value="gemini-2.5-pro">gemini-2.5-pro (Highest Precision Layout Detection)</option>
                                 <option value="gemini-2.5-flash">gemini-2.5-flash (Balanced Speed & Vision Precision)</option>
                             </select>
                         </div>
-                        <div class="p-3.5 m3-group-item grid grid-cols-2 gap-2.5">
+                        <div class="p-4 m3-group-item grid grid-cols-2 gap-3">
                             <div>
-                                <label class="block text-[10.5px] font-bold m3-text-muted mb-1">Top Safe Margin (0-30)</label>
-                                <input id="padTopInput" type="number" min="0" max="40" value="4" class="w-full h-9 m3-input px-3 text-xs">
+                                <label class="block text-[11px] font-bold m3-text-muted mb-1">Top Safe Margin (0-30)</label>
+                                <input id="padTopInput" type="number" min="0" max="40" value="4" class="w-full h-10 m3-input px-3 text-xs">
                             </div>
                             <div>
-                                <label class="block text-[10.5px] font-bold m3-text-muted mb-1">Bottom Safe Margin (0-30)</label>
-                                <input id="padBottomInput" type="number" min="0" max="40" value="6" class="w-full h-9 m3-input px-3 text-xs">
+                                <label class="block text-[11px] font-bold m3-text-muted mb-1">Bottom Safe Margin (0-30)</label>
+                                <input id="padBottomInput" type="number" min="0" max="40" value="6" class="w-full h-10 m3-input px-3 text-xs">
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div class="px-4 py-2.5 m3-surface-low border-t m3-border flex items-center justify-end shrink-0">
-                <button type="button" onclick="window.app.saveSettings()" class="h-9 px-5 m3-btn-filled text-xs flex items-center gap-1.5 shadow">
+            <div class="px-5 py-3 m3-surface-low border-t m3-border flex items-center justify-end shrink-0">
+                <button type="button" onclick="window.app.saveSettings()" class="h-10 px-6 m3-btn-filled text-xs flex items-center gap-1.5 shadow">
                     <i class="ph-bold ph-check text-sm"></i>
                     <span>Save & Done</span>
                 </button>
@@ -768,89 +779,89 @@
     </div>
 
     <!-- UPLOAD TEST PDF MODAL -->
-    <div id="uploadModal" onclick="if(event.target === this && !window.app.isExtracting()) window.app.closeUploadModal()" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-2.5 sm:p-5">
+    <div id="uploadModal" onclick="if(event.target === this && !window.app.isExtracting()) window.app.closeUploadModal()" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-3 sm:p-6">
         <div class="m3-dialog max-w-2xl w-full max-h-[90vh] flex flex-col overflow-hidden">
-            <div class="px-4 py-3 m3-surface-low border-b m3-border flex items-center justify-between gap-2">
-                <div class="flex items-center gap-2 min-w-0">
-                    <div class="w-9 h-9 m3-cookie-12 flex items-center justify-center shrink-0" style="background: var(--md-primary-container); color: var(--md-primary);">
-                        <i class="ph-bold ph-file-pdf text-base"></i>
+            <div class="px-5 py-3.5 m3-surface-low border-b m3-border flex items-center justify-between gap-2">
+                <div class="flex items-center gap-2.5 min-w-0">
+                    <div class="w-10 h-10 m3-cookie-12 flex items-center justify-center shrink-0" style="background: var(--md-primary-container); color: var(--md-primary);">
+                        <i class="ph-bold ph-file-pdf text-xl"></i>
                     </div>
                     <div class="min-w-0">
-                        <h3 class="font-extrabold text-xs sm:text-sm truncate">Add Test Paper PDF</h3>
-                        <p class="text-[10.5px] m3-text-muted truncate">Full-Width Crops • Whitespace Snapper • Clean OCR</p>
+                        <h3 class="font-extrabold text-sm sm:text-base truncate">Add Test Paper PDF</h3>
+                        <p class="text-[11px] m3-text-muted truncate">Full-Width Crops • Whitespace Snapper • Clean OCR</p>
                     </div>
                 </div>
 
-                <div class="flex items-center gap-1 shrink-0">
-                    <button type="button" id="minimizeUploadBtn" onclick="window.app.minimizeUploadModal()" class="hidden h-8 w-8 m3-btn-tonal items-center justify-center" title="Minimize extraction to background bar">
-                        <i class="ph-bold ph-minus text-sm"></i>
+                <div class="flex items-center gap-1.5 shrink-0">
+                    <button type="button" id="minimizeUploadBtn" onclick="window.app.minimizeUploadModal()" class="hidden h-9 w-9 m3-btn-tonal items-center justify-center" title="Minimize extraction to background bar">
+                        <i class="ph-bold ph-minus text-base"></i>
                     </button>
-                    <button type="button" id="uploadTopCloseBtn" onclick="window.app.closeUploadModal()" class="h-8 w-8 m3-btn-tonal disabled:opacity-35 disabled:pointer-events-none flex items-center justify-center" title="Close Dialog">
-                        <i class="ph-bold ph-x text-xs"></i>
+                    <button type="button" id="uploadTopCloseBtn" onclick="window.app.closeUploadModal()" class="h-9 w-9 m3-btn-tonal disabled:opacity-35 disabled:pointer-events-none flex items-center justify-center" title="Close Dialog">
+                        <i class="ph-bold ph-x text-sm"></i>
                     </button>
                 </div>
             </div>
 
-            <div class="p-4 overflow-y-auto space-y-3 flex-1">
+            <div class="p-5 overflow-y-auto space-y-4 flex-1">
                 <div id="uploadSetupView" class="m3-group-list">
-                    <label for="pdfFileInput" class="block m3-group-item p-5 text-center cursor-pointer border-2 border-dashed m3-outline">
+                    <label for="pdfFileInput" class="block m3-group-item p-6 text-center cursor-pointer border-2 border-dashed m3-outline">
                         <input type="file" id="pdfFileInput" accept="application/pdf" class="hidden" onchange="window.app.onPdfSelected(event)">
-                        <div class="w-12 h-12 m3-cookie-12 flex items-center justify-center mx-auto mb-2" style="background: var(--md-primary-container); color: var(--md-primary);">
-                            <i class="ph-duotone ph-cloud-arrow-up text-xl"></i>
+                        <div class="w-14 h-14 m3-cookie-12 flex items-center justify-center mx-auto mb-2.5" style="background: var(--md-primary-container); color: var(--md-primary);">
+                            <i class="ph-duotone ph-cloud-arrow-up text-2xl"></i>
                         </div>
-                        <p id="selectedFileLabel" class="text-xs sm:text-sm font-extrabold">Tap to Select Your JEE Question Paper PDF</p>
-                        <p class="text-[11px] m3-text-muted mt-1">You can minimize this window during extraction or cancel & rollback anytime!</p>
+                        <p id="selectedFileLabel" class="text-sm sm:text-base font-extrabold">Tap to Select Your JEE Question Paper PDF</p>
+                        <p class="text-xs m3-text-muted mt-1">You can minimize this window during extraction or cancel & rollback anytime!</p>
                     </label>
 
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 m3-group-item p-3.5">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 m3-group-item p-4">
                         <div>
-                            <label class="block text-[10.5px] font-bold m3-text-muted mb-1">Test Paper Name</label>
-                            <input id="paperTitleInput" type="text" placeholder="e.g. Allen Test 3" class="w-full h-8 m3-input px-3 text-xs">
+                            <label class="block text-[11px] font-bold m3-text-muted mb-1">Test Paper Name</label>
+                            <input id="paperTitleInput" type="text" placeholder="e.g. Allen Test 3" class="w-full h-9 m3-input px-3 text-xs">
                         </div>
                         <div>
-                            <label class="block text-[10.5px] font-bold m3-text-muted mb-1">Pages Range</label>
+                            <label class="block text-[11px] font-bold m3-text-muted mb-1">Pages Range</label>
                             <div class="flex items-center gap-1.5">
-                                <input id="startPageInput" type="number" min="1" value="1" class="w-full h-8 m3-input px-2 text-xs text-center">
+                                <input id="startPageInput" type="number" min="1" value="1" class="w-full h-9 m3-input px-2 text-xs text-center">
                                 <span class="m3-text-muted text-xs">to</span>
-                                <input id="endPageInput" type="number" min="1" value="10" class="w-full h-8 m3-input px-2 text-xs text-center">
+                                <input id="endPageInput" type="number" min="1" value="10" class="w-full h-9 m3-input px-2 text-xs text-center">
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <div id="uploadProgressView" class="hidden space-y-2.5">
-                    <div class="m3-surface-high border m3-border rounded-2xl p-3.5 space-y-2.5">
+                <div id="uploadProgressView" class="hidden space-y-3">
+                    <div class="m3-surface-high border m3-border rounded-3xl p-4 space-y-3">
                         <div class="flex items-center justify-between text-xs">
                             <span id="extractStepTitle" class="font-extrabold flex items-center gap-2">
-                                <span class="w-3.5 h-3.5 m3-cookie-12 m3-spin-slow inline-block" style="background: var(--md-primary)"></span>
+                                <span class="w-4 h-4 m3-cookie-12 m3-spin-slow inline-block" style="background: var(--md-primary)"></span>
                                 Detecting Question Boundaries & OCR...
                             </span>
-                            <span id="extractPageBadge" class="px-2 py-0.5 rounded-full font-bold text-[10px]" style="background: var(--md-primary-container); color: var(--md-on-primary-container);">Page 1/1</span>
+                            <span id="extractPageBadge" class="px-2.5 py-0.5 rounded-full font-bold text-xs" style="background: var(--md-primary-container); color: var(--md-on-primary-container);">Page 1/1</span>
                         </div>
 
                         <div id="extractWavyBarWrap"></div>
 
-                        <p id="extractSubText" class="text-[10.5px] font-semibold font-mono" style="color: var(--md-primary)">Preparing high-resolution renderer...</p>
+                        <p id="extractSubText" class="text-[11px] font-semibold font-mono" style="color: var(--md-primary)">Preparing renderer...</p>
                     </div>
 
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                        <div class="m3-surface-low border m3-border rounded-2xl p-2 flex flex-col items-center justify-center h-36 overflow-hidden">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div class="m3-surface-low border m3-border rounded-3xl p-2 flex flex-col items-center justify-center h-44 overflow-hidden">
                             <canvas id="pdfWorkCanvas" class="max-h-full max-w-full object-contain"></canvas>
                         </div>
-                        <div id="extractLiveLog" class="m3-surface-low border m3-border rounded-2xl p-2.5 h-36 overflow-y-auto font-mono text-[10px] space-y-1"></div>
+                        <div id="extractLiveLog" class="m3-surface-low border m3-border rounded-3xl p-3 h-44 overflow-y-auto font-mono text-[11px] space-y-1.5"></div>
                     </div>
                 </div>
             </div>
 
-            <div class="px-4 py-2.5 m3-surface-low border-t m3-border flex items-center justify-between">
+            <div class="px-5 py-3 m3-surface-low border-t m3-border flex items-center justify-between">
                 <div>
-                    <button type="button" id="cancelExtractBtn" onclick="window.app.cancelPdfExtraction()" class="hidden h-8 px-3.5 rounded-full bg-rose-500/20 hover:bg-rose-600 text-rose-400 hover:text-white border border-rose-500/40 text-xs font-extrabold items-center gap-1.5 transition">
+                    <button type="button" id="cancelExtractBtn" onclick="window.app.cancelPdfExtraction()" class="hidden h-9 px-4 rounded-full bg-rose-500/20 hover:bg-rose-600 text-rose-400 hover:text-white border border-rose-500/40 text-xs font-extrabold items-center gap-1.5 transition">
                         <i class="ph-bold ph-stop-circle"></i>
                         <span>Cancel & Rollback</span>
                     </button>
                 </div>
 
-                <button type="button" id="startExtractBtn" onclick="window.app.startPdfExtraction()" disabled class="h-9 px-5 m3-btn-filled disabled:opacity-40 text-xs flex items-center gap-1.5 shadow-lg ml-auto">
+                <button type="button" id="startExtractBtn" onclick="window.app.startPdfExtraction()" disabled class="h-10 px-6 m3-btn-filled disabled:opacity-40 text-xs sm:text-sm flex items-center gap-1.5 shadow-lg ml-auto">
                     <i class="ph-bold ph-magic-wand"></i>
                     <span>Extract Questions</span>
                 </button>
@@ -859,53 +870,53 @@
     </div>
 
     <!-- SPLIT / TRIM MODAL -->
-    <div id="splitModal" onclick="if(event.target === this) window.app.closeSplitModal()" class="fixed inset-0 bg-black/75 backdrop-blur-sm z-50 hidden flex items-center justify-center p-2.5 sm:p-5">
+    <div id="splitModal" onclick="if(event.target === this) window.app.closeSplitModal()" class="fixed inset-0 bg-black/75 backdrop-blur-sm z-50 hidden flex items-center justify-center p-3 sm:p-6">
         <div class="m3-dialog max-w-4xl w-full max-h-[92vh] flex flex-col overflow-hidden">
-            <div class="px-4 py-3 m3-surface-low border-b m3-border flex items-center justify-between gap-2">
+            <div class="px-5 py-3.5 m3-surface-low border-b m3-border flex items-center justify-between gap-2">
                 <div>
-                    <h3 class="font-extrabold text-xs sm:text-sm flex items-center gap-1.5">
-                        <i class="ph-bold ph-scissors text-sm" style="color: var(--md-primary)"></i>
+                    <h3 class="font-extrabold text-sm sm:text-base flex items-center gap-2">
+                        <i class="ph-bold ph-scissors text-base" style="color: var(--md-primary)"></i>
                         <span>Split Clubbed Questions or Trim Vertical Height</span>
                     </h3>
-                    <p class="text-[10.5px] m3-text-muted">Horizontal width is locked to 100% full page width.</p>
+                    <p class="text-[11px] m3-text-muted">Horizontal width is locked to 100% full page width.</p>
                 </div>
-                <button type="button" onclick="window.app.closeSplitModal()" class="h-8 w-8 m3-btn-tonal flex items-center justify-center shrink-0" title="Close">
-                    <i class="ph-bold ph-x text-xs"></i>
+                <button type="button" onclick="window.app.closeSplitModal()" class="h-9 w-9 m3-btn-tonal flex items-center justify-center shrink-0" title="Close">
+                    <i class="ph-bold ph-x text-sm"></i>
                 </button>
             </div>
 
-            <div class="p-3.5 overflow-y-auto flex-1 space-y-2.5">
-                <div class="flex flex-wrap items-center justify-between gap-2 m3-surface-high p-2.5 rounded-2xl border m3-border">
+            <div class="p-4 overflow-y-auto flex-1 space-y-3">
+                <div class="flex flex-wrap items-center justify-between gap-2 m3-surface-high p-3 rounded-3xl border m3-border">
                     <div class="m3-segmented-group">
                         <button type="button" id="modeSplitBtn" onclick="window.app.setSplitMode('SPLIT')" class="m3-seg-btn active">Split into 2 Questions</button>
                         <button type="button" id="modeTrimBtn" onclick="window.app.setSplitMode('TRIM')" class="m3-seg-btn">Vertical Trim</button>
                     </div>
 
-                    <div id="splitRangeWrap" class="flex items-center gap-2">
+                    <div id="splitRangeWrap" class="flex items-center gap-2.5">
                         <span class="text-xs font-bold" style="color: var(--md-primary)">Cut Line:</span>
-                        <input id="splitCutSlider" type="range" min="10" max="90" value="50" oninput="window.app.updateSplitPreview()" class="split-slider w-36">
-                        <span id="splitCutVal" class="text-xs font-mono font-bold w-8">50%</span>
+                        <input id="splitCutSlider" type="range" min="10" max="90" value="50" oninput="window.app.updateSplitPreview()" class="split-slider w-44">
+                        <span id="splitCutVal" class="text-xs font-mono font-bold w-9">50%</span>
                     </div>
 
-                    <div id="trimRangeWrap" class="hidden items-center gap-2.5">
-                        <label class="text-xs font-bold flex items-center gap-1">Top <input id="trimTopSlider" type="range" min="0" max="45" value="0" oninput="window.app.updateSplitPreview()" class="split-slider w-20"></label>
-                        <label class="text-xs font-bold flex items-center gap-1">Bottom <input id="trimBotSlider" type="range" min="55" max="100" value="100" oninput="window.app.updateSplitPreview()" class="split-slider w-20"></label>
+                    <div id="trimRangeWrap" class="hidden items-center gap-3">
+                        <label class="text-xs font-bold flex items-center gap-1.5">Top <input id="trimTopSlider" type="range" min="0" max="45" value="0" oninput="window.app.updateSplitPreview()" class="split-slider w-24"></label>
+                        <label class="text-xs font-bold flex items-center gap-1.5">Bottom <input id="trimBotSlider" type="range" min="55" max="100" value="100" oninput="window.app.updateSplitPreview()" class="split-slider w-24"></label>
                     </div>
                 </div>
 
-                <div class="relative bg-white rounded-2xl overflow-hidden border m3-border mx-auto max-w-3xl">
+                <div class="relative bg-white rounded-3xl overflow-hidden border m3-border mx-auto max-w-3xl">
                     <img id="splitPreviewImg" src="" alt="Preview" class="w-full h-auto block">
-                    <div id="splitDividerLine" class="absolute left-0 right-0 border-t-3 border-dashed border-amber-500 pointer-events-none flex items-center justify-between px-3" style="top: 50%;">
-                        <span class="-mt-5 bg-amber-500 text-slate-950 font-extrabold text-[9.5px] px-2 py-0.5 rounded-full">▲ Card 1</span>
-                        <span class="mt-5 bg-indigo-600 text-white font-extrabold text-[9.5px] px-2 py-0.5 rounded-full">▼ Card 2</span>
+                    <div id="splitDividerLine" class="absolute left-0 right-0 border-t-4 border-dashed border-amber-500 pointer-events-none flex items-center justify-between px-3" style="top: 50%;">
+                        <span class="-mt-6 bg-amber-500 text-slate-950 font-extrabold text-[10px] px-2.5 py-0.5 rounded-full">▲ Card 1</span>
+                        <span class="mt-6 bg-indigo-600 text-white font-extrabold text-[10px] px-2.5 py-0.5 rounded-full">▼ Card 2</span>
                     </div>
                     <div id="trimTopMask" class="hidden absolute top-0 left-0 right-0 bg-rose-900/50 border-b-2 border-rose-500 pointer-events-none" style="height:0%"></div>
                     <div id="trimBotMask" class="hidden absolute bottom-0 left-0 right-0 bg-rose-900/50 border-t-2 border-rose-500 pointer-events-none" style="height:0%"></div>
                 </div>
             </div>
 
-            <div class="px-4 py-2.5 m3-surface-low border-t m3-border flex items-center justify-end">
-                <button type="button" onclick="window.app.confirmSplitOrTrim()" class="h-9 px-5 m3-btn-filled text-xs flex items-center gap-1.5 shadow-lg">
+            <div class="px-5 py-3 m3-surface-low border-t m3-border flex items-center justify-end">
+                <button type="button" onclick="window.app.confirmSplitOrTrim()" class="h-10 px-6 m3-btn-filled text-xs sm:text-sm flex items-center gap-1.5 shadow-lg">
                     <i class="ph-bold ph-check text-sm"></i>
                     <span id="splitConfirmLabel">Split Question Now</span>
                 </button>
@@ -929,7 +940,7 @@
                 <button type="button" onclick="window.app.closeClearVaultModal()" class="h-10 m3-btn-tonal text-xs font-bold">
                     Cancel
                 </button>
-                <button type="button" onclick="window.app.executeClearVault()" class="h-10 px-4 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-extrabold text-xs shadow-lg transition">
+                <button type="button" onclick="window.app.executeClearVault()" class="h-10 px-4 rounded-full bg-rose-600 hover:bg-rose-700 text-white font-extrabold text-xs shadow-lg transition">
                     Yes, Delete Everything
                 </button>
             </div>
@@ -938,39 +949,39 @@
 
     <!-- STYLUS SCRATCHPAD -->
     <div id="scratchpadModal" class="fixed inset-0 m3-surface z-50 hidden flex flex-col">
-        <div class="h-12 m3-surface-low border-b m3-border px-3 sm:px-4 flex items-center justify-between gap-2 shrink-0 overflow-x-auto no-scrollbar">
+        <div class="h-14 m3-surface-low border-b m3-border px-3 sm:px-5 flex items-center justify-between gap-2 shrink-0 overflow-x-auto no-scrollbar">
             <div class="flex items-center gap-2 min-w-0 shrink-0">
-                <button type="button" onclick="window.app.closeScratchpad()" class="h-8 px-3 m3-btn-tonal text-xs font-extrabold flex items-center gap-1 shrink-0">
-                    <i class="ph-bold ph-x text-xs"></i> Close Pad
+                <button type="button" onclick="window.app.closeScratchpad()" class="h-9 px-4 m3-btn-tonal text-xs font-extrabold flex items-center gap-1.5 shrink-0">
+                    <i class="ph-bold ph-x"></i> Close Pad
                 </button>
-                <span id="padQTitle" class="font-bold text-xs truncate max-w-[200px] sm:max-w-md">Q.1</span>
+                <span id="padQTitle" class="font-bold text-xs sm:text-sm truncate max-w-[220px] sm:max-w-md">Q.1</span>
             </div>
 
             <div class="flex items-center gap-2 shrink-0">
-                <button type="button" onclick="window.app.setInk('#f8fafc', false)" class="w-5 h-5 rounded-full bg-white border-2 border-indigo-500" title="White Pen"></button>
-                <button type="button" onclick="window.app.setInk('#38bdf8', false)" class="w-5 h-5 rounded-full bg-sky-400" title="Blue Pen"></button>
-                <button type="button" onclick="window.app.setInk('#fbbf24', false)" class="w-5 h-5 rounded-full bg-amber-400" title="Yellow Pen"></button>
-                <button type="button" onclick="window.app.setInk('#4ade80', false)" class="w-5 h-5 rounded-full bg-emerald-400" title="Green Pen"></button>
-                <select onchange="window.app.setStrokeWidth(this.value)" class="h-7 m3-select text-[11px] px-2">
+                <button type="button" onclick="window.app.setInk('#f8fafc', false)" class="w-6 h-6 rounded-full bg-white border-2 border-indigo-500" title="White Pen"></button>
+                <button type="button" onclick="window.app.setInk('#38bdf8', false)" class="w-6 h-6 rounded-full bg-sky-400" title="Blue Pen"></button>
+                <button type="button" onclick="window.app.setInk('#fbbf24', false)" class="w-6 h-6 rounded-full bg-amber-400" title="Yellow Pen"></button>
+                <button type="button" onclick="window.app.setInk('#4ade80', false)" class="w-6 h-6 rounded-full bg-emerald-400" title="Green Pen"></button>
+                <select onchange="window.app.setStrokeWidth(this.value)" class="h-8 m3-select text-xs px-3">
                     <option value="2.2">Fine</option>
                     <option value="3.5" selected>Medium</option>
                     <option value="6">Bold</option>
                 </select>
-                <button type="button" onclick="window.app.setInk('#090d16', true)" id="eraserBtn" class="h-7 px-2.5 m3-btn-tonal text-[11px] flex items-center gap-1">
-                    <i class="ph-bold ph-eraser text-xs"></i> <span class="hidden sm:inline">Eraser</span>
+                <button type="button" onclick="window.app.setInk('#090d16', true)" id="eraserBtn" class="h-8 px-3 m3-btn-tonal text-xs flex items-center gap-1">
+                    <i class="ph-bold ph-eraser"></i> <span class="hidden sm:inline">Eraser</span>
                 </button>
-                <button type="button" onclick="window.app.clearInk()" class="h-7 px-2.5 m3-btn-tonal text-[11px] font-bold">Clear</button>
+                <button type="button" onclick="window.app.clearInk()" class="h-8 px-3 m3-btn-tonal text-xs font-bold">Clear Ink</button>
             </div>
         </div>
 
         <div class="flex-1 flex flex-col lg:flex-row overflow-hidden">
-            <div class="w-full lg:w-1/2 h-2/5 lg:h-full overflow-y-auto p-2.5 m3-surface border-b lg:border-b-0 lg:border-r m3-border">
-                <div class="bg-white rounded-2xl p-2 shadow">
+            <div class="w-full lg:w-1/2 h-2/5 lg:h-full overflow-y-auto p-3 m3-surface border-b lg:border-b-0 lg:border-r m3-border">
+                <div class="bg-white rounded-3xl p-2 shadow">
                     <img id="padQuestionImg" src="" alt="Question" class="w-full h-auto block">
                 </div>
             </div>
             <div id="padCanvasWrap" class="w-full lg:w-1/2 h-3/5 lg:h-full bg-[#070a12] relative overflow-hidden">
-                <div class="absolute top-2 left-3 pointer-events-none text-[10.5px] m3-text-muted font-medium">
+                <div class="absolute top-2.5 left-3 pointer-events-none text-[11px] m3-text-muted font-medium">
                     Stylus Rough Work Pad
                 </div>
                 <canvas id="stylusCanvas" class="w-full h-full cursor-crosshair"></canvas>
@@ -978,7 +989,7 @@
         </div>
     </div>
 
-    <div id="toastBox" class="fixed bottom-20 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
+    <div id="toastBox" class="fixed bottom-24 right-6 z-50 flex flex-col gap-2 pointer-events-none"></div>
 
     <script>
         try { indexedDB.deleteDatabase('JEEQuestionVaultDB'); } catch (_) {}
@@ -1004,7 +1015,6 @@
             if (p8) p8.setAttribute('d', makeSoftStarburst(8, 0.445, 0.495));
         }
 
-        // Seamless Wavy Progress Bar with 2px gap, stationary intersection point, and circular empty track
         function renderM3WavyProgress(targetElOrId, pct = 50) {
             const el = typeof targetElOrId === 'string' ? document.getElementById(targetElOrId) : targetElOrId;
             if (!el) return;
@@ -1012,7 +1022,7 @@
             const rem = Math.max(0, 100 - clamped);
             const primaryColor = getComputedStyle(document.documentElement).getPropertyValue('--md-primary').trim() || '#a78bfa';
 
-            const waveSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 44 12" width="44" height="12"><path d="M 0 6 Q 11 1.5, 22 6 T 44 6" fill="none" stroke="${primaryColor}" stroke-width="4" stroke-linecap="round"/></svg>`;
+            const waveSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 44 14" width="44" height="14"><path d="M 0 7 Q 11 1.8, 22 7 T 44 7" fill="none" stroke="${primaryColor}" stroke-width="4.5" stroke-linecap="round"/></svg>`;
             const bgUrl = `url('data:image/svg+xml;utf8,${encodeURIComponent(waveSvg)}')`;
 
             let activeEl = el.querySelector('.m3-wavy-active');
@@ -1021,7 +1031,7 @@
 
             if (!activeEl) {
                 el.innerHTML = `
-                    <div class="flex items-center w-full h-3.5 overflow-hidden">
+                    <div class="flex items-center w-full h-4 overflow-hidden rounded-full">
                         <div class="m3-wavy-active shrink-0" style="width: 5%; background-image: ${bgUrl};"></div>
                         <div class="m3-wavy-track flex-1 relative flex items-center justify-end pr-1.5 min-w-0">
                             <span class="m3-wavy-dot w-1.5 h-1.5 rounded-full shrink-0" style="background: var(--md-primary)"></span>
@@ -1202,7 +1212,7 @@
             const box = document.getElementById('toastBox');
             const el = document.createElement('div');
             const isWarn = type === 'warn';
-            el.className = `px-3.5 py-2.5 rounded-2xl shadow-2xl text-xs font-extrabold flex items-center gap-2 transition-all duration-300 border`;
+            el.className = `px-4 py-3 rounded-2xl shadow-2xl text-xs font-extrabold flex items-center gap-2.5 transition-all duration-300 border`;
             if (isWarn) {
                 el.style.background = '#7f1d1d';
                 el.style.color = '#fecdd3';
@@ -1212,13 +1222,13 @@
                 el.style.color = 'var(--md-on-primary-container)';
                 el.style.borderColor = 'var(--md-primary)';
             }
-            el.innerHTML = `<i class="ph-bold ${isWarn ? 'ph-warning-circle' : 'ph-check-circle'} text-sm" style="color: ${isWarn ? '#fb7185' : 'var(--md-primary)'}"></i><span>${msg}</span>`;
+            el.innerHTML = `<i class="ph-bold ${isWarn ? 'ph-warning-circle' : 'ph-check-circle'} text-base" style="color: ${isWarn ? '#fb7185' : 'var(--md-primary)'}"></i><span>${msg}</span>`;
             box.appendChild(el);
             setTimeout(() => {
                 el.style.opacity = '0';
-                el.style.transform = 'translateY(6px) scale(0.95)';
-                setTimeout(() => el.remove(), 220);
-            }, 2800);
+                el.style.transform = 'translateY(8px) scale(0.95)';
+                setTimeout(() => el.remove(), 250);
+            }, 3000);
         }
 
         function cleanQuestionTextOnly(rawText) {
@@ -1321,15 +1331,14 @@
             const dot = document.getElementById('apiKeyDot');
             if (!dot) return;
             if (getApiKey()) {
-                dot.className = 'w-2 h-2 rounded-full absolute top-1 right-1';
+                dot.className = 'w-2 h-2 rounded-full absolute top-1.5 right-1.5';
                 dot.style.background = 'var(--md-primary)';
             } else {
-                dot.className = 'w-2 h-2 rounded-full bg-amber-400 animate-ping absolute top-1 right-1';
+                dot.className = 'w-2 h-2 rounded-full bg-amber-400 animate-ping absolute top-1.5 right-1.5';
                 dot.style.background = '';
             }
         }
 
-        // Sync Button with SVG Sector Progress Loader
         function updateCloudStatusUI(status = 'idle', detail = '', progressPct = 0) {
             const syncBtn = document.getElementById('syncHeaderBtn');
             const icon = document.getElementById('cloudStatusIcon');
@@ -2082,9 +2091,9 @@
 
             const isAllSelected = state.subject === 'ALL' && state.chapter === 'ALL';
             let html = `
-                <button onclick="window.app.selectSubjectChapter('ALL', 'ALL')" class="w-full px-3.5 py-2 rounded-xl flex items-center justify-between text-xs font-extrabold transition ${isAllSelected ? 'm3-btn-filled' : 'm3-surface-high hover:brightness-105'}">
+                <button onclick="window.app.selectSubjectChapter('ALL', 'ALL')" class="w-full px-4 py-2.5 rounded-full flex items-center justify-between text-xs font-extrabold transition ${isAllSelected ? 'm3-btn-filled' : 'm3-surface-high hover:brightness-105'}">
                     <span>All Subjects & Chapters</span>
-                    <span class="px-2 py-0.2 rounded-full bg-black/15 text-[10.5px]">${all.length}</span>
+                    <span class="px-2 py-0.5 rounded-full bg-black/15 text-[11px]">${all.length}</span>
                 </button>
             `;
 
@@ -2106,12 +2115,12 @@
 
                 html += `
                     <div class="pt-1">
-                        <button onclick="window.app.selectSubjectChapter('${sMeta.name}', 'ALL')" class="w-full px-3.5 py-1.5 mb-1 flex items-center justify-between text-xs font-extrabold uppercase tracking-wider transition ${isSubjAllActive ? 'm3-btn-filled' : 'm3-surface-low rounded-xl border m3-border hover:brightness-105'}">
+                        <button onclick="window.app.selectSubjectChapter('${sMeta.name}', 'ALL')" class="w-full px-3.5 py-2 mb-1.5 flex items-center justify-between text-xs font-extrabold uppercase tracking-wider transition ${isSubjAllActive ? 'm3-btn-filled' : 'm3-surface-low rounded-2xl border m3-border hover:brightness-105'}">
                             <div class="flex items-center gap-2">
-                                <span class="w-2.5 h-2.5 m3-cookie-12 ${sMeta.dot}"></span>
+                                <span class="w-3 h-3 m3-cookie-12 ${sMeta.dot}"></span>
                                 <span>${sMeta.name}</span>
                             </div>
-                            <span class="px-2 py-0.2 rounded-full bg-black/15 text-[10px] font-bold">${subjQuestions.length}</span>
+                            <span class="px-2 py-0.5 rounded-full bg-black/15 text-[11px] font-bold">${subjQuestions.length}</span>
                         </button>
                         <div class="m3-group-list">
                 `;
@@ -2125,9 +2134,9 @@
                         html += `
                             <button onclick="window.app.selectSubjectChapter('${sMeta.name}', '${safeName}')" class="w-full px-3.5 py-2 m3-group-item flex items-center justify-between text-xs font-semibold ${active ? 'ring-2 ring-inset ring-[var(--md-primary)] font-extrabold' : ''}" style="${active ? 'background: var(--md-primary-container); color: var(--md-on-primary-container);' : ''}">
                                 <span class="truncate pr-2">${cName}</span>
-                                <div class="flex items-center gap-1 shrink-0 text-[10.5px]">
-                                    ${st.starred > 0 ? `<span class="text-amber-400 font-extrabold">★${st.starred}</span>` : ''}
-                                    <span class="px-2 py-0.1 rounded-full bg-black/15">${st.solved}/${st.total}</span>
+                                <div class="flex items-center gap-1 shrink-0 text-[11px]">
+                                    ${st.starred > 0 ? `<span class="text-amber-500 font-extrabold">★${st.starred}</span>` : ''}
+                                    <span class="px-2 py-0.2 rounded-full bg-black/15">${st.solved}/${st.total}</span>
                                 </div>
                             </button>
                         `;
@@ -2141,7 +2150,6 @@
             document.getElementById('drawerProgressText').textContent = `Solved: ${solvedTotal} / ${all.length}`;
         }
 
-        // Card rendering with pencil button completely removed, and split/stitch merged into action group
         function buildCardHtml(q) {
             const chapList = JEE_CHAPTERS[q.subject] || JEE_CHAPTERS.Physics;
             const chapOpts = chapList.map(c => `<option value="${c}" ${c === q.chapter ? 'selected' : ''}>${c}</option>`).join('');
@@ -2149,22 +2157,22 @@
 
             return `
             <article class="m3-card min-w-0" style="${borderStyle}">
-                <div class="px-3 py-1.5 m3-card-top-segment flex items-center justify-between gap-2 flex-nowrap overflow-x-auto no-scrollbar">
+                <div class="px-3 py-2 m3-card-top-segment flex items-center justify-between gap-2 flex-nowrap overflow-x-auto no-scrollbar">
                     <div class="flex items-center gap-1.5 min-w-0 flex-nowrap">
-                        <span class="w-7 h-7 m3-cookie-12 font-extrabold text-[10px] flex items-center justify-center shrink-0" style="background: var(--md-primary); color: var(--md-on-primary);">Q.${q.questionNumber}</span>
+                        <span class="w-8 h-8 m3-cookie-12 font-extrabold text-[10px] flex items-center justify-center shrink-0" style="background: var(--md-primary); color: var(--md-on-primary);">Q.${q.questionNumber}</span>
 
-                        <select onchange="window.app.updateQField(${q.id}, 'subject', this.value)" class="h-7 m3-select shrink-0" style="color: var(--md-primary);">
+                        <select onchange="window.app.updateQField(${q.id}, 'subject', this.value)" class="h-8 m3-select shrink-0" style="color: var(--md-primary);">
                             <option value="Physics" ${q.subject === 'Physics' ? 'selected' : ''}>Physics</option>
                             <option value="Chemistry" ${q.subject === 'Chemistry' ? 'selected' : ''}>Chemistry</option>
                             <option value="Mathematics" ${q.subject === 'Mathematics' ? 'selected' : ''}>Maths</option>
                         </select>
 
-                        <select onchange="window.app.updateQField(${q.id}, 'chapter', this.value)" class="h-7 m3-select max-w-[120px] sm:max-w-[160px] truncate shrink-0">
+                        <select onchange="window.app.updateQField(${q.id}, 'chapter', this.value)" class="h-8 m3-select max-w-[130px] sm:max-w-[180px] truncate shrink-0">
                             <option value="${q.chapter}">${q.chapter}</option>
                             ${chapOpts}
                         </select>
 
-                        ${q.isStitched ? `<span class="px-2 py-0.2 rounded-full m3-primary-pill text-[9px] font-extrabold shrink-0" title="Stitched">🔗</span>` : ''}
+                        ${q.isStitched ? `<span class="px-2 py-0.5 rounded-full m3-primary-pill text-[9px] font-extrabold shrink-0" title="Stitched">🔗</span>` : ''}
                     </div>
 
                     <div class="m3-icon-group shrink-0 ml-auto">
@@ -2194,8 +2202,8 @@
                     </div>
                 </div>
 
-                <div class="p-2 m3-card-img-segment flex items-center justify-center min-w-0">
-                    <img src="${q.imageDataUrl}" onclick="event.stopPropagation(); window.app.openImagePopup(${q.id})" alt="Q.${q.questionNumber}" class="question-slice-img rounded-lg w-full h-auto object-contain cursor-zoom-in" loading="lazy" title="Click image to enlarge">
+                <div class="p-2.5 m3-card-img-segment flex items-center justify-center min-w-0">
+                    <img src="${q.imageDataUrl}" onclick="event.stopPropagation(); window.app.openImagePopup(${q.id})" alt="Q.${q.questionNumber}" class="question-slice-img rounded-xl w-full h-auto object-contain cursor-zoom-in" loading="lazy" title="Click image to enlarge">
                 </div>
             </article>
             `;
@@ -2206,29 +2214,31 @@
             const list = getFiltered();
 
             if (list.length === 0) {
+                // Ensure initial empty screen card sits dead-center of the page
+                container.className = "flex-1 min-h-0 overflow-y-auto px-3 sm:px-5 pt-4 pb-36 flex flex-col items-center justify-center";
                 container.innerHTML = `
-                    <div class="max-w-md mx-auto my-10 m3-dialog p-6 text-center space-y-3.5">
-                        <div class="w-14 h-14 m3-cookie-12 flex items-center justify-center mx-auto ${state.isSyncingCloud ? 'm3-spin-slow' : ''}" style="background: var(--md-primary-container); color: var(--md-primary);">
-                            <i class="ph-bold ${state.isSyncingCloud ? 'ph-cloud-arrow-down' : 'ph-scissors'} text-2xl"></i>
+                    <div class="max-w-lg w-full mx-auto m3-dialog p-8 text-center space-y-4 shadow-2xl">
+                        <div class="w-16 h-16 m3-cookie-12 flex items-center justify-center mx-auto ${state.isSyncingCloud ? 'm3-spin-slow' : ''}" style="background: var(--md-primary-container); color: var(--md-primary);">
+                            <i class="ph-bold ${state.isSyncingCloud ? 'ph-cloud-arrow-down' : 'ph-scissors'} text-3xl"></i>
                         </div>
-                        <h2 class="text-base font-extrabold">
-                            ${state.isSyncingCloud ? 'Syncing Questions from Cloud...' : state.questions.length === 0 ? 'Material 3 Expressive Vault Ready!' : 'No Questions Match Filter'}
+                        <h2 class="text-lg font-extrabold">
+                            ${state.isSyncingCloud ? 'Syncing Questions from Cloud...' : state.questions.length === 0 ? 'Material 3 Expressive Vault Ready!' : 'No Questions Match Current Search / Filter'}
                         </h2>
                         <div id="emptyStateWaveWrap" class="${state.isSyncingCloud ? 'py-1' : 'hidden'}"></div>
-                        <p class="text-xs m3-text-muted leading-relaxed">
-                            ${state.isSyncingCloud ? 'Fetching your latest question bank...' : state.questions.length === 0 ? 'Tap "+ Add Test PDF" to extract questions with full-width crops and precision OCR!' : 'Try clearing your search or switching filters.'}
+                        <p class="text-xs sm:text-sm m3-text-muted leading-relaxed">
+                            ${state.isSyncingCloud ? 'Fetching your latest question bank from your Cloud Gist...' : state.questions.length === 0 ? 'Tap the floating "+ Add Test PDF" button to extract questions with 100% full-width crops, precision multi-page stitching, and clean question-text OCR!' : 'Try clearing the search box, swiping the Status pill to "All", or selecting "All Subjects & Chapters" inside the Chapters drawer.'}
                         </p>
-                        <div class="flex flex-wrap items-center justify-center gap-2.5 pt-1">
+                        <div class="flex flex-wrap items-center justify-center gap-3 pt-2">
                             ${state.search ? `
-                                <button onclick="window.app.clearSearch()" class="h-9 px-4 m3-btn-tonal text-xs flex items-center gap-1.5">
-                                    <i class="ph-bold ph-x"></i> Clear Search
+                                <button onclick="window.app.clearSearch()" class="h-10 px-5 m3-btn-tonal text-xs sm:text-sm flex items-center gap-2">
+                                    <i class="ph-bold ph-x"></i> Clear Search Filter
                                 </button>
                             ` : ''}
-                            <button onclick="window.app.openUploadModal()" class="h-9 px-4 m3-btn-filled text-xs flex items-center gap-1.5 shadow">
-                                <i class="ph-bold ph-file-pdf"></i> Upload PDF
+                            <button onclick="window.app.openUploadModal()" class="h-10 px-5 m3-btn-filled text-xs sm:text-sm flex items-center gap-2 shadow-lg">
+                                <i class="ph-bold ph-file-pdf"></i> Upload Test Paper PDF
                             </button>
-                            <button onclick="window.app.pullFromCloudGist(true)" class="h-9 px-4 m3-btn-tonal text-xs flex items-center gap-1.5">
-                                <i class="ph-bold ph-cloud-arrow-down"></i> Pull Cloud
+                            <button onclick="window.app.pullFromCloudGist(true)" class="h-10 px-5 m3-btn-tonal text-xs sm:text-sm flex items-center gap-2">
+                                <i class="ph-bold ph-cloud-arrow-down"></i> Pull from Cloud
                             </button>
                         </div>
                     </div>
@@ -2237,9 +2247,10 @@
                 return;
             }
 
+            container.className = "flex-1 min-h-0 overflow-y-auto px-3 sm:px-5 pt-4 pb-36";
             const isTwoCol = window.innerWidth >= 900;
             if (!isTwoCol) {
-                container.innerHTML = `<div class="flex flex-col gap-3.5 pb-20">${list.map(buildCardHtml).join('')}</div>`;
+                container.innerHTML = `<div class="flex flex-col gap-4 pb-24">${list.map(buildCardHtml).join('')}</div>`;
             } else {
                 const colLeft = [], colRight = [];
                 let leftHeight = 0, rightHeight = 0;
@@ -2249,9 +2260,9 @@
                     else { colRight.push(buildCardHtml(q)); rightHeight += estH; }
                 });
                 container.innerHTML = `
-                    <div class="grid grid-cols-2 gap-3.5 items-start pb-20">
-                        <div class="flex flex-col gap-3.5 min-w-0">${colLeft.join('')}</div>
-                        <div class="flex flex-col gap-3.5 min-w-0">${colRight.join('')}</div>
+                    <div class="grid grid-cols-2 gap-4 items-start pb-24">
+                        <div class="flex flex-col gap-4 min-w-0">${colLeft.join('')}</div>
+                        <div class="flex flex-col gap-4 min-w-0">${colRight.join('')}</div>
                     </div>
                 `;
             }
@@ -2264,8 +2275,8 @@
                 const fab = document.getElementById('extendedAddPdfFab');
                 if (!fab || !el) return;
                 const st = el.scrollTop;
-                if (st > state.lastScrollTop + 14 && st > 50) fab.classList.add('fab-hidden');
-                else if (st < state.lastScrollTop - 8 || st < 30) fab.classList.remove('fab-hidden');
+                if (st > state.lastScrollTop + 14 && st > 60) fab.classList.add('fab-hidden');
+                else if (st < state.lastScrollTop - 8 || st < 40) fab.classList.remove('fab-hidden');
                 state.lastScrollTop = Math.max(0, st);
             },
 
@@ -2331,7 +2342,7 @@
                 if (!inp || !icon) return;
                 const isPwd = inp.type === 'password';
                 inp.type = isPwd ? 'text' : 'password';
-                icon.className = isPwd ? 'ph-bold ph-eye-slash text-sm' : 'ph-bold ph-eye text-sm';
+                icon.className = isPwd ? 'ph-bold ph-eye-slash text-base' : 'ph-bold ph-eye text-base';
             },
 
             getActivePopupId: () => state.activePopupId,
@@ -2434,7 +2445,6 @@
                 toast('Question deleted');
             },
             confirmClearVault() {
-                // Opens double confirmation dialog instead of instantly wiping
                 document.getElementById('clearVaultConfirmModal').classList.remove('hidden');
             },
             closeClearVaultModal() {
@@ -2617,7 +2627,7 @@
                 state.inkColor = color;
                 state.isEraser = isEraser;
                 const erBtn = document.getElementById('eraserBtn');
-                if (erBtn) erBtn.className = isEraser ? "h-7 px-2.5 m3-btn-filled text-[11px] flex items-center gap-1" : "h-7 px-2.5 m3-btn-tonal text-[11px] flex items-center gap-1";
+                if (erBtn) erBtn.className = isEraser ? "h-8 px-3 m3-btn-filled text-xs flex items-center gap-1" : "h-8 px-3 m3-btn-tonal text-xs flex items-center gap-1";
             },
             setStrokeWidth(w) { state.strokeWidth = Number(w) || 3.5; },
             clearInk() {
@@ -2656,7 +2666,7 @@
                 ctx.moveTo(lx, ly);
                 ctx.lineTo(p.x, p.y);
                 ctx.strokeStyle = state.inkColor;
-                ctx.lineWidth = state.isEraser ? 20 : state.strokeWidth;
+                ctx.lineWidth = state.isEraser ? 22 : state.strokeWidth;
                 ctx.stroke();
                 lx = p.x; ly = p.y;
             };
