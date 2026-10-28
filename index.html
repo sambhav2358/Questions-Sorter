@@ -3,189 +3,366 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>JEE Sorter + Multi-Page Stitching</title>
-    <!-- Tailwind CSS CDN -->
+    <title>JEE Sorter • Material 3 Expressive</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    fontFamily: {
-                        sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
-                    },
-                    colors: {
-                        canvas: '#090d16',
-                        panel: '#111726',
-                        card: '#151c2e',
-                        borderdark: '#222b40'
-                    }
-                }
-            }
-        }
-    </script>
-    <!-- Google Fonts: Inter -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <!-- Phosphor Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
-    <!-- PDF.js (Local PDF Rendering & Native Text Layer Extraction) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-    <script>
-        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-    </script>
-    <!-- Tesseract.js (100% Local Browser OCR Engine for Full-Question Search) -->
+    <script>pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';</script>
     <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
     <style>
-        * {
-            -webkit-tap-highlight-color: transparent;
-            box-sizing: border-box;
+        :root {
+            --md-primary: hsl(252, 92%, 78%);
+            --md-on-primary: hsl(252, 75%, 15%);
+            --md-primary-container: hsl(252, 58%, 27%);
+            --md-on-primary-container: hsl(252, 95%, 92%);
+            --md-secondary-container: hsl(252, 32%, 22%);
+            --md-on-secondary-container: hsl(252, 75%, 90%);
+            --md-surface: hsl(252, 24%, 7%);
+            --md-surface-low: hsl(252, 24%, 10%);
+            --md-surface-container: hsl(252, 24%, 13%);
+            --md-surface-high: hsl(252, 24%, 17%);
+            --md-surface-highest: hsl(252, 24%, 22%);
+            --md-on-surface: hsl(252, 20%, 95%);
+            --md-on-surface-variant: hsl(252, 15%, 72%);
+            --md-outline: hsl(252, 16%, 32%);
+            --md-outline-variant: hsl(252, 18%, 20%);
+            --m3-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+            --m3-emphasized: cubic-bezier(0.2, 0, 0, 1);
         }
+
+        * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; }
         body {
-            font-family: 'Inter', sans-serif;
-            background-color: #090d16;
-            color: #f1f5f9;
+            font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+            background-color: var(--md-surface);
+            color: var(--md-on-surface);
             overscroll-behavior: none;
+            transition: background-color 0.35s var(--m3-emphasized);
         }
-        ::-webkit-scrollbar {
-            width: 6px;
-            height: 6px;
+        .font-mono { font-family: 'JetBrains Mono', monospace; }
+
+        /* M3 Expressive Color Surfaces */
+        .m3-surface { background-color: var(--md-surface); }
+        .m3-surface-low { background-color: var(--md-surface-low); }
+        .m3-surface-container { background-color: var(--md-surface-container); }
+        .m3-surface-high { background-color: var(--md-surface-high); }
+        .m3-surface-highest { background-color: var(--md-surface-highest); }
+        .m3-border { border-color: var(--md-outline-variant); }
+        .m3-outline { border-color: var(--md-outline); }
+        .m3-text-muted { color: var(--md-on-surface-variant); }
+
+        /* M3 Expressive Scalloped "Cookie" / Starburst Shapes */
+        .m3-cookie-12 { clip-path: url(#m3Cookie12Clip); }
+        .m3-clover-8 { clip-path: url(#m3Clover8Clip); }
+        .m3-spin-slow { animation: m3Spin 14s linear infinite; }
+        @keyframes m3Spin { to { transform: rotate(360deg); } }
+
+        /* M3 Expressive Segmented / Grouped List (28px outer corners, 6px inner corners) */
+        .m3-group-list {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
         }
-        ::-webkit-scrollbar-track {
-            background: transparent;
+        .m3-group-item {
+            background-color: var(--md-surface-high);
+            border: 1px solid var(--md-outline-variant);
+            border-radius: 6px;
+            transition: all 0.28s var(--m3-spring);
         }
-        ::-webkit-scrollbar-thumb {
-            background: rgba(148, 163, 184, 0.25);
+        .m3-group-item:first-child {
+            border-top-left-radius: 26px;
+            border-top-right-radius: 26px;
+        }
+        .m3-group-item:last-child {
+            border-bottom-left-radius: 26px;
+            border-bottom-right-radius: 26px;
+        }
+        .m3-group-item:only-child {
+            border-radius: 26px;
+        }
+        .m3-group-item:hover {
+            background-color: var(--md-surface-highest);
+            border-color: var(--md-outline);
+            transform: scale(1.008);
+        }
+        .m3-group-item:active {
+            transform: scale(0.98);
+            border-radius: 16px;
+        }
+
+        /* M3 Expressive Morphing Buttons & Chips */
+        .m3-btn-filled {
+            background-color: var(--md-primary);
+            color: var(--md-on-primary);
             border-radius: 9999px;
+            font-weight: 800;
+            transition: all 0.3s var(--m3-spring);
         }
-        .no-scrollbar::-webkit-scrollbar {
-            display: none;
+        .m3-btn-filled:hover:not(:disabled) {
+            filter: brightness(1.08);
+            border-radius: 16px;
+            transform: translateY(-1px) scale(1.02);
+            box-shadow: 0 8px 20px -4px rgba(0, 0, 0, 0.5);
         }
-        .no-scrollbar {
-            -ms-overflow-style: none;
-            scrollbar-width: none;
+        .m3-btn-filled:active:not(:disabled) {
+            transform: scale(0.94);
+            border-radius: 12px;
         }
-        .question-slice-img {
-            width: 100%;
-            height: auto;
-            display: block;
-            image-rendering: -webkit-optimize-contrast;
+
+        .m3-btn-tonal {
+            background-color: var(--md-secondary-container);
+            color: var(--md-on-secondary-container);
+            border-radius: 9999px;
+            font-weight: 700;
+            transition: all 0.3s var(--m3-spring);
         }
-        input[type=range].split-slider {
-            -webkit-appearance: none;
-            appearance: none;
-            width: 100%;
-            background: transparent;
+        .m3-btn-tonal:hover {
+            background-color: var(--md-primary-container);
+            color: var(--md-on-primary-container);
+            border-radius: 14px;
+            transform: scale(1.03);
         }
+        .m3-btn-tonal:active {
+            transform: scale(0.93);
+            border-radius: 10px;
+        }
+
+        /* Active Chip morphs from Pill (9999px) to Expressive Squircle (12px) */
+        .m3-chip-active {
+            background-color: var(--md-primary);
+            color: var(--md-on-primary);
+            border: 1px solid var(--md-primary);
+            border-radius: 12px;
+            font-weight: 800;
+            transform: scale(1.03);
+            transition: all 0.32s var(--m3-spring);
+        }
+        .m3-chip-inactive {
+            background-color: var(--md-surface-high);
+            color: var(--md-on-surface-variant);
+            border: 1px solid var(--md-outline-variant);
+            border-radius: 9999px;
+            font-weight: 600;
+            transition: all 0.32s var(--m3-spring);
+        }
+        .m3-chip-inactive:hover {
+            background-color: var(--md-surface-highest);
+            color: var(--md-on-surface);
+            border-radius: 16px;
+        }
+
+        /* M3 Expressive Cards (Asymmetric/Grouped Inner Geometry + Spring Entrance) */
+        @keyframes m3CardPop {
+            from { opacity: 0; transform: translateY(16px) scale(0.97); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        .m3-card {
+            background-color: var(--md-surface-container);
+            border: 1.5px solid var(--md-outline-variant);
+            border-radius: 28px;
+            padding: 6px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            animation: m3CardPop 0.38s var(--m3-spring) backwards;
+            transition: transform 0.28s var(--m3-spring), border-color 0.25s ease, box-shadow 0.28s ease;
+        }
+        .m3-card:hover {
+            border-color: var(--md-outline);
+            box-shadow: 0 14px 32px -8px rgba(0, 0, 0, 0.55);
+        }
+        /* Top bar of card has 22px top corners & 8px bottom corners */
+        .m3-card-top-segment {
+            background-color: var(--md-surface-high);
+            border-radius: 22px 22px 8px 8px;
+        }
+        /* Bottom image segment of card has 8px top corners & 22px bottom corners */
+        .m3-card-img-segment {
+            background-color: #ffffff;
+            border-radius: 8px 8px 22px 22px;
+        }
+
+        /* M3 Expressive Dialogs */
+        @keyframes m3DialogIn {
+            from { opacity: 0; transform: scale(0.9) translateY(18px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+        .m3-dialog {
+            background-color: var(--md-surface-container);
+            border: 1.5px solid var(--md-outline);
+            border-radius: 32px;
+            box-shadow: 0 28px 60px rgba(0, 0, 0, 0.72);
+            animation: m3DialogIn 0.34s var(--m3-spring);
+        }
+
+        .m3-input {
+            background-color: var(--md-surface-low);
+            border: 1.5px solid var(--md-outline);
+            color: var(--md-on-surface);
+            border-radius: 16px;
+            transition: all 0.22s var(--m3-spring);
+        }
+        .m3-input:focus {
+            outline: none;
+            border-color: var(--md-primary);
+            border-radius: 12px;
+            box-shadow: 0 0 0 3px var(--md-primary-container);
+        }
+
+        /* M3 Expressive Wavy Squiggle Progress Bar */
+        @keyframes m3WaveScroll {
+            from { background-position-x: 0px; }
+            to { background-position-x: 40px; }
+        }
+        .m3-wavy-active {
+            background-repeat: repeat-x;
+            background-position: 0 center;
+            background-size: 40px 14px;
+            animation: m3WaveScroll 0.85s linear infinite;
+            transition: width 0.35s var(--m3-emphasized);
+        }
+        .m3-wavy-track {
+            background-color: var(--md-surface-highest);
+            border-radius: 9999px;
+            transition: width 0.35s var(--m3-emphasized);
+        }
+
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--md-outline); border-radius: 9999px; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .question-slice-img { width: 100%; height: auto; display: block; image-rendering: -webkit-optimize-contrast; }
+        input[type=range].split-slider { -webkit-appearance: none; appearance: none; width: 100%; background: transparent; }
         input[type=range].split-slider::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            appearance: none;
-            height: 26px;
-            width: 26px;
+            -webkit-appearance: none; appearance: none;
+            height: 28px; width: 28px; border-radius: 10px;
+            background: var(--md-primary); cursor: pointer;
+            border: 3px solid var(--md-on-primary);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.65);
+            transition: transform 0.2s var(--m3-spring), border-radius 0.2s var(--m3-spring);
+        }
+        input[type=range].split-slider::-webkit-slider-thumb:active {
+            transform: scale(1.2);
             border-radius: 50%;
-            background: #f59e0b;
-            cursor: pointer;
-            border: 3px solid #ffffff;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.6);
         }
-        #stylusCanvas {
-            touch-action: none;
-        }
+        #stylusCanvas { touch-action: none; }
     </style>
 </head>
-<body class="h-screen w-screen overflow-hidden flex flex-col select-none bg-canvas">
+<body class="h-screen w-screen overflow-hidden flex flex-col select-none m3-surface">
+
+    <!-- HIDDEN SVG DEFINITIONS FOR MATERIAL 3 EXPRESSIVE "COOKIE" & CLOVER SHAPES -->
+    <svg width="0" height="0" class="absolute pointer-events-none">
+        <defs>
+            <!-- 12-Lobe Scalloped "Cookie" Starburst (Matches Sophia/Anna avatar shape in reference image) -->
+            <clipPath id="m3Cookie12Clip" clipPathUnits="objectBoundingBox">
+                <path id="m3Cookie12Path" d=""></path>
+            </clipPath>
+            <!-- 8-Lobe Soft Clover Shape -->
+            <clipPath id="m3Clover8Clip" clipPathUnits="objectBoundingBox">
+                <path id="m3Clover8Path" d=""></path>
+            </clipPath>
+        </defs>
+    </svg>
 
     <!-- =================================================================== -->
-    <!-- COMPACT TOP HEADER BAR                                              -->
+    <!-- MATERIAL 3 EXPRESSIVE TOP APP BAR                                   -->
     <!-- =================================================================== -->
-    <header class="h-12 bg-panel border-b border-borderdark px-3 sm:px-4 flex items-center justify-between gap-2 shrink-0 z-30">
-        <!-- Left: Chapters Drawer Toggle + Brand + Cloud Status Pill + Local OCR Pill -->
-        <div class="flex items-center gap-2 min-w-0">
-            <button onclick="window.app.toggleDrawer()" class="h-8 px-2.5 rounded-xl bg-slate-800/90 hover:bg-slate-700 border border-slate-700/80 text-slate-200 text-xs font-semibold flex items-center gap-1.5 transition shrink-0">
-                <i class="ph-bold ph-tree-structure text-indigo-400 text-sm"></i>
+    <header class="h-14 m3-surface-low border-b m3-border px-3 sm:px-5 flex items-center justify-between gap-2 shrink-0 z-30 relative">
+        <!-- Left: Chapters Navigation Pill + Scalloped Cookie Brand + Cloud & OCR Status -->
+        <div class="flex items-center gap-2.5 min-w-0">
+            <button onclick="window.app.toggleDrawer()" class="h-9 px-3.5 m3-btn-tonal text-xs flex items-center gap-2 shrink-0">
+                <i class="ph-bold ph-tree-structure text-sm" style="color: var(--md-primary)"></i>
                 <span>Chapters</span>
-                <span id="activeChapterIndicator" class="px-1.5 py-0.5 text-[10px] rounded bg-indigo-500/20 text-indigo-300 font-bold max-w-[110px] truncate">All</span>
+                <span id="activeChapterIndicator" class="px-2 py-0.5 text-[10px] rounded-md font-extrabold max-w-[115px] truncate" style="background: var(--md-primary); color: var(--md-on-primary);">All</span>
             </button>
 
-            <div class="w-7 h-7 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-md shadow-indigo-500/20 shrink-0">
-                <i class="ph-bold ph-scissors text-white text-sm"></i>
+            <!-- Expressive 12-Sided Cookie Badge Icon -->
+            <div class="w-9 h-9 m3-cookie-12 flex items-center justify-center shrink-0 shadow-sm" style="background: var(--md-primary-container); color: var(--md-primary);">
+                <i class="ph-bold ph-scissors text-base"></i>
             </div>
 
-            <div class="min-w-0 flex items-center gap-1.5">
-                <h1 class="font-bold text-xs sm:text-sm text-white truncate">JEE Sorter</h1>
+            <div class="min-w-0 flex items-center gap-2">
+                <h1 class="font-extrabold text-xs sm:text-sm tracking-tight truncate">JEE Sorter</h1>
                 <!-- Cloud Sync Status Pill -->
-                <button id="cloudStatusBadge" onclick="window.app.handleCloudBadgeClick()" class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-slate-800 text-slate-400 border border-slate-700 hover:border-indigo-500/50 transition shrink-0" title="Click to Sync with GitHub Cloud or Configure">
+                <button id="cloudStatusBadge" onclick="window.app.handleCloudBadgeClick()" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold m3-surface-high border m3-border transition shrink-0" title="Click to Sync with GitHub Cloud or Configure">
                     <i id="cloudStatusIcon" class="ph-bold ph-cloud-slash text-xs"></i>
                     <span id="cloudStatusText">Cloud: Off</span>
                 </button>
-                <!-- Live Local OCR Indexing Pill (Shown while indexing question text locally) -->
-                <div id="ocrStatusBadge" class="hidden items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-500/15 text-amber-300 border border-amber-500/30 shrink-0" title="Local Tesseract OCR indexing questions for instant multi-word search">
-                    <i class="ph-bold ph-text-T animate-pulse text-xs"></i>
+                <!-- Live Local OCR Indexing Pill -->
+                <div id="ocrStatusBadge" class="hidden items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold bg-amber-500/15 text-amber-300 border border-amber-500/30 shrink-0" title="Local Tesseract OCR indexing questions">
+                    <i class="ph-bold ph-text-T animate-bounce text-xs"></i>
                     <span id="ocrStatusText">OCR: 0/0</span>
                 </div>
             </div>
         </div>
 
-        <!-- Right: Action Buttons (+ Add Test PDF, Pull Cloud, Fullscreen, Settings) -->
+        <!-- Right: M3 Extended Squircle FAB (+ Add Test PDF), Pull Cloud, Fullscreen, Settings -->
         <div class="flex items-center gap-1.5 shrink-0">
-            <button onclick="window.app.openUploadModal()" class="h-8 px-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 text-white text-xs font-bold flex items-center gap-1.5 shadow-lg shadow-indigo-600/30 transition">
+            <button onclick="window.app.openUploadModal()" class="h-9 px-4 m3-btn-filled text-xs flex items-center gap-1.5 shadow-md">
                 <i class="ph-bold ph-file-plus text-sm"></i>
                 <span>+ Add Test PDF</span>
             </button>
 
-            <button onclick="window.app.pullFromCloudGist(true)" class="h-8 w-8 rounded-xl bg-slate-800/90 hover:bg-slate-700 border border-slate-700/80 text-sky-400 flex items-center justify-center transition" title="Pull Latest Questions from Cloud">
+            <button onclick="window.app.pullFromCloudGist(true)" class="h-9 w-9 m3-btn-tonal flex items-center justify-center" title="Pull Latest Questions from Cloud">
                 <i class="ph-bold ph-cloud-arrow-down text-sm"></i>
             </button>
 
-            <button onclick="window.app.toggleFullscreen()" class="h-8 w-8 rounded-xl bg-slate-800/90 hover:bg-slate-700 border border-slate-700/80 text-slate-200 flex items-center justify-center transition" title="Toggle Fullscreen">
+            <button onclick="window.app.toggleFullscreen()" class="h-9 w-9 m3-btn-tonal flex items-center justify-center" title="Toggle Fullscreen">
                 <i id="fullscreenIcon" class="ph-bold ph-corners-out text-sm"></i>
             </button>
 
-            <button onclick="window.app.openSettingsModal()" id="apiSettingsBtn" class="h-8 w-8 rounded-xl bg-slate-800/90 hover:bg-slate-700 border border-slate-700/80 text-slate-200 flex items-center justify-center transition relative" title="Settings, Cloud Sync & Backup">
+            <button onclick="window.app.openSettingsModal()" id="apiSettingsBtn" class="h-9 w-9 m3-btn-tonal flex items-center justify-center relative" title="Open Phone-Style Settings Menu">
                 <i class="ph-bold ph-gear text-sm"></i>
-                <span id="apiKeyDot" class="w-2 h-2 rounded-full bg-amber-400 absolute top-1 right-1"></span>
+                <span id="apiKeyDot" class="w-2 h-2 rounded-full bg-amber-400 absolute top-1.5 right-1.5"></span>
             </button>
+        </div>
+
+        <!-- Global Top Wavy Progress Bar (Appears automatically during Cloud Push/Pull or Background OCR) -->
+        <div id="topGlobalWaveWrap" class="hidden absolute bottom-0 left-0 right-0 translate-y-full z-40 px-4 py-1 m3-surface-low/95 backdrop-blur-xs border-b m3-border">
+            <div id="topGlobalWaveBar"></div>
         </div>
     </header>
 
     <!-- =================================================================== -->
-    <!-- SINGLE-ROW FILTER BAR (Status, Starred, Search, Paper, Difficulty)  -->
+    <!-- MATERIAL 3 EXPRESSIVE FILTER BAR (Morphing Chips & Search)          -->
     <!-- =================================================================== -->
-    <div class="bg-panel/90 border-b border-borderdark px-3 sm:px-4 py-1.5 flex items-center justify-between gap-2 overflow-x-auto no-scrollbar shrink-0 z-20">
-        <!-- Left: Easy-Access Status & ★ Starred Filter Pills -->
+    <div class="m3-surface-low border-b m3-border px-3 sm:px-5 py-2 flex items-center justify-between gap-2 overflow-x-auto no-scrollbar shrink-0 z-20">
+        <!-- Left: M3 Expressive Morphing Filter Chips -->
         <div class="flex items-center gap-1.5 shrink-0">
-            <button onclick="window.app.setStatus('ALL')" data-status="ALL" class="status-btn h-7 px-2.5 rounded-lg text-xs font-bold transition flex items-center gap-1 bg-indigo-600 text-white">
+            <button onclick="window.app.setStatus('ALL')" data-status="ALL" class="status-btn h-8 px-3.5 text-xs flex items-center gap-1.5 m3-chip-active">
                 <span>All Status</span>
             </button>
-            <button onclick="window.app.setStatus('UNSOLVED')" data-status="UNSOLVED" class="status-btn h-7 px-2.5 rounded-lg text-xs font-semibold transition flex items-center gap-1.5 bg-slate-800/90 text-slate-300 border border-slate-700/80">
+            <button onclick="window.app.setStatus('UNSOLVED')" data-status="UNSOLVED" class="status-btn h-8 px-3.5 text-xs flex items-center gap-1.5 m3-chip-inactive">
                 <i class="ph-bold ph-circle text-amber-400"></i>
                 <span>Unsolved</span>
-                <span id="status-count-UNSOLVED" class="text-[11px] text-amber-300 font-bold">0</span>
+                <span id="status-count-UNSOLVED" class="text-[11px] font-extrabold">0</span>
             </button>
-            <button onclick="window.app.setStatus('SOLVED')" data-status="SOLVED" class="status-btn h-7 px-2.5 rounded-lg text-xs font-semibold transition flex items-center gap-1.5 bg-slate-800/90 text-slate-300 border border-slate-700/80">
+            <button onclick="window.app.setStatus('SOLVED')" data-status="SOLVED" class="status-btn h-8 px-3.5 text-xs flex items-center gap-1.5 m3-chip-inactive">
                 <i class="ph-fill ph-check-circle text-emerald-400"></i>
                 <span>Solved</span>
-                <span id="status-count-SOLVED" class="text-[11px] text-emerald-300 font-bold">0</span>
+                <span id="status-count-SOLVED" class="text-[11px] font-extrabold">0</span>
             </button>
-            <button onclick="window.app.setStatus('STARRED')" data-status="STARRED" class="status-btn h-7 px-2.5 rounded-lg text-xs font-semibold transition flex items-center gap-1.5 bg-slate-800/90 text-slate-300 border border-yellow-500/40">
+            <button onclick="window.app.setStatus('STARRED')" data-status="STARRED" class="status-btn h-8 px-3.5 text-xs flex items-center gap-1.5 m3-chip-inactive">
                 <i class="ph-fill ph-star text-yellow-400"></i>
                 <span>★ Starred</span>
-                <span id="status-count-STARRED" class="text-[11px] text-yellow-300 font-bold">0</span>
+                <span id="status-count-STARRED" class="text-[11px] font-extrabold">0</span>
             </button>
         </div>
 
-        <!-- Right: Multi-Word Full-Text OCR Search, Paper & Difficulty Dropdowns -->
-        <div class="flex items-center gap-1.5 shrink-0 ml-auto">
+        <!-- Right: M3 Expressive Search & Dropdowns -->
+        <div class="flex items-center gap-2 shrink-0 ml-auto">
             <div class="relative flex items-center">
-                <i class="ph ph-magnifying-glass absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs pointer-events-none"></i>
-                <input id="searchBox" oninput="window.app.setSearch(this.value)" type="text" placeholder="Search words in question, chapter, Q#..." class="h-7 w-44 sm:w-64 bg-slate-900 border border-slate-700/80 rounded-lg pl-7 pr-6 text-xs text-white placeholder-slate-400 focus:outline-none focus:border-indigo-500">
-                <button id="clearSearchBtn" onclick="window.app.clearSearch()" class="hidden absolute right-1.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white p-0.5" title="Clear search">
-                    <i class="ph-bold ph-x text-[11px]"></i>
+                <i class="ph-bold ph-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 m3-text-muted text-xs pointer-events-none"></i>
+                <input id="searchBox" oninput="window.app.setSearch(this.value)" type="text" placeholder="Search any words in question, chapter..." class="h-8 w-44 sm:w-64 m3-input rounded-full pl-8 pr-7 text-xs placeholder-slate-400">
+                <button id="clearSearchBtn" onclick="window.app.clearSearch()" class="hidden absolute right-2 top-1/2 -translate-y-1/2 m3-text-muted hover:text-white p-0.5" title="Clear search">
+                    <i class="ph-bold ph-x text-xs"></i>
                 </button>
             </div>
-            <select id="paperDropdown" onchange="window.app.setPaper(this.value)" class="h-7 bg-slate-900 border border-slate-700/80 rounded-lg px-2 text-xs text-slate-200 focus:outline-none focus:border-indigo-500 max-w-[130px] truncate">
+            <select id="paperDropdown" onchange="window.app.setPaper(this.value)" class="h-8 m3-surface-high border m3-border rounded-2xl px-3 text-xs font-semibold focus:outline-none max-w-[140px] truncate" style="color: var(--md-on-surface);">
                 <option value="ALL">All Papers (0)</option>
             </select>
-            <select id="difficultyDropdown" onchange="window.app.setDifficulty(this.value)" class="h-7 bg-slate-900 border border-slate-700/80 rounded-lg px-2 text-xs text-slate-200 focus:outline-none focus:border-indigo-500">
+            <select id="difficultyDropdown" onchange="window.app.setDifficulty(this.value)" class="h-8 m3-surface-high border m3-border rounded-2xl px-3 text-xs font-semibold focus:outline-none" style="color: var(--md-on-surface);">
                 <option value="ALL">All Difficulty</option>
                 <option value="Easy">Easy</option>
                 <option value="Medium">Medium</option>
@@ -195,293 +372,420 @@
     </div>
 
     <!-- =================================================================== -->
-    <!-- SLIDE-OUT CHAPTERS DRAWER (Subjects & Nested Chapters)              -->
+    <!-- MATERIAL 3 EXPRESSIVE NAVIGATION DRAWER (With Wavy Progress Bar)    -->
     <!-- =================================================================== -->
-    <div id="drawerBackdrop" onclick="window.app.toggleDrawer(false)" class="fixed inset-0 bg-black/60 backdrop-blur-xs z-40 hidden"></div>
-    <aside id="chaptersDrawer" class="fixed inset-y-0 left-0 w-80 bg-panel border-r border-borderdark z-50 -translate-x-full transition-transform duration-200 ease-out flex flex-col shadow-2xl">
-        <div class="p-3.5 border-b border-borderdark flex items-center justify-between">
-            <div class="flex items-center gap-2">
-                <i class="ph-bold ph-folders text-indigo-400 text-lg"></i>
-                <h2 class="font-bold text-xs text-white uppercase tracking-wider">Subjects & Chapters</h2>
+    <div id="drawerBackdrop" onclick="window.app.toggleDrawer(false)" class="fixed inset-0 bg-black/65 backdrop-blur-xs z-40 hidden"></div>
+    <aside id="chaptersDrawer" class="fixed inset-y-0 left-0 w-80 m3-surface-container border-r m3-border rounded-r-[32px] z-50 -translate-x-full transition-transform duration-300 ease-out flex flex-col shadow-2xl overflow-hidden">
+        <div class="p-4 border-b m3-border flex items-center justify-between">
+            <div class="flex items-center gap-2.5">
+                <div class="w-9 h-9 m3-cookie-12 flex items-center justify-center" style="background: var(--md-primary-container); color: var(--md-primary);">
+                    <i class="ph-bold ph-folders text-base"></i>
+                </div>
+                <h2 class="font-extrabold text-xs uppercase tracking-wider">Subjects & Chapters</h2>
             </div>
-            <button onclick="window.app.toggleDrawer(false)" class="p-1 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800">
-                <i class="ph-bold ph-x text-base"></i>
+            <button onclick="window.app.toggleDrawer(false)" class="h-8 px-3 rounded-full m3-surface-high hover:bg-rose-500/20 hover:text-rose-300 text-xs font-bold flex items-center gap-1 transition">
+                <i class="ph-bold ph-x text-xs"></i>
+                <span>Close</span>
             </button>
         </div>
 
-        <div class="p-2.5 border-b border-borderdark">
-            <input id="drawerChapterSearch" oninput="window.app.renderDrawerChapters()" type="text" placeholder="Filter chapters..." class="w-full h-8 bg-slate-900 border border-slate-700 rounded-xl px-3 text-xs text-white placeholder-slate-400 focus:outline-none focus:border-indigo-500">
+        <div class="p-3 border-b m3-border">
+            <input id="drawerChapterSearch" oninput="window.app.renderDrawerChapters()" type="text" placeholder="Filter chapters..." class="w-full h-9 m3-input rounded-full px-3.5 text-xs placeholder-slate-400">
         </div>
 
-        <div id="drawerChapterList" class="flex-1 overflow-y-auto p-2.5 space-y-2"></div>
+        <!-- Grouped Segmented Chapter List -->
+        <div id="drawerChapterList" class="flex-1 overflow-y-auto p-3 space-y-3"></div>
 
-        <div class="p-3 border-t border-borderdark bg-canvas/60 flex items-center justify-between text-xs">
-            <span id="drawerProgressText" class="text-slate-400 font-medium">Solved: 0 / 0</span>
-            <button onclick="window.app.confirmClearVault()" class="text-rose-400 hover:text-rose-300 font-semibold flex items-center gap-1">
-                <i class="ph-bold ph-trash"></i> Clear All
-            </button>
+        <!-- Drawer Footer with Expressive Wavy Solved Progress Bar -->
+        <div class="p-3.5 border-t m3-border m3-surface-low space-y-2">
+            <div class="flex items-center justify-between text-xs">
+                <span id="drawerProgressText" class="m3-text-muted font-bold">Solved: 0 / 0</span>
+                <button onclick="window.app.confirmClearVault()" class="px-3 py-1 rounded-full bg-rose-500/15 text-rose-300 hover:bg-rose-500/25 font-bold flex items-center gap-1 transition">
+                    <i class="ph-bold ph-trash"></i> Clear All
+                </button>
+            </div>
+            <div id="drawerWavyProgress"></div>
         </div>
     </aside>
 
     <!-- =================================================================== -->
     <!-- MAIN QUESTION FEED WORKSPACE (HEIGHT-BALANCED 2-COLUMN MASONRY)     -->
     <!-- =================================================================== -->
-    <main id="mainFeedContainer" class="flex-1 overflow-y-auto px-3 sm:px-5 py-3">
-        <!-- Populated dynamically by renderFeed() with height-balanced columns -->
-    </main>
+    <main id="mainFeedContainer" class="flex-1 overflow-y-auto px-3 sm:px-5 py-4"></main>
 
     <!-- =================================================================== -->
-    <!-- IMAGE POPUP LIGHTBOX MODAL (CLEAN FULL-IMAGE VIEW)                  -->
+    <!-- IMAGE POPUP LIGHTBOX DIALOG                                         -->
     <!-- =================================================================== -->
     <div id="imagePopupModal" onclick="if(event.target === this) window.app.closeImagePopup()" class="fixed inset-0 bg-black/85 backdrop-blur-sm z-50 hidden flex items-center justify-center p-3 sm:p-5">
-        <div class="relative max-w-5xl w-full max-h-[94vh] bg-panel border border-borderdark rounded-2xl shadow-2xl flex flex-col overflow-hidden">
-            <!-- Top Bar inside Popup -->
-            <div class="px-4 py-2.5 bg-panel border-b border-borderdark flex items-center justify-between gap-2 shrink-0">
-                <div class="flex items-center gap-2 min-w-0">
-                    <span id="popupQBadge" class="px-2 py-0.5 rounded bg-indigo-600 text-white font-extrabold text-xs">Q.1</span>
-                    <span id="popupSubjChap" class="text-xs text-slate-300 font-semibold truncate">Physics</span>
+        <div class="relative max-w-5xl w-full max-h-[92vh] m3-dialog flex flex-col overflow-hidden">
+            <div class="px-4 py-3 m3-surface-low border-b m3-border flex items-center justify-between gap-2 shrink-0">
+                <div class="flex items-center gap-2.5 min-w-0">
+                    <span id="popupQBadge" class="w-9 h-9 m3-cookie-12 font-extrabold text-xs flex items-center justify-center shrink-0" style="background: var(--md-primary); color: var(--md-on-primary);">Q.1</span>
+                    <span id="popupSubjChap" class="text-xs sm:text-sm font-bold truncate">Physics</span>
                 </div>
 
                 <div class="flex items-center gap-2 shrink-0">
-                    <!-- Open in Split/Trim -->
-                    <button onclick="const id = window.app.getActivePopupId(); window.app.closeImagePopup(); window.app.openSplitModal(id);" class="h-8 px-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-amber-300 text-xs font-semibold flex items-center gap-1 transition" title="Split or Trim Question">
-                        <i class="ph-bold ph-scissors"></i>
+                    <button type="button" onclick="const id = window.app.getActivePopupId(); window.app.closeImagePopup(); window.app.openSplitModal(id);" class="h-9 px-3.5 m3-btn-tonal text-xs flex items-center gap-1.5">
+                        <i class="ph-bold ph-scissors text-amber-400"></i>
                         <span class="hidden sm:inline">Split / Trim</span>
                     </button>
-
-                    <!-- Open in Scratchpad -->
-                    <button onclick="const id = window.app.getActivePopupId(); window.app.closeImagePopup(); window.app.openScratchpad(id);" class="h-8 px-2.5 rounded-xl bg-indigo-600/20 hover:bg-indigo-600 border border-indigo-500/40 text-indigo-300 hover:text-white text-xs font-semibold flex items-center gap-1 transition" title="Open Rough Work Pad">
+                    <button type="button" onclick="const id = window.app.getActivePopupId(); window.app.closeImagePopup(); window.app.openScratchpad(id);" class="h-9 px-3.5 m3-btn-tonal text-xs flex items-center gap-1.5">
                         <i class="ph-bold ph-pencil-line"></i>
                         <span class="hidden sm:inline">Solve Pad</span>
                     </button>
-
-                    <!-- Close Popup Button -->
-                    <button onclick="window.app.closeImagePopup()" class="w-8 h-8 rounded-xl bg-slate-800 hover:bg-rose-600 text-slate-300 hover:text-white flex items-center justify-center transition" title="Close (Esc)">
-                        <i class="ph-bold ph-x text-base"></i>
+                    <button type="button" onclick="window.app.closeImagePopup()" class="h-9 px-4 rounded-full bg-rose-500/20 hover:bg-rose-600 text-rose-200 hover:text-white border border-rose-500/40 text-xs font-extrabold flex items-center gap-1.5 transition">
+                        <i class="ph-bold ph-x text-sm"></i>
+                        <span>Close</span>
                     </button>
                 </div>
             </div>
 
-            <!-- Question Image Viewport -->
-            <div class="w-full flex-1 overflow-y-auto bg-white flex items-center justify-center p-3 sm:p-5">
-                <img id="popupImageEl" src="" alt="Full Question View" class="max-w-full h-auto object-contain rounded">
+            <div class="w-full flex-1 overflow-y-auto bg-white flex items-center justify-center p-3 sm:p-6">
+                <img id="popupImageEl" src="" alt="Full Question View" class="max-w-full h-auto object-contain rounded-xl">
+            </div>
+
+            <div class="px-4 py-2.5 m3-surface-low border-t m3-border flex items-center justify-between shrink-0">
+                <span class="text-[11px] m3-text-muted">Tap outside or press Esc to close</span>
+                <button type="button" onclick="window.app.closeImagePopup()" class="h-8 px-4 rounded-full m3-surface-highest hover:bg-rose-600 text-xs font-bold transition">
+                    Close Preview
+                </button>
             </div>
         </div>
     </div>
 
     <!-- =================================================================== -->
-    <!-- MODAL 1: SETTINGS, GITHUB GIST CLOUD SYNC & VAULT TOOLS MODAL       -->
+    <!-- MODAL 1: PHONE-STYLE HIERARCHICAL M3 EXPRESSIVE SETTINGS MENU       -->
     <!-- =================================================================== -->
-    <div id="settingsModal" class="fixed inset-0 bg-black/80 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-panel border border-borderdark rounded-2xl max-w-lg w-full shadow-2xl overflow-hidden">
-            <div class="px-5 py-3.5 border-b border-borderdark flex items-center justify-between">
-                <div class="flex items-center gap-2.5">
-                    <div class="w-8 h-8 rounded-xl bg-indigo-500/20 border border-indigo-500/30 flex items-center justify-center text-indigo-400">
+    <div id="settingsModal" onclick="if(event.target === this) window.app.closeSettingsModal()" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-3 sm:p-5">
+        <div class="m3-dialog max-w-lg w-full max-h-[90vh] flex flex-col overflow-hidden">
+            <div class="px-4 py-3.5 m3-surface-low border-b m3-border flex items-center justify-between gap-2 shrink-0">
+                <div class="flex items-center gap-2.5 min-w-0">
+                    <button type="button" id="settingsBackBtn" onclick="window.app.openSettingsPage('HOME')" class="hidden h-9 w-9 rounded-2xl m3-surface-high hover:brightness-110 items-center justify-center transition shrink-0" title="Back">
+                        <i class="ph-bold ph-arrow-left text-base"></i>
+                    </button>
+                    <div id="settingsHeaderIcon" class="w-10 h-10 m3-cookie-12 flex items-center justify-center shrink-0" style="background: var(--md-primary-container); color: var(--md-primary);">
                         <i class="ph-bold ph-gear text-lg"></i>
                     </div>
-                    <div>
-                        <h3 class="font-bold text-sm text-white">Settings, Cloud Sync & Local OCR Tools</h3>
-                        <p class="text-[11px] text-slate-400">Keys saved locally • Questions & OCR stored in GitHub Cloud Gist</p>
+                    <div class="min-w-0">
+                        <h3 id="settingsHeaderTitle" class="font-extrabold text-sm sm:text-base truncate">Settings</h3>
+                        <p id="settingsHeaderSub" class="text-[11px] m3-text-muted truncate">Material 3 Expressive • Tap a section</p>
                     </div>
                 </div>
-                <button onclick="window.app.closeSettingsModal()" class="p-1.5 rounded-lg text-slate-400 hover:text-white">
-                    <i class="ph-bold ph-x text-lg"></i>
+
+                <button type="button" onclick="window.app.closeSettingsModal()" class="h-9 px-3.5 rounded-full bg-rose-500/20 hover:bg-rose-600 text-rose-200 hover:text-white border border-rose-500/40 text-xs font-extrabold flex items-center gap-1.5 transition shrink-0">
+                    <i class="ph-bold ph-x text-sm"></i>
+                    <span>Close</span>
                 </button>
             </div>
 
-            <div class="p-4 space-y-4 max-h-[80vh] overflow-y-auto">
-                <!-- GITHUB SECRET GIST CLOUD BACKUP PANEL -->
-                <div class="bg-indigo-950/25 border border-indigo-500/30 rounded-xl p-3.5 space-y-3">
-                    <div class="flex items-center justify-between">
-                        <span class="text-xs font-extrabold uppercase tracking-wider text-indigo-300 flex items-center gap-1.5">
-                            <i class="ph-bold ph-cloud-arrow-up text-base"></i>
-                            GitHub Secret Gist Cloud Storage
-                        </span>
-                        <label class="flex items-center gap-1.5 text-[11px] text-slate-300 font-semibold cursor-pointer">
-                            <input id="cloudAutoSyncCheckbox" type="checkbox" checked class="rounded border-slate-600 text-indigo-600 focus:ring-0">
-                            <span>Auto-Sync</span>
-                        </label>
-                    </div>
-
-                    <div class="space-y-2">
-                        <div>
-                            <label class="block text-[11px] font-bold text-slate-300 mb-1">GitHub Personal Access Token (`gist` scope only)</label>
-                            <div class="relative">
-                                <input id="githubTokenInput" type="password" placeholder="ghp_..." class="w-full h-8 bg-canvas border border-slate-700 rounded-lg pl-2.5 pr-9 text-xs text-white font-mono focus:outline-none focus:border-indigo-500">
-                                <button type="button" onclick="window.app.toggleGithubTokenVisibility()" class="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white">
-                                    <i id="githubTokenEyeIcon" class="ph-bold ph-eye text-sm"></i>
-                                </button>
-                            </div>
-                        </div>
-
-                        <div>
-                            <label class="block text-[11px] font-bold text-slate-300 mb-1">Secret Gist ID <span class="text-slate-500 font-normal">(Leave blank to auto-discover or create)</span></label>
-                            <input id="githubGistIdInput" type="text" placeholder="Auto-filled on first Push/Pull..." class="w-full h-8 bg-canvas border border-slate-700 rounded-lg px-2.5 text-xs text-white font-mono focus:outline-none focus:border-indigo-500">
-                        </div>
-                    </div>
-
-                    <div class="grid grid-cols-2 gap-2 pt-1">
-                        <button type="button" onclick="window.app.pushToCloudGist(true)" class="h-8 px-3 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold flex items-center justify-center gap-1.5 shadow transition">
-                            <i class="ph-bold ph-cloud-arrow-up"></i>
-                            <span>Push to Cloud</span>
-                        </button>
-                        <button type="button" onclick="window.app.pullFromCloudGist(true)" class="h-8 px-3 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-600 text-sky-300 text-xs font-bold flex items-center justify-center gap-1.5 transition">
-                            <i class="ph-bold ph-cloud-arrow-down"></i>
-                            <span>Pull from Cloud</span>
-                        </button>
-                    </div>
-                    <p id="cloudLastSyncInfo" class="text-[10px] text-slate-400 font-mono">Questions are stored exclusively in your Cloud Gist so all devices stay in sync.</p>
-                </div>
-
-                <!-- Vault Tools: Deduplicate, Export, Import, Local OCR Re-Index -->
-                <div class="bg-slate-900/90 border border-borderdark rounded-xl p-3 space-y-2.5">
-                    <span class="block text-[11px] font-bold uppercase tracking-wider text-slate-400">File Backup, Deduplicate & Local OCR Search Index</span>
-                    <div class="grid grid-cols-3 gap-2">
-                        <button onclick="window.app.runDeduplication(true)" class="h-9 px-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 text-xs font-semibold flex items-center justify-center gap-1.5 transition" title="Remove duplicate questions">
-                            <i class="ph-bold ph-stack text-sky-400"></i>
-                            <span>Deduplicate</span>
-                        </button>
-
-                        <button onclick="window.app.exportBackupJson()" class="h-9 px-2 rounded-xl bg-emerald-600/20 hover:bg-emerald-600/30 border border-emerald-500/40 text-emerald-300 text-xs font-bold flex items-center justify-center gap-1.5 transition" title="Export Backup (.json)">
-                            <i class="ph-bold ph-download-simple"></i>
-                            <span>Export JSON</span>
-                        </button>
-
-                        <label class="h-9 px-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-sky-300 text-xs font-bold flex items-center justify-center gap-1.5 cursor-pointer transition" title="Import Backup (.json)">
-                            <i class="ph-bold ph-upload-simple"></i>
-                            <span>Import JSON</span>
-                            <input type="file" accept=".json,application/json" class="hidden" onchange="window.app.importBackupJson(event)">
-                        </label>
-                    </div>
-                    <button type="button" onclick="window.app.runBackgroundLocalOcrForExistingQuestions(true)" class="w-full h-8 rounded-lg bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/30 text-amber-300 text-xs font-semibold flex items-center justify-center gap-1.5 transition" title="Run local Tesseract.js OCR on any questions missing full-text search index">
-                        <i class="ph-bold ph-text-T"></i>
-                        <span id="settingsOcrBtnLabel">Run Local OCR Indexer on Unindexed Questions</span>
-                    </button>
-                </div>
-
-                <div id="apiKeyMissingAlert" class="hidden p-3 rounded-xl bg-amber-500/15 border border-amber-500/40 text-amber-200 text-xs leading-relaxed">
+            <div class="p-4 overflow-y-auto flex-1 space-y-3">
+                <div id="apiKeyMissingAlert" class="hidden p-3.5 rounded-3xl bg-amber-500/15 border border-amber-500/40 text-amber-200 text-xs leading-relaxed">
                     <strong class="font-bold block text-amber-300 mb-0.5">API Key Required for PDF Scanning:</strong>
                     Please enter your Google AI Studio API Key below to extract and stitch questions from PDF files.
                 </div>
 
-                <div>
-                    <label class="block text-xs font-bold text-slate-300 mb-1.5">Google AI Studio API Key</label>
-                    <div class="relative">
-                        <input id="apiKeyInput" type="password" placeholder="AIzaSy..." class="w-full h-9 bg-canvas border border-slate-700 rounded-xl pl-3 pr-10 text-xs text-white font-mono focus:outline-none focus:border-indigo-500">
-                        <button type="button" onclick="window.app.toggleApiKeyVisibility()" class="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white">
-                            <i id="apiKeyEyeIcon" class="ph-bold ph-eye text-base"></i>
-                        </button>
-                    </div>
-                    <p class="text-[11px] text-slate-400 mt-1">Saved locally in browser `localStorage` so you never have to re-type it.</p>
+                <!-- PAGE 0: SEGMENTED GROUPED LIST HUB (Matches 1000006106.jpg) -->
+                <div id="settingsPage_HOME" class="m3-group-list">
+                    <button type="button" onclick="window.app.openSettingsPage('KEYS')" class="w-full p-4 m3-group-item flex items-center justify-between gap-3.5 text-left">
+                        <div class="flex items-center gap-3.5 min-w-0">
+                            <div class="w-12 h-12 rounded-full flex items-center justify-center shrink-0" style="background: var(--md-primary-container); color: var(--md-primary);">
+                                <i class="ph-bold ph-key text-xl"></i>
+                            </div>
+                            <div class="min-w-0">
+                                <div class="font-extrabold text-sm">API Keys & Cloud Credentials</div>
+                                <div class="text-xs m3-text-muted truncate">Gemini Vision API Key, GitHub PAT & Gist ID</div>
+                            </div>
+                        </div>
+                        <i class="ph-bold ph-caret-right m3-text-muted text-base shrink-0"></i>
+                    </button>
+
+                    <button type="button" onclick="window.app.openSettingsPage('THEME')" class="w-full p-4 m3-group-item flex items-center justify-between gap-3.5 text-left">
+                        <div class="flex items-center gap-3.5 min-w-0">
+                            <div class="w-12 h-12 m3-cookie-12 flex items-center justify-center shrink-0 bg-pink-500/25 text-pink-300">
+                                <i class="ph-bold ph-palette text-xl"></i>
+                            </div>
+                            <div class="min-w-0">
+                                <div class="font-extrabold text-sm">Appearance & Material You Theme</div>
+                                <div class="text-xs m3-text-muted truncate">Primary color seed & dynamic M3 tonal surfaces</div>
+                            </div>
+                        </div>
+                        <i class="ph-bold ph-caret-right m3-text-muted text-base shrink-0"></i>
+                    </button>
+
+                    <button type="button" onclick="window.app.openSettingsPage('BACKUP')" class="w-full p-4 m3-group-item flex items-center justify-between gap-3.5 text-left">
+                        <div class="flex items-center gap-3.5 min-w-0">
+                            <div class="w-12 h-12 m3-clover-8 flex items-center justify-center shrink-0 bg-emerald-500/25 text-emerald-300">
+                                <i class="ph-bold ph-cloud-arrow-up text-xl"></i>
+                            </div>
+                            <div class="min-w-0">
+                                <div class="font-extrabold text-sm">Cloud Sync, Backups & Vault Tools</div>
+                                <div class="text-xs m3-text-muted truncate">Push/Pull Cloud, JSON Export/Import, Deduplicate & OCR</div>
+                            </div>
+                        </div>
+                        <i class="ph-bold ph-caret-right m3-text-muted text-base shrink-0"></i>
+                    </button>
+
+                    <button type="button" onclick="window.app.openSettingsPage('SCANNER')" class="w-full p-4 m3-group-item flex items-center justify-between gap-3.5 text-left">
+                        <div class="flex items-center gap-3.5 min-w-0">
+                            <div class="w-12 h-12 m3-cookie-12 flex items-center justify-center shrink-0 bg-sky-500/25 text-sky-300">
+                                <i class="ph-bold ph-sliders-horizontal text-xl"></i>
+                            </div>
+                            <div class="min-w-0">
+                                <div class="font-extrabold text-sm">AI Scanner & Crop Margins</div>
+                                <div class="text-xs m3-text-muted truncate">Gemini Vision model & vertical crop padding</div>
+                            </div>
+                        </div>
+                        <i class="ph-bold ph-caret-right m3-text-muted text-base shrink-0"></i>
+                    </button>
                 </div>
 
-                <div>
-                    <label class="block text-xs font-bold text-slate-300 mb-1.5">Gemini Vision Model</label>
-                    <select id="geminiModelSelect" class="w-full h-9 bg-canvas border border-slate-700 rounded-xl px-3 text-xs text-white font-semibold focus:outline-none focus:border-indigo-500">
-                        <option value="gemini-3.5-flash-lite">gemini-3.5-flash-lite (Default • Fast & Accurate)</option>
-                        <option value="gemini-2.5-pro">gemini-2.5-pro (Highest Precision Layout Detection)</option>
-                        <option value="gemini-2.5-flash">gemini-2.5-flash (Balanced Speed & Vision Precision)</option>
-                    </select>
+                <!-- PAGE 1: API KEYS -->
+                <div id="settingsPage_KEYS" class="hidden space-y-3">
+                    <div class="m3-group-list">
+                        <div class="p-4 m3-group-item space-y-1.5">
+                            <label class="block text-xs font-bold">Google AI Studio API Key (Gemini Vision)</label>
+                            <div class="relative">
+                                <input id="apiKeyInput" type="password" placeholder="AIzaSy..." class="w-full h-10 m3-input pl-3.5 pr-10 text-xs font-mono">
+                                <button type="button" onclick="window.app.toggleVisibility('apiKeyInput', 'apiKeyEyeIcon')" class="absolute right-3 top-1/2 -translate-y-1/2 m3-text-muted hover:text-white">
+                                    <i id="apiKeyEyeIcon" class="ph-bold ph-eye text-base"></i>
+                                </button>
+                            </div>
+                            <p class="text-[11px] m3-text-muted">Saved locally on this device. Get a free key from <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer" class="underline" style="color: var(--md-primary)">Google AI Studio</a>.</p>
+                        </div>
+
+                        <div class="p-4 m3-group-item space-y-1.5">
+                            <label class="block text-xs font-bold">GitHub Personal Access Token (`gist` scope only)</label>
+                            <div class="relative">
+                                <input id="githubTokenInput" type="password" placeholder="ghp_..." class="w-full h-10 m3-input pl-3.5 pr-10 text-xs font-mono">
+                                <button type="button" onclick="window.app.toggleVisibility('githubTokenInput', 'githubTokenEyeIcon')" class="absolute right-3 top-1/2 -translate-y-1/2 m3-text-muted hover:text-white">
+                                    <i id="githubTokenEyeIcon" class="ph-bold ph-eye text-base"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="p-4 m3-group-item space-y-1.5">
+                            <label class="block text-xs font-bold">Secret Gist ID <span class="m3-text-muted font-normal">(Auto-filled on Push/Pull)</span></label>
+                            <input id="githubGistIdInput" type="text" placeholder="Leave blank to auto-discover or create..." class="w-full h-10 m3-input px-3.5 text-xs font-mono">
+                        </div>
+                    </div>
                 </div>
 
-                <div class="grid grid-cols-2 gap-3 pt-1">
-                    <div>
-                        <label class="block text-[11px] font-semibold text-slate-400 mb-1">Top Safe Margin (0-30)</label>
-                        <input id="padTopInput" type="number" min="0" max="40" value="4" class="w-full h-8 bg-canvas border border-slate-700 rounded-lg px-2.5 text-xs text-white">
-                    </div>
-                    <div>
-                        <label class="block text-[11px] font-semibold text-slate-400 mb-1">Bottom Safe Margin (0-30)</label>
-                        <input id="padBottomInput" type="number" min="0" max="40" value="6" class="w-full h-8 bg-canvas border border-slate-700 rounded-lg px-2.5 text-xs text-white">
+                <!-- PAGE 2: APPEARANCE & M3 EXPRESSIVE THEME -->
+                <div id="settingsPage_THEME" class="hidden space-y-3">
+                    <div class="m3-group-list">
+                        <div class="p-4 m3-group-item space-y-3">
+                            <div>
+                                <h4 class="text-xs font-extrabold uppercase tracking-wider mb-1">Material 3 Expressive Color Seeds</h4>
+                                <p class="text-[11px] m3-text-muted">Tap a scalloped cookie swatch to re-tint all surfaces, squiggle bars, and containers.</p>
+                            </div>
+
+                            <div class="grid grid-cols-3 sm:grid-cols-6 gap-2.5 pt-1">
+                                <button type="button" onclick="window.app.setMaterialTheme('#8b5cf6')" class="p-2.5 rounded-2xl m3-surface-low border m3-border hover:scale-105 transition flex flex-col items-center gap-1.5">
+                                    <span class="w-9 h-9 m3-cookie-12 bg-[#8b5cf6] block"></span>
+                                    <span class="text-[10px] font-bold">Violet</span>
+                                </button>
+                                <button type="button" onclick="window.app.setMaterialTheme('#38bdf8')" class="p-2.5 rounded-2xl m3-surface-low border m3-border hover:scale-105 transition flex flex-col items-center gap-1.5">
+                                    <span class="w-9 h-9 m3-cookie-12 bg-[#38bdf8] block"></span>
+                                    <span class="text-[10px] font-bold">Ocean</span>
+                                </button>
+                                <button type="button" onclick="window.app.setMaterialTheme('#34d399')" class="p-2.5 rounded-2xl m3-surface-low border m3-border hover:scale-105 transition flex flex-col items-center gap-1.5">
+                                    <span class="w-9 h-9 m3-cookie-12 bg-[#34d399] block"></span>
+                                    <span class="text-[10px] font-bold">Emerald</span>
+                                </button>
+                                <button type="button" onclick="window.app.setMaterialTheme('#fb7185')" class="p-2.5 rounded-2xl m3-surface-low border m3-border hover:scale-105 transition flex flex-col items-center gap-1.5">
+                                    <span class="w-9 h-9 m3-cookie-12 bg-[#fb7185] block"></span>
+                                    <span class="text-[10px] font-bold">Sakura</span>
+                                </button>
+                                <button type="button" onclick="window.app.setMaterialTheme('#fbbf24')" class="p-2.5 rounded-2xl m3-surface-low border m3-border hover:scale-105 transition flex flex-col items-center gap-1.5">
+                                    <span class="w-9 h-9 m3-cookie-12 bg-[#fbbf24] block"></span>
+                                    <span class="text-[10px] font-bold">Amber</span>
+                                </button>
+                                <button type="button" onclick="window.app.setMaterialTheme('#2dd4bf')" class="p-2.5 rounded-2xl m3-surface-low border m3-border hover:scale-105 transition flex flex-col items-center gap-1.5">
+                                    <span class="w-9 h-9 m3-cookie-12 bg-[#2dd4bf] block"></span>
+                                    <span class="text-[10px] font-bold">Mint</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="p-4 m3-group-item flex items-center justify-between gap-3">
+                            <div>
+                                <div class="text-xs font-bold">Custom Primary Seed Color</div>
+                                <div class="text-[11px] m3-text-muted">Generate a custom Material 3 palette from any hex color</div>
+                            </div>
+                            <input id="customThemeColorPicker" type="color" value="#8b5cf6" oninput="window.app.setMaterialTheme(this.value)" class="w-12 h-10 rounded-xl cursor-pointer bg-transparent border-0">
+                        </div>
                     </div>
                 </div>
+
+                <!-- PAGE 3: CLOUD SYNC, BACKUPS & VAULT TOOLS -->
+                <div id="settingsPage_BACKUP" class="hidden space-y-3">
+                    <div class="m3-group-list">
+                        <div class="p-4 m3-group-item space-y-3">
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs font-extrabold uppercase tracking-wider" style="color: var(--md-primary)">GitHub Cloud Synchronization</span>
+                                <label class="flex items-center gap-2 text-xs font-bold cursor-pointer">
+                                    <input id="cloudAutoSyncCheckbox" type="checkbox" checked onchange="window.app.saveSettings(false)" class="rounded text-indigo-600 focus:ring-0">
+                                    <span>Auto-Sync</span>
+                                </label>
+                            </div>
+                            <div class="grid grid-cols-2 gap-2.5">
+                                <button type="button" onclick="window.app.pushToCloudGist(true)" class="h-10 px-4 m3-btn-filled text-xs flex items-center justify-center gap-1.5 shadow">
+                                    <i class="ph-bold ph-cloud-arrow-up text-sm"></i>
+                                    <span>Push to Cloud</span>
+                                </button>
+                                <button type="button" onclick="window.app.pullFromCloudGist(true)" class="h-10 px-4 m3-btn-tonal text-xs flex items-center justify-center gap-1.5">
+                                    <i class="ph-bold ph-cloud-arrow-down text-sm"></i>
+                                    <span>Pull from Cloud</span>
+                                </button>
+                            </div>
+                            <div id="settingsCloudWavyBar" class="hidden pt-1"></div>
+                            <p id="cloudLastSyncInfo" class="text-[11px] m3-text-muted font-mono">Questions are stored 100% in your Cloud Gist.</p>
+                        </div>
+
+                        <div class="p-4 m3-group-item space-y-3">
+                            <span class="block text-xs font-extrabold uppercase tracking-wider m3-text-muted">JSON File Backup & Vault Maintenance</span>
+                            <div class="grid grid-cols-3 gap-2">
+                                <button type="button" onclick="window.app.runDeduplication(true)" class="h-10 px-2 m3-btn-tonal text-xs flex items-center justify-center gap-1.5">
+                                    <i class="ph-bold ph-stack"></i>
+                                    <span>Deduplicate</span>
+                                </button>
+                                <button type="button" onclick="window.app.exportBackupJson()" class="h-10 px-2 m3-btn-tonal text-xs flex items-center justify-center gap-1.5">
+                                    <i class="ph-bold ph-download-simple"></i>
+                                    <span>Export JSON</span>
+                                </button>
+                                <label class="h-10 px-2 m3-btn-tonal text-xs flex items-center justify-center gap-1.5 cursor-pointer">
+                                    <i class="ph-bold ph-upload-simple"></i>
+                                    <span>Import JSON</span>
+                                    <input type="file" accept=".json,application/json" class="hidden" onchange="window.app.importBackupJson(event)">
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="p-4 m3-group-item space-y-2">
+                            <button type="button" onclick="window.app.runBackgroundLocalOcrForExistingQuestions(true)" class="w-full h-10 m3-btn-tonal text-xs flex items-center justify-center gap-2">
+                                <i class="ph-bold ph-text-T text-sm"></i>
+                                <span id="settingsOcrBtnLabel">Run Local OCR Indexer on Unindexed Questions</span>
+                            </button>
+                            <div id="settingsOcrWavyBar" class="hidden pt-1"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PAGE 4: AI SCANNER & CROP MARGINS -->
+                <div id="settingsPage_SCANNER" class="hidden space-y-3">
+                    <div class="m3-group-list">
+                        <div class="p-4 m3-group-item space-y-1.5">
+                            <label class="block text-xs font-bold">Gemini Vision Model</label>
+                            <select id="geminiModelSelect" class="w-full h-10 m3-input px-3.5 text-xs font-semibold">
+                                <option value="gemini-3.5-flash-lite">gemini-3.5-flash-lite (Default • Fast & Accurate)</option>
+                                <option value="gemini-2.5-pro">gemini-2.5-pro (Highest Precision Layout Detection)</option>
+                                <option value="gemini-2.5-flash">gemini-2.5-flash (Balanced Speed & Vision Precision)</option>
+                            </select>
+                        </div>
+                        <div class="p-4 m3-group-item grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-[11px] font-bold m3-text-muted mb-1">Top Safe Margin (0-30)</label>
+                                <input id="padTopInput" type="number" min="0" max="40" value="4" class="w-full h-10 m3-input px-3 text-xs">
+                            </div>
+                            <div>
+                                <label class="block text-[11px] font-bold m3-text-muted mb-1">Bottom Safe Margin (0-30)</label>
+                                <input id="padBottomInput" type="number" min="0" max="40" value="6" class="w-full h-10 m3-input px-3 text-xs">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
             </div>
 
-            <div class="px-5 py-3 border-t border-borderdark bg-canvas flex items-center justify-between">
-                <button onclick="window.app.closeSettingsModal()" class="h-8 px-4 rounded-xl bg-slate-800 text-slate-300 text-xs font-semibold">Cancel</button>
-                <button onclick="window.app.saveSettings()" class="h-8 px-5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold flex items-center gap-1.5 shadow-lg">
-                    <i class="ph-bold ph-floppy-disk"></i>
-                    <span>Save Settings</span>
+            <div class="px-4 py-3 m3-surface-low border-t m3-border flex items-center justify-between shrink-0">
+                <button type="button" onclick="window.app.closeSettingsModal()" class="h-9 px-4 rounded-full m3-surface-highest hover:bg-rose-600 text-xs font-bold transition">
+                    Close Dialog
+                </button>
+                <button type="button" onclick="window.app.saveSettings()" class="h-9 px-5 m3-btn-filled text-xs flex items-center gap-1.5 shadow">
+                    <i class="ph-bold ph-check text-sm"></i>
+                    <span>Save & Done</span>
                 </button>
             </div>
         </div>
     </div>
 
     <!-- =================================================================== -->
-    <!-- MODAL 2: UPLOAD TEST PDF + PRECISION LAYOUT SCANNER                 -->
+    <!-- MODAL 2: UPLOAD TEST PDF + WAVY SQUIGGLE PROGRESS BAR               -->
     <!-- =================================================================== -->
-    <div id="uploadModal" class="fixed inset-0 bg-black/75 backdrop-blur-xs z-50 hidden flex items-center justify-center p-3 sm:p-6">
-        <div class="bg-panel border border-borderdark rounded-2xl max-w-2xl w-full max-h-[90vh] flex flex-col shadow-2xl overflow-hidden">
-            <div class="px-5 py-3.5 border-b border-borderdark flex items-center justify-between">
-                <div class="flex items-center gap-2.5">
-                    <div class="w-9 h-9 rounded-xl bg-indigo-500/20 border border-indigo-500/30 flex items-center justify-center text-indigo-400">
+    <div id="uploadModal" onclick="if(event.target === this) window.app.closeUploadModal()" class="fixed inset-0 bg-black/75 backdrop-blur-sm z-50 hidden flex items-center justify-center p-3 sm:p-6">
+        <div class="m3-dialog max-w-2xl w-full max-h-[90vh] flex flex-col overflow-hidden">
+            <div class="px-5 py-3.5 m3-surface-low border-b m3-border flex items-center justify-between gap-2">
+                <div class="flex items-center gap-2.5 min-w-0">
+                    <div class="w-10 h-10 m3-cookie-12 flex items-center justify-center shrink-0" style="background: var(--md-primary-container); color: var(--md-primary);">
                         <i class="ph-bold ph-file-pdf text-xl"></i>
                     </div>
-                    <div>
-                        <h3 class="font-bold text-base text-white">Add Test Paper PDF (Precision Scanner + Local OCR)</h3>
-                        <p class="text-xs text-slate-400">100% Full-Width Crops • Whitespace Gap Snapper • Full-Question Local OCR</p>
+                    <div class="min-w-0">
+                        <h3 class="font-extrabold text-sm sm:text-base truncate">Add Test Paper PDF</h3>
+                        <p class="text-[11px] m3-text-muted truncate">100% Full-Width Crops • Whitespace Gap Snapper • Local OCR</p>
                     </div>
                 </div>
-                <button onclick="window.app.closeUploadModal()" class="p-2 rounded-lg text-slate-400 hover:text-white">
-                    <i class="ph-bold ph-x text-lg"></i>
+                <button type="button" onclick="window.app.closeUploadModal()" class="h-9 px-3.5 rounded-full bg-rose-500/20 hover:bg-rose-600 text-rose-200 hover:text-white border border-rose-500/40 text-xs font-extrabold flex items-center gap-1.5 transition shrink-0">
+                    <i class="ph-bold ph-x text-sm"></i>
+                    <span>Close</span>
                 </button>
             </div>
 
             <div class="p-5 overflow-y-auto space-y-4 flex-1">
-                <!-- Setup Section -->
-                <div id="uploadSetupView" class="space-y-4">
-                    <label for="pdfFileInput" class="block border-2 border-dashed border-indigo-500/40 hover:border-indigo-400 bg-indigo-950/15 hover:bg-indigo-950/25 transition rounded-2xl p-6 text-center cursor-pointer">
+                <div id="uploadSetupView" class="m3-group-list">
+                    <label for="pdfFileInput" class="block m3-group-item p-6 text-center cursor-pointer border-2 border-dashed m3-outline">
                         <input type="file" id="pdfFileInput" accept="application/pdf" class="hidden" onchange="window.app.onPdfSelected(event)">
-                        <div class="w-12 h-12 rounded-2xl bg-indigo-500/20 text-indigo-400 flex items-center justify-center mx-auto mb-2.5">
+                        <div class="w-14 h-14 m3-cookie-12 flex items-center justify-center mx-auto mb-2.5" style="background: var(--md-primary-container); color: var(--md-primary);">
                             <i class="ph-duotone ph-cloud-arrow-up text-2xl"></i>
                         </div>
-                        <p id="selectedFileLabel" class="text-sm sm:text-base font-bold text-white">Tap to Select Your JEE Question Paper PDF</p>
-                        <p class="text-xs text-slate-400 mt-1">Full question text is extracted locally (PDF.js + Tesseract.js) so crop quality stays 100% untouched!</p>
+                        <p id="selectedFileLabel" class="text-sm sm:text-base font-extrabold">Tap to Select Your JEE Question Paper PDF</p>
+                        <p class="text-xs m3-text-muted mt-1">Full question text is extracted locally (PDF.js + Tesseract.js) so crop quality stays 100% untouched!</p>
                     </label>
 
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-slate-900/80 p-3.5 rounded-xl border border-borderdark">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 m3-group-item p-4">
                         <div>
-                            <label class="block text-[11px] font-semibold text-slate-400 mb-1">Test Paper Name</label>
-                            <input id="paperTitleInput" type="text" placeholder="e.g. Allen Score Test 3" class="w-full h-9 bg-canvas border border-slate-700 rounded-lg px-2.5 text-xs text-white focus:outline-none focus:border-indigo-500">
+                            <label class="block text-[11px] font-bold m3-text-muted mb-1">Test Paper Name</label>
+                            <input id="paperTitleInput" type="text" placeholder="e.g. Allen Score Test 3" class="w-full h-9 m3-input px-3 text-xs">
                         </div>
                         <div>
-                            <label class="block text-[11px] font-semibold text-slate-400 mb-1">Pages Range to Extract</label>
+                            <label class="block text-[11px] font-bold m3-text-muted mb-1">Pages Range to Extract</label>
                             <div class="flex items-center gap-1.5">
-                                <input id="startPageInput" type="number" min="1" value="1" class="w-full h-9 bg-canvas border border-slate-700 rounded-lg px-2 text-xs text-white text-center">
-                                <span class="text-slate-500 text-xs">to</span>
-                                <input id="endPageInput" type="number" min="1" value="10" class="w-full h-9 bg-canvas border border-slate-700 rounded-lg px-2 text-xs text-white text-center">
+                                <input id="startPageInput" type="number" min="1" value="1" class="w-full h-9 m3-input px-2 text-xs text-center">
+                                <span class="m3-text-muted text-xs">to</span>
+                                <input id="endPageInput" type="number" min="1" value="10" class="w-full h-9 m3-input px-2 text-xs text-center">
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Live Progress View -->
+                <!-- Live Progress View with Material 3 Expressive Wavy Squiggle Bar -->
                 <div id="uploadProgressView" class="hidden space-y-3">
-                    <div class="bg-canvas border border-borderdark rounded-xl p-3.5 space-y-2">
+                    <div class="m3-surface-high border m3-border rounded-3xl p-4 space-y-3">
                         <div class="flex items-center justify-between text-xs">
-                            <span id="extractStepTitle" class="font-bold text-white flex items-center gap-2">
-                                <span class="w-2.5 h-2.5 rounded-full bg-indigo-500 animate-ping"></span>
+                            <span id="extractStepTitle" class="font-extrabold flex items-center gap-2">
+                                <span class="w-4 h-4 m3-cookie-12 m3-spin-slow inline-block" style="background: var(--md-primary)"></span>
                                 Detecting Question Boundaries & Local OCR...
                             </span>
-                            <span id="extractPageBadge" class="px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-300 font-bold">Page 1/1</span>
+                            <span id="extractPageBadge" class="px-2.5 py-0.5 rounded-full font-bold" style="background: var(--md-primary-container); color: var(--md-on-primary-container);">Page 1/1</span>
                         </div>
-                        <div class="w-full h-2 bg-slate-800 rounded-full overflow-hidden">
-                            <div id="extractProgressBar" class="h-full bg-gradient-to-r from-indigo-500 to-emerald-400 transition-all duration-300" style="width: 8%"></div>
-                        </div>
-                        <p id="extractSubText" class="text-[11px] text-slate-400 font-mono">Preparing 2.0x high-resolution full-width renderer...</p>
+
+                        <!-- M3 Expressive Wavy Squiggle Progress Container -->
+                        <div id="extractWavyBarWrap"></div>
+
+                        <p id="extractSubText" class="text-[11px] m3-text-muted font-mono">Preparing 2.0x high-resolution full-width renderer...</p>
                     </div>
 
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        <div class="bg-canvas border border-borderdark rounded-xl p-2 flex flex-col items-center justify-center h-44 overflow-hidden">
+                        <div class="m3-surface-low border m3-border rounded-3xl p-2 flex flex-col items-center justify-center h-44 overflow-hidden">
                             <canvas id="pdfWorkCanvas" class="max-h-full max-w-full object-contain"></canvas>
                         </div>
-                        <div id="extractLiveLog" class="bg-canvas border border-borderdark rounded-xl p-2.5 h-44 overflow-y-auto font-mono text-[11px] space-y-1 text-slate-300"></div>
+                        <div id="extractLiveLog" class="m3-surface-low border m3-border rounded-3xl p-3 h-44 overflow-y-auto font-mono text-[11px] space-y-1"></div>
                     </div>
                 </div>
             </div>
 
-            <div class="px-5 py-3 border-t border-borderdark bg-canvas flex items-center justify-between">
-                <button onclick="window.app.closeUploadModal()" class="h-9 px-4 rounded-xl bg-slate-800 text-slate-300 text-xs font-semibold">Cancel</button>
-                <button id="startExtractBtn" onclick="window.app.startPdfExtraction()" disabled class="h-9 px-5 rounded-xl bg-indigo-600 hover:bg-indigo-500 disabled:opacity-40 text-white text-xs sm:text-sm font-bold flex items-center gap-1.5 shadow-lg">
+            <div class="px-5 py-3 m3-surface-low border-t m3-border flex items-center justify-between">
+                <button type="button" onclick="window.app.closeUploadModal()" class="h-9 px-4 rounded-full m3-surface-highest text-xs font-bold">Close</button>
+                <button type="button" id="startExtractBtn" onclick="window.app.startPdfExtraction()" disabled class="h-9 px-5 m3-btn-filled disabled:opacity-40 text-xs sm:text-sm flex items-center gap-1.5 shadow-lg">
                     <i class="ph-bold ph-magic-wand"></i>
                     <span>Extract Questions</span>
                 </button>
@@ -492,32 +796,33 @@
     <!-- =================================================================== -->
     <!-- MODAL 3: SPLIT CLUBBED QUESTION / VERTICAL TRIM TOOL                -->
     <!-- =================================================================== -->
-    <div id="splitModal" class="fixed inset-0 bg-black/80 backdrop-blur-xs z-50 hidden flex items-center justify-center p-3 sm:p-6">
-        <div class="bg-panel border border-borderdark rounded-2xl max-w-4xl w-full max-h-[92vh] flex flex-col shadow-2xl overflow-hidden">
-            <div class="px-5 py-3 border-b border-borderdark flex items-center justify-between">
+    <div id="splitModal" onclick="if(event.target === this) window.app.closeSplitModal()" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-3 sm:p-6">
+        <div class="m3-dialog max-w-4xl w-full max-h-[92vh] flex flex-col overflow-hidden">
+            <div class="px-5 py-3.5 m3-surface-low border-b m3-border flex items-center justify-between gap-2">
                 <div>
-                    <h3 class="font-bold text-sm sm:text-base text-white flex items-center gap-2">
+                    <h3 class="font-extrabold text-sm sm:text-base flex items-center gap-2">
                         <i class="ph-bold ph-scissors text-amber-400"></i>
                         <span>Split Clubbed Questions or Trim Vertical Height</span>
                     </h3>
-                    <p class="text-[11px] text-slate-400">Horizontal width is locked to 100% full page width so alignment never breaks.</p>
+                    <p class="text-[11px] m3-text-muted">Horizontal width is locked to 100% full page width so alignment never breaks.</p>
                 </div>
-                <button onclick="window.app.closeSplitModal()" class="p-1.5 rounded-lg text-slate-400 hover:text-white">
-                    <i class="ph-bold ph-x text-lg"></i>
+                <button type="button" onclick="window.app.closeSplitModal()" class="h-9 px-3.5 rounded-full bg-rose-500/20 hover:bg-rose-600 text-rose-200 hover:text-white border border-rose-500/40 text-xs font-extrabold flex items-center gap-1.5 transition shrink-0">
+                    <i class="ph-bold ph-x text-sm"></i>
+                    <span>Close</span>
                 </button>
             </div>
 
             <div class="p-4 overflow-y-auto flex-1 space-y-3">
-                <div class="flex flex-wrap items-center justify-between gap-2 bg-slate-900 p-2.5 rounded-xl border border-borderdark">
+                <div class="flex flex-wrap items-center justify-between gap-2 m3-surface-high p-3 rounded-3xl border m3-border">
                     <div class="flex items-center gap-1.5">
-                        <button id="modeSplitBtn" onclick="window.app.setSplitMode('SPLIT')" class="h-8 px-3 rounded-lg text-xs font-bold bg-amber-500 text-slate-950">Split into 2 Questions (Q#a & Q#b)</button>
-                        <button id="modeTrimBtn" onclick="window.app.setSplitMode('TRIM')" class="h-8 px-3 rounded-lg text-xs font-semibold bg-slate-800 text-slate-300">Vertical Trim</button>
+                        <button type="button" id="modeSplitBtn" onclick="window.app.setSplitMode('SPLIT')" class="h-8 px-3.5 text-xs m3-btn-filled">Split into 2 Questions (Q#a & Q#b)</button>
+                        <button type="button" id="modeTrimBtn" onclick="window.app.setSplitMode('TRIM')" class="h-8 px-3.5 text-xs m3-btn-tonal">Vertical Trim</button>
                     </div>
 
                     <div id="splitRangeWrap" class="flex items-center gap-2.5">
-                        <span class="text-xs text-amber-300 font-semibold">Cut Line:</span>
+                        <span class="text-xs font-bold" style="color: var(--md-primary)">Cut Line:</span>
                         <input id="splitCutSlider" type="range" min="10" max="90" value="50" oninput="window.app.updateSplitPreview()" class="split-slider w-44">
-                        <span id="splitCutVal" class="text-xs font-mono text-white w-9">50%</span>
+                        <span id="splitCutVal" class="text-xs font-mono font-bold w-9">50%</span>
                     </div>
 
                     <div id="trimRangeWrap" class="hidden items-center gap-3">
@@ -526,20 +831,20 @@
                     </div>
                 </div>
 
-                <div class="relative bg-white rounded-xl overflow-hidden border border-slate-700 mx-auto max-w-3xl">
+                <div class="relative bg-white rounded-3xl overflow-hidden border m3-border mx-auto max-w-3xl">
                     <img id="splitPreviewImg" src="" alt="Preview" class="w-full h-auto block">
                     <div id="splitDividerLine" class="absolute left-0 right-0 border-t-4 border-dashed border-amber-500 pointer-events-none flex items-center justify-between px-3" style="top: 50%;">
-                        <span class="-mt-6 bg-amber-500 text-slate-950 font-extrabold text-[10px] px-2 py-0.5 rounded">▲ Card 1 (Top Half)</span>
-                        <span class="mt-6 bg-indigo-600 text-white font-extrabold text-[10px] px-2 py-0.5 rounded">▼ Card 2 (Bottom Half)</span>
+                        <span class="-mt-6 bg-amber-500 text-slate-950 font-extrabold text-[10px] px-2.5 py-0.5 rounded-full">▲ Card 1 (Top Half)</span>
+                        <span class="mt-6 bg-indigo-600 text-white font-extrabold text-[10px] px-2.5 py-0.5 rounded-full">▼ Card 2 (Bottom Half)</span>
                     </div>
                     <div id="trimTopMask" class="hidden absolute top-0 left-0 right-0 bg-rose-900/50 border-b-2 border-rose-500 pointer-events-none" style="height:0%"></div>
                     <div id="trimBotMask" class="hidden absolute bottom-0 left-0 right-0 bg-rose-900/50 border-t-2 border-rose-500 pointer-events-none" style="height:0%"></div>
                 </div>
             </div>
 
-            <div class="px-5 py-3 border-t border-borderdark bg-canvas flex items-center justify-between">
-                <button onclick="window.app.closeSplitModal()" class="h-9 px-4 rounded-xl bg-slate-800 text-slate-300 text-xs font-semibold">Cancel</button>
-                <button onclick="window.app.confirmSplitOrTrim()" class="h-9 px-5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs sm:text-sm font-bold flex items-center gap-1.5">
+            <div class="px-5 py-3 m3-surface-low border-t m3-border flex items-center justify-between">
+                <button type="button" onclick="window.app.closeSplitModal()" class="h-9 px-4 rounded-full m3-surface-highest text-xs font-bold">Close</button>
+                <button type="button" onclick="window.app.confirmSplitOrTrim()" class="h-9 px-5 m3-btn-filled text-xs sm:text-sm flex items-center gap-1.5 shadow-lg">
                     <i class="ph-bold ph-check"></i>
                     <span id="splitConfirmLabel">Split Question Now</span>
                 </button>
@@ -550,40 +855,40 @@
     <!-- =================================================================== -->
     <!-- MODAL 4: FULLSCREEN TABLET STYLUS SCRATCHPAD                        -->
     <!-- =================================================================== -->
-    <div id="scratchpadModal" class="fixed inset-0 bg-canvas z-50 hidden flex flex-col">
-        <div class="h-12 bg-panel border-b border-borderdark px-3 sm:px-4 flex items-center justify-between gap-2 shrink-0 overflow-x-auto no-scrollbar">
+    <div id="scratchpadModal" class="fixed inset-0 m3-surface z-50 hidden flex flex-col">
+        <div class="h-14 m3-surface-low border-b m3-border px-3 sm:px-5 flex items-center justify-between gap-2 shrink-0 overflow-x-auto no-scrollbar">
             <div class="flex items-center gap-2 min-w-0 shrink-0">
-                <button onclick="window.app.closeScratchpad()" class="h-8 px-3 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold flex items-center gap-1.5 shrink-0">
-                    <i class="ph-bold ph-arrow-left"></i> Back
+                <button type="button" onclick="window.app.closeScratchpad()" class="h-9 px-3.5 rounded-full bg-rose-500/20 hover:bg-rose-600 text-rose-200 hover:text-white border border-rose-500/40 text-xs font-extrabold flex items-center gap-1.5 shrink-0 transition">
+                    <i class="ph-bold ph-x"></i> Close Pad
                 </button>
-                <span id="padQTitle" class="font-bold text-xs sm:text-sm text-white truncate max-w-[220px] sm:max-w-md">Q.1</span>
+                <span id="padQTitle" class="font-bold text-xs sm:text-sm truncate max-w-[220px] sm:max-w-md">Q.1</span>
             </div>
 
             <div class="flex items-center gap-2 shrink-0">
-                <button onclick="window.app.setInk('#f8fafc', false)" class="w-6 h-6 rounded-full bg-white border-2 border-indigo-500" title="White Pen"></button>
-                <button onclick="window.app.setInk('#38bdf8', false)" class="w-6 h-6 rounded-full bg-sky-400" title="Blue Pen"></button>
-                <button onclick="window.app.setInk('#fbbf24', false)" class="w-6 h-6 rounded-full bg-amber-400" title="Yellow Pen"></button>
-                <button onclick="window.app.setInk('#4ade80', false)" class="w-6 h-6 rounded-full bg-emerald-400" title="Green Pen"></button>
-                <select onchange="window.app.setStrokeWidth(this.value)" class="h-8 bg-slate-800 border border-slate-700 rounded-lg px-2 text-xs text-slate-200">
+                <button type="button" onclick="window.app.setInk('#f8fafc', false)" class="w-6 h-6 rounded-full bg-white border-2 border-indigo-500" title="White Pen"></button>
+                <button type="button" onclick="window.app.setInk('#38bdf8', false)" class="w-6 h-6 rounded-full bg-sky-400" title="Blue Pen"></button>
+                <button type="button" onclick="window.app.setInk('#fbbf24', false)" class="w-6 h-6 rounded-full bg-amber-400" title="Yellow Pen"></button>
+                <button type="button" onclick="window.app.setInk('#4ade80', false)" class="w-6 h-6 rounded-full bg-emerald-400" title="Green Pen"></button>
+                <select onchange="window.app.setStrokeWidth(this.value)" class="h-8 m3-surface-high border m3-border rounded-full px-3 text-xs">
                     <option value="2.2">Fine</option>
                     <option value="3.5" selected>Medium</option>
                     <option value="6">Bold</option>
                 </select>
-                <button onclick="window.app.setInk('#090d16', true)" id="eraserBtn" class="h-8 px-2.5 rounded-lg bg-slate-800 border border-slate-700 text-slate-300 text-xs font-semibold flex items-center gap-1">
+                <button type="button" onclick="window.app.setInk('#090d16', true)" id="eraserBtn" class="h-8 px-3 m3-btn-tonal text-xs flex items-center gap-1">
                     <i class="ph-bold ph-eraser"></i> <span class="hidden sm:inline">Eraser</span>
                 </button>
-                <button onclick="window.app.clearInk()" class="h-8 px-2.5 rounded-lg bg-rose-950/60 border border-rose-500/30 text-rose-300 text-xs font-semibold">Clear</button>
+                <button type="button" onclick="window.app.clearInk()" class="h-8 px-3 rounded-full bg-rose-950/60 border border-rose-500/30 text-rose-300 text-xs font-bold">Clear Ink</button>
             </div>
         </div>
 
         <div class="flex-1 flex flex-col lg:flex-row overflow-hidden">
-            <div class="w-full lg:w-1/2 h-2/5 lg:h-full overflow-y-auto p-3 bg-canvas border-b lg:border-b-0 lg:border-r border-borderdark">
-                <div class="bg-white rounded-xl p-2 shadow">
+            <div class="w-full lg:w-1/2 h-2/5 lg:h-full overflow-y-auto p-3 m3-surface border-b lg:border-b-0 lg:border-r m3-border">
+                <div class="bg-white rounded-3xl p-2 shadow">
                     <img id="padQuestionImg" src="" alt="Question" class="w-full h-auto block">
                 </div>
             </div>
             <div id="padCanvasWrap" class="w-full lg:w-1/2 h-3/5 lg:h-full bg-[#070a12] relative overflow-hidden">
-                <div class="absolute top-2.5 left-3 pointer-events-none text-[11px] text-slate-500 font-medium">
+                <div class="absolute top-2.5 left-3 pointer-events-none text-[11px] m3-text-muted font-medium">
                     Stylus / Touch Rough Work Pad (Zero-scroll interference)
                 </div>
                 <canvas id="stylusCanvas" class="w-full h-full cursor-crosshair"></canvas>
@@ -595,13 +900,68 @@
     <div id="toastBox" class="fixed bottom-4 right-4 z-50 flex flex-col gap-2 pointer-events-none"></div>
 
     <!-- =================================================================== -->
-    <!-- CORE APPLICATION LOGIC (LOCAL KEYS + CLOUD QUESTIONS + LOCAL OCR)   -->
+    <!-- CORE APPLICATION LOGIC (M3 EXPRESSIVE + CLOUD GIST + LOCAL OCR)     -->
     <!-- =================================================================== -->
     <script>
-        // Wipe any leftover local IndexedDB question database so old cached questions never cause sync conflicts
         try { indexedDB.deleteDatabase('JEEQuestionVaultDB'); } catch (_) {}
 
-        // Conic Sections split into Circles, Parabola, Ellipse, Hyperbola
+        // 1. Generate Smooth Parametric SVG Scalloped "Cookie" Paths (12-Lobe & 8-Lobe)
+        function initM3ExpressiveShapes() {
+            const makeStarburst = (lobes, innerR, outerR) => {
+                const pts = 144;
+                let d = '';
+                const mid = (outerR + innerR) / 2;
+                const amp = (outerR - innerR) / 2;
+                for (let i = 0; i <= pts; i++) {
+                    const a = (i / pts) * Math.PI * 2;
+                    const r = mid + amp * Math.cos(lobes * a);
+                    const x = (0.5 + r * Math.cos(a)).toFixed(4);
+                    const y = (0.5 + r * Math.sin(a)).toFixed(4);
+                    d += (i === 0 ? `M ${x} ${y}` : ` L ${x} ${y}`);
+                }
+                return d + ' Z';
+            };
+            const p12 = document.getElementById('m3Cookie12Path');
+            const p8 = document.getElementById('m3Clover8Path');
+            if (p12) p12.setAttribute('d', makeStarburst(12, 0.425, 0.495));
+            if (p8) p8.setAttribute('d', makeStarburst(8, 0.43, 0.495));
+        }
+
+        // 2. Material 3 Expressive Wavy Squiggle Progress Bar Renderer (Matches 1000006104.jpg)
+        function renderM3WavyProgress(targetElOrId, pct = 50) {
+            const el = typeof targetElOrId === 'string' ? document.getElementById(targetElOrId) : targetElOrId;
+            if (!el) return;
+            const clamped = Math.max(4, Math.min(100, Math.round(pct)));
+            const rem = Math.max(0, 100 - clamped);
+            const primaryColor = getComputedStyle(document.documentElement).getPropertyValue('--md-primary').trim() || '#a78bfa';
+            const waveSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 14" width="40" height="14"><path d="M 0 7 Q 5 1.5, 10 7 T 20 7 T 30 7 T 40 7" fill="none" stroke="${primaryColor}" stroke-width="4.2" stroke-linecap="round"/></svg>`;
+            const bgUrl = `url('data:image/svg+xml;utf8,${encodeURIComponent(waveSvg)}')`;
+
+            el.innerHTML = `
+                <div class="flex items-center gap-2 w-full h-4">
+                    <div class="h-3.5 m3-wavy-active shrink-0" style="width: calc(${clamped}% - ${rem > 0 ? '4px' : '0px'}); background-image: ${bgUrl};"></div>
+                    ${rem > 0 ? `
+                        <div class="h-2.5 m3-wavy-track flex-1 relative flex items-center justify-end pr-1 min-w-[14px]">
+                            <span class="w-1.5 h-1.5 rounded-full shrink-0" style="background: var(--md-primary)"></span>
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+        }
+
+        function toggleGlobalWaveBar(show, pct = 65) {
+            const wrap = document.getElementById('topGlobalWaveWrap');
+            const settingsCloudWave = document.getElementById('settingsCloudWavyBar');
+            if (wrap) {
+                wrap.classList.toggle('hidden', !show);
+                if (show) renderM3WavyProgress('topGlobalWaveBar', pct);
+            }
+            if (settingsCloudWave) {
+                settingsCloudWave.classList.toggle('hidden', !show);
+                if (show) renderM3WavyProgress(settingsCloudWave, pct);
+            }
+        }
+
         const JEE_CHAPTERS = {
             Physics: [
                 "Basic Mathematics", "Units and Measurements, Errors and Experiments", "Vectors", "Rectilinear Motion", "Projectile Motion", "Relative Motion", "Circular Kinematics", "Newton's Laws of Motion", "Work, Power and Energy", "COM, Momentum and Collision", "Rigid Body Mechanics", "Mechanical properties of Solids (Elasticity)", "Thermometry", "Thermal Expansion", "Calorimetry", "Heat Transfer", "Kinetic Theory of Gases", "Thermodynamics", "Fluid Mechanics", "Simple Harmonic Motion", "Transverse waves (String Waves)", "Longitudinal Waves (Sound Waves)", "Gravitation",
@@ -622,45 +982,96 @@
             nextId: 1,
             subject: 'ALL',
             chapter: 'ALL',
-            status: 'ALL', // ALL | UNSOLVED | SOLVED | STARRED
+            status: 'ALL',
             paper: 'ALL',
             difficulty: 'ALL',
             search: '',
-            // Popup Lightbox State
             activePopupId: null,
-            // PDF State
+            activeSettingsPage: 'HOME',
             pdfDoc: null,
             isExtracting: false,
-            // Split / Trim Modal State
             activeSplitId: null,
             splitMode: 'SPLIT',
-            // Scratchpad State
             activePadId: null,
             inkColor: '#f8fafc',
             isEraser: false,
             strokeWidth: 3.5,
             isDrawing: false,
-            // Cloud Sync State
             isSyncingCloud: false,
             hasPendingCloudPush: false,
-            // Local Tesseract OCR Worker State
             ocrWorker: null,
             isRunningBackgroundOcr: false
         };
 
-        function generateUniqueId() {
-            return Date.now() * 1000 + (state.nextId++ % 1000);
-        }
+        const generateUniqueId = () => Date.now() * 1000 + (state.nextId++ % 1000);
+        const getApiKey = () => (localStorage.getItem('jee_gemini_api_key') || '').trim();
+        const getSelectedModel = () => localStorage.getItem('jee_gemini_model') || 'gemini-3.5-flash-lite';
+        const getVerticalPads = () => ({
+            padTop: Number(localStorage.getItem('jee_pad_top') ?? 4),
+            padBottom: Number(localStorage.getItem('jee_pad_bottom') ?? 6)
+        });
+        const getGithubToken = () => (localStorage.getItem('jee_github_pat') || '').trim();
+        const getGithubGistId = () => (localStorage.getItem('jee_github_gist_id') || '').trim();
+        const isCloudAutoSyncEnabled = () => localStorage.getItem('jee_cloud_autosync') !== 'false';
 
         // ===================================================================
-        // TOAST HELPER
+        // MATERIAL 3 EXPRESSIVE DYNAMIC COLOR ENGINE
         // ===================================================================
+        function hexToHsl(hex) {
+            hex = String(hex || '#8b5cf6').replace('#', '');
+            if (hex.length === 3) hex = hex.split('').map(c => c + c).join('');
+            const r = parseInt(hex.substring(0, 2), 16) / 255;
+            const g = parseInt(hex.substring(2, 4), 16) / 255;
+            const b = parseInt(hex.substring(4, 6), 16) / 255;
+            const max = Math.max(r, g, b), min = Math.min(r, g, b);
+            let h = 0, s = 0, l = (max + min) / 2;
+            if (max !== min) {
+                const d = max - min;
+                s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+                switch (max) {
+                    case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+                    case g: h = (b - r) / d + 2; break;
+                    case b: h = (r - g) / d + 4; break;
+                }
+                h /= 6;
+            }
+            return { h: Math.round(h * 360), s: Math.round(s * 100), l: Math.round(l * 100) };
+        }
+
+        function applyMaterialThemeFromSeed(hexSeed) {
+            const cleanHex = /^#[0-9A-Fa-f]{6}$/.test(hexSeed) ? hexSeed : '#8b5cf6';
+            const { h, s } = hexToHsl(cleanHex);
+            const root = document.documentElement;
+            const sat = Math.max(58, s);
+
+            root.style.setProperty('--md-primary', `hsl(${h}, ${sat}%, 78%)`);
+            root.style.setProperty('--md-on-primary', `hsl(${h}, ${Math.min(80, sat)}%, 15%)`);
+            root.style.setProperty('--md-primary-container', `hsl(${h}, ${Math.round(sat * 0.65)}%, 27%)`);
+            root.style.setProperty('--md-on-primary-container', `hsl(${h}, 95%, 92%)`);
+            root.style.setProperty('--md-secondary-container', `hsl(${h}, ${Math.round(sat * 0.35)}%, 22%)`);
+            root.style.setProperty('--md-on-secondary-container', `hsl(${h}, 75%, 90%)`);
+            root.style.setProperty('--md-surface', `hsl(${h}, 24%, 7%)`);
+            root.style.setProperty('--md-surface-low', `hsl(${h}, 24%, 10%)`);
+            root.style.setProperty('--md-surface-container', `hsl(${h}, 24%, 13%)`);
+            root.style.setProperty('--md-surface-high', `hsl(${h}, 24%, 17%)`);
+            root.style.setProperty('--md-surface-highest', `hsl(${h}, 24%, 22%)`);
+            root.style.setProperty('--md-on-surface', `hsl(${h}, 20%, 95%)`);
+            root.style.setProperty('--md-on-surface-variant', `hsl(${h}, 15%, 72%)`);
+            root.style.setProperty('--md-outline', `hsl(${h}, 16%, 32%)`);
+            root.style.setProperty('--md-outline-variant', `hsl(${h}, 18%, 20%)`);
+
+            localStorage.setItem('jee_m3_seed_color', cleanHex);
+            const picker = document.getElementById('customThemeColorPicker');
+            if (picker) picker.value = cleanHex;
+            renderDrawerChapters();
+        }
+
         function toast(msg, type = 'info') {
             const box = document.getElementById('toastBox');
             const el = document.createElement('div');
             const bg = type === 'success' ? 'bg-emerald-600 border-emerald-400' :
                        type === 'warn' ? 'bg-amber-600 border-amber-400' : 'bg-indigo-600 border-indigo-400';
-            el.className = `${bg} border text-white px-3.5 py-2.5 rounded-xl shadow-xl text-xs font-bold flex items-center gap-2 transition-all duration-300`;
+            el.className = `${bg} border text-white px-4 py-2.5 rounded-2xl shadow-xl text-xs font-extrabold flex items-center gap-2 transition-all duration-300`;
             el.innerHTML = `<i class="ph-bold ph-check-circle text-sm"></i><span>${msg}</span>`;
             box.appendChild(el);
             setTimeout(() => {
@@ -670,11 +1081,10 @@
         }
 
         // ===================================================================
-        // 100% LOCAL OCR ENGINE (PDF.JS TEXT LAYER + TESSERACT.JS V5)
+        // 100% LOCAL OCR ENGINE (PDF.JS + TESSERACT.JS V5)
         // ===================================================================
         async function getLocalTesseractWorker() {
-            if (state.ocrWorker) return state.ocrWorker;
-            state.ocrWorker = await Tesseract.createWorker('eng');
+            if (!state.ocrWorker) state.ocrWorker = await Tesseract.createWorker('eng');
             return state.ocrWorker;
         }
 
@@ -684,41 +1094,32 @@
                 const ret = await worker.recognize(imageSource);
                 return (ret?.data?.text || '').replace(/\s+/g, ' ').trim();
             } catch (err) {
-                console.warn('Local Tesseract OCR warning:', err);
                 return '';
             }
         }
 
-        // Extracts embedded vector text from a PDF.js page within [yminNorm, ymaxNorm] (0..1000) in 1ms
         async function extractPdfNativeTextInSlice(page, yminNorm, ymaxNorm) {
             try {
                 const vp = page.getViewport({ scale: 1.0 });
                 const pageH = vp.height || 1;
                 const textContent = await page.getTextContent();
                 const matched = [];
-
                 for (const item of (textContent.items || [])) {
                     if (!item.str || !item.transform) continue;
-                    // PDF coordinate system has y=0 at bottom, y=pageH at top
-                    const pdfY = item.transform[5];
-                    const topDownNormY = ((pageH - pdfY) / pageH) * 1000;
-                    if (topDownNormY >= yminNorm - 18 && topDownNormY <= ymaxNorm + 18) {
-                        matched.push(item.str);
-                    }
+                    const topDownNormY = ((pageH - item.transform[5]) / pageH) * 1000;
+                    if (topDownNormY >= yminNorm - 18 && topDownNormY <= ymaxNorm + 18) matched.push(item.str);
                 }
                 return matched.join(' ').replace(/\s+/g, ' ').trim();
-            } catch (e) {
+            } catch (_) {
                 return '';
             }
         }
 
-        // Automatically indexes any existing questions in Cloud Vault that don't have full `ocrText` yet
         async function runBackgroundLocalOcrForExistingQuestions(manualNotify = false) {
             if (state.isRunningBackgroundOcr) {
                 if (manualNotify) toast('Local OCR indexing is already running!', 'info');
                 return;
             }
-
             const unindexed = state.questions.filter(q => !q.ocrText || String(q.ocrText).trim().length < 15);
             if (unindexed.length === 0) {
                 if (manualNotify) toast('All questions already have full OCR text indexed ✓', 'success');
@@ -729,86 +1130,47 @@
             const badge = document.getElementById('ocrStatusBadge');
             const badgeTxt = document.getElementById('ocrStatusText');
             const settingsBtnLbl = document.getElementById('settingsOcrBtnLabel');
-            if (badge) {
-                badge.classList.remove('hidden');
-                badge.classList.add('inline-flex');
-            }
-
-            if (manualNotify) {
-                toast(`Running local Tesseract OCR on ${unindexed.length} questions...`, 'info');
-            }
+            const settingsOcrWave = document.getElementById('settingsOcrWavyBar');
+            if (badge) { badge.classList.remove('hidden'); badge.classList.add('inline-flex'); }
+            if (settingsOcrWave) settingsOcrWave.classList.remove('hidden');
+            if (manualNotify) toast(`Running local Tesseract OCR on ${unindexed.length} questions...`, 'info');
 
             let completed = 0;
             let updatedAny = false;
 
             try {
                 for (const q of unindexed) {
-                    // Check if question still exists in state
                     if (!state.questions.some(item => item.id === q.id)) continue;
                     completed++;
+                    const pct = Math.round((completed / unindexed.length) * 100);
                     if (badgeTxt) badgeTxt.textContent = `OCR: ${completed}/${unindexed.length}`;
-                    if (settingsBtnLbl) settingsBtnLbl.textContent = `Indexing Question ${completed} of ${unindexed.length}...`;
+                    if (settingsBtnLbl) settingsBtnLbl.textContent = `Indexing Question ${completed} of ${unindexed.length} (${pct}%)...`;
+                    if (settingsOcrWave) renderM3WavyProgress(settingsOcrWave, pct);
 
                     const extracted = await recognizeImageTextWithTesseract(q.imageDataUrl);
                     const fallback = `${q.firstLineSnippet || ''} ${q.lastLineSnippet || ''}`.trim();
                     q.ocrText = (extracted || fallback || `Q.${q.questionNumber}`).trim();
                     updatedAny = true;
-
-                    // If user is actively typing in search bar, live-refresh feed as OCR finishes
                     if (state.search) renderFeed();
                 }
-
                 if (updatedAny) {
                     scheduleCloudAutoSync();
                     if (manualNotify) toast(`Indexed full OCR text for ${completed} questions!`, 'success');
                 }
-            } catch (err) {
-                console.warn('Background OCR error:', err);
             } finally {
                 state.isRunningBackgroundOcr = false;
-                if (badge) {
-                    badge.classList.add('hidden');
-                    badge.classList.remove('inline-flex');
-                }
-                if (settingsBtnLbl) {
-                    settingsBtnLbl.textContent = 'Run Local OCR Indexer on Unindexed Questions';
-                }
+                if (badge) { badge.classList.add('hidden'); badge.classList.remove('inline-flex'); }
+                if (settingsOcrWave) settingsOcrWave.classList.add('hidden');
+                if (settingsBtnLbl) settingsBtnLbl.textContent = 'Run Local OCR Indexer on Unindexed Questions';
             }
-        }
-
-        // ===================================================================
-        // LOCALLY STORED KEYS & SETTINGS ONLY (localStorage)
-        // ===================================================================
-        function getApiKey() {
-            return (localStorage.getItem('jee_gemini_api_key') || '').trim();
-        }
-        function getSelectedModel() {
-            return localStorage.getItem('jee_gemini_model') || 'gemini-3.5-flash-lite';
-        }
-        function getVerticalPads() {
-            return {
-                padTop: Number(localStorage.getItem('jee_pad_top') ?? 4),
-                padBottom: Number(localStorage.getItem('jee_pad_bottom') ?? 6)
-            };
-        }
-        function getGithubToken() {
-            return (localStorage.getItem('jee_github_pat') || '').trim();
-        }
-        function getGithubGistId() {
-            return (localStorage.getItem('jee_github_gist_id') || '').trim();
-        }
-        function isCloudAutoSyncEnabled() {
-            return localStorage.getItem('jee_cloud_autosync') !== 'false';
         }
 
         function updateApiKeyIndicator() {
             const dot = document.getElementById('apiKeyDot');
             if (!dot) return;
-            if (getApiKey()) {
-                dot.className = 'w-2 h-2 rounded-full bg-emerald-400 absolute top-1 right-1';
-            } else {
-                dot.className = 'w-2 h-2 rounded-full bg-amber-400 animate-ping absolute top-1 right-1';
-            }
+            dot.className = getApiKey()
+                ? 'w-2 h-2 rounded-full bg-emerald-400 absolute top-1.5 right-1.5'
+                : 'w-2 h-2 rounded-full bg-amber-400 animate-ping absolute top-1.5 right-1.5';
         }
 
         function updateCloudStatusUI(status = 'idle', detail = '') {
@@ -822,24 +1184,28 @@
             const lastSync = localStorage.getItem('jee_cloud_last_sync') || '';
 
             if (!hasToken) {
-                badge.className = 'inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-slate-800 text-slate-400 border border-slate-700 hover:border-indigo-500/50 transition shrink-0';
+                toggleGlobalWaveBar(false);
+                badge.className = 'inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold m3-surface-high border m3-border transition shrink-0';
                 icon.className = 'ph-bold ph-cloud-slash text-xs';
                 txt.textContent = 'Cloud: Off';
-                if (infoEl) infoEl.textContent = 'Enter a GitHub Token above to store & sync your questions in the cloud.';
+                if (infoEl) infoEl.textContent = 'Enter a GitHub Token in API Keys settings to store & sync your questions in the cloud.';
                 return;
             }
 
             if (status === 'syncing') {
-                badge.className = 'inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-indigo-500/20 text-indigo-300 border border-indigo-500/40 transition shrink-0';
+                toggleGlobalWaveBar(true, 68);
+                badge.className = 'inline-flex items-center gap-1.5 px-3 py-1 text-[10px] font-bold m3-chip-active transition shrink-0';
                 icon.className = 'ph-bold ph-arrows-clockwise animate-spin text-xs';
                 txt.textContent = detail || 'Syncing...';
             } else if (status === 'error') {
-                badge.className = 'inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-rose-500/20 text-rose-300 border border-rose-500/40 transition shrink-0';
+                toggleGlobalWaveBar(false);
+                badge.className = 'inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold bg-rose-500/20 text-rose-300 border border-rose-500/40 transition shrink-0';
                 icon.className = 'ph-bold ph-cloud-warning text-xs';
                 txt.textContent = 'Sync Error';
                 if (infoEl && detail) infoEl.textContent = `Last Cloud Error: ${detail}`;
             } else {
-                badge.className = 'inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-sky-500/15 text-sky-300 border border-sky-500/30 hover:bg-sky-500/25 transition shrink-0';
+                toggleGlobalWaveBar(false);
+                badge.className = 'inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 hover:bg-emerald-500/25 transition shrink-0';
                 icon.className = 'ph-bold ph-cloud-check text-xs';
                 txt.textContent = `Cloud: ${state.questions.length} Saved`;
                 if (infoEl) {
@@ -850,9 +1216,6 @@
             }
         }
 
-        // ===================================================================
-        // MEASURE IMAGE ASPECT RATIO FOR EVEN MASONRY COLUMNS
-        // ===================================================================
         let aspectUpdateTimer = null;
         function ensureQuestionAspectRatio(q) {
             if (typeof q.aspectRatio === 'number' && q.aspectRatio > 0) return;
@@ -876,68 +1239,68 @@
             state.questions.sort((a, b) => {
                 const nA = parseFloat(String(a.questionNumber).replace(/[^\d.]/g, '')) || 9999;
                 const nB = parseFloat(String(b.questionNumber).replace(/[^\d.]/g, '')) || 9999;
-                if (nA !== nB) return nA - nB;
-                return String(a.questionNumber).localeCompare(String(b.questionNumber));
+                return nA !== nB ? nA - nB : String(a.questionNumber).localeCompare(String(b.questionNumber));
             });
             updateCloudStatusUI(state.isSyncingCloud ? 'syncing' : 'idle');
             renderAll();
         }
 
         // ===================================================================
-        // GITHUB SECRET GIST CLOUD SYNC ENGINE (SHARDED BY PAPER)
+        // GITHUB SECRET GIST CLOUD SYNC ENGINE
         // ===================================================================
         let cloudSyncTimer = null;
         function scheduleCloudAutoSync() {
             sortAndRefreshQuestions();
             if (!getGithubToken() || !isCloudAutoSyncEnabled() || state.isExtracting) return;
             clearTimeout(cloudSyncTimer);
-            cloudSyncTimer = setTimeout(() => {
-                pushToCloudGist(false);
-            }, 1200);
+            cloudSyncTimer = setTimeout(() => pushToCloudGist(false), 1200);
         }
 
-        function sanitizePaperFilename(paperName) {
-            const clean = String(paperName || 'Default_Paper').replace(/[^a-zA-Z0-9_-]/g, '_').slice(0, 45);
-            return `jee_vault_paper_${clean || 'Default'}.json`;
+        const sanitizePaperFilename = (p) => `jee_vault_paper_${String(p || 'Default_Paper').replace(/[^a-zA-Z0-9_-]/g, '_').slice(0, 45) || 'Default'}.json`;
+
+        async function resolveOrDiscoverGistId(token, gistInp) {
+            let gistId = getGithubGistId();
+            if (gistId) return gistId;
+            const listRes = await fetch('https://api.github.com/gists?per_page=50', {
+                headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/vnd.github+json' }
+            });
+            if (listRes.ok) {
+                const gists = await listRes.json();
+                const found = gists.find(g => g.files && g.files['jee_vault_manifest.json']);
+                if (found) {
+                    gistId = found.id;
+                    localStorage.setItem('jee_github_gist_id', gistId);
+                    if (gistInp) gistInp.value = gistId;
+                }
+            }
+            return gistId;
         }
 
         async function pushToCloudGist(manualNotify = false) {
             const tokenInp = document.getElementById('githubTokenInput');
             const gistInp = document.getElementById('githubGistIdInput');
-            if (tokenInp && tokenInp.value.trim()) {
-                localStorage.setItem('jee_github_pat', tokenInp.value.trim());
-            }
-            if (gistInp && gistInp.value.trim()) {
-                localStorage.setItem('jee_github_gist_id', gistInp.value.trim());
-            }
+            if (tokenInp?.value.trim()) localStorage.setItem('jee_github_pat', tokenInp.value.trim());
+            if (gistInp?.value.trim()) localStorage.setItem('jee_github_gist_id', gistInp.value.trim());
 
             const token = getGithubToken();
-            let gistId = getGithubGistId();
-
             if (!token) {
                 if (manualNotify) {
-                    window.app.openSettingsModal();
+                    window.app.openSettingsModal(false, 'KEYS');
                     toast('Paste your GitHub Personal Access Token (gist scope) first!', 'warn');
                 }
                 return;
             }
 
-            if (state.isSyncingCloud) {
-                state.hasPendingCloudPush = true;
-                return;
-            }
+            if (state.isSyncingCloud) { state.hasPendingCloudPush = true; return; }
             state.isSyncingCloud = true;
             state.hasPendingCloudPush = false;
             updateCloudStatusUI('syncing', 'Pushing...');
 
             try {
-                const allRecords = state.questions;
-
                 const paperGroups = {};
-                allRecords.forEach(q => {
+                state.questions.forEach(q => {
                     const pName = q.paperName || 'Default Paper';
-                    if (!paperGroups[pName]) paperGroups[pName] = [];
-                    paperGroups[pName].push(q);
+                    (paperGroups[pName] = paperGroups[pName] || []).push(q);
                 });
 
                 const filesPayload = {
@@ -945,7 +1308,7 @@
                         content: JSON.stringify({
                             app: 'JEE Sorter Cloud Vault',
                             updatedAt: new Date().toISOString(),
-                            totalQuestions: allRecords.length,
+                            totalQuestions: state.questions.length,
                             papers: Object.keys(paperGroups).map(p => ({
                                 paperName: p,
                                 fileName: sanitizePaperFilename(p),
@@ -956,55 +1319,25 @@
                 };
 
                 for (const [pName, qList] of Object.entries(paperGroups)) {
-                    const fName = sanitizePaperFilename(pName);
-                    filesPayload[fName] = {
-                        content: JSON.stringify(qList)
-                    };
+                    filesPayload[sanitizePaperFilename(pName)] = { content: JSON.stringify(qList) };
                 }
 
-                // Auto-discover existing Gist if Gist ID is blank
-                if (!gistId) {
-                    const listRes = await fetch('https://api.github.com/gists?per_page=50', {
-                        headers: {
-                            'Authorization': `Bearer ${token}`,
-                            'Accept': 'application/vnd.github+json'
-                        }
-                    });
-                    if (listRes.ok) {
-                        const gists = await listRes.json();
-                        const found = gists.find(g => g.files && g.files['jee_vault_manifest.json']);
-                        if (found) {
-                            gistId = found.id;
-                            localStorage.setItem('jee_github_gist_id', gistId);
-                            if (gistInp) gistInp.value = gistId;
-                        }
-                    }
-                }
+                let gistId = await resolveOrDiscoverGistId(token, gistInp);
 
                 if (gistId) {
                     const checkRes = await fetch(`https://api.github.com/gists/${gistId}`, {
-                        headers: {
-                            'Authorization': `Bearer ${token}`,
-                            'Accept': 'application/vnd.github+json'
-                        }
+                        headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/vnd.github+json' }
                     });
                     if (checkRes.ok) {
                         const existingGist = await checkRes.json();
                         Object.keys(existingGist.files || {}).forEach(oldFile => {
-                            if (oldFile.startsWith('jee_vault_paper_') && !filesPayload[oldFile]) {
-                                filesPayload[oldFile] = null;
-                            }
+                            if (oldFile.startsWith('jee_vault_paper_') && !filesPayload[oldFile]) filesPayload[oldFile] = null;
                         });
-                    } else if (checkRes.status === 404) {
-                        gistId = '';
-                    }
+                    } else if (checkRes.status === 404) gistId = '';
                 }
 
-                const url = gistId ? `https://api.github.com/gists/${gistId}` : 'https://api.github.com/gists';
-                const method = gistId ? 'PATCH' : 'POST';
-
-                const res = await fetch(url, {
-                    method,
+                const res = await fetch(gistId ? `https://api.github.com/gists/${gistId}` : 'https://api.github.com/gists', {
+                    method: gistId ? 'PATCH' : 'POST',
                     headers: {
                         'Authorization': `Bearer ${token}`,
                         'Accept': 'application/vnd.github+json',
@@ -1017,26 +1350,17 @@
                     })
                 });
 
-                if (!res.ok) {
-                    const errTxt = await res.text();
-                    throw new Error(`HTTP ${res.status}: ${errTxt.slice(0, 100)}`);
-                }
-
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
                 const data = await res.json();
                 if (data.id) {
                     localStorage.setItem('jee_github_gist_id', data.id);
-                    const gistInputEl = document.getElementById('githubGistIdInput');
-                    if (gistInputEl) gistInputEl.value = data.id;
+                    if (gistInp) gistInp.value = data.id;
                 }
 
-                const nowStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-                localStorage.setItem('jee_cloud_last_sync', nowStr);
+                localStorage.setItem('jee_cloud_last_sync', new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }));
                 updateCloudStatusUI('idle');
-                if (manualNotify) {
-                    toast(`Synced ${allRecords.length} questions to GitHub Secret Gist!`, 'success');
-                }
+                if (manualNotify) toast(`Synced ${state.questions.length} questions to GitHub Secret Gist!`, 'success');
             } catch (err) {
-                console.error('Cloud Push Error:', err);
                 updateCloudStatusUI('error', err.message);
                 if (manualNotify) toast(`Cloud Push failed: ${err.message}`, 'warn');
             } finally {
@@ -1051,19 +1375,13 @@
         async function pullFromCloudGist(manualNotify = false) {
             const tokenInp = document.getElementById('githubTokenInput');
             const gistInp = document.getElementById('githubGistIdInput');
-            if (tokenInp && tokenInp.value.trim()) {
-                localStorage.setItem('jee_github_pat', tokenInp.value.trim());
-            }
-            if (gistInp && gistInp.value.trim()) {
-                localStorage.setItem('jee_github_gist_id', gistInp.value.trim());
-            }
+            if (tokenInp?.value.trim()) localStorage.setItem('jee_github_pat', tokenInp.value.trim());
+            if (gistInp?.value.trim()) localStorage.setItem('jee_github_gist_id', gistInp.value.trim());
 
             const token = getGithubToken();
-            let gistId = getGithubGistId();
-
             if (!token) {
                 if (manualNotify) {
-                    window.app.openSettingsModal();
+                    window.app.openSettingsModal(false, 'KEYS');
                     toast('Paste your GitHub Personal Access Token first!', 'warn');
                 }
                 return;
@@ -1074,24 +1392,7 @@
             updateCloudStatusUI('syncing', 'Pulling...');
 
             try {
-                if (!gistId) {
-                    const listRes = await fetch('https://api.github.com/gists?per_page=50', {
-                        headers: {
-                            'Authorization': `Bearer ${token}`,
-                            'Accept': 'application/vnd.github+json'
-                        }
-                    });
-                    if (listRes.ok) {
-                        const gists = await listRes.json();
-                        const found = gists.find(g => g.files && g.files['jee_vault_manifest.json']);
-                        if (found) {
-                            gistId = found.id;
-                            localStorage.setItem('jee_github_gist_id', gistId);
-                            if (gistInp) gistInp.value = gistId;
-                        }
-                    }
-                }
-
+                const gistId = await resolveOrDiscoverGistId(token, gistInp);
                 if (!gistId) {
                     state.questions = [];
                     state.isSyncingCloud = false;
@@ -1101,51 +1402,33 @@
                 }
 
                 const res = await fetch(`https://api.github.com/gists/${gistId}?t=${Date.now()}`, {
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Accept': 'application/vnd.github+json'
-                    },
+                    headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/vnd.github+json' },
                     cache: 'no-store'
                 });
                 if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
                 const gistData = await res.json();
-                const files = gistData.files || {};
                 const restoredQuestions = [];
 
-                for (const [fName, fileObj] of Object.entries(files)) {
+                for (const [fName, fileObj] of Object.entries(gistData.files || {})) {
                     if (!fName.startsWith('jee_vault_paper_')) continue;
                     let rawJson = fileObj.content;
                     if (fileObj.truncated && fileObj.raw_url) {
-                        const rawRes = await fetch(fileObj.raw_url, { cache: 'no-store' });
-                        rawJson = await rawRes.text();
+                        rawJson = await (await fetch(fileObj.raw_url, { cache: 'no-store' })).text();
                     }
                     if (rawJson) {
                         const parsed = JSON.parse(rawJson);
-                        if (Array.isArray(parsed)) {
-                            restoredQuestions.push(...parsed);
-                        }
+                        if (Array.isArray(parsed)) restoredQuestions.push(...parsed);
                     }
                 }
 
-                state.questions = restoredQuestions.map(r => ({
-                    ...r,
-                    id: r.id || generateUniqueId()
-                }));
-
-                const nowStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-                localStorage.setItem('jee_cloud_last_sync', nowStr);
+                state.questions = restoredQuestions.map(r => ({ ...r, id: r.id || generateUniqueId() }));
+                localStorage.setItem('jee_cloud_last_sync', new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }));
                 state.isSyncingCloud = false;
                 sortAndRefreshQuestions();
-
-                if (manualNotify) {
-                    toast(`Pulled ${state.questions.length} questions from GitHub Cloud!`, 'success');
-                }
-
-                // Automatically index any loaded questions that don't have full local OCR text yet
+                if (manualNotify) toast(`Pulled ${state.questions.length} questions from GitHub Cloud!`, 'success');
                 runBackgroundLocalOcrForExistingQuestions(false);
             } catch (err) {
-                console.error('Cloud Pull Error:', err);
                 state.isSyncingCloud = false;
                 updateCloudStatusUI('error', err.message);
                 if (manualNotify) toast(`Cloud Pull failed: ${err.message}`, 'warn');
@@ -1156,16 +1439,13 @@
         // BACKUP EXPORT & IMPORT (.JSON)
         // ===================================================================
         function exportBackupJson() {
-            if (state.questions.length === 0) {
-                return toast('No questions in Cloud Vault to export yet!', 'warn');
-            }
-            const payload = {
+            if (state.questions.length === 0) return toast('No questions in Cloud Vault to export yet!', 'warn');
+            const blob = new Blob([JSON.stringify({
                 app: 'JEE Sorter + Multi-Page Stitching',
                 exportedAt: new Date().toISOString(),
                 count: state.questions.length,
                 questions: state.questions
-            };
-            const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+            }, null, 2)], { type: 'application/json' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
@@ -1181,19 +1461,12 @@
             const file = event.target.files?.[0];
             if (!file) return;
             try {
-                const text = await file.text();
-                const parsed = JSON.parse(text);
+                const parsed = JSON.parse(await file.text());
                 const records = Array.isArray(parsed) ? parsed : (parsed.questions || []);
-                if (!Array.isArray(records) || records.length === 0) {
-                    return toast('Invalid or empty backup JSON file', 'warn');
-                }
-                const sanitized = records.map(r => ({
-                    ...r,
-                    id: generateUniqueId()
-                }));
-                state.questions.push(...sanitized);
+                if (!records.length) return toast('Invalid or empty backup JSON file', 'warn');
+                state.questions.push(...records.map(r => ({ ...r, id: generateUniqueId() })));
                 scheduleCloudAutoSync();
-                toast(`Imported ${sanitized.length} questions & syncing to Cloud!`, 'success');
+                toast(`Imported ${records.length} questions & syncing to Cloud!`, 'success');
                 runBackgroundLocalOcrForExistingQuestions(false);
             } catch (err) {
                 toast('Failed to import JSON: ' + err.message, 'warn');
@@ -1206,99 +1479,66 @@
         // PIXEL WHITESPACE GAP SNAPPER & SMART AUTO-TRIMMER
         // ===================================================================
         function findCleanHorizontalWhitespaceNormY(sourceCanvas, targetNormY, searchUpNorm = 45, searchDownNorm = 15) {
-            const w = sourceCanvas.width;
-            const h = sourceCanvas.height;
+            const w = sourceCanvas.width, h = sourceCanvas.height;
             const centerPx = Math.floor((targetNormY / 1000) * h);
             const minPx = Math.max(10, Math.floor(((targetNormY - searchUpNorm) / 1000) * h));
             const maxPx = Math.min(h - 10, Math.floor(((targetNormY + searchDownNorm) / 1000) * h));
             if (maxPx <= minPx) return targetNormY;
 
-            const ctx = sourceCanvas.getContext('2d');
             const sliceH = maxPx - minPx + 1;
-            const imgData = ctx.getImageData(0, minPx, w, sliceH).data;
-
+            const imgData = sourceCanvas.getContext('2d').getImageData(0, minPx, w, sliceH).data;
             const isRowWhite = new Array(sliceH).fill(true);
+
             for (let r = 0; r < sliceH; r++) {
                 let darkPixels = 0;
                 for (let x = 20; x < w - 20; x += 3) {
                     const idx = (r * w + x) * 4;
                     if (imgData[idx] < 235 || imgData[idx + 1] < 235 || imgData[idx + 2] < 235) {
-                        darkPixels++;
-                        if (darkPixels > 2) {
-                            isRowWhite[r] = false;
-                            break;
-                        }
+                        if (++darkPixels > 2) { isRowWhite[r] = false; break; }
                     }
                 }
             }
 
-            let bestRowPx = centerPx;
-            let bestScore = -999999;
-
+            let bestRowPx = centerPx, bestScore = -999999;
             for (let r = 0; r < sliceH; r++) {
                 if (!isRowWhite[r]) continue;
                 let band = 1;
                 for (let u = r - 1; u >= 0 && isRowWhite[u]; u--) band++;
                 for (let d = r + 1; d < sliceH && isRowWhite[d]; d++) band++;
-
                 const absY = minPx + r;
-                const dist = Math.abs(absY - centerPx);
-                const score = band * 4 - dist;
-                if (score > bestScore) {
-                    bestScore = score;
-                    bestRowPx = absY;
-                }
+                const score = band * 4 - Math.abs(absY - centerPx);
+                if (score > bestScore) { bestScore = score; bestRowPx = absY; }
             }
-
             return Math.round((bestRowPx / h) * 1000);
         }
 
         function autoTrimVerticalWhitespace(canvas) {
-            const ctx = canvas.getContext('2d');
-            const w = canvas.width;
-            const h = canvas.height;
+            const ctx = canvas.getContext('2d'), w = canvas.width, h = canvas.height;
             if (h < 60) return canvas;
-
             const imgData = ctx.getImageData(0, 0, w, h).data;
-            let topRow = 0;
-            let botRow = h - 1;
+            let topRow = 0, botRow = h - 1;
 
             for (let y = 0; y < h; y++) {
                 let hasInk = false;
                 for (let x = 10; x < w - 10; x += 4) {
                     const idx = (y * w + x) * 4;
-                    if (imgData[idx] < 240 || imgData[idx + 1] < 240 || imgData[idx + 2] < 240) {
-                        hasInk = true;
-                        break;
-                    }
+                    if (imgData[idx] < 240 || imgData[idx + 1] < 240 || imgData[idx + 2] < 240) { hasInk = true; break; }
                 }
-                if (hasInk) {
-                    topRow = Math.max(0, y - 14);
-                    break;
-                }
+                if (hasInk) { topRow = Math.max(0, y - 14); break; }
             }
-
             for (let y = h - 1; y >= topRow; y--) {
                 let hasInk = false;
                 for (let x = 10; x < w - 10; x += 4) {
                     const idx = (y * w + x) * 4;
-                    if (imgData[idx] < 240 || imgData[idx + 1] < 240 || imgData[idx + 2] < 240) {
-                        hasInk = true;
-                        break;
-                    }
+                    if (imgData[idx] < 240 || imgData[idx + 1] < 240 || imgData[idx + 2] < 240) { hasInk = true; break; }
                 }
-                if (hasInk) {
-                    botRow = Math.min(h - 1, y + 14);
-                    break;
-                }
+                if (hasInk) { botRow = Math.min(h - 1, y + 14); break; }
             }
 
             const trimmedH = Math.max(40, botRow - topRow + 1);
             if (trimmedH >= h - 8) return canvas;
-
             const trimmed = document.createElement('canvas');
-            trimmed.width = w;
-            trimmed.height = trimmedH;
+            trimmed.width = w; trimmed.height = trimmedH;
             const tCtx = trimmed.getContext('2d');
             tCtx.fillStyle = '#FFFFFF';
             tCtx.fillRect(0, 0, w, trimmedH);
@@ -1307,29 +1547,20 @@
         }
 
         function cropFullWidthSlice(sourceCanvas, yminNorm, ymaxNorm, padTop = 4, padBottom = 6) {
-            const w = sourceCanvas.width;
-            const h = sourceCanvas.height;
-
-            const safeYMin = Math.max(0, yminNorm - padTop);
-            const safeYMax = Math.min(1000, ymaxNorm + padBottom);
-
+            const w = sourceCanvas.width, h = sourceCanvas.height;
+            const safeYMin = Math.max(0, yminNorm - padTop), safeYMax = Math.min(1000, ymaxNorm + padBottom);
             const cropY = Math.floor((safeYMin / 1000) * h);
             const cropH = Math.max(40, Math.floor(((safeYMax - safeYMin) / 1000) * h));
-
-            const outW = Math.min(1200, w);
-            const scale = outW / w;
-            const outH = Math.floor(cropH * scale);
+            const outW = Math.min(1200, w), outH = Math.floor(cropH * (outW / w));
 
             const rawCanvas = document.createElement('canvas');
-            rawCanvas.width = outW;
-            rawCanvas.height = outH;
+            rawCanvas.width = outW; rawCanvas.height = outH;
             const ctx = rawCanvas.getContext('2d');
             ctx.fillStyle = '#FFFFFF';
             ctx.fillRect(0, 0, outW, outH);
             ctx.drawImage(sourceCanvas, 0, cropY, w, cropH, 0, 0, outW, outH);
 
             const finalCanvas = autoTrimVerticalWhitespace(rawCanvas);
-
             return {
                 canvas: finalCanvas,
                 dataUrl: finalCanvas.toDataURL('image/jpeg', 0.88),
@@ -1339,10 +1570,7 @@
 
         async function stitchCanvasesVertically(topDataUrl, botDataUrl) {
             const loadImg = (src) => new Promise((res, rej) => {
-                const img = new Image();
-                img.onload = () => res(img);
-                img.onerror = rej;
-                img.src = src;
+                const img = new Image(); img.onload = () => res(img); img.onerror = rej; img.src = src;
             });
             const [topImg, botImg] = await Promise.all([loadImg(topDataUrl), loadImg(botDataUrl)]);
             const targetW = Math.max(topImg.width, botImg.width);
@@ -1350,17 +1578,13 @@
             const botH = Math.round(botImg.height * (targetW / botImg.width));
 
             const c = document.createElement('canvas');
-            c.width = targetW;
-            c.height = topH + botH + 4;
+            c.width = targetW; c.height = topH + botH + 4;
             const ctx = c.getContext('2d');
             ctx.fillStyle = '#FFFFFF';
             ctx.fillRect(0, 0, c.width, c.height);
             ctx.drawImage(topImg, 0, 0, targetW, topH);
             ctx.drawImage(botImg, 0, topH + 4, targetW, botH);
-            return {
-                dataUrl: c.toDataURL('image/jpeg', 0.88),
-                aspectRatio: c.height / c.width
-            };
+            return { dataUrl: c.toDataURL('image/jpeg', 0.88), aspectRatio: c.height / c.width };
         }
 
         // ===================================================================
@@ -1448,10 +1672,7 @@ CRITICAL RULES FOR ZERO CLUBBING & EXACT STITCHING:
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify(payload)
                     });
-                    if (!res.ok) {
-                        const errText = await res.text();
-                        throw new Error(`HTTP ${res.status}: ${errText.slice(0, 120)}`);
-                    }
+                    if (!res.ok) throw new Error(`HTTP ${res.status}: ${(await res.text()).slice(0, 120)}`);
                     const data = await res.json();
                     const txt = data.candidates?.[0]?.content?.parts?.[0]?.text;
                     return txt ? JSON.parse(txt) : { questions: [] };
@@ -1474,7 +1695,7 @@ CRITICAL RULES FOR ZERO CLUBBING & EXACT STITCHING:
         }
 
         // ===================================================================
-        // PDF UPLOAD & EXTRACTION WORKFLOW (WITH LOCAL FULL-QUESTION OCR)
+        // PDF UPLOAD & EXTRACTION WORKFLOW
         // ===================================================================
         async function onPdfSelected(e) {
             const file = e.target.files?.[0];
@@ -1490,17 +1711,16 @@ CRITICAL RULES FOR ZERO CLUBBING & EXACT STITCHING:
                 document.getElementById('endPageInput').value = state.pdfDoc.numPages;
                 document.getElementById('startExtractBtn').disabled = false;
                 toast(`Loaded PDF (${state.pdfDoc.numPages} pages)`, 'success');
-            } catch (err) {
+            } catch (_) {
                 toast('Could not read PDF file', 'warn');
             }
         }
 
         async function startPdfExtraction() {
             if (!state.pdfDoc || state.isExtracting) return;
-
             if (!getApiKey()) {
                 window.app.closeUploadModal();
-                window.app.openSettingsModal(true);
+                window.app.openSettingsModal(true, 'KEYS');
                 toast('Please save your Gemini API Key first!', 'warn');
                 return;
             }
@@ -1515,6 +1735,7 @@ CRITICAL RULES FOR ZERO CLUBBING & EXACT STITCHING:
             document.getElementById('uploadProgressView').classList.remove('hidden');
             document.getElementById('startExtractBtn').disabled = true;
             document.getElementById('extractLiveLog').innerHTML = '';
+            renderM3WavyProgress('extractWavyBarWrap', 8);
 
             const canvas = document.getElementById('pdfWorkCanvas');
             const ctx = canvas.getContext('2d');
@@ -1527,13 +1748,12 @@ CRITICAL RULES FOR ZERO CLUBBING & EXACT STITCHING:
                 for (let pageNum = startP; pageNum <= endP; pageNum++) {
                     const pct = Math.round(((pageNum - startP + 1) / countPages) * 100);
                     document.getElementById('extractPageBadge').textContent = `Page ${pageNum}/${endP}`;
-                    document.getElementById('extractProgressBar').style.width = `${pct}%`;
+                    renderM3WavyProgress('extractWavyBarWrap', pct);
                     document.getElementById('extractSubText').textContent = `Rendering Page ${pageNum} at 2.0x scale & detecting boundaries...`;
 
                     const page = await state.pdfDoc.getPage(pageNum);
                     const vp = page.getViewport({ scale: 2.0 });
-                    canvas.width = vp.width;
-                    canvas.height = vp.height;
+                    canvas.width = vp.width; canvas.height = vp.height;
                     ctx.fillStyle = '#FFFFFF';
                     ctx.fillRect(0, 0, canvas.width, canvas.height);
                     await page.render({ canvasContext: ctx, viewport: vp }).promise;
@@ -1543,10 +1763,8 @@ CRITICAL RULES FOR ZERO CLUBBING & EXACT STITCHING:
 
                     const aiResult = await analyzePageLayoutWithGemini(base64Jpeg, pageNum);
                     const blocks = aiResult.questions || [];
-
                     blocks.sort((a, b) => (a.ymin || 0) - (b.ymin || 0));
 
-                    // SMART WHITESPACE GAP BOUNDARY SNAPPING
                     for (let i = 0; i < blocks.length; i++) {
                         blocks[i].ymin = findCleanHorizontalWhitespaceNormY(canvas, Number(blocks[i].ymin) || 0, 28, 10);
                     }
@@ -1556,9 +1774,7 @@ CRITICAL RULES FOR ZERO CLUBBING & EXACT STITCHING:
                             blocks[i].ymax = Math.max(blocks[i].ymin + 25, nextYMin - 2);
                         } else {
                             blocks[i].ymax = findCleanHorizontalWhitespaceNormY(canvas, Number(blocks[i].ymax) || nextYMin, 15, 25);
-                            if (blocks[i].ymax >= nextYMin) {
-                                blocks[i].ymax = Math.max(blocks[i].ymin + 25, nextYMin - 2);
-                            }
+                            if (blocks[i].ymax >= nextYMin) blocks[i].ymax = Math.max(blocks[i].ymin + 25, nextYMin - 2);
                         }
                     }
 
@@ -1568,14 +1784,11 @@ CRITICAL RULES FOR ZERO CLUBBING & EXACT STITCHING:
                         const ymax = Math.max(ymin + 25, Math.min(1000, Number(b.ymax) || 1000));
                         const cropRes = cropFullWidthSlice(canvas, ymin, ymax, padTop, padBottom);
 
-                        // 100% LOCAL FULL-QUESTION OCR (PDF.js native text layer first, then local Tesseract.js OCR)
                         let fullQuestionText = await extractPdfNativeTextInSlice(page, ymin, ymax);
                         if (fullQuestionText.length < 25) {
                             document.getElementById('extractSubText').textContent = `Running local Tesseract OCR on Page ${pageNum} slice ${i + 1}/${blocks.length}...`;
                             const tessText = await recognizeImageTextWithTesseract(cropRes.canvas);
-                            if (tessText.length > fullQuestionText.length) {
-                                fullQuestionText = tessText;
-                            }
+                            if (tessText.length > fullQuestionText.length) fullQuestionText = tessText;
                         }
                         const combinedOcrText = `${fullQuestionText} ${b.firstLineSnippet || ''} ${b.lastLineSnippet || ''}`.replace(/\s+/g, ' ').trim();
 
@@ -1583,10 +1796,7 @@ CRITICAL RULES FOR ZERO CLUBBING & EXACT STITCHING:
                         const isExplicitCont = rawQNum.toUpperCase() === 'CONT' || b.isContinuationFromPrevPage === true;
                         const startsWithNewNum = /^\s*(?:Q\.?\s*)?\d+[\.\)\:]/.test(String(b.firstLineSnippet || '')) && !isExplicitCont;
 
-                        const isStitch = prevQuestion &&
-                            i === 0 &&
-                            prevQuestion.page === pageNum - 1 &&
-                            !startsWithNewNum &&
+                        const isStitch = prevQuestion && i === 0 && prevQuestion.page === pageNum - 1 && !startsWithNewNum &&
                             (isExplicitCont || prevQuestion.continuesToNextPage === true);
 
                         if (isStitch) {
@@ -1602,7 +1812,6 @@ CRITICAL RULES FOR ZERO CLUBBING & EXACT STITCHING:
                         }
 
                         const cleanNum = rawQNum.replace(/\D/g, '') || `${extractedCount + 1}`;
-
                         const qObj = {
                             id: generateUniqueId(),
                             questionNumber: rawQNum.toUpperCase() === 'CONT' ? cleanNum : rawQNum,
@@ -1627,18 +1836,16 @@ CRITICAL RULES FOR ZERO CLUBBING & EXACT STITCHING:
                         sortAndRefreshQuestions();
                         extractedCount++;
                         prevQuestion = qObj;
-                        appendExtractLog(`✓ Q.${qObj.questionNumber} (${qObj.subject} • ${qObj.chapter}) [OCR: ${combinedOcrText.split(' ').length} words]`, 'text-emerald-400');
+                        appendExtractLog(`✓ Q.${qObj.questionNumber} (${qObj.subject} • ${qObj.chapter}) [OCR: ${combinedOcrText.split(' ').length}w]`, 'text-emerald-400');
                     }
                 }
 
                 state.isExtracting = false;
+                renderM3WavyProgress('extractWavyBarWrap', 100);
                 toast(`Extracted ${extractedCount} questions with full local OCR! Syncing...`, 'success');
                 await pushToCloudGist(false);
-                setTimeout(() => {
-                    window.app.closeUploadModal();
-                }, 700);
+                setTimeout(() => window.app.closeUploadModal(), 700);
             } catch (err) {
-                console.error(err);
                 appendExtractLog(`⚠ Error: ${err.message}`, 'text-rose-400');
                 toast('Extraction error: ' + err.message, 'warn');
             } finally {
@@ -1650,17 +1857,10 @@ CRITICAL RULES FOR ZERO CLUBBING & EXACT STITCHING:
         // ===================================================================
         // CASE-INSENSITIVE MULTI-WORD FULL-QUESTION SEARCH & FILTERING
         // ===================================================================
-        function normalizeForSearch(str) {
-            return String(str || '')
-                .toLowerCase()
-                .replace(/[^\w\s.]/g, ' ')
-                .replace(/\s+/g, ' ')
-                .trim();
-        }
+        const normalizeForSearch = (str) => String(str || '').toLowerCase().replace(/[^\w\s.]/g, ' ').replace(/\s+/g, ' ').trim();
 
         function getFiltered() {
             const queryTokens = normalizeForSearch(state.search).split(' ').filter(Boolean);
-
             return state.questions.filter(q => {
                 if (state.subject !== 'ALL' && q.subject !== state.subject) return false;
                 if (state.chapter !== 'ALL' && q.chapter !== state.chapter) return false;
@@ -1669,15 +1869,11 @@ CRITICAL RULES FOR ZERO CLUBBING & EXACT STITCHING:
                 if (state.status === 'UNSOLVED' && q.solved) return false;
                 if (state.status === 'SOLVED' && !q.solved) return false;
                 if (state.status === 'STARRED' && !q.starred) return false;
-
                 if (queryTokens.length > 0) {
                     const haystack = normalizeForSearch(
                         `q.${q.questionNumber} ${q.questionNumber} ${q.subject || ''} ${q.chapter || ''} ${q.paperName || ''} ${q.difficulty || ''} ${q.ocrText || ''} ${q.firstLineSnippet || ''} ${q.lastLineSnippet || ''}`
                     );
-                    // Every word typed in the search bar must appear in the question's OCR text or metadata (in any order, case-insensitive)
-                    for (const token of queryTokens) {
-                        if (!haystack.includes(token)) return false;
-                    }
+                    for (const token of queryTokens) if (!haystack.includes(token)) return false;
                 }
                 return true;
             });
@@ -1685,7 +1881,6 @@ CRITICAL RULES FOR ZERO CLUBBING & EXACT STITCHING:
 
         function renderAll() {
             const all = state.questions;
-
             const scoped = all.filter(q => (state.subject === 'ALL' || q.subject === state.subject) && (state.chapter === 'ALL' || q.chapter === state.chapter));
             document.getElementById('status-count-UNSOLVED').textContent = scoped.filter(q => !q.solved).length;
             document.getElementById('status-count-SOLVED').textContent = scoped.filter(q => q.solved).length;
@@ -1693,24 +1888,13 @@ CRITICAL RULES FOR ZERO CLUBBING & EXACT STITCHING:
 
             document.querySelectorAll('.status-btn').forEach(btn => {
                 const st = btn.getAttribute('data-status');
-                const active = st === state.status;
-                if (active) {
-                    btn.className = st === 'STARRED'
-                        ? "status-btn h-7 px-2.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 bg-yellow-400 text-slate-950 shadow"
-                        : "status-btn h-7 px-2.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 bg-indigo-600 text-white shadow";
-                } else {
-                    btn.className = "status-btn h-7 px-2.5 rounded-lg text-xs font-semibold transition flex items-center gap-1.5 bg-slate-800/90 text-slate-300 border border-slate-700/80";
-                }
+                btn.className = st === state.status
+                    ? "status-btn h-8 px-3.5 text-xs flex items-center gap-1.5 m3-chip-active shadow-sm"
+                    : "status-btn h-8 px-3.5 text-xs flex items-center gap-1.5 m3-chip-inactive";
             });
 
-            const indicator = document.getElementById('activeChapterIndicator');
-            if (state.chapter !== 'ALL') {
-                indicator.textContent = state.chapter;
-            } else if (state.subject !== 'ALL') {
-                indicator.textContent = state.subject;
-            } else {
-                indicator.textContent = 'All';
-            }
+            document.getElementById('activeChapterIndicator').textContent =
+                state.chapter !== 'ALL' ? state.chapter : (state.subject !== 'ALL' ? state.subject : 'All');
 
             const pSel = document.getElementById('paperDropdown');
             const papers = Array.from(new Set(all.map(q => q.paperName).filter(Boolean)));
@@ -1727,15 +1911,16 @@ CRITICAL RULES FOR ZERO CLUBBING & EXACT STITCHING:
             const all = state.questions;
 
             const subjectsMeta = [
-                { name: 'Physics', dot: 'bg-sky-400', text: 'text-sky-300' },
-                { name: 'Chemistry', dot: 'bg-amber-400', text: 'text-amber-300' },
-                { name: 'Mathematics', dot: 'bg-rose-400', text: 'text-rose-300' }
+                { name: 'Physics', dot: 'bg-sky-400' },
+                { name: 'Chemistry', dot: 'bg-amber-400' },
+                { name: 'Mathematics', dot: 'bg-rose-400' }
             ];
 
+            const isAllSelected = state.subject === 'ALL' && state.chapter === 'ALL';
             let html = `
-                <button onclick="window.app.selectSubjectChapter('ALL', 'ALL')" class="w-full px-3 py-2 rounded-xl flex items-center justify-between text-xs font-bold transition ${state.subject === 'ALL' && state.chapter === 'ALL' ? 'bg-indigo-600 text-white shadow' : 'bg-slate-800/70 text-slate-200 hover:bg-slate-800'}">
+                <button onclick="window.app.selectSubjectChapter('ALL', 'ALL')" class="w-full px-4 py-2.5 flex items-center justify-between text-xs font-extrabold transition ${isAllSelected ? 'm3-chip-active' : 'm3-surface-high rounded-full hover:brightness-110'}">
                     <span>All Subjects & Chapters</span>
-                    <span class="px-2 py-0.5 rounded bg-black/25 text-[11px]">${all.length}</span>
+                    <span class="px-2 py-0.5 rounded-full bg-black/25 text-[11px]">${all.length}</span>
                 </button>
             `;
 
@@ -1756,118 +1941,114 @@ CRITICAL RULES FOR ZERO CLUBBING & EXACT STITCHING:
                     .sort((a, b) => b[1].total - a[1].total);
 
                 if (qFilter && rows.length === 0) return;
-
                 const isSubjAllActive = state.subject === sMeta.name && state.chapter === 'ALL';
 
                 html += `
-                    <div class="pt-2">
-                        <button onclick="window.app.selectSubjectChapter('${sMeta.name}', 'ALL')" class="w-full px-3 py-2 rounded-xl flex items-center justify-between text-xs font-extrabold uppercase tracking-wider transition ${isSubjAllActive ? 'bg-indigo-600 text-white shadow' : 'bg-slate-900/90 text-slate-200 hover:bg-slate-800 border border-slate-800'}">
+                    <div class="pt-1">
+                        <button onclick="window.app.selectSubjectChapter('${sMeta.name}', 'ALL')" class="w-full px-3.5 py-2 mb-1.5 flex items-center justify-between text-xs font-extrabold uppercase tracking-wider transition ${isSubjAllActive ? 'm3-chip-active' : 'm3-surface-low rounded-2xl border m3-border hover:brightness-110'}">
                             <div class="flex items-center gap-2">
-                                <span class="w-2 h-2 rounded-full ${sMeta.dot}"></span>
+                                <span class="w-3 h-3 m3-cookie-12 ${sMeta.dot}"></span>
                                 <span>${sMeta.name}</span>
                             </div>
-                            <span class="px-1.5 py-0.5 rounded bg-black/30 text-[11px] font-bold">${subjQuestions.length}</span>
+                            <span class="px-2 py-0.5 rounded-full bg-black/30 text-[11px] font-bold">${subjQuestions.length}</span>
                         </button>
-                        <div class="mt-1 pl-2.5 border-l-2 border-slate-800 space-y-1">
+                        <div class="m3-group-list">
                 `;
 
                 if (rows.length === 0) {
-                    html += `<div class="px-3 py-1.5 text-[11px] text-slate-500 italic">No questions yet</div>`;
+                    html += `<div class="px-3.5 py-2 m3-group-item text-[11px] m3-text-muted italic">No questions yet</div>`;
                 } else {
                     rows.forEach(([cName, st]) => {
                         const active = state.subject === sMeta.name && state.chapter === cName;
                         const safeName = cName.replace(/'/g, "\\'");
                         html += `
-                            <button onclick="window.app.selectSubjectChapter('${sMeta.name}', '${safeName}')" class="w-full px-2.5 py-1.5 rounded-lg flex items-center justify-between text-xs font-medium transition ${active ? 'bg-indigo-600/90 text-white font-bold' : 'text-slate-300 hover:bg-slate-800/80'}">
+                            <button onclick="window.app.selectSubjectChapter('${sMeta.name}', '${safeName}')" class="w-full px-3.5 py-2 m3-group-item flex items-center justify-between text-xs font-semibold ${active ? 'ring-2 ring-inset ring-[var(--md-primary)] font-extrabold' : ''}" style="${active ? 'background: var(--md-primary-container); color: var(--md-on-primary-container);' : ''}">
                                 <span class="truncate pr-2">${cName}</span>
                                 <div class="flex items-center gap-1 shrink-0 text-[11px]">
                                     ${st.starred > 0 ? `<span class="text-yellow-400 font-bold">★${st.starred}</span>` : ''}
-                                    <span class="px-1.5 py-0.2 rounded bg-slate-800 text-slate-300">${st.solved}/${st.total}</span>
+                                    <span class="px-2 py-0.2 rounded-full bg-black/25">${st.solved}/${st.total}</span>
                                 </div>
                             </button>
                         `;
                     });
                 }
-
                 html += `</div></div>`;
             });
 
             list.innerHTML = html;
 
             const solvedTotal = all.filter(q => q.solved).length;
-            document.getElementById('drawerProgressText').textContent = `Solved: ${solvedTotal} / ${all.length}`;
+            const totalCount = all.length;
+            document.getElementById('drawerProgressText').textContent = `Solved: ${solvedTotal} / ${totalCount}`;
+            renderM3WavyProgress('drawerWavyProgress', totalCount > 0 ? (solvedTotal / totalCount) * 100 : 6);
         }
 
-        // Card HTML Builder
+        // Material 3 Expressive Card HTML Builder (Asymmetric Inner Segments + Scalloped Cookie Q# Badge)
         function buildCardHtml(q) {
             const chapList = JEE_CHAPTERS[q.subject] || JEE_CHAPTERS.Physics;
             const chapOpts = chapList.map(c => `<option value="${c}" ${c === q.chapter ? 'selected' : ''}>${c}</option>`).join('');
             const diff = q.difficulty || 'Medium';
-
-            const borderCls = q.starred
-                ? 'border-yellow-500/60'
-                : q.solved
-                ? 'border-emerald-500/40'
-                : 'border-borderdark';
+            const borderStyle = q.starred ? 'border-color: #facc15;' : (q.solved ? 'border-color: #34d399;' : '');
 
             return `
-            <article class="w-full bg-card border ${borderCls} rounded-2xl overflow-hidden shadow-lg flex flex-col min-w-0">
-                <!-- Single-Row Compact Card Header -->
-                <div class="px-2.5 py-1.5 bg-panel border-b border-borderdark flex items-center justify-between gap-1 flex-nowrap overflow-x-auto no-scrollbar">
-                    <div class="flex items-center gap-1 min-w-0 flex-nowrap">
-                        <span class="px-1.5 py-0.5 rounded bg-slate-800 text-white font-extrabold text-[11px] border border-slate-700 shrink-0">Q.${q.questionNumber}</span>
+            <article class="m3-card min-w-0" style="${borderStyle}">
+                <!-- Top Asymmetric Segment (22px top radius, 8px bottom radius) -->
+                <div class="px-3 py-2 m3-card-top-segment flex items-center justify-between gap-1.5 flex-nowrap overflow-x-auto no-scrollbar">
+                    <div class="flex items-center gap-1.5 min-w-0 flex-nowrap">
+                        <!-- Scalloped 12-Lobe Cookie Badge for Q# -->
+                        <span class="w-8 h-8 m3-cookie-12 font-extrabold text-[10px] flex items-center justify-center shrink-0" style="background: var(--md-primary); color: var(--md-on-primary);">Q.${q.questionNumber}</span>
 
-                        <select onchange="window.app.changeSubj(${q.id}, this.value)" class="h-6 px-1 rounded text-[11px] font-bold bg-slate-900 text-indigo-300 border border-slate-700 focus:outline-none shrink-0">
+                        <select onchange="window.app.updateQField(${q.id}, 'subject', this.value)" class="h-7 px-2.5 rounded-xl text-[11px] font-bold m3-surface-low border m3-border focus:outline-none shrink-0" style="color: var(--md-primary);">
                             <option value="Physics" ${q.subject === 'Physics' ? 'selected' : ''}>Physics</option>
                             <option value="Chemistry" ${q.subject === 'Chemistry' ? 'selected' : ''}>Chemistry</option>
                             <option value="Mathematics" ${q.subject === 'Mathematics' ? 'selected' : ''}>Maths</option>
                         </select>
 
-                        <select onchange="window.app.changeChap(${q.id}, this.value)" class="h-6 px-1 rounded text-[11px] font-medium bg-slate-900 text-slate-200 border border-slate-700 max-w-[100px] sm:max-w-[130px] truncate focus:outline-none shrink-0">
+                        <select onchange="window.app.updateQField(${q.id}, 'chapter', this.value)" class="h-7 px-2.5 rounded-xl text-[11px] font-semibold m3-surface-low border m3-border max-w-[105px] sm:max-w-[135px] truncate focus:outline-none shrink-0">
                             <option value="${q.chapter}">${q.chapter}</option>
                             ${chapOpts}
                         </select>
 
-                        <select onchange="window.app.changeDifficulty(${q.id}, this.value)" class="h-6 px-1 rounded text-[10px] font-bold bg-slate-900 text-slate-300 border border-slate-700 focus:outline-none shrink-0">
+                        <select onchange="window.app.updateQField(${q.id}, 'difficulty', this.value)" class="h-7 px-2 rounded-xl text-[10px] font-bold m3-surface-low border m3-border focus:outline-none shrink-0">
                             <option value="Easy" ${diff === 'Easy' ? 'selected' : ''}>Easy</option>
                             <option value="Medium" ${diff === 'Medium' ? 'selected' : ''}>Med</option>
                             <option value="Hard" ${diff === 'Hard' ? 'selected' : ''}>Hard</option>
                         </select>
 
-                        ${q.isStitched ? `<span class="px-1 py-0.5 rounded bg-purple-500/20 text-purple-300 text-[9px] font-bold border border-purple-500/30 shrink-0" title="Stitched">🔗</span>` : ''}
+                        ${q.isStitched ? `<span class="px-2 py-0.5 rounded-lg bg-purple-500/20 text-purple-300 text-[9px] font-bold border border-purple-500/30 shrink-0" title="Stitched">🔗</span>` : ''}
                     </div>
 
-                    <!-- Single-Row 1-Tap Controls -->
+                    <!-- Expressive Morphing Icon Controls -->
                     <div class="flex items-center gap-1 shrink-0 ml-auto">
-                        <button onclick="window.app.toggleStar(${q.id})" class="h-6 w-6 rounded text-xs font-bold flex items-center justify-center border transition ${q.starred ? 'bg-yellow-400/20 border-yellow-400 text-yellow-300' : 'bg-slate-800 border-slate-700 text-slate-300'}" title="Star">
+                        <button onclick="window.app.toggleQBool(${q.id}, 'starred')" class="h-7 w-7 rounded-xl text-xs font-bold flex items-center justify-center border transition ${q.starred ? 'bg-yellow-400/25 border-yellow-400 text-yellow-300 scale-105' : 'm3-surface-low m3-border m3-text-muted hover:rounded-lg'}" title="Star">
                             <i class="${q.starred ? 'ph-fill ph-star text-yellow-400' : 'ph-bold ph-star'}"></i>
                         </button>
 
-                        <button onclick="window.app.toggleSolved(${q.id})" class="h-6 w-6 rounded text-xs font-bold flex items-center justify-center border transition ${q.solved ? 'bg-emerald-500/20 border-emerald-500 text-emerald-300' : 'bg-amber-500/15 border-amber-500/40 text-amber-300'}" title="${q.solved ? 'Solved' : 'Unsolved'}">
+                        <button onclick="window.app.toggleQBool(${q.id}, 'solved')" class="h-7 w-7 rounded-xl text-xs font-bold flex items-center justify-center border transition ${q.solved ? 'bg-emerald-500/25 border-emerald-500 text-emerald-300 scale-105' : 'bg-amber-500/15 border-amber-500/40 text-amber-300 hover:rounded-lg'}" title="${q.solved ? 'Solved' : 'Unsolved'}">
                             <i class="${q.solved ? 'ph-fill ph-check-circle text-emerald-400' : 'ph-bold ph-circle'}"></i>
                         </button>
 
-                        <button onclick="window.app.stitchWithNext(${q.id})" class="h-6 w-6 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 text-xs flex items-center justify-center" title="Stitch with Next Card">
+                        <button onclick="window.app.stitchWithNext(${q.id})" class="h-7 w-7 rounded-xl m3-surface-low hover:brightness-125 border m3-border text-xs flex items-center justify-center transition" title="Stitch with Next Card">
                             <i class="ph-bold ph-arrows-in-line-vertical text-sky-400"></i>
                         </button>
 
-                        <button onclick="window.app.openSplitModal(${q.id})" class="h-6 w-6 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 text-xs flex items-center justify-center" title="Split or Trim">
+                        <button onclick="window.app.openSplitModal(${q.id})" class="h-7 w-7 rounded-xl m3-surface-low hover:brightness-125 border m3-border text-xs flex items-center justify-center transition" title="Split or Trim">
                             <i class="ph-bold ph-scissors text-amber-400"></i>
                         </button>
 
-                        <button onclick="window.app.openScratchpad(${q.id})" class="h-6 w-6 rounded bg-indigo-600/20 hover:bg-indigo-600 text-indigo-300 hover:text-white border border-indigo-500/30 text-xs flex items-center justify-center" title="Solve Pad (Rough Work)">
+                        <button onclick="window.app.openScratchpad(${q.id})" class="h-7 w-7 m3-btn-tonal text-xs flex items-center justify-center" title="Solve Pad">
                             <i class="ph-bold ph-pencil-line"></i>
                         </button>
 
-                        <button onclick="window.app.deleteQ(${q.id})" class="h-6 w-6 rounded bg-slate-800 hover:bg-rose-950 text-slate-400 hover:text-rose-400 flex items-center justify-center text-xs" title="Delete">
+                        <button onclick="window.app.deleteQ(${q.id})" class="h-7 w-7 rounded-xl m3-surface-low hover:bg-rose-950 hover:text-rose-400 m3-text-muted flex items-center justify-center text-xs transition" title="Delete">
                             <i class="ph-bold ph-trash"></i>
                         </button>
                     </div>
                 </div>
 
-                <!-- Question Image Container (Click Image to Open Full Question Popup) -->
-                <div class="p-2 bg-white flex items-center justify-center min-w-0">
-                    <img src="${q.imageDataUrl}" onclick="event.stopPropagation(); window.app.openImagePopup(${q.id})" alt="Q.${q.questionNumber}" class="question-slice-img rounded w-full h-auto object-contain cursor-zoom-in" loading="lazy" title="Click image to enlarge">
+                <!-- Bottom Asymmetric Image Segment (8px top radius, 22px bottom radius) -->
+                <div class="p-2.5 m3-card-img-segment flex items-center justify-center min-w-0">
+                    <img src="${q.imageDataUrl}" onclick="event.stopPropagation(); window.app.openImagePopup(${q.id})" alt="Q.${q.questionNumber}" class="question-slice-img rounded-lg w-full h-auto object-contain cursor-zoom-in" loading="lazy" title="Click image to enlarge">
                 </div>
             </article>
             `;
@@ -1879,65 +2060,55 @@ CRITICAL RULES FOR ZERO CLUBBING & EXACT STITCHING:
 
             if (list.length === 0) {
                 container.innerHTML = `
-                    <div class="max-w-lg mx-auto my-12 bg-panel border border-borderdark rounded-3xl p-8 text-center space-y-4 shadow-2xl">
-                        <div class="w-14 h-14 rounded-2xl bg-indigo-500/15 border border-indigo-500/30 text-indigo-400 flex items-center justify-center mx-auto">
-                            <i class="ph-bold ${state.isSyncingCloud ? 'ph-arrows-clockwise animate-spin' : 'ph-scissors'} text-3xl"></i>
+                    <div class="max-w-lg mx-auto my-12 m3-dialog p-8 text-center space-y-4">
+                        <div class="w-16 h-16 m3-cookie-12 flex items-center justify-center mx-auto ${state.isSyncingCloud ? 'm3-spin-slow' : ''}" style="background: var(--md-primary-container); color: var(--md-primary);">
+                            <i class="ph-bold ${state.isSyncingCloud ? 'ph-cloud-arrow-down' : 'ph-scissors'} text-3xl"></i>
                         </div>
-                        <h2 class="text-lg font-bold text-white">
+                        <h2 class="text-lg font-extrabold">
                             ${state.isSyncingCloud
                                 ? 'Syncing Questions from GitHub Cloud...'
                                 : state.questions.length === 0
-                                ? 'Cloud Question Vault Ready!'
+                                ? 'Material 3 Expressive Vault Ready!'
                                 : 'No Questions Match Current Search / Filter'}
                         </h2>
-                        <p class="text-xs sm:text-sm text-slate-400 leading-relaxed">
+                        <div id="emptyStateWaveWrap" class="${state.isSyncingCloud ? 'py-1' : 'hidden'}"></div>
+                        <p class="text-xs sm:text-sm m3-text-muted leading-relaxed">
                             ${state.isSyncingCloud
                                 ? 'Fetching your latest question bank from your GitHub Secret Gist...'
                                 : state.questions.length === 0
                                 ? 'Tap "+ Add Test PDF" to extract questions with 100% full-width crops, precision multi-page stitching, and local full-question OCR search!'
-                                : (state.isRunningBackgroundOcr
-                                    ? 'Local Tesseract OCR is currently indexing your questions in the background—results will appear automatically as they finish!'
-                                    : 'Try clearing the search box, switching Status to "All Status", or selecting "All Subjects & Chapters" inside the Chapters drawer.')}
+                                : 'Try clearing the search box, switching Status to "All Status", or selecting "All Subjects & Chapters" inside the Chapters drawer.'}
                         </p>
                         <div class="flex flex-wrap items-center justify-center gap-3 pt-2">
                             ${state.search ? `
-                                <button onclick="window.app.clearSearch()" class="h-10 px-5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-600 text-white text-xs sm:text-sm font-bold flex items-center gap-2">
+                                <button onclick="window.app.clearSearch()" class="h-10 px-5 m3-btn-tonal text-xs sm:text-sm flex items-center gap-2">
                                     <i class="ph-bold ph-x"></i> Clear Search Filter
                                 </button>
                             ` : ''}
-                            <button onclick="window.app.openUploadModal()" class="h-10 px-5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs sm:text-sm font-bold flex items-center gap-2 shadow-lg shadow-indigo-600/30">
+                            <button onclick="window.app.openUploadModal()" class="h-10 px-5 m3-btn-filled text-xs sm:text-sm flex items-center gap-2 shadow-lg">
                                 <i class="ph-bold ph-file-pdf"></i> Upload Test Paper PDF
                             </button>
-                            <button onclick="window.app.pullFromCloudGist(true)" class="h-10 px-4 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-sky-300 text-xs sm:text-sm font-semibold flex items-center gap-2">
+                            <button onclick="window.app.pullFromCloudGist(true)" class="h-10 px-5 m3-btn-tonal text-xs sm:text-sm flex items-center gap-2">
                                 <i class="ph-bold ph-cloud-arrow-down"></i> Pull from Cloud
                             </button>
                         </div>
                     </div>
                 `;
+                if (state.isSyncingCloud) renderM3WavyProgress('emptyStateWaveWrap', 68);
                 return;
             }
 
-            // SHORTEST-COLUMN-FIRST HEIGHT BALANCED MASONRY
             const isTwoCol = window.innerWidth >= 900;
             if (!isTwoCol) {
-                container.innerHTML = `<div class="flex flex-col gap-3.5 pb-10">${list.map(buildCardHtml).join('')}</div>`;
+                container.innerHTML = `<div class="flex flex-col gap-4 pb-10">${list.map(buildCardHtml).join('')}</div>`;
             } else {
-                const colLeft = [];
-                const colRight = [];
-                let leftHeight = 0;
-                let rightHeight = 0;
-
-                list.forEach((q) => {
-                    const estimatedCardHeight = 0.11 + (typeof q.aspectRatio === 'number' ? q.aspectRatio : 0.42);
-                    if (leftHeight <= rightHeight) {
-                        colLeft.push(buildCardHtml(q));
-                        leftHeight += estimatedCardHeight;
-                    } else {
-                        colRight.push(buildCardHtml(q));
-                        rightHeight += estimatedCardHeight;
-                    }
+                const colLeft = [], colRight = [];
+                let leftHeight = 0, rightHeight = 0;
+                list.forEach(q => {
+                    const estH = 0.11 + (typeof q.aspectRatio === 'number' ? q.aspectRatio : 0.42);
+                    if (leftHeight <= rightHeight) { colLeft.push(buildCardHtml(q)); leftHeight += estH; }
+                    else { colRight.push(buildCardHtml(q)); rightHeight += estH; }
                 });
-
                 container.innerHTML = `
                     <div class="grid grid-cols-2 gap-4 items-start pb-10">
                         <div class="flex flex-col gap-4 min-w-0">${colLeft.join('')}</div>
@@ -1964,35 +2135,33 @@ CRITICAL RULES FOR ZERO CLUBBING & EXACT STITCHING:
                 this.toggleDrawer(false);
                 renderAll();
             },
-            setSubject(s) { state.subject = s; state.chapter = 'ALL'; renderAll(); },
-            setChapter(c) { state.chapter = c; this.toggleDrawer(false); renderAll(); },
             setStatus(st) { state.status = st; renderAll(); },
             setPaper(p) { state.paper = p; renderAll(); },
             setDifficulty(d) { state.difficulty = d; renderAll(); },
             setSearch(v) {
                 state.search = v || '';
-                const clearBtn = document.getElementById('clearSearchBtn');
-                if (clearBtn) clearBtn.classList.toggle('hidden', !state.search.trim());
+                document.getElementById('clearSearchBtn')?.classList.toggle('hidden', !state.search.trim());
                 renderFeed();
             },
             clearSearch() {
                 state.search = '';
                 const inp = document.getElementById('searchBox');
                 if (inp) inp.value = '';
-                const clearBtn = document.getElementById('clearSearchBtn');
-                if (clearBtn) clearBtn.classList.add('hidden');
+                document.getElementById('clearSearchBtn')?.classList.add('hidden');
                 renderFeed();
             },
             renderDrawerChapters,
             runBackgroundLocalOcrForExistingQuestions,
 
-            // Fullscreen Toggle
+            setMaterialTheme(hexColor) {
+                applyMaterialThemeFromSeed(hexColor);
+                toast(`Applied Material 3 Expressive Theme (${hexColor})`, 'success');
+            },
+
             toggleFullscreen() {
                 const icon = document.getElementById('fullscreenIcon');
                 if (!document.fullscreenElement) {
-                    document.documentElement.requestFullscreen().catch(err => {
-                        toast(`Fullscreen error: ${err.message}`, 'warn');
-                    });
+                    document.documentElement.requestFullscreen().catch(err => toast(`Fullscreen error: ${err.message}`, 'warn'));
                     if (icon) icon.className = 'ph-bold ph-corners-in text-sm';
                 } else {
                     document.exitFullscreen().catch(() => {});
@@ -2000,32 +2169,22 @@ CRITICAL RULES FOR ZERO CLUBBING & EXACT STITCHING:
                 }
             },
 
-            // Cloud Sync Handlers
             pushToCloudGist,
             pullFromCloudGist,
             handleCloudBadgeClick() {
-                if (!getGithubToken()) {
-                    this.openSettingsModal();
-                } else {
-                    pushToCloudGist(true);
-                }
+                if (!getGithubToken()) this.openSettingsModal(false, 'KEYS');
+                else pushToCloudGist(true);
             },
-            toggleGithubTokenVisibility() {
-                const inp = document.getElementById('githubTokenInput');
-                const icon = document.getElementById('githubTokenEyeIcon');
-                if (inp.type === 'password') {
-                    inp.type = 'text';
-                    icon.className = 'ph-bold ph-eye-slash text-sm';
-                } else {
-                    inp.type = 'password';
-                    icon.className = 'ph-bold ph-eye text-sm';
-                }
+            toggleVisibility(inputId, iconId) {
+                const inp = document.getElementById(inputId);
+                const icon = document.getElementById(iconId);
+                if (!inp || !icon) return;
+                const isPwd = inp.type === 'password';
+                inp.type = isPwd ? 'text' : 'password';
+                icon.className = isPwd ? 'ph-bold ph-eye-slash text-base' : 'ph-bold ph-eye text-base';
             },
 
-            // Individual Question Image Popup Lightbox
-            getActivePopupId() {
-                return state.activePopupId;
-            },
+            getActivePopupId: () => state.activePopupId,
             openImagePopup(id) {
                 const q = state.questions.find(i => i.id === Number(id));
                 if (!q) return;
@@ -2041,8 +2200,36 @@ CRITICAL RULES FOR ZERO CLUBBING & EXACT STITCHING:
                 state.activePopupId = null;
             },
 
-            // Settings Modal (Saves API Keys & Config in localStorage)
-            openSettingsModal(showMissingAlert = false) {
+            openSettingsPage(pageKey = 'HOME') {
+                state.activeSettingsPage = pageKey;
+                ['HOME', 'KEYS', 'THEME', 'BACKUP', 'SCANNER'].forEach(p => {
+                    document.getElementById(`settingsPage_${p}`)?.classList.toggle('hidden', p !== pageKey);
+                });
+                const backBtn = document.getElementById('settingsBackBtn');
+                const headerIcon = document.getElementById('settingsHeaderIcon');
+                const titleEl = document.getElementById('settingsHeaderTitle');
+                const subEl = document.getElementById('settingsHeaderSub');
+
+                if (pageKey === 'HOME') {
+                    backBtn.classList.add('hidden'); backBtn.classList.remove('flex');
+                    headerIcon.classList.remove('hidden');
+                    titleEl.textContent = 'Settings';
+                    subEl.textContent = 'Material 3 Expressive • Tap a section';
+                } else {
+                    backBtn.classList.remove('hidden'); backBtn.classList.add('flex');
+                    headerIcon.classList.add('hidden');
+                    const meta = {
+                        KEYS: ['API Keys & Cloud Credentials', 'Stored locally on your device'],
+                        THEME: ['Appearance & Material You', 'Dynamic primary seed & tonal surfaces'],
+                        BACKUP: ['Cloud Sync, Backups & Tools', 'GitHub Gist Sync, JSON & Local OCR'],
+                        SCANNER: ['AI Scanner & Crop Margins', 'Gemini Vision model & safe padding']
+                    }[pageKey] || ['Settings', ''];
+                    titleEl.textContent = meta[0];
+                    subEl.textContent = meta[1];
+                }
+            },
+
+            openSettingsModal(showMissingAlert = false, initialPage = 'HOME') {
                 document.getElementById('apiKeyInput').value = getApiKey();
                 document.getElementById('geminiModelSelect').value = getSelectedModel();
                 const pads = getVerticalPads();
@@ -2053,23 +2240,13 @@ CRITICAL RULES FOR ZERO CLUBBING & EXACT STITCHING:
                 document.getElementById('cloudAutoSyncCheckbox').checked = isCloudAutoSyncEnabled();
                 document.getElementById('apiKeyMissingAlert').classList.toggle('hidden', !showMissingAlert);
                 updateCloudStatusUI('idle');
+                this.openSettingsPage(showMissingAlert ? 'KEYS' : initialPage);
                 document.getElementById('settingsModal').classList.remove('hidden');
             },
             closeSettingsModal() {
                 document.getElementById('settingsModal').classList.add('hidden');
             },
-            toggleApiKeyVisibility() {
-                const inp = document.getElementById('apiKeyInput');
-                const icon = document.getElementById('apiKeyEyeIcon');
-                if (inp.type === 'password') {
-                    inp.type = 'text';
-                    icon.className = 'ph-bold ph-eye-slash text-base';
-                } else {
-                    inp.type = 'password';
-                    icon.className = 'ph-bold ph-eye text-base';
-                }
-            },
-            async saveSettings() {
+            async saveSettings(closeModalAfter = true) {
                 const key = document.getElementById('apiKeyInput').value.trim();
                 const model = document.getElementById('geminiModelSelect').value;
                 const padTop = Math.max(0, Number(document.getElementById('padTopInput').value) ?? 4);
@@ -2088,48 +2265,27 @@ CRITICAL RULES FOR ZERO CLUBBING & EXACT STITCHING:
 
                 updateApiKeyIndicator();
                 updateCloudStatusUI('idle');
-                this.closeSettingsModal();
-                toast(`Saved Keys Locally!`, 'success');
+                if (closeModalAfter) this.closeSettingsModal();
+                toast('Saved Settings Locally!', 'success');
 
                 if (ghToken) {
-                    if (state.questions.length === 0) {
-                        await pullFromCloudGist(true);
-                    } else if (autoSync) {
-                        scheduleCloudAutoSync();
-                    }
+                    if (state.questions.length === 0) await pullFromCloudGist(true);
+                    else if (autoSync) scheduleCloudAutoSync();
                 }
             },
 
-            // Question Card Actions (In-Memory + Cloud Sync Only)
-            toggleStar(id) {
+            // Consolidated Card Actions
+            toggleQBool(id, field) {
                 const q = state.questions.find(i => i.id === Number(id));
                 if (!q) return;
-                q.starred = !q.starred;
+                q[field] = !q[field];
                 scheduleCloudAutoSync();
             },
-            toggleSolved(id) {
+            updateQField(id, field, val) {
                 const q = state.questions.find(i => i.id === Number(id));
                 if (!q) return;
-                q.solved = !q.solved;
-                scheduleCloudAutoSync();
-            },
-            changeSubj(id, s) {
-                const q = state.questions.find(i => i.id === Number(id));
-                if (!q) return;
-                q.subject = s;
-                q.chapter = JEE_CHAPTERS[s]?.[0] || 'General';
-                scheduleCloudAutoSync();
-            },
-            changeChap(id, c) {
-                const q = state.questions.find(i => i.id === Number(id));
-                if (!q) return;
-                q.chapter = c;
-                scheduleCloudAutoSync();
-            },
-            changeDifficulty(id, d) {
-                const q = state.questions.find(i => i.id === Number(id));
-                if (!q) return;
-                q.difficulty = d;
+                q[field] = val;
+                if (field === 'subject') q.chapter = JEE_CHAPTERS[val]?.[0] || 'General';
                 scheduleCloudAutoSync();
             },
             deleteQ(id) {
@@ -2144,45 +2300,33 @@ CRITICAL RULES FOR ZERO CLUBBING & EXACT STITCHING:
                 toast('Cleared all questions & syncing to Cloud');
             },
 
-            // Deduplication
             runDeduplication(notify = false) {
                 const seen = new Set();
                 const unique = [];
                 let removed = 0;
                 for (const q of state.questions) {
                     const key = `${(q.paperName || '').toLowerCase()}::${q.subject}::${String(q.questionNumber).trim()}`;
-                    if (seen.has(key)) {
-                        removed++;
-                    } else {
-                        seen.add(key);
-                        unique.push(q);
-                    }
+                    if (seen.has(key)) removed++;
+                    else { seen.add(key); unique.push(q); }
                 }
-                if (removed > 0) {
-                    state.questions = unique;
-                    scheduleCloudAutoSync();
-                }
+                if (removed > 0) { state.questions = unique; scheduleCloudAutoSync(); }
                 if (notify) toast(removed > 0 ? `Removed ${removed} duplicate questions!` : 'No duplicate questions found ✓', 'success');
             },
 
-            // Backup Export / Import
             exportBackupJson,
             importBackupJson,
 
-            // Upload Modal
             openUploadModal() {
                 document.getElementById('uploadSetupView').classList.remove('hidden');
                 document.getElementById('uploadProgressView').classList.add('hidden');
                 document.getElementById('uploadModal').classList.remove('hidden');
             },
             closeUploadModal() {
-                if (state.isExtracting) return;
-                document.getElementById('uploadModal').classList.add('hidden');
+                if (!state.isExtracting) document.getElementById('uploadModal').classList.add('hidden');
             },
             onPdfSelected,
             startPdfExtraction,
 
-            // Split / Vertical Trim Modal
             openSplitModal(id) {
                 const q = state.questions.find(i => i.id === Number(id));
                 if (!q) return;
@@ -2201,8 +2345,8 @@ CRITICAL RULES FOR ZERO CLUBBING & EXACT STITCHING:
             setSplitMode(m) {
                 state.splitMode = m;
                 const isSplit = m === 'SPLIT';
-                document.getElementById('modeSplitBtn').className = isSplit ? "h-8 px-3 rounded-lg text-xs font-bold bg-amber-500 text-slate-950" : "h-8 px-3 rounded-lg text-xs font-semibold bg-slate-800 text-slate-300";
-                document.getElementById('modeTrimBtn').className = !isSplit ? "h-8 px-3 rounded-lg text-xs font-bold bg-amber-500 text-slate-950" : "h-8 px-3 rounded-lg text-xs font-semibold bg-slate-800 text-slate-300";
+                document.getElementById('modeSplitBtn').className = isSplit ? "h-8 px-3.5 text-xs m3-btn-filled" : "h-8 px-3.5 text-xs m3-btn-tonal";
+                document.getElementById('modeTrimBtn').className = !isSplit ? "h-8 px-3.5 text-xs m3-btn-filled" : "h-8 px-3.5 text-xs m3-btn-tonal";
                 document.getElementById('splitRangeWrap').classList.toggle('hidden', !isSplit);
                 document.getElementById('trimRangeWrap').classList.toggle('hidden', isSplit);
                 document.getElementById('trimRangeWrap').classList.toggle('flex', !isSplit);
@@ -2231,18 +2375,15 @@ CRITICAL RULES FOR ZERO CLUBBING & EXACT STITCHING:
                 await new Promise(r => { img.onload = r; img.src = q.imageDataUrl; });
 
                 if (state.splitMode === 'SPLIT') {
-                    const ratio = Number(document.getElementById('splitCutSlider').value) / 100;
-                    const cutY = Math.floor(img.height * ratio);
+                    const cutY = Math.floor(img.height * (Number(document.getElementById('splitCutSlider').value) / 100));
 
                     const c1Raw = document.createElement('canvas');
-                    c1Raw.width = img.width;
-                    c1Raw.height = cutY;
+                    c1Raw.width = img.width; c1Raw.height = cutY;
                     c1Raw.getContext('2d').drawImage(img, 0, 0, img.width, cutY, 0, 0, img.width, cutY);
                     const c1 = autoTrimVerticalWhitespace(c1Raw);
 
                     const c2Raw = document.createElement('canvas');
-                    c2Raw.width = img.width;
-                    c2Raw.height = Math.max(20, img.height - cutY);
+                    c2Raw.width = img.width; c2Raw.height = Math.max(20, img.height - cutY);
                     c2Raw.getContext('2d').drawImage(img, 0, cutY, img.width, img.height - cutY, 0, 0, img.width, img.height - cutY);
                     const c2 = autoTrimVerticalWhitespace(c2Raw);
 
@@ -2250,9 +2391,9 @@ CRITICAL RULES FOR ZERO CLUBBING & EXACT STITCHING:
                     q.questionNumber = `${baseNum}a`;
                     q.imageDataUrl = c1.toDataURL('image/jpeg', 0.88);
                     q.aspectRatio = c1.height / c1.width;
-                    q.ocrText = ''; // Clear so background local OCR re-indexes the exact split half
+                    q.ocrText = '';
 
-                    const secondCard = {
+                    state.questions.push({
                         ...q,
                         id: generateUniqueId(),
                         questionNumber: `${baseNum}b`,
@@ -2261,8 +2402,7 @@ CRITICAL RULES FOR ZERO CLUBBING & EXACT STITCHING:
                         ocrText: '',
                         solved: false,
                         createdAt: (q.createdAt || Date.now()) + 1
-                    };
-                    state.questions.push(secondCard);
+                    });
                     scheduleCloudAutoSync();
                     toast(`Split into Q.${baseNum}a & Q.${baseNum}b!`, 'success');
                     runBackgroundLocalOcrForExistingQuestions(false);
@@ -2272,8 +2412,7 @@ CRITICAL RULES FOR ZERO CLUBBING & EXACT STITCHING:
                     const sy = Math.floor(img.height * t);
                     const sh = Math.max(30, Math.floor(img.height * (b - t)));
                     const c = document.createElement('canvas');
-                    c.width = img.width;
-                    c.height = sh;
+                    c.width = img.width; c.height = sh;
                     c.getContext('2d').drawImage(img, 0, sy, img.width, sh, 0, 0, img.width, sh);
                     q.imageDataUrl = c.toDataURL('image/jpeg', 0.88);
                     q.aspectRatio = c.height / c.width;
@@ -2286,8 +2425,7 @@ CRITICAL RULES FOR ZERO CLUBBING & EXACT STITCHING:
                 const list = getFiltered();
                 const idx = list.findIndex(q => q.id === Number(id));
                 if (idx < 0 || idx === list.length - 1) return toast('No card below to stitch with', 'warn');
-                const curr = list[idx];
-                const next = list[idx + 1];
+                const curr = list[idx], next = list[idx + 1];
                 const stitchRes = await stitchCanvasesVertically(curr.imageDataUrl, next.imageDataUrl);
                 curr.imageDataUrl = stitchRes.dataUrl;
                 curr.aspectRatio = stitchRes.aspectRatio;
@@ -2298,10 +2436,7 @@ CRITICAL RULES FOR ZERO CLUBBING & EXACT STITCHING:
                 toast(`Stitched Q.${curr.questionNumber} & Q.${next.questionNumber}!`, 'success');
             },
 
-            // Fullscreen Tablet Stylus Scratchpad
-            getActivePadId() {
-                return state.activePadId;
-            },
+            getActivePadId: () => state.activePadId,
             openScratchpad(id) {
                 const q = state.questions.find(i => i.id === Number(id));
                 if (!q) return;
@@ -2318,24 +2453,15 @@ CRITICAL RULES FOR ZERO CLUBBING & EXACT STITCHING:
                 state.inkColor = color;
                 state.isEraser = isEraser;
                 const erBtn = document.getElementById('eraserBtn');
-                if (erBtn) {
-                    erBtn.className = isEraser
-                        ? "h-8 px-2.5 rounded-lg bg-amber-500 text-slate-950 text-xs font-bold flex items-center gap-1"
-                        : "h-8 px-2.5 rounded-lg bg-slate-800 border border-slate-700 text-slate-300 text-xs font-semibold flex items-center gap-1";
-                }
+                if (erBtn) erBtn.className = isEraser ? "h-8 px-3 m3-btn-filled text-xs flex items-center gap-1" : "h-8 px-3 m3-btn-tonal text-xs flex items-center gap-1";
             },
-            setStrokeWidth(w) {
-                state.strokeWidth = Number(w) || 3.5;
-            },
+            setStrokeWidth(w) { state.strokeWidth = Number(w) || 3.5; },
             clearInk() {
                 const c = document.getElementById('stylusCanvas');
                 c.getContext('2d').clearRect(0, 0, c.width, c.height);
             }
         };
 
-        // ===================================================================
-        // TABLET STYLUS SCRATCHPAD POINTER EVENTS
-        // ===================================================================
         function initStylusCanvas() {
             const wrap = document.getElementById('padCanvasWrap');
             const canvas = document.getElementById('stylusCanvas');
@@ -2356,10 +2482,8 @@ CRITICAL RULES FOR ZERO CLUBBING & EXACT STITCHING:
                 canvas.setPointerCapture(e.pointerId);
                 state.isDrawing = true;
                 const p = getPos(e);
-                lx = p.x;
-                ly = p.y;
+                lx = p.x; ly = p.y;
             };
-
             canvas.onpointermove = (e) => {
                 if (!state.isDrawing) return;
                 e.preventDefault();
@@ -2370,16 +2494,13 @@ CRITICAL RULES FOR ZERO CLUBBING & EXACT STITCHING:
                 ctx.strokeStyle = state.inkColor;
                 ctx.lineWidth = state.isEraser ? 22 : state.strokeWidth;
                 ctx.stroke();
-                lx = p.x;
-                ly = p.y;
+                lx = p.x; ly = p.y;
             };
-
             const stopDraw = (e) => {
                 if (!state.isDrawing) return;
                 state.isDrawing = false;
                 try { canvas.releasePointerCapture(e.pointerId); } catch (_) {}
             };
-
             canvas.onpointerup = stopDraw;
             canvas.onpointercancel = stopDraw;
         }
@@ -2387,6 +2508,9 @@ CRITICAL RULES FOR ZERO CLUBBING & EXACT STITCHING:
         window.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
                 window.app.closeImagePopup();
+                window.app.closeSettingsModal();
+                window.app.closeUploadModal();
+                window.app.closeSplitModal();
             }
         });
 
@@ -2397,12 +2521,12 @@ CRITICAL RULES FOR ZERO CLUBBING & EXACT STITCHING:
         });
 
         window.addEventListener('DOMContentLoaded', async () => {
+            initM3ExpressiveShapes();
+            applyMaterialThemeFromSeed(localStorage.getItem('jee_m3_seed_color') || '#8b5cf6');
             updateApiKeyIndicator();
             updateCloudStatusUI('idle');
             renderAll();
-            if (getGithubToken()) {
-                await pullFromCloudGist(false);
-            }
+            if (getGithubToken()) await pullFromCloudGist(false);
         });
     </script>
 </body>
