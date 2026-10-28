@@ -12,21 +12,26 @@
     <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
     <style>
         :root {
-            --md-primary: hsl(252, 92%, 78%);
-            --md-on-primary: hsl(252, 75%, 15%);
-            --md-primary-container: hsl(252, 58%, 27%);
-            --md-on-primary-container: hsl(252, 95%, 92%);
-            --md-secondary-container: hsl(252, 32%, 22%);
-            --md-on-secondary-container: hsl(252, 75%, 90%);
-            --md-surface: hsl(252, 24%, 7%);
-            --md-surface-low: hsl(252, 24%, 10%);
-            --md-surface-container: hsl(252, 24%, 13%);
-            --md-surface-high: hsl(252, 24%, 17%);
-            --md-surface-highest: hsl(252, 24%, 22%);
-            --md-on-surface: hsl(252, 20%, 95%);
-            --md-on-surface-variant: hsl(252, 15%, 72%);
-            --md-outline: hsl(252, 16%, 32%);
-            --md-outline-variant: hsl(252, 18%, 20%);
+            --md-primary: hsl(252, 95%, 78%);
+            --md-on-primary: hsl(252, 80%, 14%);
+            --md-primary-container: hsl(252, 68%, 28%);
+            --md-on-primary-container: hsl(252, 100%, 93%);
+            --md-secondary-container: hsl(272, 48%, 24%);
+            --md-on-secondary-container: hsl(272, 90%, 92%);
+            --md-tertiary-container: hsl(330, 55%, 26%);
+            --md-on-tertiary-container: hsl(330, 95%, 93%);
+            --md-surface: hsl(252, 28%, 7%);
+            --md-surface-low: hsl(252, 28%, 10%);
+            --md-surface-container: hsl(252, 28%, 13%);
+            --md-surface-high: hsl(252, 28%, 17%);
+            --md-surface-highest: hsl(252, 28%, 22%);
+            --md-surface-alpha: hsla(252, 28%, 11%, 0.72);
+            --md-container-alpha: hsla(252, 28%, 15%, 0.75);
+            --md-high-alpha: hsla(252, 28%, 20%, 0.72);
+            --md-on-surface: hsl(252, 25%, 96%);
+            --md-on-surface-variant: hsl(252, 18%, 74%);
+            --md-outline: hsl(252, 20%, 36%);
+            --md-outline-variant: hsl(252, 20%, 22%);
             --m3-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
             --m3-emphasized: cubic-bezier(0.2, 0, 0, 1);
         }
@@ -41,36 +46,67 @@
         }
         .font-mono { font-family: 'JetBrains Mono', monospace; }
 
-        /* M3 Expressive Dynamic Tonal Surfaces */
+        /* M3 Expressive Dynamic Tonal Surfaces + Android 17 Frosted Liquid Glass Mode */
         .m3-surface { background-color: var(--md-surface); }
         .m3-surface-low { background-color: var(--md-surface-low); }
         .m3-surface-container { background-color: var(--md-surface-container); }
         .m3-surface-high { background-color: var(--md-surface-high); }
         .m3-surface-highest { background-color: var(--md-surface-highest); }
+
+        body.liquid-glass .m3-surface-low {
+            background-color: var(--md-surface-alpha);
+            backdrop-filter: blur(22px) saturate(165%);
+            -webkit-backdrop-filter: blur(22px) saturate(165%);
+        }
+        body.liquid-glass .m3-card,
+        body.liquid-glass .m3-dialog,
+        body.liquid-glass #chaptersDrawer {
+            background-color: var(--md-container-alpha);
+            backdrop-filter: blur(24px) saturate(175%);
+            -webkit-backdrop-filter: blur(24px) saturate(175%);
+            box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.14), 0 20px 44px -10px rgba(0, 0, 0, 0.35);
+        }
+        body.liquid-glass .m3-card-top-segment,
+        body.liquid-glass .m3-group-item,
+        body.liquid-glass .m3-segmented-group {
+            background-color: var(--md-high-alpha);
+            backdrop-filter: blur(16px) saturate(150%);
+            -webkit-backdrop-filter: blur(16px) saturate(150%);
+            box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.1);
+        }
+
         .m3-border { border-color: var(--md-outline-variant); }
         .m3-outline { border-color: var(--md-outline); }
         .m3-text-muted { color: var(--md-on-surface-variant); }
         .m3-primary-pill {
             background-color: var(--md-primary-container);
             color: var(--md-on-primary-container);
-            border: 1px solid var(--md-primary);
+            border: 1.5px solid var(--md-primary);
+        }
+        .m3-tertiary-pill {
+            background-color: var(--md-tertiary-container);
+            color: var(--md-on-tertiary-container);
         }
 
-        /* M3 Expressive Scalloped Cookie & Clover Shapes */
+        /* M3 Expressive Softened Organic Shapes (Less sharp spokes + Tilted Pill) */
         .m3-cookie-12 { clip-path: url(#m3Cookie12Clip); }
         .m3-clover-8 { clip-path: url(#m3Clover8Clip); }
-        .m3-spin-slow { animation: m3Spin 14s linear infinite; }
+        .m3-arch-shape { border-radius: 9999px 9999px 28px 28px; }
+        .m3-leaf-shape { border-radius: 26px 10px 26px 10px; }
+        .m3-spin-slow { animation: m3Spin 16s linear infinite; }
         @keyframes m3Spin { to { transform: rotate(360deg); } }
 
-        /* M3 Expressive Segmented Button Group (Matches 1000006110.jpg & 1000006108.jpg) */
+        /* M3 Expressive Swipeable Segmented Button Group (No sharp corners, minimum 14px inner radius) */
         .m3-segmented-group {
             display: inline-flex;
             align-items: center;
             background-color: var(--md-surface-high);
             border: 1.5px solid var(--md-outline-variant);
             border-radius: 9999px;
-            padding: 3px;
+            padding: 3.5px;
             gap: 3px;
+            touch-action: pan-y;
+            user-select: none;
         }
         .m3-seg-btn {
             height: 32px;
@@ -82,15 +118,17 @@
             gap: 6px;
             color: var(--md-on-surface-variant);
             background-color: transparent;
-            border-radius: 8px;
+            border-radius: 14px;
             transition: all 0.32s var(--m3-spring);
             white-space: nowrap;
+            cursor: pointer;
         }
         .m3-seg-btn:first-child { border-top-left-radius: 9999px; border-bottom-left-radius: 9999px; }
         .m3-seg-btn:last-child { border-top-right-radius: 9999px; border-bottom-right-radius: 9999px; }
         .m3-seg-btn:hover:not(.active) {
             background-color: var(--md-surface-highest);
             color: var(--md-on-surface);
+            border-radius: 18px;
         }
         .m3-seg-btn:active { transform: scale(0.94); }
         .m3-seg-btn.active {
@@ -99,42 +137,44 @@
             border-radius: 9999px;
             font-weight: 800;
             padding: 0 16px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.22);
+            box-shadow: 0 3px 12px rgba(0,0,0,0.22);
         }
 
-        /* M3 Expressive Connected Icon Button Group (For Card Top Bar) */
+        /* M3 Expressive Connected Icon Button Group (Soft 14px inner corners, 9999px outer ends) */
         .m3-icon-group {
             display: inline-flex;
             align-items: center;
-            gap: 2px;
+            gap: 3px;
             background-color: var(--md-surface-low);
-            padding: 2px;
+            padding: 3px;
             border-radius: 9999px;
-            border: 1px solid var(--md-outline-variant);
+            border: 1.5px solid var(--md-outline-variant);
         }
         .m3-icon-group-btn {
-            height: 28px;
-            min-width: 28px;
-            padding: 0 7px;
-            border-radius: 6px;
+            height: 30px;
+            min-width: 30px;
+            padding: 0 8px;
+            border-radius: 14px;
             background-color: var(--md-surface-high);
             color: var(--md-on-surface-variant);
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            font-size: 12px;
-            transition: all 0.26s var(--m3-spring);
+            font-size: 13px;
+            transition: all 0.28s var(--m3-spring);
+            position: relative;
         }
-        .m3-icon-group-btn:first-child { border-top-left-radius: 9999px; border-bottom-left-radius: 9999px; padding-left: 9px; }
-        .m3-icon-group-btn:last-child { border-top-right-radius: 9999px; border-bottom-right-radius: 9999px; padding-right: 9px; }
+        .m3-icon-group-btn:first-child { border-top-left-radius: 9999px; border-bottom-left-radius: 9999px; padding-left: 11px; }
+        .m3-icon-group-btn:last-child { border-top-right-radius: 9999px; border-bottom-right-radius: 9999px; padding-right: 11px; }
         .m3-icon-group-btn:hover {
             background-color: var(--md-primary-container);
             color: var(--md-on-primary-container);
+            border-radius: 9999px;
             transform: scale(1.06);
         }
         .m3-icon-group-btn:active {
             transform: scale(0.9);
-            border-radius: 12px;
+            border-radius: 9999px;
         }
         .m3-icon-group-btn.active-state {
             background-color: var(--md-primary);
@@ -143,23 +183,23 @@
             font-weight: 800;
         }
 
-        /* M3 Expressive Segmented / Grouped List (26px outer corners, 6px inner corners) */
-        .m3-group-list { display: flex; flex-direction: column; gap: 3px; }
+        /* M3 Expressive Grouped List (28px outer corners, curved 14px inner corners — zero sharp edges) */
+        .m3-group-list { display: flex; flex-direction: column; gap: 4px; }
         .m3-group-item {
             background-color: var(--md-surface-high);
-            border: 1px solid var(--md-outline-variant);
-            border-radius: 6px;
+            border: 1.5px solid var(--md-outline-variant);
+            border-radius: 14px;
             transition: all 0.28s var(--m3-spring);
         }
-        .m3-group-item:first-child { border-top-left-radius: 26px; border-top-right-radius: 26px; }
-        .m3-group-item:last-child { border-bottom-left-radius: 26px; border-bottom-right-radius: 26px; }
-        .m3-group-item:only-child { border-radius: 26px; }
+        .m3-group-item:first-child { border-top-left-radius: 28px; border-top-right-radius: 28px; }
+        .m3-group-item:last-child { border-bottom-left-radius: 28px; border-bottom-right-radius: 28px; }
+        .m3-group-item:only-child { border-radius: 28px; }
         .m3-group-item:hover {
             background-color: var(--md-surface-highest);
             border-color: var(--md-outline);
             transform: scale(1.006);
         }
-        .m3-group-item:active { transform: scale(0.985); border-radius: 16px; }
+        .m3-group-item:active { transform: scale(0.985); border-radius: 22px; }
 
         /* M3 Expressive Morphing Buttons */
         .m3-btn-filled {
@@ -170,12 +210,12 @@
             transition: all 0.3s var(--m3-spring);
         }
         .m3-btn-filled:hover:not(:disabled) {
-            filter: brightness(1.07);
-            border-radius: 16px;
+            filter: brightness(1.06);
+            border-radius: 18px;
             transform: translateY(-1px) scale(1.02);
-            box-shadow: 0 8px 20px -4px rgba(0, 0, 0, 0.45);
+            box-shadow: 0 8px 20px -4px rgba(0, 0, 0, 0.35);
         }
-        .m3-btn-filled:active:not(:disabled) { transform: scale(0.94); border-radius: 12px; }
+        .m3-btn-filled:active:not(:disabled) { transform: scale(0.94); border-radius: 16px; }
 
         .m3-btn-tonal {
             background-color: var(--md-secondary-container);
@@ -187,34 +227,31 @@
         .m3-btn-tonal:hover:not(:disabled) {
             background-color: var(--md-primary-container);
             color: var(--md-on-primary-container);
-            border-radius: 14px;
+            border-radius: 18px;
             transform: scale(1.03);
         }
-        .m3-btn-tonal:active:not(:disabled) { transform: scale(0.93); border-radius: 10px; }
+        .m3-btn-tonal:active:not(:disabled) { transform: scale(0.93); border-radius: 14px; }
 
         /* M3 Expressive Extended FAB (Scroll-Reactive Bottom Right) */
         .m3-extended-fab {
-            background-color: var(--md-primary-container);
-            color: var(--md-on-primary-container);
-            border: 1.5px solid var(--md-primary);
-            border-radius: 22px;
-            box-shadow: 0 12px 28px -4px rgba(0, 0, 0, 0.55);
+            background-color: var(--md-primary);
+            color: var(--md-on-primary);
+            border-radius: 24px;
+            box-shadow: 0 14px 30px -4px rgba(0, 0, 0, 0.45);
             transition: transform 0.38s var(--m3-spring), opacity 0.28s ease, border-radius 0.3s var(--m3-spring);
         }
         .m3-extended-fab:hover {
-            background-color: var(--md-primary);
-            color: var(--md-on-primary);
-            border-radius: 16px;
-            transform: translateY(-3px) scale(1.03);
+            border-radius: 9999px;
+            transform: translateY(-3px) scale(1.04);
         }
         .m3-extended-fab:active { transform: scale(0.94); }
         .m3-extended-fab.fab-hidden {
-            transform: translateY(130%) scale(0.85);
+            transform: translateY(140%) scale(0.85);
             opacity: 0;
             pointer-events: none;
         }
 
-        /* M3 Expressive Cards */
+        /* M3 Expressive Cards (Curved 24px outer, curved 14px inner meeting edges) */
         @keyframes m3CardPop {
             from { opacity: 0; transform: translateY(16px) scale(0.97); }
             to { opacity: 1; transform: translateY(0) scale(1); }
@@ -222,25 +259,25 @@
         .m3-card {
             background-color: var(--md-surface-container);
             border: 1.5px solid var(--md-outline-variant);
-            border-radius: 28px;
+            border-radius: 30px;
             padding: 6px;
             display: flex;
             flex-direction: column;
-            gap: 4px;
+            gap: 5px;
             animation: m3CardPop 0.38s var(--m3-spring) backwards;
             transition: transform 0.28s var(--m3-spring), border-color 0.25s ease, box-shadow 0.28s ease;
         }
         .m3-card:hover {
-            border-color: var(--md-outline);
-            box-shadow: 0 12px 28px -8px rgba(0, 0, 0, 0.45);
+            border-color: var(--md-primary);
+            box-shadow: 0 12px 28px -8px rgba(0, 0, 0, 0.35);
         }
         .m3-card-top-segment {
             background-color: var(--md-surface-high);
-            border-radius: 22px 22px 8px 8px;
+            border-radius: 24px 24px 14px 14px;
         }
         .m3-card-img-segment {
             background-color: #ffffff;
-            border-radius: 8px 8px 22px 22px;
+            border-radius: 14px 14px 24px 24px;
         }
 
         /* M3 Expressive Dialogs */
@@ -251,8 +288,8 @@
         .m3-dialog {
             background-color: var(--md-surface-container);
             border: 1.5px solid var(--md-outline);
-            border-radius: 32px;
-            box-shadow: 0 28px 60px rgba(0, 0, 0, 0.65);
+            border-radius: 34px;
+            box-shadow: 0 28px 60px rgba(0, 0, 0, 0.55);
             animation: m3DialogIn 0.34s var(--m3-spring);
         }
 
@@ -260,34 +297,37 @@
             background-color: var(--md-surface-low);
             border: 1.5px solid var(--md-outline);
             color: var(--md-on-surface);
-            border-radius: 16px;
+            border-radius: 18px;
             transition: all 0.22s var(--m3-spring);
         }
         .m3-input:focus {
             outline: none;
             border-color: var(--md-primary);
-            border-radius: 12px;
+            border-radius: 14px;
             box-shadow: 0 0 0 3px var(--md-primary-container);
         }
 
-        /* Seamless Low-Frequency Material 3 Wavy Progress Bar (80px wavelength, zero gap, smooth width transition) */
+        /* Seamless, Slow-Velocity, Rounded-Edge Material 3 Wavy Progress Bar */
         @keyframes m3WaveFlow {
             from { background-position-x: 0px; }
-            to { background-position-x: 80px; }
+            to { background-position-x: 44px; }
         }
         .m3-wavy-active {
             height: 14px;
             background-repeat: repeat-x;
             background-position: 0 center;
-            background-size: 80px 14px;
-            animation: m3WaveFlow 1.35s linear infinite;
+            background-size: 44px 14px;
+            /* Slowed wave velocity (2.6s per cycle) + rounded capsule ends so wave never clips with sharp corners */
+            animation: m3WaveFlow 2.6s linear infinite;
+            clip-path: inset(0 round 999px);
             transition: width 0.55s var(--m3-emphasized);
         }
         .m3-wavy-track {
-            height: 5px;
+            height: 6px;
             background-color: var(--md-secondary-container);
-            border-radius: 0 9999px 9999px 0;
-            transition: width 0.55s var(--m3-emphasized);
+            border-radius: 9999px;
+            margin-left: -2px;
+            transition: width 0.55s var(--m3-emphasized), opacity 0.3s ease;
         }
 
         ::-webkit-scrollbar { width: 6px; height: 6px; }
@@ -299,10 +339,10 @@
         input[type=range].split-slider { -webkit-appearance: none; appearance: none; width: 100%; background: transparent; }
         input[type=range].split-slider::-webkit-slider-thumb {
             -webkit-appearance: none; appearance: none;
-            height: 28px; width: 28px; border-radius: 10px;
+            height: 28px; width: 28px; border-radius: 12px;
             background: var(--md-primary); cursor: pointer;
             border: 3px solid var(--md-on-primary);
-            box-shadow: 0 2px 10px rgba(0,0,0,0.55);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.45);
             transition: transform 0.2s var(--m3-spring), border-radius 0.2s var(--m3-spring);
         }
         input[type=range].split-slider::-webkit-slider-thumb:active {
@@ -312,9 +352,9 @@
         #stylusCanvas { touch-action: none; }
     </style>
 </head>
-<body class="h-[100dvh] w-screen overflow-hidden flex flex-col select-none m3-surface">
+<body class="h-[100dvh] w-screen overflow-hidden flex flex-col select-none m3-surface liquid-glass">
 
-    <!-- HIDDEN SVG DEFINITIONS FOR MATERIAL 3 EXPRESSIVE "COOKIE" & CLOVER SHAPES -->
+    <!-- HIDDEN SVG DEFINITIONS FOR SOFTENED MATERIAL 3 EXPRESSIVE "COOKIE" & CLOVER SHAPES -->
     <svg width="0" height="0" class="absolute pointer-events-none">
         <defs>
             <clipPath id="m3Cookie12Clip" clipPathUnits="objectBoundingBox">
@@ -327,102 +367,109 @@
     </svg>
 
     <!-- =================================================================== -->
-    <!-- MATERIAL 3 EXPRESSIVE TOP APP BAR (Logo Far Left, Wave In Gap)      -->
+    <!-- SINGLE UNIFIED MAIN BAR:                                            -->
+    <!-- LOGO | CHAPTERS | STATUS SEGMENTED PILL | GAP | SEARCH | PAPER | ACTIONS -->
     <!-- =================================================================== -->
-    <header class="h-14 m3-surface-low border-b m3-border px-3 sm:px-5 flex items-center justify-between gap-3 shrink-0 z-30">
-        <!-- Left: Scalloped Cookie Logo on Far Left + Chapters Button + Theme-Colored Cloud & OCR Pills -->
-        <div class="flex items-center gap-2 shrink-0">
-            <div class="w-9 h-9 m3-cookie-12 flex items-center justify-center shrink-0 shadow-sm" style="background: var(--md-primary-container); color: var(--md-primary);" title="Material 3 Question Vault">
-                <i class="ph-bold ph-scissors text-base"></i>
-            </div>
-
-            <button onclick="window.app.toggleDrawer()" class="h-9 px-3.5 m3-btn-tonal text-xs flex items-center gap-2 shrink-0">
-                <i class="ph-bold ph-tree-structure text-sm" style="color: var(--md-primary)"></i>
-                <span>Chapters</span>
-                <span id="activeChapterIndicator" class="px-2 py-0.5 text-[10px] rounded-md font-extrabold max-w-[115px] truncate" style="background: var(--md-primary); color: var(--md-on-primary);">All</span>
-            </button>
-
-            <!-- Theme-Colored Cloud Sync Status Pill -->
-            <button id="cloudStatusBadge" onclick="window.app.handleCloudBadgeClick()" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-extrabold transition shrink-0" title="Click to Sync with GitHub Cloud or Configure">
-                <i id="cloudStatusIcon" class="ph-bold ph-cloud-slash text-xs"></i>
-                <span id="cloudStatusText">Cloud: Off</span>
-            </button>
-
-            <!-- Live Local OCR Indexing Pill -->
-            <div id="ocrStatusBadge" class="hidden items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-extrabold m3-primary-pill shrink-0" title="Local Tesseract OCR indexing questions">
-                <i class="ph-bold ph-text-T animate-bounce text-xs"></i>
-                <span id="ocrStatusText">OCR: 0/0</span>
-            </div>
+    <header class="m3-surface-low border-b m3-border px-3 sm:px-4 py-2 flex items-center gap-2 overflow-x-auto no-scrollbar shrink-0 z-30">
+        <!-- 1. LOGO (Soft Scalloped 12-Lobe Cookie on Far Left) -->
+        <div class="w-9 h-9 m3-cookie-12 flex items-center justify-center shrink-0 shadow-sm" style="background: var(--md-primary-container); color: var(--md-primary);" title="Material 3 Expressive Vault">
+            <i class="ph-bold ph-scissors text-base"></i>
         </div>
 
-        <!-- Center Gap: Inline Material 3 Wavy Progress Bar (Shows inside the header gap during Cloud Sync / OCR) -->
-        <div id="topGlobalWaveWrap" class="hidden flex-1 max-w-md mx-2 items-center">
-            <div id="topGlobalWaveBar" class="w-full"></div>
-        </div>
+        <!-- 2. CHAPTERS BUTTON -->
+        <button onclick="window.app.toggleDrawer()" class="h-9 px-3.5 m3-btn-tonal text-xs flex items-center gap-2 shrink-0">
+            <i class="ph-bold ph-tree-structure text-sm" style="color: var(--md-primary)"></i>
+            <span>Chapters</span>
+            <span id="activeChapterIndicator" class="px-2 py-0.5 text-[10px] rounded-full font-extrabold max-w-[110px] truncate" style="background: var(--md-primary); color: var(--md-on-primary);">All</span>
+        </button>
 
-        <!-- Right: Connected M3 Icon Button Group (Pull Cloud, Fullscreen, Settings) -->
-        <div class="flex items-center gap-1.5 shrink-0 ml-auto">
-            <div class="m3-icon-group">
-                <button onclick="window.app.pullFromCloudGist(true)" class="m3-icon-group-btn !h-9 !px-3" title="Pull Latest Questions from Cloud">
-                    <i class="ph-bold ph-cloud-arrow-down text-sm"></i>
-                </button>
-                <button onclick="window.app.toggleFullscreen()" class="m3-icon-group-btn !h-9 !px-3" title="Toggle Fullscreen">
-                    <i id="fullscreenIcon" class="ph-bold ph-corners-out text-sm"></i>
-                </button>
-                <button onclick="window.app.openSettingsModal()" id="apiSettingsBtn" class="m3-icon-group-btn !h-9 !px-3 relative" title="Open Settings Menu">
-                    <i class="ph-bold ph-gear text-sm"></i>
-                    <span id="apiKeyDot" class="w-2 h-2 rounded-full bg-amber-400 absolute top-1.5 right-1.5"></span>
-                </button>
-            </div>
-        </div>
-    </header>
-
-    <!-- =================================================================== -->
-    <!-- MATERIAL 3 EXPRESSIVE FILTER BAR (Segmented Buttons + Search)       -->
-    <!-- =================================================================== -->
-    <div class="m3-surface-low border-b m3-border px-3 sm:px-5 py-2 flex items-center justify-between gap-2 overflow-x-auto no-scrollbar shrink-0 z-20">
-        <!-- Left: M3 Connected Segmented Buttons for Status (All, Unsolved, Solved, Starred) -->
-        <div class="m3-segmented-group shrink-0" role="group" aria-label="Question Status Filter">
+        <!-- 3. SWIPEABLE / SLIDEABLE SEGMENTED STATUS PILL (With All Icon + Touch Swipe) -->
+        <div id="statusSegmentedBar" class="m3-segmented-group shrink-0" role="group" aria-label="Swipeable Question Status Filter" title="Tap or swipe across to switch views">
             <button onclick="window.app.setStatus('ALL')" data-status="ALL" class="status-btn m3-seg-btn active">
-                <i class="ph-bold ph-Check status-check-icon text-xs"></i>
+                <i class="ph-fill ph-squares-four text-xs"></i>
                 <span>All</span>
             </button>
             <button onclick="window.app.setStatus('UNSOLVED')" data-status="UNSOLVED" class="status-btn m3-seg-btn">
                 <i class="ph-bold ph-circle text-xs"></i>
                 <span>Unsolved</span>
-                <span id="status-count-UNSOLVED" class="text-[10px] font-extrabold opacity-80">0</span>
+                <span id="status-count-UNSOLVED" class="text-[10px] font-extrabold opacity-85">0</span>
             </button>
             <button onclick="window.app.setStatus('SOLVED')" data-status="SOLVED" class="status-btn m3-seg-btn">
                 <i class="ph-fill ph-check-circle text-xs"></i>
                 <span>Solved</span>
-                <span id="status-count-SOLVED" class="text-[10px] font-extrabold opacity-80">0</span>
+                <span id="status-count-SOLVED" class="text-[10px] font-extrabold opacity-85">0</span>
             </button>
             <button onclick="window.app.setStatus('STARRED')" data-status="STARRED" class="status-btn m3-seg-btn">
                 <i class="ph-fill ph-star text-xs"></i>
                 <span>Starred</span>
-                <span id="status-count-STARRED" class="text-[10px] font-extrabold opacity-80">0</span>
+                <span id="status-count-STARRED" class="text-[10px] font-extrabold opacity-85">0</span>
             </button>
         </div>
 
-        <!-- Right: M3 Expressive Search & Paper Filter (Difficulty Removed) -->
-        <div class="flex items-center gap-2 shrink-0 ml-auto">
-            <div class="relative flex items-center">
-                <i class="ph-bold ph-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 m3-text-muted text-xs pointer-events-none"></i>
-                <input id="searchBox" oninput="window.app.setSearch(this.value)" type="text" placeholder="Search question text, chapter, Q#..." class="h-9 w-48 sm:w-72 m3-input rounded-full pl-9 pr-8 text-xs placeholder-slate-400">
-                <button id="clearSearchBtn" onclick="window.app.clearSearch()" class="hidden absolute right-2.5 top-1/2 -translate-y-1/2 m3-text-muted hover:opacity-100 p-0.5" title="Clear search">
-                    <i class="ph-bold ph-x text-xs"></i>
-                </button>
+        <!-- 4. FLEX GAP (With inline OCR pill if background OCR is active) -->
+        <div class="flex-1 min-w-[8px] flex items-center justify-center">
+            <div id="ocrStatusBadge" class="hidden items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-extrabold m3-primary-pill shrink-0">
+                <i class="ph-bold ph-text-T animate-bounce text-xs"></i>
+                <span id="ocrStatusText">OCR: 0/0</span>
             </div>
-            <select id="paperDropdown" onchange="window.app.setPaper(this.value)" class="h-9 m3-surface-high border m3-border rounded-2xl px-3.5 text-xs font-bold focus:outline-none max-w-[160px] truncate" style="color: var(--md-on-surface);">
-                <option value="ALL">All Papers (0)</option>
-            </select>
+        </div>
+
+        <!-- 5. SEARCH -->
+        <div class="relative flex items-center shrink-0">
+            <i class="ph-bold ph-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 m3-text-muted text-xs pointer-events-none"></i>
+            <input id="searchBox" oninput="window.app.setSearch(this.value)" type="text" placeholder="Search question text, chapter, Q#..." class="h-9 w-44 sm:w-64 m3-input rounded-full pl-9 pr-8 text-xs placeholder-slate-400">
+            <button id="clearSearchBtn" onclick="window.app.clearSearch()" class="hidden absolute right-2.5 top-1/2 -translate-y-1/2 m3-text-muted hover:opacity-100 p-0.5" title="Clear search">
+                <i class="ph-bold ph-x text-xs"></i>
+            </button>
+        </div>
+
+        <!-- 6. PAPER FILTER -->
+        <select id="paperDropdown" onchange="window.app.setPaper(this.value)" class="h-9 m3-surface-high border m3-border rounded-full px-3.5 text-xs font-bold focus:outline-none max-w-[150px] truncate shrink-0" style="color: var(--md-on-surface);">
+            <option value="ALL">All Papers (0)</option>
+        </select>
+
+        <!-- 7. FULLSCREEN, SYNC (Becomes Progress Loader When Syncing), AND SETTINGS BUTTONS -->
+        <div class="m3-icon-group shrink-0">
+            <button onclick="window.app.toggleFullscreen()" class="m3-icon-group-btn !h-9 !px-3" title="Toggle Fullscreen">
+                <i id="fullscreenIcon" class="ph-bold ph-corners-out text-sm"></i>
+            </button>
+            <button id="syncHeaderBtn" onclick="window.app.handleCloudBadgeClick()" class="m3-icon-group-btn !h-9 !px-3 gap-1.5" title="Click to Sync with GitHub Cloud">
+                <i id="cloudStatusIcon" class="ph-bold ph-cloud-arrow-up text-sm"></i>
+                <span id="cloudStatusText" class="text-[10px] font-extrabold hidden xl:inline">Sync</span>
+            </button>
+            <button onclick="window.app.openSettingsModal()" id="apiSettingsBtn" class="m3-icon-group-btn !h-9 !px-3 relative" title="Open Settings Menu">
+                <i class="ph-bold ph-gear text-sm"></i>
+                <span id="apiKeyDot" class="w-2 h-2 rounded-full bg-amber-400 absolute top-1.5 right-1.5"></span>
+            </button>
+        </div>
+    </header>
+
+    <!-- =================================================================== -->
+    <!-- SECONDARY BACKGROUND TASK STATUS BAR (Shows when PDF Upload is Minimized) -->
+    <!-- =================================================================== -->
+    <div id="minimizedUploadBar" onclick="window.app.restoreUploadModal()" class="hidden m3-surface-high border-b m3-border px-4 py-2 items-center justify-between gap-4 cursor-pointer hover:brightness-105 transition shrink-0 z-20" title="Click to reopen PDF Extraction Dialog">
+        <div class="flex items-center gap-2.5 min-w-0 shrink-0">
+            <span class="w-6 h-6 m3-cookie-12 m3-spin-slow flex items-center justify-center shrink-0" style="background: var(--md-primary); color: var(--md-on-primary);">
+                <i class="ph-bold ph-file-pdf text-xs"></i>
+            </span>
+            <span id="minBarStatusText" class="text-xs font-extrabold truncate">Extracting PDF in background...</span>
+            <span id="minBarPageBadge" class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold m3-primary-pill">Page 1/1</span>
+        </div>
+
+        <div id="minBarWaveWrap" class="flex-1 max-w-md"></div>
+
+        <div class="flex items-center gap-2 shrink-0">
+            <span class="text-[11px] font-bold m3-text-muted hidden sm:inline">Tap to expand</span>
+            <button type="button" onclick="event.stopPropagation(); window.app.restoreUploadModal()" class="w-7 h-7 rounded-full m3-btn-tonal flex items-center justify-center" title="Expand Dialog">
+                <i class="ph-bold ph-arrows-out-simple text-xs"></i>
+            </button>
         </div>
     </div>
 
     <!-- =================================================================== -->
-    <!-- MATERIAL 3 EXPRESSIVE NAVIGATION DRAWER                             -->
+    <!-- MATERIAL 3 EXPRESSIVE NAVIGATION DRAWER (Clean Footer, No Loading Bug) -->
     <!-- =================================================================== -->
-    <div id="drawerBackdrop" onclick="window.app.toggleDrawer(false)" class="fixed inset-0 bg-black/60 backdrop-blur-xs z-40 hidden"></div>
+    <div id="drawerBackdrop" onclick="window.app.toggleDrawer(false)" class="fixed inset-0 bg-black/55 backdrop-blur-xs z-40 hidden"></div>
     <aside id="chaptersDrawer" class="fixed inset-y-0 left-0 w-80 m3-surface-container border-r m3-border rounded-r-[32px] z-50 -translate-x-full transition-transform duration-300 ease-out flex flex-col shadow-2xl overflow-hidden">
         <div class="p-4 border-b m3-border flex items-center justify-between">
             <div class="flex items-center gap-2.5">
@@ -431,9 +478,8 @@
                 </div>
                 <h2 class="font-extrabold text-xs uppercase tracking-wider">Subjects & Chapters</h2>
             </div>
-            <button onclick="window.app.toggleDrawer(false)" class="h-8 px-3 m3-btn-tonal text-xs flex items-center gap-1">
+            <button onclick="window.app.toggleDrawer(false)" class="h-8 w-8 m3-btn-tonal flex items-center justify-center" title="Close Drawer">
                 <i class="ph-bold ph-x text-xs"></i>
-                <span>Close</span>
             </button>
         </div>
 
@@ -443,19 +489,17 @@
 
         <div id="drawerChapterList" class="flex-1 overflow-y-auto p-3 space-y-3"></div>
 
-        <div class="p-3.5 border-t m3-border m3-surface-low space-y-2">
-            <div class="flex items-center justify-between text-xs">
-                <span id="drawerProgressText" class="m3-text-muted font-bold">Solved: 0 / 0</span>
-                <button onclick="window.app.confirmClearVault()" class="px-3 py-1 rounded-full bg-rose-500/15 text-rose-400 hover:bg-rose-500/25 font-bold flex items-center gap-1 transition">
-                    <i class="ph-bold ph-trash"></i> Clear All
-                </button>
-            </div>
-            <div id="drawerWavyProgress"></div>
+        <!-- Clean Drawer Footer (Removed the confusing wave loader at the bottom) -->
+        <div class="p-3.5 border-t m3-border m3-surface-low flex items-center justify-between text-xs">
+            <span id="drawerProgressText" class="px-3 py-1 rounded-full m3-primary-pill font-extrabold text-[11px]">Solved: 0 / 0</span>
+            <button onclick="window.app.confirmClearVault()" class="px-3 py-1 rounded-full bg-rose-500/15 text-rose-400 hover:bg-rose-500/25 font-bold flex items-center gap-1 transition">
+                <i class="ph-bold ph-trash"></i> Clear All
+            </button>
         </div>
     </aside>
 
     <!-- =================================================================== -->
-    <!-- MAIN QUESTION FEED WORKSPACE (min-h-0 + pb-36 fixes bottom scroll)  -->
+    <!-- MAIN QUESTION FEED WORKSPACE                                        -->
     <!-- =================================================================== -->
     <main id="mainFeedContainer" onscroll="window.app.handleFeedScroll(this)" class="flex-1 min-h-0 overflow-y-auto px-3 sm:px-5 pt-4 pb-36"></main>
 
@@ -478,21 +522,19 @@
                     <span id="popupSubjChap" class="text-xs sm:text-sm font-bold truncate">Physics</span>
                 </div>
 
-                <div class="flex items-center gap-2 shrink-0">
-                    <div class="m3-icon-group">
-                        <button type="button" onclick="const id = window.app.getActivePopupId(); window.app.closeImagePopup(); window.app.openSplitModal(id);" class="m3-icon-group-btn !h-9 !px-3.5 gap-1.5 text-xs font-bold">
-                            <i class="ph-bold ph-scissors"></i>
-                            <span class="hidden sm:inline">Split / Trim</span>
-                        </button>
-                        <button type="button" onclick="const id = window.app.getActivePopupId(); window.app.closeImagePopup(); window.app.openScratchpad(id);" class="m3-icon-group-btn !h-9 !px-3.5 gap-1.5 text-xs font-bold">
-                            <i class="ph-bold ph-pencil-line"></i>
-                            <span class="hidden sm:inline">Solve Pad</span>
-                        </button>
-                        <button type="button" onclick="window.app.closeImagePopup()" class="m3-icon-group-btn !h-9 !px-4 gap-1.5 text-xs font-extrabold active-state">
-                            <i class="ph-bold ph-x"></i>
-                            <span>Close</span>
-                        </button>
-                    </div>
+                <div class="m3-icon-group shrink-0">
+                    <button type="button" onclick="const id = window.app.getActivePopupId(); window.app.closeImagePopup(); window.app.openSplitModal(id);" class="m3-icon-group-btn !h-9 !px-3.5 gap-1.5 text-xs font-bold">
+                        <i class="ph-bold ph-scissors"></i>
+                        <span class="hidden sm:inline">Split / Trim</span>
+                    </button>
+                    <button type="button" onclick="const id = window.app.getActivePopupId(); window.app.closeImagePopup(); window.app.openScratchpad(id);" class="m3-icon-group-btn !h-9 !px-3.5 gap-1.5 text-xs font-bold">
+                        <i class="ph-bold ph-pencil-line"></i>
+                        <span class="hidden sm:inline">Solve Pad</span>
+                    </button>
+                    <button type="button" onclick="window.app.closeImagePopup()" class="m3-icon-group-btn !h-9 !px-4 gap-1.5 text-xs font-extrabold active-state">
+                        <i class="ph-bold ph-x"></i>
+                        <span>Close</span>
+                    </button>
                 </div>
             </div>
 
@@ -503,11 +545,11 @@
     </div>
 
     <!-- =================================================================== -->
-    <!-- MODAL 1: PHONE-STYLE HIERARCHICAL M3 EXPRESSIVE SETTINGS MENU       -->
+    <!-- MODAL 1: PHONE-STYLE M3 EXPRESSIVE SETTINGS (Single Close Button)   -->
     <!-- =================================================================== -->
-    <div id="settingsModal" onclick="if(event.target === this) window.app.closeSettingsModal()" class="fixed inset-0 bg-black/75 backdrop-blur-sm z-50 hidden flex items-center justify-center p-3 sm:p-5">
+    <div id="settingsModal" onclick="if(event.target === this) window.app.closeSettingsModal()" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-3 sm:p-5">
         <div class="m3-dialog max-w-lg w-full max-h-[90vh] flex flex-col overflow-hidden">
-            <div class="px-4 py-3.5 m3-surface-low border-b m3-border flex items-center justify-between gap-2 shrink-0">
+            <div class="px-5 py-3.5 m3-surface-low border-b m3-border flex items-center justify-between gap-2 shrink-0">
                 <div class="flex items-center gap-2.5 min-w-0">
                     <button type="button" id="settingsBackBtn" onclick="window.app.openSettingsPage('HOME')" class="hidden h-9 w-9 rounded-2xl m3-surface-high hover:brightness-110 items-center justify-center transition shrink-0" title="Back">
                         <i class="ph-bold ph-arrow-left text-base"></i>
@@ -515,15 +557,12 @@
                     <div id="settingsHeaderIcon" class="w-10 h-10 m3-cookie-12 flex items-center justify-center shrink-0" style="background: var(--md-primary-container); color: var(--md-primary);">
                         <i class="ph-bold ph-gear text-lg"></i>
                     </div>
-                    <div class="min-w-0">
-                        <h3 id="settingsHeaderTitle" class="font-extrabold text-sm sm:text-base truncate">Settings</h3>
-                        <p id="settingsHeaderSub" class="text-[11px] m3-text-muted truncate">Material 3 Expressive • Tap a section</p>
-                    </div>
+                    <h3 id="settingsHeaderTitle" class="font-extrabold text-base truncate">Settings</h3>
                 </div>
 
-                <button type="button" onclick="window.app.closeSettingsModal()" class="h-9 px-4 m3-btn-tonal text-xs flex items-center gap-1.5 shrink-0">
+                <!-- Single Top-Right Close Button -->
+                <button type="button" onclick="window.app.closeSettingsModal()" class="h-9 w-9 m3-btn-tonal flex items-center justify-center shrink-0" title="Close Settings">
                     <i class="ph-bold ph-x text-sm"></i>
-                    <span>Close</span>
                 </button>
             </div>
 
@@ -554,8 +593,8 @@
                                 <i class="ph-bold ph-palette text-xl"></i>
                             </div>
                             <div class="min-w-0">
-                                <div class="font-extrabold text-sm">Appearance, Dark/Light Mode & Theme</div>
-                                <div class="text-xs m3-text-muted truncate">Light/Dark mode & Material You color seeds</div>
+                                <div class="font-extrabold text-sm">Appearance, Liquid Glass & Theme</div>
+                                <div class="text-xs m3-text-muted truncate">Dark/Light mode, Android 17 Frosted Glass & Color Seeds</div>
                             </div>
                         </div>
                         <i class="ph-bold ph-caret-right m3-text-muted text-base shrink-0"></i>
@@ -563,11 +602,11 @@
 
                     <button type="button" onclick="window.app.openSettingsPage('BACKUP')" class="w-full p-4 m3-group-item flex items-center justify-between gap-3.5 text-left">
                         <div class="flex items-center gap-3.5 min-w-0">
-                            <div class="w-12 h-12 m3-clover-8 flex items-center justify-center shrink-0" style="background: var(--md-primary-container); color: var(--md-primary);">
+                            <div class="w-12 h-12 m3-clover-8 flex items-center justify-center shrink-0" style="background: var(--md-tertiary-container); color: var(--md-on-tertiary-container);">
                                 <i class="ph-bold ph-cloud-arrow-up text-xl"></i>
                             </div>
                             <div class="min-w-0">
-                                <div class="font-extrabold text-sm">Cloud Sync, Backups & Vault Tools</div>
+                                <div class="font-extrabold text-sm">Cloud Sync, Export & Vault Tools</div>
                                 <div class="text-xs m3-text-muted truncate">Push/Pull Cloud, JSON Export/Import, Deduplicate & OCR</div>
                             </div>
                         </div>
@@ -576,7 +615,7 @@
 
                     <button type="button" onclick="window.app.openSettingsPage('SCANNER')" class="w-full p-4 m3-group-item flex items-center justify-between gap-3.5 text-left">
                         <div class="flex items-center gap-3.5 min-w-0">
-                            <div class="w-12 h-12 m3-cookie-12 flex items-center justify-center shrink-0" style="background: var(--md-secondary-container); color: var(--md-on-secondary-container);">
+                            <div class="w-12 h-12 m3-leaf-shape flex items-center justify-center shrink-0" style="background: var(--md-primary-container); color: var(--md-primary);">
                                 <i class="ph-bold ph-sliders-horizontal text-xl"></i>
                             </div>
                             <div class="min-w-0">
@@ -619,14 +658,14 @@
                     </div>
                 </div>
 
-                <!-- PAGE 2: APPEARANCE, DARK/LIGHT MODE & M3 EXPRESSIVE THEME -->
+                <!-- PAGE 2: APPEARANCE, LIQUID GLASS, DARK/LIGHT MODE & M3 EXPRESSIVE THEME -->
                 <div id="settingsPage_THEME" class="hidden space-y-3">
                     <div class="m3-group-list">
                         <!-- Dark / Light Mode Segmented Control -->
                         <div class="p-4 m3-group-item flex items-center justify-between gap-3">
                             <div>
                                 <div class="text-xs font-extrabold uppercase tracking-wider">Color Mode</div>
-                                <div class="text-[11px] m3-text-muted">Switch between Dark and Light Material 3 surfaces</div>
+                                <div class="text-[11px] m3-text-muted">Bold Material 3 Expressive Dark & Light palettes</div>
                             </div>
                             <div class="m3-segmented-group">
                                 <button type="button" id="themeModeDarkBtn" onclick="window.app.setThemeMode('dark')" class="m3-seg-btn active">
@@ -640,6 +679,23 @@
                             </div>
                         </div>
 
+                        <!-- Android 17 Frosted Liquid Glass Toggle (Default ON) -->
+                        <div class="p-4 m3-group-item flex items-center justify-between gap-3">
+                            <div>
+                                <div class="text-xs font-extrabold uppercase tracking-wider">Android 17 Frosted Liquid Glass</div>
+                                <div class="text-[11px] m3-text-muted">Translucent frosted blur on bars, cards & dialogs</div>
+                            </div>
+                            <div class="m3-segmented-group">
+                                <button type="button" id="liquidGlassOnBtn" onclick="window.app.setLiquidGlass(true)" class="m3-seg-btn active">
+                                    <i class="ph-bold ph-sparkle"></i>
+                                    <span>On</span>
+                                </button>
+                                <button type="button" id="liquidGlassOffBtn" onclick="window.app.setLiquidGlass(false)" class="m3-seg-btn">
+                                    <span>Off</span>
+                                </button>
+                            </div>
+                        </div>
+
                         <div class="p-4 m3-group-item space-y-3">
                             <div>
                                 <h4 class="text-xs font-extrabold uppercase tracking-wider mb-1">Material 3 Expressive Color Seeds</h4>
@@ -647,28 +703,28 @@
                             </div>
 
                             <div class="grid grid-cols-3 sm:grid-cols-6 gap-2.5 pt-1">
-                                <button type="button" onclick="window.app.setMaterialTheme('#8b5cf6')" class="p-2.5 rounded-2xl m3-surface-low border m3-border hover:scale-105 transition flex flex-col items-center gap-1.5">
-                                    <span class="w-9 h-9 m3-cookie-12 bg-[#8b5cf6] block"></span>
+                                <button type="button" onclick="window.app.setMaterialTheme('#7c3aed')" class="p-2.5 rounded-2xl m3-surface-low border m3-border hover:scale-105 transition flex flex-col items-center gap-1.5">
+                                    <span class="w-9 h-9 m3-cookie-12 bg-[#7c3aed] block"></span>
                                     <span class="text-[10px] font-bold">Violet</span>
                                 </button>
-                                <button type="button" onclick="window.app.setMaterialTheme('#38bdf8')" class="p-2.5 rounded-2xl m3-surface-low border m3-border hover:scale-105 transition flex flex-col items-center gap-1.5">
-                                    <span class="w-9 h-9 m3-cookie-12 bg-[#38bdf8] block"></span>
+                                <button type="button" onclick="window.app.setMaterialTheme('#0284c7')" class="p-2.5 rounded-2xl m3-surface-low border m3-border hover:scale-105 transition flex flex-col items-center gap-1.5">
+                                    <span class="w-9 h-9 m3-cookie-12 bg-[#0284c7] block"></span>
                                     <span class="text-[10px] font-bold">Ocean</span>
                                 </button>
-                                <button type="button" onclick="window.app.setMaterialTheme('#34d399')" class="p-2.5 rounded-2xl m3-surface-low border m3-border hover:scale-105 transition flex flex-col items-center gap-1.5">
-                                    <span class="w-9 h-9 m3-cookie-12 bg-[#34d399] block"></span>
+                                <button type="button" onclick="window.app.setMaterialTheme('#059669')" class="p-2.5 rounded-2xl m3-surface-low border m3-border hover:scale-105 transition flex flex-col items-center gap-1.5">
+                                    <span class="w-9 h-9 m3-cookie-12 bg-[#059669] block"></span>
                                     <span class="text-[10px] font-bold">Emerald</span>
                                 </button>
-                                <button type="button" onclick="window.app.setMaterialTheme('#fb7185')" class="p-2.5 rounded-2xl m3-surface-low border m3-border hover:scale-105 transition flex flex-col items-center gap-1.5">
-                                    <span class="w-9 h-9 m3-cookie-12 bg-[#fb7185] block"></span>
+                                <button type="button" onclick="window.app.setMaterialTheme('#e11d48')" class="p-2.5 rounded-2xl m3-surface-low border m3-border hover:scale-105 transition flex flex-col items-center gap-1.5">
+                                    <span class="w-9 h-9 m3-cookie-12 bg-[#e11d48] block"></span>
                                     <span class="text-[10px] font-bold">Sakura</span>
                                 </button>
-                                <button type="button" onclick="window.app.setMaterialTheme('#fbbf24')" class="p-2.5 rounded-2xl m3-surface-low border m3-border hover:scale-105 transition flex flex-col items-center gap-1.5">
-                                    <span class="w-9 h-9 m3-cookie-12 bg-[#fbbf24] block"></span>
+                                <button type="button" onclick="window.app.setMaterialTheme('#d97706')" class="p-2.5 rounded-2xl m3-surface-low border m3-border hover:scale-105 transition flex flex-col items-center gap-1.5">
+                                    <span class="w-9 h-9 m3-cookie-12 bg-[#d97706] block"></span>
                                     <span class="text-[10px] font-bold">Amber</span>
                                 </button>
-                                <button type="button" onclick="window.app.setMaterialTheme('#2dd4bf')" class="p-2.5 rounded-2xl m3-surface-low border m3-border hover:scale-105 transition flex flex-col items-center gap-1.5">
-                                    <span class="w-9 h-9 m3-cookie-12 bg-[#2dd4bf] block"></span>
+                                <button type="button" onclick="window.app.setMaterialTheme('#0d9488')" class="p-2.5 rounded-2xl m3-surface-low border m3-border hover:scale-105 transition flex flex-col items-center gap-1.5">
+                                    <span class="w-9 h-9 m3-cookie-12 bg-[#0d9488] block"></span>
                                     <span class="text-[10px] font-bold">Mint</span>
                                 </button>
                             </div>
@@ -677,14 +733,14 @@
                         <div class="p-4 m3-group-item flex items-center justify-between gap-3">
                             <div>
                                 <div class="text-xs font-bold">Custom Primary Seed Color</div>
-                                <div class="text-[11px] m3-text-muted">Generate a custom Material 3 palette from any hex color</div>
+                                <div class="text-[11px] m3-text-muted">Generate a bold Material 3 Expressive palette from any hex color</div>
                             </div>
-                            <input id="customThemeColorPicker" type="color" value="#8b5cf6" oninput="window.app.setMaterialTheme(this.value)" class="w-12 h-10 rounded-xl cursor-pointer bg-transparent border-0">
+                            <input id="customThemeColorPicker" type="color" value="#7c3aed" oninput="window.app.setMaterialTheme(this.value)" class="w-12 h-10 rounded-xl cursor-pointer bg-transparent border-0">
                         </div>
                     </div>
                 </div>
 
-                <!-- PAGE 3: CLOUD SYNC, BACKUPS & VAULT TOOLS -->
+                <!-- PAGE 3: CLOUD SYNC, EXPORT & VAULT TOOLS -->
                 <div id="settingsPage_BACKUP" class="hidden space-y-3">
                     <div class="m3-group-list">
                         <div class="p-4 m3-group-item space-y-3">
@@ -710,13 +766,13 @@
                         </div>
 
                         <div class="p-4 m3-group-item space-y-3">
-                            <span class="block text-xs font-extrabold uppercase tracking-wider m3-text-muted">JSON File Backup & Vault Maintenance</span>
+                            <span class="block text-xs font-extrabold uppercase tracking-wider m3-text-muted">JSON File Export, Import & Deduplication</span>
                             <div class="grid grid-cols-3 gap-2">
                                 <button type="button" onclick="window.app.runDeduplication(true)" class="h-10 px-2 m3-btn-tonal text-xs flex items-center justify-center gap-1.5">
                                     <i class="ph-bold ph-stack"></i>
                                     <span>Deduplicate</span>
                                 </button>
-                                <button type="button" onclick="window.app.exportBackupJson()" class="h-10 px-2 m3-btn-tonal text-xs flex items-center justify-center gap-1.5">
+                                <button type="button" onclick="window.app.exportBackupJson()" class="h-10 px-2 m3-btn-filled text-xs flex items-center justify-center gap-1.5">
                                     <i class="ph-bold ph-download-simple"></i>
                                     <span>Export JSON</span>
                                 </button>
@@ -763,11 +819,9 @@
                 </div>
             </div>
 
-            <div class="px-4 py-3 m3-surface-low border-t m3-border flex items-center justify-between shrink-0">
-                <button type="button" onclick="window.app.closeSettingsModal()" class="h-9 px-4 m3-btn-tonal text-xs">
-                    Close
-                </button>
-                <button type="button" onclick="window.app.saveSettings()" class="h-9 px-5 m3-btn-filled text-xs flex items-center gap-1.5 shadow">
+            <!-- Single Save Button in Footer (Removed duplicate Close button) -->
+            <div class="px-5 py-3 m3-surface-low border-t m3-border flex items-center justify-end shrink-0">
+                <button type="button" onclick="window.app.saveSettings()" class="h-10 px-6 m3-btn-filled text-xs flex items-center gap-1.5 shadow">
                     <i class="ph-bold ph-check text-sm"></i>
                     <span>Save & Done</span>
                 </button>
@@ -776,9 +830,9 @@
     </div>
 
     <!-- =================================================================== -->
-    <!-- MODAL 2: UPLOAD TEST PDF (Close Disabled On Upload, Cancel Rollback)-->
+    <!-- MODAL 2: UPLOAD TEST PDF (With Icon-Only Minimize + Single Close)   -->
     <!-- =================================================================== -->
-    <div id="uploadModal" onclick="if(event.target === this && !window.app.isExtracting()) window.app.closeUploadModal()" class="fixed inset-0 bg-black/75 backdrop-blur-sm z-50 hidden flex items-center justify-center p-3 sm:p-6">
+    <div id="uploadModal" onclick="if(event.target === this && !window.app.isExtracting()) window.app.closeUploadModal()" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-3 sm:p-6">
         <div class="m3-dialog max-w-2xl w-full max-h-[90vh] flex flex-col overflow-hidden">
             <div class="px-5 py-3.5 m3-surface-low border-b m3-border flex items-center justify-between gap-2">
                 <div class="flex items-center gap-2.5 min-w-0">
@@ -790,11 +844,16 @@
                         <p class="text-[11px] m3-text-muted truncate">100% Full-Width Crops • Whitespace Gap Snapper • Clean Question OCR</p>
                     </div>
                 </div>
-                <!-- Close Button (Automatically Disabled During Upload) -->
-                <button type="button" id="uploadTopCloseBtn" onclick="window.app.closeUploadModal()" class="h-9 px-4 m3-btn-tonal disabled:opacity-35 disabled:pointer-events-none text-xs flex items-center gap-1.5 shrink-0">
-                    <i class="ph-bold ph-x text-sm"></i>
-                    <span>Close</span>
-                </button>
+
+                <!-- Right Header Controls: Textless Icon-Only Minimize Button (During Upload) + Single Close Button -->
+                <div class="flex items-center gap-1.5 shrink-0">
+                    <button type="button" id="minimizeUploadBtn" onclick="window.app.minimizeUploadModal()" class="hidden h-9 w-9 m3-btn-tonal items-center justify-center" title="Minimize extraction to background bar">
+                        <i class="ph-bold ph-minus text-base"></i>
+                    </button>
+                    <button type="button" id="uploadTopCloseBtn" onclick="window.app.closeUploadModal()" class="h-9 w-9 m3-btn-tonal disabled:opacity-35 disabled:pointer-events-none flex items-center justify-center" title="Close Dialog">
+                        <i class="ph-bold ph-x text-sm"></i>
+                    </button>
+                </div>
             </div>
 
             <div class="p-5 overflow-y-auto space-y-4 flex-1">
@@ -805,7 +864,7 @@
                             <i class="ph-duotone ph-cloud-arrow-up text-2xl"></i>
                         </div>
                         <p id="selectedFileLabel" class="text-sm sm:text-base font-extrabold">Tap to Select Your JEE Question Paper PDF</p>
-                        <p class="text-xs m3-text-muted mt-1">Questions are buffered during extraction & added cleanly when complete (or rolled back if cancelled)!</p>
+                        <p class="text-xs m3-text-muted mt-1">You can minimize this window during extraction or cancel & rollback anytime!</p>
                     </label>
 
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 m3-group-item p-4">
@@ -824,7 +883,7 @@
                     </div>
                 </div>
 
-                <!-- Live Progress View with Seamless Animated Wavy Progress Bar -->
+                <!-- Live Progress View with Seamless Animated Wavy Progress Bar & Colored Logs -->
                 <div id="uploadProgressView" class="hidden space-y-3">
                     <div class="m3-surface-high border m3-border rounded-3xl p-4 space-y-3">
                         <div class="flex items-center justify-between text-xs">
@@ -837,32 +896,28 @@
 
                         <div id="extractWavyBarWrap"></div>
 
-                        <p id="extractSubText" class="text-[11px] m3-text-muted font-mono">Preparing 2.0x high-resolution full-width renderer...</p>
+                        <p id="extractSubText" class="text-[11px] font-semibold font-mono" style="color: var(--md-primary)">Preparing 2.0x high-resolution full-width renderer...</p>
                     </div>
 
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <div class="m3-surface-low border m3-border rounded-3xl p-2 flex flex-col items-center justify-center h-44 overflow-hidden">
                             <canvas id="pdfWorkCanvas" class="max-h-full max-w-full object-contain"></canvas>
                         </div>
-                        <div id="extractLiveLog" class="m3-surface-low border m3-border rounded-3xl p-3 h-44 overflow-y-auto font-mono text-[11px] space-y-1"></div>
+                        <div id="extractLiveLog" class="m3-surface-low border m3-border rounded-3xl p-3 h-44 overflow-y-auto font-mono text-[11px] space-y-1.5"></div>
                     </div>
                 </div>
             </div>
 
+            <!-- Upload Modal Footer (Removed duplicate Close button; only Cancel & Rollback + Extract) -->
             <div class="px-5 py-3 m3-surface-low border-t m3-border flex items-center justify-between">
-                <div class="flex items-center gap-2">
-                    <!-- Close Button (Disabled while uploading) -->
-                    <button type="button" id="uploadBotCloseBtn" onclick="window.app.closeUploadModal()" class="h-9 px-4 m3-btn-tonal disabled:opacity-35 disabled:pointer-events-none text-xs">
-                        Close
-                    </button>
-                    <!-- Cancel Upload Button (Active only while uploading; immediately deletes extracted batch) -->
-                    <button type="button" id="cancelExtractBtn" onclick="window.app.cancelPdfExtraction()" class="hidden h-9 px-4 rounded-full bg-rose-500/20 hover:bg-rose-600 text-rose-300 hover:text-white border border-rose-500/40 text-xs font-extrabold items-center gap-1.5 transition">
+                <div>
+                    <button type="button" id="cancelExtractBtn" onclick="window.app.cancelPdfExtraction()" class="hidden h-9 px-4 rounded-full bg-rose-500/20 hover:bg-rose-600 text-rose-400 hover:text-white border border-rose-500/40 text-xs font-extrabold items-center gap-1.5 transition">
                         <i class="ph-bold ph-stop-circle"></i>
                         <span>Cancel & Rollback</span>
                     </button>
                 </div>
 
-                <button type="button" id="startExtractBtn" onclick="window.app.startPdfExtraction()" disabled class="h-9 px-5 m3-btn-filled disabled:opacity-40 text-xs sm:text-sm flex items-center gap-1.5 shadow-lg">
+                <button type="button" id="startExtractBtn" onclick="window.app.startPdfExtraction()" disabled class="h-10 px-6 m3-btn-filled disabled:opacity-40 text-xs sm:text-sm flex items-center gap-1.5 shadow-lg ml-auto">
                     <i class="ph-bold ph-magic-wand"></i>
                     <span>Extract Questions</span>
                 </button>
@@ -871,9 +926,9 @@
     </div>
 
     <!-- =================================================================== -->
-    <!-- MODAL 3: SPLIT CLUBBED QUESTION / VERTICAL TRIM TOOL                -->
+    <!-- MODAL 3: SPLIT CLUBBED QUESTION / VERTICAL TRIM TOOL (Single Close) -->
     <!-- =================================================================== -->
-    <div id="splitModal" onclick="if(event.target === this) window.app.closeSplitModal()" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-3 sm:p-6">
+    <div id="splitModal" onclick="if(event.target === this) window.app.closeSplitModal()" class="fixed inset-0 bg-black/75 backdrop-blur-sm z-50 hidden flex items-center justify-center p-3 sm:p-6">
         <div class="m3-dialog max-w-4xl w-full max-h-[92vh] flex flex-col overflow-hidden">
             <div class="px-5 py-3.5 m3-surface-low border-b m3-border flex items-center justify-between gap-2">
                 <div>
@@ -883,9 +938,8 @@
                     </h3>
                     <p class="text-[11px] m3-text-muted">Horizontal width is locked to 100% full page width so alignment never breaks.</p>
                 </div>
-                <button type="button" onclick="window.app.closeSplitModal()" class="h-9 px-4 m3-btn-tonal text-xs flex items-center gap-1.5 shrink-0">
+                <button type="button" onclick="window.app.closeSplitModal()" class="h-9 w-9 m3-btn-tonal flex items-center justify-center shrink-0" title="Close">
                     <i class="ph-bold ph-x text-sm"></i>
-                    <span>Close</span>
                 </button>
             </div>
 
@@ -919,9 +973,8 @@
                 </div>
             </div>
 
-            <div class="px-5 py-3 m3-surface-low border-t m3-border flex items-center justify-between">
-                <button type="button" onclick="window.app.closeSplitModal()" class="h-9 px-4 m3-btn-tonal text-xs">Close</button>
-                <button type="button" onclick="window.app.confirmSplitOrTrim()" class="h-9 px-5 m3-btn-filled text-xs sm:text-sm flex items-center gap-1.5 shadow-lg">
+            <div class="px-5 py-3 m3-surface-low border-t m3-border flex items-center justify-end">
+                <button type="button" onclick="window.app.confirmSplitOrTrim()" class="h-10 px-6 m3-btn-filled text-xs sm:text-sm flex items-center gap-1.5 shadow-lg">
                     <i class="ph-bold ph-check"></i>
                     <span id="splitConfirmLabel">Split Question Now</span>
                 </button>
@@ -974,22 +1027,25 @@
     </div>
 
     <!-- M3 THEME-MATCHED TOAST NOTIFICATIONS -->
-    <div id="toastBox" class="fixed bottom-24 right-6 z-50 flex flex-col gap-2 pointer-events-none"></div>
+    <div id="toastBox" class="fixed bottom-24 right-6 z-50 flex flex-col gap-2 pointer-events-none"></div> 
+
+
     <!-- =================================================================== -->
     <!-- CORE APPLICATION LOGIC (M3 EXPRESSIVE + CLOUD GIST + LOCAL OCR)     -->
     <!-- =================================================================== -->
     <script>
         try { indexedDB.deleteDatabase('JEEQuestionVaultDB'); } catch (_) {}
 
-        // 1. Generate Smooth Parametric SVG Scalloped "Cookie" Paths (12-Lobe & 8-Lobe)
+        // 1. Generate Softened Parametric SVG Scalloped "Cookie" & Clover Paths (Less Sharp Spokes)
         function initM3ExpressiveShapes() {
-            const makeStarburst = (lobes, innerR, outerR) => {
-                const pts = 144;
+            const makeSoftStarburst = (lobes, innerR, outerR) => {
+                const pts = 180;
                 let d = '';
                 const mid = (outerR + innerR) / 2;
                 const amp = (outerR - innerR) / 2;
                 for (let i = 0; i <= pts; i++) {
                     const a = (i / pts) * Math.PI * 2;
+                    // Gentle cosine modulation keeps the lobes pillowy and rounded (never spiky)
                     const r = mid + amp * Math.cos(lobes * a);
                     const x = (0.5 + r * Math.cos(a)).toFixed(4);
                     const y = (0.5 + r * Math.sin(a)).toFixed(4);
@@ -999,31 +1055,29 @@
             };
             const p12 = document.getElementById('m3Cookie12Path');
             const p8 = document.getElementById('m3Clover8Path');
-            if (p12) p12.setAttribute('d', makeStarburst(12, 0.425, 0.495));
-            if (p8) p8.setAttribute('d', makeStarburst(8, 0.43, 0.495));
+            if (p12) p12.setAttribute('d', makeSoftStarburst(12, 0.448, 0.495));
+            if (p8) p8.setAttribute('d', makeSoftStarburst(8, 0.445, 0.495));
         }
 
-        // 2. Seamless Low-Frequency Animated Material 3 Wavy Progress Bar (80px wavelength, zero gap, smooth CSS width transition)
+        // 2. Seamless, Slow-Velocity, Rounded-Edge Material 3 Wavy Progress Bar
         function renderM3WavyProgress(targetElOrId, pct = 50) {
             const el = typeof targetElOrId === 'string' ? document.getElementById(targetElOrId) : targetElOrId;
             if (!el) return;
-            const clamped = Math.max(4, Math.min(100, Math.round(pct)));
+            const clamped = Math.max(5, Math.min(100, Math.round(pct)));
             const rem = Math.max(0, 100 - clamped);
             const primaryColor = getComputedStyle(document.documentElement).getPropertyValue('--md-primary').trim() || '#a78bfa';
 
-            // 80px wavelength low-frequency smooth sine wave
-            const waveSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 14" width="80" height="14"><path d="M 0 7 Q 20 1.5, 40 7 T 80 7" fill="none" stroke="${primaryColor}" stroke-width="4.5" stroke-linecap="round"/></svg>`;
+            const waveSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 44 14" width="44" height="14"><path d="M 0 7 Q 11 1.8, 22 7 T 44 7" fill="none" stroke="${primaryColor}" stroke-width="4.5" stroke-linecap="round"/></svg>`;
             const bgUrl = `url('data:image/svg+xml;utf8,${encodeURIComponent(waveSvg)}')`;
 
-            // Reuse existing DOM nodes so CSS width transition animates smoothly instead of snapping!
             let activeEl = el.querySelector('.m3-wavy-active');
             let trackEl = el.querySelector('.m3-wavy-track');
             let dotEl = el.querySelector('.m3-wavy-dot');
 
             if (!activeEl) {
                 el.innerHTML = `
-                    <div class="flex items-center w-full h-4 overflow-hidden">
-                        <div class="m3-wavy-active shrink-0" style="width: 4%; background-image: ${bgUrl};"></div>
+                    <div class="flex items-center w-full h-4 overflow-hidden rounded-full">
+                        <div class="m3-wavy-active shrink-0" style="width: 5%; background-image: ${bgUrl};"></div>
                         <div class="m3-wavy-track flex-1 relative flex items-center justify-end pr-1.5 min-w-0">
                             <span class="m3-wavy-dot w-1.5 h-1.5 rounded-full shrink-0" style="background: var(--md-primary)"></span>
                         </div>
@@ -1042,20 +1096,6 @@
 
             if (trackEl) trackEl.style.opacity = rem > 1 ? '1' : '0';
             if (dotEl) dotEl.style.background = 'var(--md-primary)';
-        }
-
-        function toggleGlobalWaveBar(show, pct = 68) {
-            const wrap = document.getElementById('topGlobalWaveWrap');
-            const settingsCloudWave = document.getElementById('settingsCloudWavyBar');
-            if (wrap) {
-                wrap.classList.toggle('hidden', !show);
-                wrap.classList.toggle('flex', show);
-                if (show) renderM3WavyProgress('topGlobalWaveBar', pct);
-            }
-            if (settingsCloudWave) {
-                settingsCloudWave.classList.toggle('hidden', !show);
-                if (show) renderM3WavyProgress(settingsCloudWave, pct);
-            }
         }
 
         const JEE_CHAPTERS = {
@@ -1085,6 +1125,7 @@
             activeSettingsPage: 'HOME',
             pdfDoc: null,
             isExtracting: false,
+            isUploadMinimized: false,
             cancelExtractionRequested: false,
             currentUploadBatchIds: [],
             activeSplitId: null,
@@ -1112,12 +1153,13 @@
         const getGithubGistId = () => (localStorage.getItem('jee_github_gist_id') || '').trim();
         const isCloudAutoSyncEnabled = () => localStorage.getItem('jee_cloud_autosync') !== 'false';
         const getThemeMode = () => localStorage.getItem('jee_m3_theme_mode') || 'dark';
+        const isLiquidGlassEnabled = () => localStorage.getItem('jee_m3_liquid_glass') !== 'false'; // Default ON
 
         // ===================================================================
-        // MATERIAL 3 EXPRESSIVE DYNAMIC COLOR ENGINE (DARK & LIGHT MODES)
+        // MATERIAL 3 EXPRESSIVE DYNAMIC COLOR ENGINE (VIBRANT LIGHT & DARK)
         // ===================================================================
         function hexToHsl(hex) {
-            hex = String(hex || '#8b5cf6').replace('#', '');
+            hex = String(hex || '#7c3aed').replace('#', '');
             if (hex.length === 3) hex = hex.split('').map(c => c + c).join('');
             const r = parseInt(hex.substring(0, 2), 16) / 255;
             const g = parseInt(hex.substring(2, 4), 16) / 255;
@@ -1138,62 +1180,106 @@
         }
 
         function applyMaterialThemeFromSeed(hexSeed, modeOverride = null) {
-            const cleanHex = /^#[0-9A-Fa-f]{6}$/.test(hexSeed) ? hexSeed : (localStorage.getItem('jee_m3_seed_color') || '#8b5cf6');
+            const cleanHex = /^#[0-9A-Fa-f]{6}$/.test(hexSeed) ? hexSeed : (localStorage.getItem('jee_m3_seed_color') || '#7c3aed');
             const mode = modeOverride || getThemeMode();
             const { h, s } = hexToHsl(cleanHex);
             const root = document.documentElement;
-            const sat = Math.max(58, s);
+            const sat = Math.max(68, s);
+            const hSec = (h + 24) % 360;
+            const hTer = (h + 65) % 360;
 
             root.classList.toggle('dark', mode === 'dark');
             localStorage.setItem('jee_m3_theme_mode', mode);
             localStorage.setItem('jee_m3_seed_color', cleanHex);
 
             if (mode === 'light') {
-                root.style.setProperty('--md-primary', `hsl(${h}, ${Math.min(85, sat)}%, 40%)`);
-                root.style.setProperty('--md-on-primary', `hsl(${h}, 100%, 98%)`);
-                root.style.setProperty('--md-primary-container', `hsl(${h}, ${Math.min(85, sat)}%, 89%)`);
-                root.style.setProperty('--md-on-primary-container', `hsl(${h}, ${Math.min(85, sat)}%, 14%)`);
-                root.style.setProperty('--md-secondary-container', `hsl(${h}, ${Math.round(sat * 0.45)}%, 90%)`);
-                root.style.setProperty('--md-on-secondary-container', `hsl(${h}, 60%, 18%)`);
-                root.style.setProperty('--md-surface', `hsl(${h}, 30%, 97%)`);
-                root.style.setProperty('--md-surface-low', `hsl(${h}, 28%, 94%)`);
-                root.style.setProperty('--md-surface-container', `hsl(${h}, 26%, 91%)`);
-                root.style.setProperty('--md-surface-high', `hsl(${h}, 24%, 87%)`);
-                root.style.setProperty('--md-surface-highest', `hsl(${h}, 22%, 82%)`);
-                root.style.setProperty('--md-on-surface', `hsl(${h}, 30%, 11%)`);
-                root.style.setProperty('--md-on-surface-variant', `hsl(${h}, 16%, 35%)`);
-                root.style.setProperty('--md-outline', `hsl(${h}, 16%, 62%)`);
-                root.style.setProperty('--md-outline-variant', `hsl(${h}, 20%, 78%)`);
+                // High-Chroma Expressive Light Mode Palette (Rich Tonal Lavender/Tinted Surfaces, Never Washed-Out Grey!)
+                root.style.setProperty('--md-primary', `hsl(${h}, ${Math.min(92, sat)}%, 44%)`);
+                root.style.setProperty('--md-on-primary', `#ffffff`);
+                root.style.setProperty('--md-primary-container', `hsl(${h}, 92%, 86%)`);
+                root.style.setProperty('--md-on-primary-container', `hsl(${h}, 88%, 16%)`);
+                root.style.setProperty('--md-secondary-container', `hsl(${hSec}, 82%, 88%)`);
+                root.style.setProperty('--md-on-secondary-container', `hsl(${hSec}, 78%, 18%)`);
+                root.style.setProperty('--md-tertiary-container', `hsl(${hTer}, 88%, 88%)`);
+                root.style.setProperty('--md-on-tertiary-container', `hsl(${hTer}, 82%, 18%)`);
+                root.style.setProperty('--md-surface', `hsl(${h}, 60%, 96%)`);
+                root.style.setProperty('--md-surface-low', `hsl(${h}, 58%, 93%)`);
+                root.style.setProperty('--md-surface-container', `hsl(${h}, 56%, 90%)`);
+                root.style.setProperty('--md-surface-high', `hsl(${h}, 52%, 86%)`);
+                root.style.setProperty('--md-surface-highest', `hsl(${h}, 50%, 81%)`);
+                root.style.setProperty('--md-surface-alpha', `hsla(${h}, 62%, 94%, 0.74)`);
+                root.style.setProperty('--md-container-alpha', `hsla(${h}, 60%, 91%, 0.76)`);
+                root.style.setProperty('--md-high-alpha', `hsla(${h}, 56%, 86%, 0.74)`);
+                root.style.setProperty('--md-on-surface', `hsl(${h}, 55%, 11%)`);
+                root.style.setProperty('--md-on-surface-variant', `hsl(${h}, 36%, 32%)`);
+                root.style.setProperty('--md-outline', `hsl(${h}, 42%, 58%)`);
+                root.style.setProperty('--md-outline-variant', `hsl(${h}, 46%, 76%)`);
             } else {
                 root.style.setProperty('--md-primary', `hsl(${h}, ${sat}%, 78%)`);
-                root.style.setProperty('--md-on-primary', `hsl(${h}, ${Math.min(80, sat)}%, 15%)`);
-                root.style.setProperty('--md-primary-container', `hsl(${h}, ${Math.round(sat * 0.65)}%, 27%)`);
-                root.style.setProperty('--md-on-primary-container', `hsl(${h}, 95%, 92%)`);
-                root.style.setProperty('--md-secondary-container', `hsl(${h}, ${Math.round(sat * 0.35)}%, 22%)`);
-                root.style.setProperty('--md-on-secondary-container', `hsl(${h}, 75%, 90%)`);
-                root.style.setProperty('--md-surface', `hsl(${h}, 24%, 7%)`);
-                root.style.setProperty('--md-surface-low', `hsl(${h}, 24%, 10%)`);
-                root.style.setProperty('--md-surface-container', `hsl(${h}, 24%, 13%)`);
-                root.style.setProperty('--md-surface-high', `hsl(${h}, 24%, 17%)`);
-                root.style.setProperty('--md-surface-highest', `hsl(${h}, 24%, 22%)`);
-                root.style.setProperty('--md-on-surface', `hsl(${h}, 20%, 95%)`);
-                root.style.setProperty('--md-on-surface-variant', `hsl(${h}, 15%, 72%)`);
-                root.style.setProperty('--md-outline', `hsl(${h}, 16%, 32%)`);
-                root.style.setProperty('--md-outline-variant', `hsl(${h}, 18%, 20%)`);
+                root.style.setProperty('--md-on-primary', `hsl(${h}, 82%, 14%)`);
+                root.style.setProperty('--md-primary-container', `hsl(${h}, 68%, 28%)`);
+                root.style.setProperty('--md-on-primary-container', `hsl(${h}, 98%, 92%)`);
+                root.style.setProperty('--md-secondary-container', `hsl(${hSec}, 48%, 24%)`);
+                root.style.setProperty('--md-on-secondary-container', `hsl(${hSec}, 88%, 91%)`);
+                root.style.setProperty('--md-tertiary-container', `hsl(${hTer}, 55%, 26%)`);
+                root.style.setProperty('--md-on-tertiary-container', `hsl(${hTer}, 95%, 92%)`);
+                root.style.setProperty('--md-surface', `hsl(${h}, 28%, 7%)`);
+                root.style.setProperty('--md-surface-low', `hsl(${h}, 28%, 10%)`);
+                root.style.setProperty('--md-surface-container', `hsl(${h}, 28%, 13%)`);
+                root.style.setProperty('--md-surface-high', `hsl(${h}, 28%, 17%)`);
+                root.style.setProperty('--md-surface-highest', `hsl(${h}, 28%, 22%)`);
+                root.style.setProperty('--md-surface-alpha', `hsla(${h}, 28%, 11%, 0.72)`);
+                root.style.setProperty('--md-container-alpha', `hsla(${h}, 28%, 15%, 0.75)`);
+                root.style.setProperty('--md-high-alpha', `hsla(${h}, 28%, 20%, 0.72)`);
+                root.style.setProperty('--md-on-surface', `hsl(${h}, 24%, 96%)`);
+                root.style.setProperty('--md-on-surface-variant', `hsl(${h}, 18%, 74%)`);
+                root.style.setProperty('--md-outline', `hsl(${h}, 20%, 36%)`);
+                root.style.setProperty('--md-outline-variant', `hsl(${h}, 22%, 22%)`);
             }
 
-            const darkBtn = document.getElementById('themeModeDarkBtn');
-            const lightBtn = document.getElementById('themeModeLightBtn');
-            if (darkBtn && lightBtn) {
-                darkBtn.classList.toggle('active', mode === 'dark');
-                lightBtn.classList.toggle('active', mode === 'light');
-            }
+            document.getElementById('themeModeDarkBtn')?.classList.toggle('active', mode === 'dark');
+            document.getElementById('themeModeLightBtn')?.classList.toggle('active', mode === 'light');
             const picker = document.getElementById('customThemeColorPicker');
             if (picker) picker.value = cleanHex;
             renderDrawerChapters();
         }
 
-        // Theme-Matched M3 Expressive Toast
+        function applyLiquidGlassSetting(enabled) {
+            localStorage.setItem('jee_m3_liquid_glass', String(enabled));
+            document.body.classList.toggle('liquid-glass', enabled);
+            document.getElementById('liquidGlassOnBtn')?.classList.toggle('active', enabled);
+            document.getElementById('liquidGlassOffBtn')?.classList.toggle('active', !enabled);
+        }
+
+        // Swipeable Android-Style Segmented Status Bar Gesture Initializer
+        function initSwipeableStatusSegmentedBar() {
+            const bar = document.getElementById('statusSegmentedBar');
+            if (!bar) return;
+            let isPointerDown = false;
+
+            const pickStatusAtPoint = (clientX, clientY) => {
+                const el = document.elementFromPoint(clientX, clientY);
+                const btn = el?.closest?.('.status-btn');
+                if (btn) {
+                    const st = btn.getAttribute('data-status');
+                    if (st && st !== state.status) {
+                        window.app.setStatus(st);
+                    }
+                }
+            };
+
+            bar.addEventListener('pointerdown', (e) => {
+                isPointerDown = true;
+                pickStatusAtPoint(e.clientX, e.clientY);
+            });
+            bar.addEventListener('pointermove', (e) => {
+                if (!isPointerDown) return;
+                pickStatusAtPoint(e.clientX, e.clientY);
+            });
+            window.addEventListener('pointerup', () => { isPointerDown = false; });
+            window.addEventListener('pointercancel', () => { isPointerDown = false; });
+        }
+
         function toast(msg, type = 'info') {
             const box = document.getElementById('toastBox');
             const el = document.createElement('div');
@@ -1220,7 +1306,6 @@
         // ===================================================================
         // DIAGRAM-NOISE FILTERED LOCAL OCR ENGINE (PDF.JS + TESSERACT.JS V5)
         // ===================================================================
-        // Strips out stray diagram axis labels, isolated single letters, and figure gibberish
         function cleanQuestionTextOnly(rawText) {
             if (!rawText) return '';
             const lines = String(rawText).split(/\r?\n/);
@@ -1230,7 +1315,6 @@
                 const line = rawLine.trim();
                 if (!line) continue;
                 const tokens = line.split(/\s+/);
-                // Count real prose words (3+ letters) vs isolated 1-2 char diagram labels (T1, m, A, B, v0)
                 const proseWords = tokens.filter(t => /[a-zA-Z]{3,}/.test(t)).length;
                 const isOptionLine = /^\(?[A-D1-4]\)?[\.\)]/i.test(line);
                 const isQuestionStart = /^(?:Q\.?\s*)?\d+[\.\)]/i.test(line);
@@ -1239,11 +1323,10 @@
                     cleanLines.push(line);
                 }
             }
-            const joined = (cleanLines.length > 0 ? cleanLines.join(' ') : String(rawText))
-                .replace(/\b[A-Za-z]\d\b/g, ' ') // strip isolated diagram subscripts like T1, T2, m1
+            return (cleanLines.length > 0 ? cleanLines.join(' ') : String(rawText))
+                .replace(/\b[A-Za-z]\d\b/g, ' ')
                 .replace(/\s+/g, ' ')
                 .trim();
-            return joined;
         }
 
         async function getLocalTesseractWorker() {
@@ -1276,15 +1359,13 @@
                     }
                 }
 
-                // Group items by vertical line so diagram callouts floating isolated beside figures are filtered out
                 const lineBuckets = new Map();
                 for (const it of itemsInSlice) {
                     if (!it.str) continue;
                     const key = Math.round(it.y / 6);
                     lineBuckets.set(key, (lineBuckets.get(key) || '') + ' ' + it.str);
                 }
-                const reconstructedLines = Array.from(lineBuckets.values()).join('\n');
-                return cleanQuestionTextOnly(reconstructedLines);
+                return cleanQuestionTextOnly(Array.from(lineBuckets.values()).join('\n'));
             } catch (_) {
                 return '';
             }
@@ -1322,7 +1403,6 @@
                     if (badgeTxt) badgeTxt.textContent = `OCR: ${completed}/${targets.length}`;
                     if (settingsBtnLbl) settingsBtnLbl.textContent = `Indexing Question ${completed} of ${targets.length} (${pct}%)...`;
                     if (settingsOcrWave) renderM3WavyProgress(settingsOcrWave, pct);
-                    toggleGlobalWaveBar(true, pct);
 
                     const extracted = await recognizeImageTextWithTesseract(q.imageDataUrl);
                     const fallback = `${q.firstLineSnippet || ''} ${q.lastLineSnippet || ''}`.trim();
@@ -1336,7 +1416,6 @@
                 }
             } finally {
                 state.isRunningBackgroundOcr = false;
-                toggleGlobalWaveBar(false);
                 if (badge) { badge.classList.add('hidden'); badge.classList.remove('inline-flex'); }
                 if (settingsOcrWave) settingsOcrWave.classList.add('hidden');
                 if (settingsBtnLbl) settingsBtnLbl.textContent = 'Re-Index Clean Question Text OCR';
@@ -1355,50 +1434,47 @@
             }
         }
 
-        // Theme-Tinted Cloud Status Pill (Uses dynamic --md-primary-container & --md-primary instead of fixed green!)
+        // Sync Button in Unified Top Bar Becomes a Live Progress Loader When Syncing
         function updateCloudStatusUI(status = 'idle', detail = '') {
-            const badge = document.getElementById('cloudStatusBadge');
+            const syncBtn = document.getElementById('syncHeaderBtn');
             const icon = document.getElementById('cloudStatusIcon');
             const txt = document.getElementById('cloudStatusText');
             const infoEl = document.getElementById('cloudLastSyncInfo');
-            if (!badge || !icon || !txt) return;
+            const settingsCloudWave = document.getElementById('settingsCloudWavyBar');
+            if (!syncBtn || !icon || !txt) return;
 
             const hasToken = Boolean(getGithubToken());
             const lastSync = localStorage.getItem('jee_cloud_last_sync') || '';
 
             if (!hasToken) {
-                toggleGlobalWaveBar(false);
-                badge.className = 'inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-extrabold m3-surface-high border m3-border transition shrink-0';
-                badge.style.background = '';
-                badge.style.color = '';
-                icon.className = 'ph-bold ph-cloud-slash text-xs';
-                txt.textContent = 'Cloud: Off';
+                if (settingsCloudWave) settingsCloudWave.classList.add('hidden');
+                syncBtn.classList.remove('active-state');
+                icon.className = 'ph-bold ph-cloud-slash text-sm';
+                txt.textContent = 'Off';
                 if (infoEl) infoEl.textContent = 'Enter a GitHub Token in API Keys settings to store & sync your questions in the cloud.';
                 return;
             }
 
             if (status === 'syncing') {
-                toggleGlobalWaveBar(true, 72);
-                badge.className = 'inline-flex items-center gap-1.5 px-3.5 py-1 rounded-xl text-[10px] font-extrabold transition shrink-0 shadow-sm';
-                badge.style.background = 'var(--md-primary)';
-                badge.style.color = 'var(--md-on-primary)';
-                icon.className = 'ph-bold ph-arrows-clockwise animate-spin text-xs';
-                txt.textContent = detail || 'Syncing...';
+                if (settingsCloudWave) {
+                    settingsCloudWave.classList.remove('hidden');
+                    renderM3WavyProgress(settingsCloudWave, 72);
+                }
+                syncBtn.classList.add('active-state');
+                icon.className = 'ph-bold ph-circle-notch animate-spin text-sm';
+                txt.textContent = detail || 'Syncing';
             } else if (status === 'error') {
-                toggleGlobalWaveBar(false);
-                badge.className = 'inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-extrabold bg-rose-500/20 text-rose-300 border border-rose-500/40 transition shrink-0';
-                badge.style.background = '';
-                badge.style.color = '';
-                icon.className = 'ph-bold ph-cloud-warning text-xs';
-                txt.textContent = 'Sync Error';
+                if (settingsCloudWave) settingsCloudWave.classList.add('hidden');
+                syncBtn.classList.remove('active-state');
+                icon.className = 'ph-bold ph-cloud-warning text-rose-400 text-sm';
+                txt.textContent = 'Error';
                 if (infoEl && detail) infoEl.textContent = `Last Cloud Error: ${detail}`;
             } else {
-                toggleGlobalWaveBar(false);
-                badge.className = 'inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-extrabold m3-primary-pill hover:brightness-110 transition shrink-0';
-                badge.style.background = 'var(--md-primary-container)';
-                badge.style.color = 'var(--md-on-primary-container)';
-                icon.className = 'ph-bold ph-cloud-check text-xs';
-                txt.textContent = `Cloud: ${state.questions.length} Saved`;
+                if (settingsCloudWave) settingsCloudWave.classList.add('hidden');
+                syncBtn.classList.remove('active-state');
+                icon.className = 'ph-bold ph-cloud-check text-sm';
+                icon.style.color = 'var(--md-primary)';
+                txt.textContent = `${state.questions.length}`;
                 if (infoEl) {
                     infoEl.textContent = lastSync
                         ? `Last Cloud Sync: ${lastSync} • Gist ID: ${getGithubGistId() || 'Pending first push'}`
@@ -1489,7 +1565,7 @@
             if (state.isSyncingCloud) { state.hasPendingCloudPush = true; return; }
             state.isSyncingCloud = true;
             state.hasPendingCloudPush = false;
-            updateCloudStatusUI('syncing', 'Pushing...');
+            updateCloudStatusUI('syncing', 'Pushing');
 
             try {
                 const paperGroups = {};
@@ -1584,7 +1660,7 @@
 
             if (state.isSyncingCloud) return;
             state.isSyncingCloud = true;
-            updateCloudStatusUI('syncing', 'Pulling...');
+            updateCloudStatusUI('syncing', 'Pulling');
 
             try {
                 const gistId = await resolveOrDiscoverGistId(token, gistInp);
@@ -1783,7 +1859,7 @@
         }
 
         // ===================================================================
-        // GEMINI VISION API CALL (100% DEDICATED TO BOUNDARIES & CHAPTERS)
+        // GEMINI VISION API CALL
         // ===================================================================
         async function analyzePageLayoutWithGemini(base64Jpeg, pageNum) {
             const apiKey = getApiKey();
@@ -1876,30 +1952,56 @@ CRITICAL RULES FOR ZERO CLUBBING & EXACT STITCHING:
             return { questions: [] };
         }
 
-        function appendExtractLog(msg, cls = 'm3-text-muted') {
+        // Rich Color-Coded Live Extraction Logs (Fixes the colorless text in Add PDF menu)
+        function appendExtractLog(msg, tone = 'info') {
             const box = document.getElementById('extractLiveLog');
             const d = document.createElement('div');
-            d.className = cls;
+            if (tone === 'success') {
+                d.className = 'font-bold text-emerald-500 dark:text-emerald-400';
+            } else if (tone === 'stitch') {
+                d.className = 'font-extrabold text-amber-500 dark:text-amber-300';
+            } else if (tone === 'error') {
+                d.className = 'font-extrabold text-rose-500 dark:text-rose-400';
+            } else {
+                d.className = 'font-semibold';
+                d.style.color = 'var(--md-primary)';
+            }
             d.textContent = `• ${msg}`;
             box.appendChild(d);
             box.scrollTop = box.scrollHeight;
         }
 
         // ===================================================================
-        // PDF UPLOAD & EXTRACTION (NO BACKGROUND REFRESH, CANCEL ROLLBACK)
+        // PDF UPLOAD, BACKGROUND MINIMIZE BAR & CANCEL ROLLBACK
         // ===================================================================
         function setUploadButtonsLock(isUploading) {
             const topClose = document.getElementById('uploadTopCloseBtn');
-            const botClose = document.getElementById('uploadBotCloseBtn');
+            const minBtn = document.getElementById('minimizeUploadBtn');
             const cancelBtn = document.getElementById('cancelExtractBtn');
             const startBtn = document.getElementById('startExtractBtn');
             if (topClose) topClose.disabled = isUploading;
-            if (botClose) botClose.disabled = isUploading;
             if (startBtn) startBtn.disabled = isUploading;
+            if (minBtn) {
+                minBtn.classList.toggle('hidden', !isUploading);
+                minBtn.classList.toggle('flex', isUploading);
+            }
             if (cancelBtn) {
                 cancelBtn.classList.toggle('hidden', !isUploading);
                 cancelBtn.classList.toggle('inline-flex', isUploading);
             }
+        }
+
+        function updateUploadProgressEverywhere(pct, pageBadgeText, subStatusText) {
+            document.getElementById('extractPageBadge').textContent = pageBadgeText;
+            document.getElementById('extractSubText').textContent = subStatusText;
+            renderM3WavyProgress('extractWavyBarWrap', pct);
+
+            // Also update the Secondary Background Task Status Bar if minimized
+            const minBadge = document.getElementById('minBarPageBadge');
+            const minTxt = document.getElementById('minBarStatusText');
+            if (minBadge) minBadge.textContent = pageBadgeText;
+            if (minTxt) minTxt.textContent = subStatusText;
+            renderM3WavyProgress('minBarWaveWrap', pct);
         }
 
         async function onPdfSelected(e) {
@@ -1924,7 +2026,7 @@ CRITICAL RULES FOR ZERO CLUBBING & EXACT STITCHING:
         function cancelPdfExtraction() {
             if (!state.isExtracting) return;
             state.cancelExtractionRequested = true;
-            appendExtractLog(`🛑 Cancelling upload & rolling back extracted questions...`, 'text-rose-400 font-bold');
+            appendExtractLog(`🛑 Cancelling upload & rolling back extracted questions...`, 'error');
         }
 
         async function startPdfExtraction() {
@@ -1937,6 +2039,7 @@ CRITICAL RULES FOR ZERO CLUBBING & EXACT STITCHING:
             }
 
             state.isExtracting = true;
+            state.isUploadMinimized = false;
             state.cancelExtractionRequested = false;
             state.currentUploadBatchIds = [];
             setUploadButtonsLock(true);
@@ -1949,13 +2052,11 @@ CRITICAL RULES FOR ZERO CLUBBING & EXACT STITCHING:
             document.getElementById('uploadSetupView').classList.add('hidden');
             document.getElementById('uploadProgressView').classList.remove('hidden');
             document.getElementById('extractLiveLog').innerHTML = '';
-            renderM3WavyProgress('extractWavyBarWrap', 6);
+            updateUploadProgressEverywhere(6, `Page ${startP}/${endP}`, `Preparing 2.0x high-resolution renderer...`);
 
             const canvas = document.getElementById('pdfWorkCanvas');
             const ctx = canvas.getContext('2d');
 
-            // Buffer extracted questions in a temporary array so the main page NEVER refreshes mid-upload
-            // and cancelling immediately discards the entire batch!
             const batchQuestions = [];
             let prevQuestion = null;
             let extractedCount = 0;
@@ -1966,9 +2067,11 @@ CRITICAL RULES FOR ZERO CLUBBING & EXACT STITCHING:
                     if (state.cancelExtractionRequested) break;
 
                     const basePagePct = Math.round(((pageNum - startP) / countPages) * 100);
-                    document.getElementById('extractPageBadge').textContent = `Page ${pageNum}/${endP}`;
-                    renderM3WavyProgress('extractWavyBarWrap', Math.max(8, basePagePct));
-                    document.getElementById('extractSubText').textContent = `Rendering Page ${pageNum} at 2.0x scale & detecting boundaries...`;
+                    updateUploadProgressEverywhere(
+                        Math.max(8, basePagePct),
+                        `Page ${pageNum}/${endP}`,
+                        `Scanning Page ${pageNum} boundaries (${extractedCount} questions found)...`
+                    );
 
                     const page = await state.pdfDoc.getPage(pageNum);
                     if (state.cancelExtractionRequested) break;
@@ -1981,7 +2084,7 @@ CRITICAL RULES FOR ZERO CLUBBING & EXACT STITCHING:
                     if (state.cancelExtractionRequested) break;
 
                     const base64Jpeg = canvas.toDataURL('image/jpeg', 0.84).split(',')[1];
-                    appendExtractLog(`Scanning Page ${pageNum} layout with ${getSelectedModel()}...`);
+                    appendExtractLog(`Scanning Page ${pageNum} layout with ${getSelectedModel()}...`, 'info');
 
                     const aiResult = await analyzePageLayoutWithGemini(base64Jpeg, pageNum);
                     if (state.cancelExtractionRequested) break;
@@ -2006,18 +2109,26 @@ CRITICAL RULES FOR ZERO CLUBBING & EXACT STITCHING:
                         if (state.cancelExtractionRequested) break;
                         const b = blocks[i];
                         const slicePct = Math.round(((pageNum - startP + (i + 1) / blocks.length) / countPages) * 100);
-                        renderM3WavyProgress('extractWavyBarWrap', slicePct);
 
                         const ymin = Math.max(0, Math.min(990, Number(b.ymin) || 0));
                         const ymax = Math.max(ymin + 25, Math.min(1000, Number(b.ymax) || 1000));
                         const cropRes = cropFullWidthSlice(canvas, ymin, ymax, padTop, padBottom);
 
-                        // Extract clean question prose (filtering out diagram noise)
                         let fullQuestionText = await extractPdfNativeTextInSlice(page, ymin, ymax);
                         if (fullQuestionText.length < 25) {
-                            document.getElementById('extractSubText').textContent = `Running clean question OCR on Page ${pageNum} (${i + 1}/${blocks.length})...`;
+                            updateUploadProgressEverywhere(
+                                slicePct,
+                                `Page ${pageNum}/${endP}`,
+                                `Running local OCR on Page ${pageNum} (${i + 1}/${blocks.length})...`
+                            );
                             const tessText = await recognizeImageTextWithTesseract(cropRes.canvas);
                             if (tessText.length > fullQuestionText.length) fullQuestionText = tessText;
+                        } else {
+                            updateUploadProgressEverywhere(
+                                slicePct,
+                                `Page ${pageNum}/${endP}`,
+                                `Cropping Page ${pageNum} question ${i + 1}/${blocks.length}...`
+                            );
                         }
                         if (state.cancelExtractionRequested) break;
 
@@ -2031,7 +2142,7 @@ CRITICAL RULES FOR ZERO CLUBBING & EXACT STITCHING:
                             (isExplicitCont || prevQuestion.continuesToNextPage === true);
 
                         if (isStitch) {
-                            appendExtractLog(`🔗 Stitched split Q.${prevQuestion.questionNumber} across Page ${prevQuestion.page} → ${pageNum}`);
+                            appendExtractLog(`🔗 Stitched split Q.${prevQuestion.questionNumber} across Page ${prevQuestion.page} → ${pageNum}`, 'stitch');
                             const stitchRes = await stitchCanvasesVertically(prevQuestion.imageDataUrl, cropRes.dataUrl);
                             prevQuestion.imageDataUrl = stitchRes.dataUrl;
                             prevQuestion.aspectRatio = stitchRes.aspectRatio;
@@ -2065,11 +2176,14 @@ CRITICAL RULES FOR ZERO CLUBBING & EXACT STITCHING:
                         state.currentUploadBatchIds.push(qObj.id);
                         extractedCount++;
                         prevQuestion = qObj;
-                        appendExtractLog(`✓ Q.${qObj.questionNumber} (${qObj.subject} • ${qObj.chapter})`);
+                        appendExtractLog(`✓ Q.${qObj.questionNumber} (${qObj.subject} • ${qObj.chapter})`, 'success');
                     }
                 }
 
-                // If user clicked Cancel at any point, discard all questions from this cancelled PDF!
+                document.getElementById('minimizedUploadBar')?.classList.add('hidden');
+                document.getElementById('minimizedUploadBar')?.classList.remove('flex');
+                state.isUploadMinimized = false;
+
                 if (state.cancelExtractionRequested) {
                     const cancelSet = new Set(state.currentUploadBatchIds);
                     state.questions = state.questions.filter(q => !cancelSet.has(q.id));
@@ -2081,21 +2195,23 @@ CRITICAL RULES FOR ZERO CLUBBING & EXACT STITCHING:
                     return;
                 }
 
-                // Commit the entire batch to state.questions at once & render the page once!
                 state.questions.push(...batchQuestions);
                 state.currentUploadBatchIds = [];
                 state.isExtracting = false;
                 setUploadButtonsLock(false);
-                renderM3WavyProgress('extractWavyBarWrap', 100);
+                updateUploadProgressEverywhere(100, `Done`, `Completed extracting ${extractedCount} questions!`);
                 sortAndRefreshQuestions(false);
 
                 toast(`Extracted ${extractedCount} questions! Syncing to Cloud...`, 'success');
                 await pushToCloudGist(false);
-                setTimeout(() => window.app.closeUploadModal(), 500);
+                setTimeout(() => window.app.closeUploadModal(), 450);
             } catch (err) {
                 state.isExtracting = false;
+                state.isUploadMinimized = false;
+                document.getElementById('minimizedUploadBar')?.classList.add('hidden');
+                document.getElementById('minimizedUploadBar')?.classList.remove('flex');
                 setUploadButtonsLock(false);
-                appendExtractLog(`⚠ Error: ${err.message}`, 'text-rose-400');
+                appendExtractLog(`⚠ Error: ${err.message}`, 'error');
                 toast('Extraction error: ' + err.message, 'warn');
             }
         }
@@ -2133,8 +2249,7 @@ CRITICAL RULES FOR ZERO CLUBBING & EXACT STITCHING:
 
             document.querySelectorAll('.status-btn').forEach(btn => {
                 const st = btn.getAttribute('data-status');
-                const active = st === state.status;
-                btn.classList.toggle('active', active);
+                btn.classList.toggle('active', st === state.status);
             });
 
             document.getElementById('activeChapterIndicator').textContent =
@@ -2162,9 +2277,9 @@ CRITICAL RULES FOR ZERO CLUBBING & EXACT STITCHING:
 
             const isAllSelected = state.subject === 'ALL' && state.chapter === 'ALL';
             let html = `
-                <button onclick="window.app.selectSubjectChapter('ALL', 'ALL')" class="w-full px-4 py-2.5 rounded-full flex items-center justify-between text-xs font-extrabold transition ${isAllSelected ? 'm3-btn-filled' : 'm3-surface-high hover:brightness-110'}">
+                <button onclick="window.app.selectSubjectChapter('ALL', 'ALL')" class="w-full px-4 py-2.5 rounded-full flex items-center justify-between text-xs font-extrabold transition ${isAllSelected ? 'm3-btn-filled' : 'm3-surface-high hover:brightness-105'}">
                     <span>All Subjects & Chapters</span>
-                    <span class="px-2 py-0.5 rounded-full bg-black/20 text-[11px]">${all.length}</span>
+                    <span class="px-2 py-0.5 rounded-full bg-black/15 text-[11px]">${all.length}</span>
                 </button>
             `;
 
@@ -2189,12 +2304,12 @@ CRITICAL RULES FOR ZERO CLUBBING & EXACT STITCHING:
 
                 html += `
                     <div class="pt-1">
-                        <button onclick="window.app.selectSubjectChapter('${sMeta.name}', 'ALL')" class="w-full px-3.5 py-2 mb-1.5 flex items-center justify-between text-xs font-extrabold uppercase tracking-wider transition ${isSubjAllActive ? 'm3-btn-filled' : 'm3-surface-low rounded-2xl border m3-border hover:brightness-110'}">
+                        <button onclick="window.app.selectSubjectChapter('${sMeta.name}', 'ALL')" class="w-full px-3.5 py-2 mb-1.5 flex items-center justify-between text-xs font-extrabold uppercase tracking-wider transition ${isSubjAllActive ? 'm3-btn-filled' : 'm3-surface-low rounded-2xl border m3-border hover:brightness-105'}">
                             <div class="flex items-center gap-2">
                                 <span class="w-3 h-3 m3-cookie-12 ${sMeta.dot}"></span>
                                 <span>${sMeta.name}</span>
                             </div>
-                            <span class="px-2 py-0.5 rounded-full bg-black/20 text-[11px] font-bold">${subjQuestions.length}</span>
+                            <span class="px-2 py-0.5 rounded-full bg-black/15 text-[11px] font-bold">${subjQuestions.length}</span>
                         </button>
                         <div class="m3-group-list">
                 `;
@@ -2209,8 +2324,8 @@ CRITICAL RULES FOR ZERO CLUBBING & EXACT STITCHING:
                             <button onclick="window.app.selectSubjectChapter('${sMeta.name}', '${safeName}')" class="w-full px-3.5 py-2 m3-group-item flex items-center justify-between text-xs font-semibold ${active ? 'ring-2 ring-inset ring-[var(--md-primary)] font-extrabold' : ''}" style="${active ? 'background: var(--md-primary-container); color: var(--md-on-primary-container);' : ''}">
                                 <span class="truncate pr-2">${cName}</span>
                                 <div class="flex items-center gap-1 shrink-0 text-[11px]">
-                                    ${st.starred > 0 ? `<span class="text-yellow-400 font-bold">★${st.starred}</span>` : ''}
-                                    <span class="px-2 py-0.2 rounded-full bg-black/20">${st.solved}/${st.total}</span>
+                                    ${st.starred > 0 ? `<span class="text-amber-500 font-extrabold">★${st.starred}</span>` : ''}
+                                    <span class="px-2 py-0.2 rounded-full bg-black/15">${st.solved}/${st.total}</span>
                                 </div>
                             </button>
                         `;
@@ -2222,39 +2337,34 @@ CRITICAL RULES FOR ZERO CLUBBING & EXACT STITCHING:
             list.innerHTML = html;
 
             const solvedTotal = all.filter(q => q.solved).length;
-            const totalCount = all.length;
-            document.getElementById('drawerProgressText').textContent = `Solved: ${solvedTotal} / ${totalCount}`;
-            renderM3WavyProgress('drawerWavyProgress', totalCount > 0 ? (solvedTotal / totalCount) * 100 : 6);
+            document.getElementById('drawerProgressText').textContent = `Solved: ${solvedTotal} / ${all.length}`;
         }
 
-        // Material 3 Expressive Card HTML Builder (No Difficulty, Connected Icon Button Group)
         function buildCardHtml(q) {
             const chapList = JEE_CHAPTERS[q.subject] || JEE_CHAPTERS.Physics;
             const chapOpts = chapList.map(c => `<option value="${c}" ${c === q.chapter ? 'selected' : ''}>${c}</option>`).join('');
-            const borderStyle = q.starred ? 'border-color: var(--md-primary);' : (q.solved ? 'border-color: #34d399;' : '');
+            const borderStyle = q.starred ? 'border-color: var(--md-primary);' : (q.solved ? 'border-color: #10b981;' : '');
 
             return `
             <article class="m3-card min-w-0" style="${borderStyle}">
                 <div class="px-3 py-2 m3-card-top-segment flex items-center justify-between gap-2 flex-nowrap overflow-x-auto no-scrollbar">
                     <div class="flex items-center gap-1.5 min-w-0 flex-nowrap">
-                        <!-- Scalloped 12-Lobe Cookie Badge for Q# -->
                         <span class="w-8 h-8 m3-cookie-12 font-extrabold text-[10px] flex items-center justify-center shrink-0" style="background: var(--md-primary); color: var(--md-on-primary);">Q.${q.questionNumber}</span>
 
-                        <select onchange="window.app.updateQField(${q.id}, 'subject', this.value)" class="h-7 px-2.5 rounded-xl text-[11px] font-bold m3-surface-low border m3-border focus:outline-none shrink-0" style="color: var(--md-primary);">
+                        <select onchange="window.app.updateQField(${q.id}, 'subject', this.value)" class="h-7 px-2.5 rounded-full text-[11px] font-extrabold m3-surface-low border m3-border focus:outline-none shrink-0" style="color: var(--md-primary);">
                             <option value="Physics" ${q.subject === 'Physics' ? 'selected' : ''}>Physics</option>
                             <option value="Chemistry" ${q.subject === 'Chemistry' ? 'selected' : ''}>Chemistry</option>
                             <option value="Mathematics" ${q.subject === 'Mathematics' ? 'selected' : ''}>Maths</option>
                         </select>
 
-                        <select onchange="window.app.updateQField(${q.id}, 'chapter', this.value)" class="h-7 px-2.5 rounded-xl text-[11px] font-semibold m3-surface-low border m3-border max-w-[130px] sm:max-w-[175px] truncate focus:outline-none shrink-0">
+                        <select onchange="window.app.updateQField(${q.id}, 'chapter', this.value)" class="h-7 px-2.5 rounded-full text-[11px] font-semibold m3-surface-low border m3-border max-w-[130px] sm:max-w-[180px] truncate focus:outline-none shrink-0">
                             <option value="${q.chapter}">${q.chapter}</option>
                             ${chapOpts}
                         </select>
 
-                        ${q.isStitched ? `<span class="px-2 py-0.5 rounded-lg m3-primary-pill text-[9px] font-extrabold shrink-0" title="Stitched">🔗</span>` : ''}
+                        ${q.isStitched ? `<span class="px-2 py-0.5 rounded-full m3-primary-pill text-[9px] font-extrabold shrink-0" title="Stitched">🔗</span>` : ''}
                     </div>
 
-                    <!-- M3 Expressive Connected Button Group -->
                     <div class="m3-icon-group shrink-0 ml-auto">
                         <button onclick="window.app.toggleQBool(${q.id}, 'starred')" class="m3-icon-group-btn ${q.starred ? 'active-state' : ''}" title="Star">
                             <i class="${q.starred ? 'ph-fill ph-star' : 'ph-bold ph-star'}"></i>
@@ -2282,9 +2392,8 @@ CRITICAL RULES FOR ZERO CLUBBING & EXACT STITCHING:
                     </div>
                 </div>
 
-                <!-- Bottom Asymmetric Image Segment -->
                 <div class="p-2.5 m3-card-img-segment flex items-center justify-center min-w-0">
-                    <img src="${q.imageDataUrl}" onclick="event.stopPropagation(); window.app.openImagePopup(${q.id})" alt="Q.${q.questionNumber}" class="question-slice-img rounded-lg w-full h-auto object-contain cursor-zoom-in" loading="lazy" title="Click image to enlarge">
+                    <img src="${q.imageDataUrl}" onclick="event.stopPropagation(); window.app.openImagePopup(${q.id})" alt="Q.${q.questionNumber}" class="question-slice-img rounded-xl w-full h-auto object-contain cursor-zoom-in" loading="lazy" title="Click image to enlarge">
                 </div>
             </article>
             `;
@@ -2313,7 +2422,7 @@ CRITICAL RULES FOR ZERO CLUBBING & EXACT STITCHING:
                                 ? 'Fetching your latest question bank from your GitHub Secret Gist...'
                                 : state.questions.length === 0
                                 ? 'Tap the floating "+ Add Test PDF" button to extract questions with 100% full-width crops, precision multi-page stitching, and clean question-text OCR!'
-                                : 'Try clearing the search box, switching Status to "All", or selecting "All Subjects & Chapters" inside the Chapters drawer.'}
+                                : 'Try clearing the search box, swiping the Status pill to "All", or selecting "All Subjects & Chapters" inside the Chapters drawer.'}
                         </p>
                         <div class="flex flex-wrap items-center justify-center gap-3 pt-2">
                             ${state.search ? `
@@ -2360,7 +2469,6 @@ CRITICAL RULES FOR ZERO CLUBBING & EXACT STITCHING:
         window.app = {
             isExtracting: () => state.isExtracting,
 
-            // Scroll-Reactive Extended FAB (Hides on scroll down, springs back on scroll up)
             handleFeedScroll(el) {
                 const fab = document.getElementById('extendedAddPdfFab');
                 if (!fab || !el) return;
@@ -2408,8 +2516,12 @@ CRITICAL RULES FOR ZERO CLUBBING & EXACT STITCHING:
                 toast(`Applied Material 3 Expressive Theme (${hexColor})`, 'success');
             },
             setThemeMode(mode) {
-                applyMaterialThemeFromSeed(localStorage.getItem('jee_m3_seed_color') || '#8b5cf6', mode);
-                toast(`Switched to Material 3 ${mode === 'light' ? 'Light' : 'Dark'} Mode`, 'success');
+                applyMaterialThemeFromSeed(localStorage.getItem('jee_m3_seed_color') || '#7c3aed', mode);
+                toast(`Switched to Material 3 Expressive ${mode === 'light' ? 'Light' : 'Dark'} Mode`, 'success');
+            },
+            setLiquidGlass(enabled) {
+                applyLiquidGlassSetting(enabled);
+                toast(`Android 17 Frosted Liquid Glass ${enabled ? 'Enabled' : 'Disabled'}`, 'success');
             },
 
             toggleFullscreen() {
@@ -2462,24 +2574,21 @@ CRITICAL RULES FOR ZERO CLUBBING & EXACT STITCHING:
                 const backBtn = document.getElementById('settingsBackBtn');
                 const headerIcon = document.getElementById('settingsHeaderIcon');
                 const titleEl = document.getElementById('settingsHeaderTitle');
-                const subEl = document.getElementById('settingsHeaderSub');
 
                 if (pageKey === 'HOME') {
                     backBtn.classList.add('hidden'); backBtn.classList.remove('flex');
                     headerIcon.classList.remove('hidden');
                     titleEl.textContent = 'Settings';
-                    subEl.textContent = 'Material 3 Expressive • Tap a section';
                 } else {
                     backBtn.classList.remove('hidden'); backBtn.classList.add('flex');
                     headerIcon.classList.add('hidden');
-                    const meta = {
-                        KEYS: ['API Keys & Cloud Credentials', 'Stored locally on your device'],
-                        THEME: ['Appearance & Material You', 'Dark/Light mode & tonal color seeds'],
-                        BACKUP: ['Cloud Sync, Backups & Tools', 'GitHub Gist Sync, JSON & Clean OCR'],
-                        SCANNER: ['AI Scanner & Crop Margins', 'Gemini Vision model & safe padding']
-                    }[pageKey] || ['Settings', ''];
-                    titleEl.textContent = meta[0];
-                    subEl.textContent = meta[1];
+                    const titles = {
+                        KEYS: 'API Keys & Cloud Credentials',
+                        THEME: 'Appearance, Liquid Glass & Theme',
+                        BACKUP: 'Cloud Sync, Export & Vault Tools',
+                        SCANNER: 'AI Scanner & Crop Margins'
+                    };
+                    titleEl.textContent = titles[pageKey] || 'Settings';
                 }
             },
 
@@ -2493,7 +2602,7 @@ CRITICAL RULES FOR ZERO CLUBBING & EXACT STITCHING:
                 document.getElementById('githubGistIdInput').value = getGithubGistId();
                 document.getElementById('cloudAutoSyncCheckbox').checked = isCloudAutoSyncEnabled();
                 document.getElementById('apiKeyMissingAlert').classList.toggle('hidden', !showMissingAlert);
-                updateCloudStatusUI('idle');
+                updateCloudStatusUI(state.isSyncingCloud ? 'syncing' : 'idle');
                 this.openSettingsPage(showMissingAlert ? 'KEYS' : initialPage);
                 document.getElementById('settingsModal').classList.remove('hidden');
             },
@@ -2570,9 +2679,32 @@ CRITICAL RULES FOR ZERO CLUBBING & EXACT STITCHING:
             importBackupJson,
 
             openUploadModal() {
+                if (state.isExtracting && state.isUploadMinimized) {
+                    this.restoreUploadModal();
+                    return;
+                }
                 setUploadButtonsLock(false);
                 document.getElementById('uploadSetupView').classList.remove('hidden');
                 document.getElementById('uploadProgressView').classList.add('hidden');
+                document.getElementById('uploadModal').classList.remove('hidden');
+            },
+            minimizeUploadModal() {
+                if (!state.isExtracting) return;
+                state.isUploadMinimized = true;
+                document.getElementById('uploadModal').classList.add('hidden');
+                const minBar = document.getElementById('minimizedUploadBar');
+                if (minBar) {
+                    minBar.classList.remove('hidden');
+                    minBar.classList.add('flex');
+                }
+            },
+            restoreUploadModal() {
+                state.isUploadMinimized = false;
+                const minBar = document.getElementById('minimizedUploadBar');
+                if (minBar) {
+                    minBar.classList.add('hidden');
+                    minBar.classList.remove('flex');
+                }
                 document.getElementById('uploadModal').classList.remove('hidden');
             },
             closeUploadModal() {
@@ -2779,8 +2911,10 @@ CRITICAL RULES FOR ZERO CLUBBING & EXACT STITCHING:
 
         window.addEventListener('DOMContentLoaded', async () => {
             initM3ExpressiveShapes();
+            initSwipeableStatusSegmentedBar();
+            applyLiquidGlassSetting(isLiquidGlassEnabled());
             applyMaterialThemeFromSeed(
-                localStorage.getItem('jee_m3_seed_color') || '#8b5cf6',
+                localStorage.getItem('jee_m3_seed_color') || '#7c3aed',
                 localStorage.getItem('jee_m3_theme_mode') || 'dark'
             );
             updateApiKeyIndicator();
@@ -2791,3 +2925,4 @@ CRITICAL RULES FOR ZERO CLUBBING & EXACT STITCHING:
     </script>
 </body>
 </html>
+
