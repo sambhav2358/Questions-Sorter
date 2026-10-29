@@ -58,11 +58,11 @@
         /* Softened Organic Cookie & Clover Shapes */
         .m3-cookie-12 { clip-path: url(#m3Cookie12Clip); }
         .m3-clover-8 { clip-path: url(#m3Clover8Clip); }
-        .m3-leaf-shape { border-radius: 24px 8px 24px 8px; }
+        .m3-leaf-shape { border-radius: 24px 10px 24px 10px; }
         .m3-spin-slow { animation: m3Spin 16s linear infinite; }
         @keyframes m3Spin { to { transform: rotate(360deg); } }
 
-        /* Connected Continuation Segmented Button Group (4px inner radius, 9999px outer ends, zero borders) */
+        /* Connected Continuation Segmented Button Group (Smooth 10px inner radius, 9999px outer ends, zero sharp corners) */
         .m3-segmented-group {
             display: inline-flex;
             align-items: center;
@@ -70,13 +70,13 @@
             background-color: var(--md-surface-low);
             border-radius: 9999px;
             padding: 3px;
-            gap: 2px;
+            gap: 2.5px;
             touch-action: pan-y;
             user-select: none;
         }
         .m3-seg-btn {
             height: 30px;
-            padding: 0 9px;
+            padding: 0 10px;
             font-size: 11px;
             font-weight: 700;
             display: inline-flex;
@@ -84,16 +84,17 @@
             gap: 4.5px;
             color: var(--md-on-surface-variant);
             background-color: var(--md-surface-high);
-            border-radius: 4px;
+            border-radius: 10px;
             transition: all 0.26s var(--m3-spring);
             white-space: nowrap;
             cursor: pointer;
         }
-        .m3-seg-btn:first-child { border-top-left-radius: 9999px; border-bottom-left-radius: 9999px; padding-left: 12px; }
-        .m3-seg-btn:last-child { border-top-right-radius: 9999px; border-bottom-right-radius: 9999px; padding-right: 12px; }
+        .m3-seg-btn:first-child { border-top-left-radius: 9999px; border-bottom-left-radius: 9999px; padding-left: 13px; }
+        .m3-seg-btn:last-child { border-top-right-radius: 9999px; border-bottom-right-radius: 9999px; padding-right: 13px; }
         .m3-seg-btn:hover:not(.active) {
             background-color: var(--md-surface-highest);
             color: var(--md-on-surface);
+            border-radius: 13px;
         }
         .m3-seg-btn:active { transform: scale(0.95); }
         .m3-seg-btn.active {
@@ -101,15 +102,15 @@
             color: var(--md-on-primary);
             border-radius: 9999px;
             font-weight: 800;
-            padding: 0 12px;
+            padding: 0 13px;
         }
 
-        /* Connected Continuation Icon Button Group (4px inner corners, 9999px outer ends, zero borders) */
+        /* Connected Continuation Icon Button Group (Smooth 10px inner corners, 9999px outer ends) */
         .m3-icon-group {
             display: inline-flex;
             align-items: center;
             height: 36px;
-            gap: 2px;
+            gap: 2.5px;
             background-color: var(--md-surface-low);
             padding: 3px;
             border-radius: 9999px;
@@ -123,7 +124,7 @@
             height: 30px;
             min-width: 30px;
             padding: 0 8px;
-            border-radius: 4px;
+            border-radius: 10px;
             background-color: var(--md-surface-high);
             color: var(--md-on-surface-variant);
             display: inline-flex;
@@ -138,35 +139,37 @@
             min-width: 28px;
             padding: 0 7px;
             font-size: 12px;
+            border-radius: 9px;
         }
-        .m3-icon-group-btn:first-child { border-top-left-radius: 9999px; border-bottom-left-radius: 9999px; padding-left: 10px; }
-        .m3-icon-group-btn:last-child { border-top-right-radius: 9999px; border-bottom-right-radius: 9999px; padding-right: 10px; }
+        .m3-icon-group-btn:first-child { border-top-left-radius: 9999px !important; border-bottom-left-radius: 9999px !important; padding-left: 10px; }
+        .m3-icon-group-btn:last-child { border-top-right-radius: 9999px !important; border-bottom-right-radius: 9999px !important; padding-right: 10px; }
         .m3-icon-group-btn:hover {
             background-color: var(--md-primary-container);
             color: var(--md-on-primary-container);
+            border-radius: 14px;
         }
         .m3-icon-group-btn:active { transform: scale(0.92); }
         .m3-icon-group-btn.active-state {
             background-color: var(--md-primary);
             color: var(--md-on-primary);
-            border-radius: 9999px;
+            border-radius: 9999px !important;
             font-weight: 800;
         }
 
-        /* M3 Expressive Grouped List (26px outer corners, tight 4px inner continuation corners, zero borders) */
-        .m3-group-list { display: flex; flex-direction: column; gap: 2px; }
+        /* M3 Expressive Grouped List (26px outer corners, smooth 11px inner continuation corners, zero sharp edges) */
+        .m3-group-list { display: flex; flex-direction: column; gap: 3px; }
         .m3-group-item {
             background-color: var(--md-surface-high);
-            border-radius: 4px;
+            border-radius: 11px;
             transition: all 0.24s var(--m3-spring);
         }
-        .m3-group-item:first-child { border-top-left-radius: 24px; border-top-right-radius: 24px; }
-        .m3-group-item:last-child { border-bottom-left-radius: 24px; border-bottom-right-radius: 24px; }
-        .m3-group-item:only-child { border-radius: 24px; }
+        .m3-group-item:first-child { border-top-left-radius: 26px; border-top-right-radius: 26px; }
+        .m3-group-item:last-child { border-bottom-left-radius: 26px; border-bottom-right-radius: 26px; }
+        .m3-group-item:only-child { border-radius: 26px; }
         .m3-group-item:hover { background-color: var(--md-surface-highest); }
-        .m3-group-item:active { transform: scale(0.99); border-radius: 12px; }
+        .m3-group-item:active { transform: scale(0.99); border-radius: 16px; }
 
-        /* M3 Expressive Morphing Buttons (Zero Borders) */
+        /* M3 Expressive Morphing Buttons */
         .m3-btn-filled {
             background-color: var(--md-primary);
             color: var(--md-on-primary);
@@ -176,9 +179,9 @@
         }
         .m3-btn-filled:hover:not(:disabled) {
             filter: brightness(1.06);
-            border-radius: 12px;
+            border-radius: 16px;
         }
-        .m3-btn-filled:active:not(:disabled) { transform: scale(0.95); border-radius: 8px; }
+        .m3-btn-filled:active:not(:disabled) { transform: scale(0.95); border-radius: 12px; }
 
         .m3-btn-tonal {
             background-color: var(--md-secondary-container);
@@ -190,11 +193,11 @@
         .m3-btn-tonal:hover:not(:disabled) {
             background-color: var(--md-primary-container);
             color: var(--md-on-primary-container);
-            border-radius: 12px;
+            border-radius: 14px;
         }
-        .m3-btn-tonal:active:not(:disabled) { transform: scale(0.94); border-radius: 8px; }
+        .m3-btn-tonal:active:not(:disabled) { transform: scale(0.94); border-radius: 11px; }
 
-        /* Connected Custom M3 Dropdown Trigger (Matches Segmented Continuation) */
+        /* Connected Custom M3 Dropdown Trigger */
         .m3-dropdown-trigger {
             background-color: var(--md-surface-high);
             color: var(--md-on-surface);
@@ -210,11 +213,11 @@
         }
         .m3-dropdown-trigger:hover {
             background-color: var(--md-surface-highest);
-            border-radius: 10px;
+            border-radius: 14px;
         }
         .m3-dropdown-trigger:active { transform: scale(0.96); }
 
-        /* Connected Pair for Subject + Chapter Dropdowns Inside Cards (4px inner meeting edge) */
+        /* Connected Pair for Subject + Chapter Dropdowns Inside Cards (Smooth 9px inner meeting edge) */
         .m3-card-dropdown-group {
             display: inline-flex;
             align-items: center;
@@ -230,7 +233,7 @@
             font-weight: 700;
             background-color: var(--md-surface-high);
             color: var(--md-on-surface);
-            border-radius: 4px;
+            border-radius: 9px;
             display: inline-flex;
             align-items: center;
             gap: 4px;
@@ -251,28 +254,28 @@
         }
         .m3-card-dropdown-btn:hover { background-color: var(--md-surface-highest); }
 
-        /* Floating Custom M3 Dropdown Popover Menu */
+        /* Floating Custom M3 Dropdown Popover Menu (Rendered at z-[100] above all modals) */
         @keyframes m3MenuPop {
             from { opacity: 0; transform: scale(0.92) translateY(-6px); }
             to { opacity: 1; transform: scale(1) translateY(0); }
         }
         .m3-custom-menu {
             background-color: var(--md-surface-high);
-            border-radius: 22px;
-            padding: 4px;
-            box-shadow: 0 20px 48px rgba(0, 0, 0, 0.65);
+            border-radius: 24px;
+            padding: 5px;
+            box-shadow: 0 22px 52px rgba(0, 0, 0, 0.72);
             animation: m3MenuPop 0.2s var(--m3-spring);
             display: flex;
             flex-direction: column;
-            gap: 2px;
+            gap: 2.5px;
         }
         .m3-custom-menu-item {
             width: 100%;
             text-align: left;
-            padding: 8px 13px;
+            padding: 9px 14px;
             font-size: 11.5px;
             font-weight: 600;
-            border-radius: 4px;
+            border-radius: 10px;
             background-color: var(--md-surface-container);
             color: var(--md-on-surface);
             display: flex;
@@ -281,9 +284,9 @@
             gap: 8px;
             transition: all 0.16s ease;
         }
-        .m3-custom-menu-item:first-child { border-top-left-radius: 18px; border-top-right-radius: 18px; }
-        .m3-custom-menu-item:last-child { border-bottom-left-radius: 18px; border-bottom-right-radius: 18px; }
-        .m3-custom-menu-item:only-child { border-radius: 18px; }
+        .m3-custom-menu-item:first-child { border-top-left-radius: 19px; border-top-right-radius: 19px; }
+        .m3-custom-menu-item:last-child { border-bottom-left-radius: 19px; border-bottom-right-radius: 19px; }
+        .m3-custom-menu-item:only-child { border-radius: 19px; }
         .m3-custom-menu-item:hover { background-color: var(--md-surface-highest); }
         .m3-custom-menu-item.selected {
             background-color: var(--md-primary);
@@ -311,7 +314,7 @@
             pointer-events: none;
         }
 
-        /* ONLY Cards Have Borders (As Requested) */
+        /* ONLY Cards Have Borders */
         @keyframes m3CardPop {
             from { opacity: 0; transform: translateY(14px) scale(0.98); }
             to { opacity: 1; transform: translateY(0) scale(1); }
@@ -323,7 +326,7 @@
             padding: 5px;
             display: flex;
             flex-direction: column;
-            gap: 3px;
+            gap: 3.5px;
             animation: m3CardPop 0.35s var(--m3-spring) backwards;
             transition: transform 0.25s var(--m3-spring), border-color 0.22s ease, box-shadow 0.25s ease;
         }
@@ -333,14 +336,14 @@
         }
         .m3-card-top-segment {
             background-color: var(--md-surface-high);
-            border-radius: 23px 23px 6px 6px;
+            border-radius: 23px 23px 10px 10px;
         }
         .m3-card-img-segment {
             background-color: #ffffff;
-            border-radius: 6px 6px 23px 23px;
+            border-radius: 10px 10px 23px 23px;
         }
 
-        /* M3 Expressive Dialogs (Borderless Tonal Elevation) */
+        /* M3 Expressive Dialogs */
         @keyframes m3DialogIn {
             from { opacity: 0; transform: scale(0.92) translateY(14px); }
             to { opacity: 1; transform: scale(1) translateY(0); }
@@ -375,7 +378,7 @@
         input[type=range].split-slider { -webkit-appearance: none; appearance: none; width: 100%; background: transparent; }
         input[type=range].split-slider::-webkit-slider-thumb {
             -webkit-appearance: none; appearance: none;
-            height: 26px; width: 26px; border-radius: 6px;
+            height: 26px; width: 26px; border-radius: 9px;
             background: var(--md-primary); cursor: pointer;
             border: 3px solid var(--md-on-primary);
             box-shadow: 0 2px 8px rgba(0,0,0,0.45);
@@ -419,7 +422,7 @@
             <span id="activeChapterIndicator" class="px-2 py-0.5 text-[10px] rounded-full font-extrabold max-w-[78px] truncate" style="background: var(--md-primary); color: var(--md-on-primary);">All</span>
         </button>
 
-        <!-- 3. SWIPEABLE SEGMENTED STATUS PILL (Exact 36px h-9, 4px Inner Continuation Radius) -->
+        <!-- 3. SWIPEABLE SEGMENTED STATUS PILL (Exact 36px h-9, Smooth 10px Inner Radius) -->
         <div id="statusSegmentedBar" class="m3-segmented-group shrink-0" role="group" aria-label="Swipeable Question Status Filter">
             <button onclick="window.app.setStatus('ALL')" data-status="ALL" class="status-btn m3-seg-btn active">
                 <i class="ph-fill ph-squares-four text-xs"></i>
@@ -494,7 +497,6 @@
             <span class="w-6 h-6 m3-cookie-12 m3-spin-slow flex items-center justify-center shrink-0" style="background: var(--md-primary); color: var(--md-on-primary);">
                 <i class="ph-bold ph-file-pdf text-xs"></i>
             </span>
-            <!-- Strict fixed-width status text so changing strings NEVER shifts the wave bar -->
             <span id="minBarStatusText" class="w-56 sm:w-64 text-[11px] font-bold font-mono truncate shrink-0">Scanning Page 1...</span>
             <span id="minBarPageBadge" class="w-20 text-center py-0.5 rounded-full text-[10px] font-extrabold m3-primary-pill shrink-0">Page 1/1</span>
         </div>
@@ -508,12 +510,6 @@
             </button>
         </div>
     </div>
-
-    <!-- =================================================================== -->
-    <!-- GLOBAL CUSTOM MATERIAL 3 EXPRESSIVE FLOATING DROPDOWN MENU          -->
-    <!-- =================================================================== -->
-    <div id="customDropdownBackdrop" onclick="window.app.closeCustomDropdown()" class="fixed inset-0 z-50 hidden"></div>
-    <div id="customDropdownMenu" class="fixed z-50 hidden m3-custom-menu max-h-72 overflow-y-auto min-w-[165px] max-w-[270px]"></div>
 
     <!-- =================================================================== -->
     <!-- DOUBLE CONFIRMATION DIALOG FOR CLEAR ALL QUESTIONS                  -->
@@ -622,7 +618,7 @@
     </div>
 
     <!-- =================================================================== -->
-    <!-- MODAL 1: PHONE-STYLE M3 EXPRESSIVE SETTINGS (4px Inner Radii)       -->
+    <!-- MODAL 1: PHONE-STYLE M3 EXPRESSIVE SETTINGS                         -->
     <!-- =================================================================== -->
     <div id="settingsModal" onclick="if(event.target === this) window.app.closeSettingsModal()" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-3 sm:p-5">
         <div class="m3-dialog max-w-lg w-full max-h-[90vh] flex flex-col overflow-hidden">
@@ -648,7 +644,7 @@
                     Please enter your Google AI Studio API Key below to extract and stitch questions from PDF files.
                 </div>
 
-                <!-- PAGE 0: SEGMENTED GROUPED LIST HUB (4px Inner Continuation Corners) -->
+                <!-- PAGE 0: SEGMENTED GROUPED LIST HUB -->
                 <div id="settingsPage_HOME" class="m3-group-list">
                     <button type="button" onclick="window.app.openSettingsPage('KEYS')" class="w-full p-4 m3-group-item flex items-center justify-between gap-3.5 text-left">
                         <div class="flex items-center gap-3.5 min-w-0">
@@ -709,7 +705,7 @@
                         <div class="p-4 m3-group-item space-y-1.5">
                             <label class="block text-xs font-bold">Google AI Studio API Key (Gemini Vision)</label>
                             <div class="relative">
-                                <input id="apiKeyInput" type="password" placeholder="AIzaSy..." class="w-full h-10 m3-input pl-3.5 pr-10 text-xs font-mono">
+                                <input id="apiKeyInput" type="password" placeholder="AIzaSy..." class="w-full h-10 m3-input m3-surface-low pl-3.5 pr-10 text-xs font-mono">
                                 <button type="button" onclick="window.app.toggleVisibility('apiKeyInput', 'apiKeyEyeIcon')" class="absolute right-3 top-1/2 -translate-y-1/2 m3-text-muted">
                                     <i id="apiKeyEyeIcon" class="ph-bold ph-eye text-base"></i>
                                 </button>
@@ -720,7 +716,7 @@
                         <div class="p-4 m3-group-item space-y-1.5">
                             <label class="block text-xs font-bold">GitHub Personal Access Token (`gist` scope only)</label>
                             <div class="relative">
-                                <input id="githubTokenInput" type="password" placeholder="ghp_..." class="w-full h-10 m3-input pl-3.5 pr-10 text-xs font-mono">
+                                <input id="githubTokenInput" type="password" placeholder="ghp_..." class="w-full h-10 m3-input m3-surface-low pl-3.5 pr-10 text-xs font-mono">
                                 <button type="button" onclick="window.app.toggleVisibility('githubTokenInput', 'githubTokenEyeIcon')" class="absolute right-3 top-1/2 -translate-y-1/2 m3-text-muted">
                                     <i id="githubTokenEyeIcon" class="ph-bold ph-eye text-base"></i>
                                 </button>
@@ -729,7 +725,7 @@
 
                         <div class="p-4 m3-group-item space-y-1.5">
                             <label class="block text-xs font-bold">Secret Gist ID <span class="m3-text-muted font-normal">(Auto-filled on Push/Pull)</span></label>
-                            <input id="githubGistIdInput" type="text" placeholder="Leave blank to auto-discover or create..." class="w-full h-10 m3-input px-3.5 text-xs font-mono">
+                            <input id="githubGistIdInput" type="text" placeholder="Leave blank to auto-discover or create..." class="w-full h-10 m3-input m3-surface-low px-3.5 text-xs font-mono">
                         </div>
                     </div>
                 </div>
@@ -864,12 +860,12 @@
                         </div>
                         <div class="p-4 m3-group-item grid grid-cols-2 gap-3">
                             <div>
-                                <label class="block text-[11px] font-bold m3-text-muted mb-1">Top Safe Margin (0-30)</label>
-                                <input id="padTopInput" type="number" min="0" max="40" value="4" class="w-full h-10 m3-input m3-surface-low px-3.5 text-xs">
+                                <label class="block text-[11px] font-bold m3-text-muted mb-1">Top Safe Margin (0-40)</label>
+                                <input id="padTopInput" type="number" min="0" max="40" value="10" class="w-full h-10 m3-input m3-surface-low px-3.5 text-xs">
                             </div>
                             <div>
-                                <label class="block text-[11px] font-bold m3-text-muted mb-1">Bottom Safe Margin (0-30)</label>
-                                <input id="padBottomInput" type="number" min="0" max="40" value="6" class="w-full h-10 m3-input m3-surface-low px-3.5 text-xs">
+                                <label class="block text-[11px] font-bold m3-text-muted mb-1">Bottom Safe Margin (0-40)</label>
+                                <input id="padBottomInput" type="number" min="0" max="40" value="10" class="w-full h-10 m3-input m3-surface-low px-3.5 text-xs">
                             </div>
                         </div>
                     </div>
@@ -886,7 +882,7 @@
     </div>
 
     <!-- =================================================================== -->
-    <!-- MODAL 2: UPLOAD TEST PDF (Fixed-Width Status, Instant Cancel Close) -->
+    <!-- MODAL 2: UPLOAD TEST PDF                                            -->
     <!-- =================================================================== -->
     <div id="uploadModal" onclick="if(event.target === this && !window.app.isExtracting()) window.app.closeUploadModal()" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-3 sm:p-6">
         <div class="m3-dialog max-w-2xl w-full max-h-[90vh] flex flex-col overflow-hidden">
@@ -897,7 +893,7 @@
                     </div>
                     <div class="min-w-0">
                         <h3 class="font-extrabold text-sm sm:text-base truncate">Add Test Paper PDF</h3>
-                        <p class="text-[11px] m3-text-muted truncate">100% Full-Width Crops • Whitespace Gap Snapper • Clean Question OCR</p>
+                        <p class="text-[11px] m3-text-muted truncate">3-Stage Anti-Clip Guard • Whitespace Snapper • Clean Question OCR</p>
                     </div>
                 </div>
 
@@ -938,7 +934,7 @@
                     </div>
                 </div>
 
-                <!-- Live Progress View with Phase-Locked Canvas Sine Wave -->
+                <!-- Live Progress View with Seamless Undistorted Sine Wave -->
                 <div id="uploadProgressView" class="hidden space-y-3">
                     <div class="m3-surface-high rounded-3xl p-4 space-y-3">
                         <div class="flex items-center justify-between gap-2 text-xs">
@@ -1037,7 +1033,7 @@
     </div>
 
     <!-- =================================================================== -->
-    <!-- MODAL 4: FULLSCREEN TABLET STYLUS SCRATCHPAD (Custom Pen Dropdown)  -->
+    <!-- MODAL 4: FULLSCREEN TABLET STYLUS SCRATCHPAD                        -->
     <!-- =================================================================== -->
     <div id="scratchpadModal" class="fixed inset-0 m3-surface z-50 hidden flex flex-col">
         <div class="h-14 m3-surface-low px-3 sm:px-5 flex items-center justify-between gap-2 shrink-0 overflow-x-auto no-scrollbar">
@@ -1079,8 +1075,14 @@
         </div>
     </div>
 
+    <!-- =================================================================== -->
+    <!-- GLOBAL CUSTOM DROPDOWN AT VERY END OF BODY WITH Z-[100] (Always Above Modals!) -->
+    <!-- =================================================================== -->
+    <div id="customDropdownBackdrop" onclick="window.app.closeCustomDropdown()" class="fixed inset-0 z-[95] hidden"></div>
+    <div id="customDropdownMenu" class="fixed z-[100] hidden m3-custom-menu max-h-72 overflow-y-auto min-w-[165px] max-w-[300px]"></div>
+
     <!-- M3 THEME-MATCHED TOAST NOTIFICATIONS -->
-    <div id="toastBox" class="fixed bottom-24 right-6 z-50 flex flex-col gap-2 pointer-events-none"></div>
+    <div id="toastBox" class="fixed bottom-24 right-6 z-[110] flex flex-col gap-2 pointer-events-none"></div>
     <!-- =================================================================== -->
     <!-- CORE APPLICATION LOGIC (M3 EXPRESSIVE + CLOUD GIST + LOCAL OCR)     -->
     <!-- =================================================================== -->
@@ -1109,24 +1111,24 @@
             if (p8) p8.setAttribute('d', makeSoftStarburst(8, 0.445, 0.495));
         }
 
-        // 2. True Phase-Locked HTML5 Canvas Sine Wave Progress Bar
-        // - Stationary at y=0 at the intersection tip (sin(k*(x - waveEndX)) * envelope)
+        // 2. Seamless Undistorted HTML5 Canvas Sine Wave Progress Bar
+        // - Pure sine wave anchored at phase 0 at the right intersection tip (y = cy at x = waveEndX with ZERO pinching/bunching)
         // - True circular rounded ends (lineCap = 'round') on both wave and empty track
-        // - Exact 2px gap between the wave tip and the empty bar
-        // - Slow, damped length interpolation (0.042 per frame)
+        // - Crisp 3px visual gap between the wave tip cap and the empty track cap
+        // - Smooth, slow damped length progression
         const waveInstances = new Map();
         let waveAnimFrame = null;
 
         function renderM3WavyProgress(targetElOrId, targetPct = 50) {
             const el = typeof targetElOrId === 'string' ? document.getElementById(targetElOrId) : targetElOrId;
             if (!el) return;
-            const clamped = Math.max(4, Math.min(100, Number(targetPct) || 5));
+            const clamped = Math.max(5, Math.min(100, Number(targetPct) || 5));
 
             let inst = waveInstances.get(el);
             if (!inst || !el.contains(inst.canvas)) {
                 el.innerHTML = `<canvas class="w-full h-4 block"></canvas>`;
                 const canvas = el.querySelector('canvas');
-                inst = { canvas, currentPct: clamped, targetPct: clamped, phase: 0 };
+                inst = { canvas, currentPct: Math.min(clamped, 8), targetPct: clamped };
                 waveInstances.set(el, inst);
             } else {
                 inst.targetPct = clamped;
@@ -1141,22 +1143,19 @@
             const rootStyle = getComputedStyle(document.documentElement);
             const primaryColor = rootStyle.getPropertyValue('--md-primary').trim() || '#a78bfa';
             const trackColor = rootStyle.getPropertyValue('--md-secondary-container').trim() || '#312e52';
-            let anyActive = false;
+            let anyNeedsNextFrame = false;
 
             for (const [el, inst] of waveInstances.entries()) {
                 if (!document.body.contains(el) || el.offsetParent === null) continue;
-                anyActive = true;
 
-                // Slow, smooth damped length increase
+                // Smooth, slow damped length interpolation
                 const diff = inst.targetPct - inst.currentPct;
-                if (Math.abs(diff) > 0.08) {
-                    inst.currentPct += diff * 0.042;
+                if (Math.abs(diff) > 0.04) {
+                    inst.currentPct += diff * 0.038;
+                    anyNeedsNextFrame = true;
                 } else {
                     inst.currentPct = inst.targetPct;
                 }
-
-                // Slow wave propagation speed
-                inst.phase += 0.045;
 
                 const canvas = inst.canvas;
                 const dpr = window.devicePixelRatio || 1;
@@ -1173,39 +1172,33 @@
                 ctx.clearRect(0, 0, w, h);
 
                 const cy = h / 2;
-                const strokeW = 4.5;
+                const strokeW = 4.2;
                 const r = strokeW / 2;
-                const usableW = Math.max(20, w - strokeW * 2);
+                const usableW = Math.max(24, w - strokeW * 2);
                 const waveEndX = r + (usableW * (inst.currentPct / 100));
 
-                // Draw Active Sine Wave:
-                // Anchored at (x - waveEndX) with a smooth envelope that pins displacement to 0 at waveEndX and left start!
+                // Draw Pure, Undistorted Sine Wave:
+                // Phase is locked to 0 at x === waveEndX so y === cy naturally at the intersection tip without any bunching!
                 ctx.beginPath();
                 ctx.strokeStyle = primaryColor;
                 ctx.lineWidth = strokeW;
                 ctx.lineCap = 'round';
                 ctx.lineJoin = 'round';
 
-                const wavelength = 36;
+                const wavelength = 32;
                 const k = (Math.PI * 2) / wavelength;
-                const maxAmp = 3.6;
+                const amp = 3.4;
 
                 for (let x = r; x <= waveEndX; x += 1) {
-                    const distFromLeft = x - r;
-                    const distFromRight = waveEndX - x;
-                    // Smoothly tapers amplitude to 0 at the right intersection tip & left start cap
-                    const envRight = Math.min(1, distFromRight / 10);
-                    const envLeft = Math.min(1, distFromLeft / 6);
-                    // Stationary node at x === waveEndX because envRight === 0 at the tip
-                    const y = cy + maxAmp * envLeft * envRight * Math.sin(k * (x - waveEndX) - inst.phase);
+                    const y = cy - amp * Math.sin(k * (waveEndX - x));
                     if (x === r) ctx.moveTo(x, y);
                     else ctx.lineTo(x, y);
                 }
+                ctx.lineTo(waveEndX, cy);
                 ctx.stroke();
 
-                // Draw Empty Track with Circular Ends and an Exact 2px Gap from the Wave Tip
-                // Visual gap between round caps = (trackStartX - strokeW/2) - (waveEndX + strokeW/2) = 2px => trackStartX = waveEndX + strokeW + 2
-                const trackStartX = waveEndX + strokeW + 2;
+                // Draw Empty Track with Circular Ends and an Exact 3px Visual Gap from the Wave Tip Cap
+                const trackStartX = waveEndX + strokeW + 3;
                 const trackEndX = w - r;
 
                 if (trackEndX > trackStartX + 2) {
@@ -1227,7 +1220,7 @@
                 ctx.restore();
             }
 
-            if (anyActive) {
+            if (anyNeedsNextFrame) {
                 waveAnimFrame = requestAnimationFrame(stepAllWavyBars);
             } else {
                 waveAnimFrame = null;
@@ -1256,7 +1249,7 @@
             svg.classList.remove('hidden');
 
             const drawSector = (deg) => {
-                const clamped = Math.max(12, Math.min(359.5, deg));
+                const clamped = Math.max(15, Math.min(359.5, deg));
                 const rad = (clamped - 90) * (Math.PI / 180);
                 const cx = 12, cy = 12, r = 8.5;
                 const x = (cx + r * Math.cos(rad)).toFixed(3);
@@ -1340,8 +1333,8 @@
         const getApiKey = () => (localStorage.getItem('jee_gemini_api_key') || '').trim();
         const getSelectedModel = () => state.selectedModel || localStorage.getItem('jee_gemini_model') || 'gemini-3.5-flash-lite';
         const getVerticalPads = () => ({
-            padTop: Number(localStorage.getItem('jee_pad_top') ?? 4),
-            padBottom: Number(localStorage.getItem('jee_pad_bottom') ?? 6)
+            padTop: Number(localStorage.getItem('jee_pad_top') ?? 10),
+            padBottom: Number(localStorage.getItem('jee_pad_bottom') ?? 10)
         });
         const getGithubToken = () => (localStorage.getItem('jee_github_pat') || '').trim();
         const getGithubGistId = () => (localStorage.getItem('jee_github_gist_id') || '').trim();
@@ -1349,7 +1342,7 @@
         const getThemeMode = () => localStorage.getItem('jee_m3_theme_mode') || 'dark';
 
         // ===================================================================
-        // CUSTOM FLOATING MATERIAL 3 DROPDOWN ENGINE
+        // CUSTOM FLOATING MATERIAL 3 DROPDOWN ENGINE (Z-[100] ABOVE MODALS)
         // ===================================================================
         function openCustomDropdown(anchorEl, options, currentVal, onSelectCallback) {
             const menu = document.getElementById('customDropdownMenu');
@@ -1379,8 +1372,8 @@
             menu.classList.remove('hidden');
 
             const rect = anchorEl.getBoundingClientRect();
-            const menuW = Math.max(rect.width, 185);
-            menu.style.minWidth = `${Math.min(270, menuW)}px`;
+            const menuW = Math.max(rect.width, 190);
+            menu.style.width = `${Math.min(320, menuW)}px`;
 
             let left = rect.left;
             if (left + menu.offsetWidth > window.innerWidth - 10) {
@@ -1479,6 +1472,9 @@
             const picker = document.getElementById('customThemeColorPicker');
             if (picker) picker.value = cleanHex;
             renderDrawerChapters();
+            if (! waveAnimFrame && waveInstances.size > 0) {
+                waveAnimFrame = requestAnimationFrame(stepAllWavyBars);
+            }
         }
 
         function initSwipeableStatusSegmentedBar() {
@@ -1569,25 +1565,37 @@
             }
         }
 
-        async function extractPdfNativeTextInSlice(page, yminNorm, ymaxNorm) {
+        // Extracts PDF.js text items with their exact normalized top & bottom vertical bounds (0..1000)
+        async function getPageTextLineIntervals(page) {
             try {
                 const vp = page.getViewport({ scale: 1.0 });
                 const pageH = vp.height || 1;
                 const textContent = await page.getTextContent();
-                const itemsInSlice = [];
+                const lines = [];
 
                 for (const item of (textContent.items || [])) {
-                    if (!item.str || !item.transform) continue;
-                    const topDownNormY = ((pageH - item.transform[5]) / pageH) * 1000;
-                    if (topDownNormY >= yminNorm - 14 && topDownNormY <= ymaxNorm + 14) {
-                        itemsInSlice.push({ y: Math.round(topDownNormY), str: item.str.trim() });
-                    }
+                    const str = (item.str || '').trim();
+                    if (!str || !item.transform) continue;
+                    const fontH = Math.max(8, Math.hypot(item.transform[2] || 0, item.transform[3] || 10));
+                    const baselineY = item.transform[5];
+                    // In PDF coordinates, y=0 is bottom, y=pageH is top
+                    const botNorm = Math.min(1000, ((pageH - baselineY + fontH * 0.35) / pageH) * 1000);
+                    const topNorm = Math.max(0, ((pageH - (baselineY + fontH * 1.15)) / pageH) * 1000);
+                    lines.push({ topNorm, botNorm, str });
                 }
+                return lines;
+            } catch (_) {
+                return [];
+            }
+        }
 
+        async function extractPdfNativeTextInSlice(page, yminNorm, ymaxNorm) {
+            try {
+                const lines = await getPageTextLineIntervals(page);
+                const itemsInSlice = lines.filter(l => l.botNorm >= yminNorm - 10 && l.topNorm <= ymaxNorm + 10);
                 const lineBuckets = new Map();
                 for (const it of itemsInSlice) {
-                    if (!it.str) continue;
-                    const key = Math.round(it.y / 6);
+                    const key = Math.round(it.topNorm / 6);
                     lineBuckets.set(key, (lineBuckets.get(key) || '') + ' ' + it.str);
                 }
                 return cleanQuestionTextOnly(Array.from(lineBuckets.values()).join('\n'));
@@ -1659,7 +1667,6 @@
             }
         }
 
-        // Sync Button with Pie-Sector Circular Progress Indicator
         function updateCloudStatusUI(status = 'idle', detail = '', sectorAngle = null) {
             const syncBtn = document.getElementById('syncHeaderBtn');
             const icon = document.getElementById('cloudStatusIcon');
@@ -1978,14 +1985,41 @@
         }
 
         // ===================================================================
-        // PIXEL WHITESPACE GAP SNAPPER & SMART AUTO-TRIMMER
+        // 3-STAGE BULLETPROOF ANTI-TEXT-CLIP BOUNDARY GUARD & AUTO-TRIMMER
         // ===================================================================
-        function findCleanHorizontalWhitespaceNormY(sourceCanvas, targetNormY, searchUpNorm = 45, searchDownNorm = 15) {
+        // Stage 1: Uses PDF.js vector text bounding boxes so ymin/ymax NEVER slice through a text line!
+        // Stage 2: Uses pixel ink-climbing so if a boundary lands on dark pixels, it walks outward until clean whitespace!
+        function snapBoundaryOutOfTextAndInk(sourceCanvas, pageLines, targetNormY, minAllowedNorm, maxAllowedNorm, preferDirection = 'UP') {
+            let yNorm = Math.max(minAllowedNorm, Math.min(maxAllowedNorm, targetNormY));
+
+            // 1. PDF.js Vector Line Guard: If yNorm cuts through or is within 6 units of any text line, push it outside that line!
+            for (let pass = 0; pass < 3; pass++) {
+                let adjusted = false;
+                for (const line of pageLines) {
+                    if (yNorm >= line.topNorm - 5 && yNorm <= line.botNorm + 5) {
+                        if (preferDirection === 'UP') {
+                            const candidate = Math.max(minAllowedNorm, line.topNorm - 7);
+                            if (candidate < yNorm) { yNorm = candidate; adjusted = true; }
+                        } else {
+                            const candidate = Math.min(maxAllowedNorm, line.botNorm + 7);
+                            if (candidate > yNorm) { yNorm = candidate; adjusted = true; }
+                        }
+                    }
+                }
+                if (!adjusted) break;
+            }
+
+            // 2. Pixel Ink-Climbing Guard: Scan horizontal rows around yNorm; if on ink, climb UP (for ymin) or DOWN (for ymax)
             const w = sourceCanvas.width, h = sourceCanvas.height;
-            const centerPx = Math.floor((targetNormY / 1000) * h);
-            const minPx = Math.max(10, Math.floor(((targetNormY - searchUpNorm) / 1000) * h));
-            const maxPx = Math.min(h - 10, Math.floor(((targetNormY + searchDownNorm) / 1000) * h));
-            if (maxPx <= minPx) return targetNormY;
+            const searchUpNorm = preferDirection === 'UP' ? 50 : 18;
+            const searchDownNorm = preferDirection === 'DOWN' ? 50 : 18;
+
+            const startMinNorm = Math.max(minAllowedNorm, yNorm - searchUpNorm);
+            const endMaxNorm = Math.min(maxAllowedNorm, yNorm + searchDownNorm);
+            const minPx = Math.max(4, Math.floor((startMinNorm / 1000) * h));
+            const maxPx = Math.min(h - 4, Math.floor((endMaxNorm / 1000) * h));
+            const centerPx = Math.max(minPx, Math.min(maxPx, Math.floor((yNorm / 1000) * h)));
+            if (maxPx <= minPx + 4) return Math.round(yNorm);
 
             const sliceH = maxPx - minPx + 1;
             const imgData = sourceCanvas.getContext('2d').getImageData(0, minPx, w, sliceH).data;
@@ -1993,14 +2027,31 @@
 
             for (let r = 0; r < sliceH; r++) {
                 let darkPixels = 0;
-                for (let x = 20; x < w - 20; x += 3) {
+                for (let x = 14; x < w - 14; x += 2) {
                     const idx = (r * w + x) * 4;
-                    if (imgData[idx] < 235 || imgData[idx + 1] < 235 || imgData[idx + 2] < 235) {
-                        if (++darkPixels > 2) { isRowWhite[r] = false; break; }
+                    if (imgData[idx] < 238 || imgData[idx + 1] < 238 || imgData[idx + 2] < 238) {
+                        if (++darkPixels > 1) { isRowWhite[r] = false; break; }
                     }
                 }
             }
 
+            const startIdx = centerPx - minPx;
+            // Walk in preferred direction first to find a clean whitespace band of at least 4 consecutive white rows
+            if (preferDirection === 'UP') {
+                for (let r = startIdx; r >= 2; r--) {
+                    if (isRowWhite[r] && isRowWhite[r - 1] && isRowWhite[r - 2]) {
+                        return Math.round(((minPx + r - 1) / h) * 1000);
+                    }
+                }
+            } else {
+                for (let r = startIdx; r < sliceH - 2; r++) {
+                    if (isRowWhite[r] && isRowWhite[r + 1] && isRowWhite[r + 2]) {
+                        return Math.round(((minPx + r + 1) / h) * 1000);
+                    }
+                }
+            }
+
+            // Fallback: pick widest whitespace band in range
             let bestRowPx = centerPx, bestScore = -999999;
             for (let r = 0; r < sliceH; r++) {
                 if (!isRowWhite[r]) continue;
@@ -2008,37 +2059,38 @@
                 for (let u = r - 1; u >= 0 && isRowWhite[u]; u--) band++;
                 for (let d = r + 1; d < sliceH && isRowWhite[d]; d++) band++;
                 const absY = minPx + r;
-                const score = band * 4 - Math.abs(absY - centerPx);
+                const score = band * 5 - Math.abs(absY - centerPx);
                 if (score > bestScore) { bestScore = score; bestRowPx = absY; }
             }
             return Math.round((bestRowPx / h) * 1000);
         }
 
+        // Stage 3: Generous 24px vertical breathing margin so top ascenders/fractions are never shaved
         function autoTrimVerticalWhitespace(canvas) {
             const ctx = canvas.getContext('2d'), w = canvas.width, h = canvas.height;
-            if (h < 60) return canvas;
+            if (h < 70) return canvas;
             const imgData = ctx.getImageData(0, 0, w, h).data;
             let topRow = 0, botRow = h - 1;
 
             for (let y = 0; y < h; y++) {
                 let hasInk = false;
-                for (let x = 10; x < w - 10; x += 4) {
+                for (let x = 6; x < w - 6; x += 2) {
                     const idx = (y * w + x) * 4;
-                    if (imgData[idx] < 240 || imgData[idx + 1] < 240 || imgData[idx + 2] < 240) { hasInk = true; break; }
+                    if (imgData[idx] < 242 || imgData[idx + 1] < 242 || imgData[idx + 2] < 242) { hasInk = true; break; }
                 }
-                if (hasInk) { topRow = Math.max(0, y - 14); break; }
+                if (hasInk) { topRow = Math.max(0, y - 24); break; }
             }
             for (let y = h - 1; y >= topRow; y--) {
                 let hasInk = false;
-                for (let x = 10; x < w - 10; x += 4) {
+                for (let x = 6; x < w - 6; x += 2) {
                     const idx = (y * w + x) * 4;
-                    if (imgData[idx] < 240 || imgData[idx + 1] < 240 || imgData[idx + 2] < 240) { hasInk = true; break; }
+                    if (imgData[idx] < 242 || imgData[idx + 1] < 242 || imgData[idx + 2] < 242) { hasInk = true; break; }
                 }
-                if (hasInk) { botRow = Math.min(h - 1, y + 14); break; }
+                if (hasInk) { botRow = Math.min(h - 1, y + 24); break; }
             }
 
-            const trimmedH = Math.max(40, botRow - topRow + 1);
-            if (trimmedH >= h - 8) return canvas;
+            const trimmedH = Math.max(48, botRow - topRow + 1);
+            if (trimmedH >= h - 6) return canvas;
             const trimmed = document.createElement('canvas');
             trimmed.width = w; trimmed.height = trimmedH;
             const tCtx = trimmed.getContext('2d');
@@ -2048,11 +2100,11 @@
             return trimmed;
         }
 
-        function cropFullWidthSlice(sourceCanvas, yminNorm, ymaxNorm, padTop = 4, padBottom = 6) {
+        function cropFullWidthSlice(sourceCanvas, yminNorm, ymaxNorm, padTop = 10, padBottom = 10) {
             const w = sourceCanvas.width, h = sourceCanvas.height;
             const safeYMin = Math.max(0, yminNorm - padTop), safeYMax = Math.min(1000, ymaxNorm + padBottom);
             const cropY = Math.floor((safeYMin / 1000) * h);
-            const cropH = Math.max(40, Math.floor(((safeYMax - safeYMin) / 1000) * h));
+            const cropH = Math.max(44, Math.floor(((safeYMax - safeYMin) / 1000) * h));
             const outW = Math.min(1200, w), outH = Math.floor(cropH * (outW / w));
 
             const rawCanvas = document.createElement('canvas');
@@ -2100,27 +2152,23 @@
             const systemPrompt = `You are a high-precision JEE Question Paper Layout & Boundary Detector.
 Do NOT solve the questions. Dedicate 100% of your attention to finding the exact vertical pixel boundaries (\`ymin\` to \`ymax\`, normalized 0 to 1000) of every single question or continuation block on this page.
 
-CRITICAL RULES FOR ZERO CLUBBING & EXACT STITCHING:
-1. NEVER CLUB TWO QUESTIONS TOGETHER:
-   - Scan down the left margin for question numbers like \`1)\`, \`2)\`, \`3)\`, \`Q.1\`, \`Q.2\`, \`1.\`, \`2.\`.
-   - Every single numbered question MUST be its own separate object in the \`questions\` array.
-   - Its \`ymin\` MUST start right at the top of its question number/first line, and its \`ymax\` MUST end in the white space strictly ABOVE the next question number!
-2. STRICT TOP-OF-PAGE CONTINUATION SEPARATION:
-   - Look at the very top of the page (below any page header). If there is text, a diagram, or options \`(A)\`, \`(B)\`, \`(C)\`, \`(D)\` that DO NOT start with a question number (because they are the leftover continuation of a split question from the bottom of the previous page), output that top fragment as its OWN separate first entry with \`questionNumber: "CONT"\` and \`isContinuationFromPrevPage: true\`.
-   - Its \`ymax\` MUST stop immediately after that fragment's last line/diagram/option, strictly BEFORE the next numbered question begins!
-3. STRICT BOTTOM-OF-PAGE CUTOFF DETECTION (\`continuesToNextPage\`):
+CRITICAL RULES FOR ZERO TEXT CLIPPING & ZERO CLUBBING:
+1. GENEROUS TOP MARGIN ABOVE FIRST LINE (\`ymin\`):
+   - Always place \`ymin\` in the clean white space 8 to 12 units strictly ABOVE the highest ascender, fraction bar, superscript, or diagram of the question's first line! NEVER place \`ymin\` on or inside the first line of text!
+2. GENEROUS BOTTOM MARGIN BELOW LAST LINE (\`ymax\`):
+   - Always place \`ymax\` in the clean white space 8 to 12 units strictly BELOW the lowest option/diagram of the question, and strictly ABOVE the next question number!
+3. STRICT TOP-OF-PAGE CONTINUATION SEPARATION:
+   - If there is text, a diagram, or options at the very top of the page that DO NOT start with a question number, output that top fragment as its OWN separate first entry with \`questionNumber: "CONT"\` and \`isContinuationFromPrevPage: true\`.
+4. STRICT BOTTOM-OF-PAGE CUTOFF DETECTION (\`continuesToNextPage\`):
    - Set \`continuesToNextPage: true\` ONLY if the final question at the bottom of the page is genuinely incomplete.
-4. ANCHOR VERIFICATION:
-   - For each block, transcribe the first 4-6 words of the question prose into \`firstLineSnippet\` and the last 4-6 words of the question prose into \`lastLineSnippet\` (ignore diagram labels).
 5. CURRICULUM CLASSIFICATION:
-   - Classify \`subject\` into "Physics", "Chemistry", or "Mathematics".
-   - Classify \`chapter\` STRICTLY from the allowed enum list.`;
+   - Classify \`subject\` into "Physics", "Chemistry", or "Mathematics" and \`chapter\` STRICTLY from the allowed enum list.`;
 
             const payload = {
                 contents: [{
                     role: "user",
                     parts: [
-                        { text: `Analyze Page ${pageNum}. Strictly separate any top-of-page continuation fragment ("CONT") from numbered questions (1, 2, 3...). Ensure each question's ymax stops in the whitespace strictly above the next question's ymin.` },
+                        { text: `Analyze Page ${pageNum}. Place each question's ymin in the whitespace strictly ABOVE its first line/superscript, and ymax in the whitespace strictly BELOW its last line/diagram.` },
                         { inlineData: { mimeType: "image/jpeg", data: base64Jpeg } }
                     ]
                 }],
@@ -2248,7 +2296,6 @@ CRITICAL RULES FOR ZERO CLUBBING & EXACT STITCHING:
             }
         }
 
-        // Instant Cancel & Rollback: Immediately aborts network request, deletes batch, and closes modal!
         function cancelPdfExtraction() {
             if (!state.isExtracting) return;
             state.cancelExtractionRequested = true;
@@ -2322,6 +2369,9 @@ CRITICAL RULES FOR ZERO CLUBBING & EXACT STITCHING:
                     await page.render({ canvasContext: ctx, viewport: vp }).promise;
                     if (state.cancelExtractionRequested) return;
 
+                    const pageLines = await getPageTextLineIntervals(page);
+                    if (state.cancelExtractionRequested) return;
+
                     const base64Jpeg = canvas.toDataURL('image/jpeg', 0.84).split(',')[1];
                     appendExtractLog(`Scanning Page ${pageNum} layout with ${getSelectedModel()}...`, 'info');
 
@@ -2331,17 +2381,29 @@ CRITICAL RULES FOR ZERO CLUBBING & EXACT STITCHING:
                     const blocks = aiResult.questions || [];
                     blocks.sort((a, b) => (a.ymin || 0) - (b.ymin || 0));
 
+                    // Apply 3-Stage Anti-Clip Boundary Guard to every question block
                     for (let i = 0; i < blocks.length; i++) {
-                        blocks[i].ymin = findCleanHorizontalWhitespaceNormY(canvas, Number(blocks[i].ymin) || 0, 28, 10);
+                        const minAllowed = i === 0 ? 2 : Math.min(blocks[i].ymin, blocks[i - 1].ymax + 2);
+                        blocks[i].ymin = snapBoundaryOutOfTextAndInk(
+                            canvas,
+                            pageLines,
+                            Number(blocks[i].ymin) || 0,
+                            minAllowed,
+                            985,
+                            'UP'
+                        );
                     }
-                    for (let i = 0; i < blocks.length - 1; i++) {
-                        const nextYMin = blocks[i + 1].ymin;
-                        if (blocks[i].ymax >= nextYMin - 4) {
-                            blocks[i].ymax = Math.max(blocks[i].ymin + 25, nextYMin - 2);
-                        } else {
-                            blocks[i].ymax = findCleanHorizontalWhitespaceNormY(canvas, Number(blocks[i].ymax) || nextYMin, 15, 25);
-                            if (blocks[i].ymax >= nextYMin) blocks[i].ymax = Math.max(blocks[i].ymin + 25, nextYMin - 2);
-                        }
+                    for (let i = 0; i < blocks.length; i++) {
+                        const maxAllowed = i < blocks.length - 1 ? Math.max(blocks[i].ymin + 25, blocks[i + 1].ymin - 2) : 998;
+                        const rawYMax = Math.min(maxAllowed, Number(blocks[i].ymax) || maxAllowed);
+                        blocks[i].ymax = snapBoundaryOutOfTextAndInk(
+                            canvas,
+                            pageLines,
+                            rawYMax,
+                            blocks[i].ymin + 25,
+                            maxAllowed,
+                            'DOWN'
+                        );
                     }
 
                     for (let i = 0; i < blocks.length; i++) {
@@ -2572,7 +2634,6 @@ CRITICAL RULES FOR ZERO CLUBBING & EXACT STITCHING:
             document.getElementById('drawerProgressText').textContent = `Solved: ${solvedTotal} / ${all.length}`;
         }
 
-        // Uncluttered Material 3 Card Builder (Custom Dropdowns + Only Star, Solved, Split, Delete)
         function buildCardHtml(q) {
             const borderStyle = q.starred ? 'border-color: var(--md-primary);' : (q.solved ? 'border-color: #10b981;' : '');
             const shortSubj = q.subject === 'Mathematics' ? 'Maths' : q.subject;
@@ -2583,7 +2644,6 @@ CRITICAL RULES FOR ZERO CLUBBING & EXACT STITCHING:
                     <div class="flex items-center gap-1.5 min-w-0 flex-nowrap">
                         <span class="w-7 h-7 m3-cookie-12 font-extrabold text-[10px] flex items-center justify-center shrink-0" style="background: var(--md-primary); color: var(--md-on-primary);">Q.${q.questionNumber}</span>
 
-                        <!-- Connected Custom Subject + Chapter Dropdown Group (4px Inner Continuation Radius) -->
                         <div class="m3-card-dropdown-group shrink-0">
                             <button type="button" onclick="window.app.openCardSubjMenu(${q.id}, this)" class="m3-card-dropdown-btn">
                                 <span>${shortSubj}</span>
@@ -2598,7 +2658,6 @@ CRITICAL RULES FOR ZERO CLUBBING & EXACT STITCHING:
                         ${q.isStitched ? `<span class="px-2 py-0.5 rounded-full m3-primary-pill text-[9px] font-extrabold shrink-0" title="Stitched">🔗</span>` : ''}
                     </div>
 
-                    <!-- Streamlined 4-Button Connected Continuation Group (Star, Solved, Split, Delete) -->
                     <div class="m3-icon-group m3-icon-group-card shrink-0 ml-auto">
                         <button onclick="window.app.toggleQBool(${q.id}, 'starred')" class="m3-icon-group-btn ${q.starred ? 'active-state' : ''}" title="Star">
                             <i class="${q.starred ? 'ph-fill ph-star' : 'ph-bold ph-star'}"></i>
@@ -2696,7 +2755,6 @@ CRITICAL RULES FOR ZERO CLUBBING & EXACT STITCHING:
             isExtracting: () => state.isExtracting,
             closeCustomDropdown,
 
-            // Custom M3 Dropdown Openers
             openPaperMenu(anchorEl) {
                 const papers = Array.from(new Set(state.questions.map(q => q.paperName).filter(Boolean)));
                 const opts = [
@@ -2739,6 +2797,7 @@ CRITICAL RULES FOR ZERO CLUBBING & EXACT STITCHING:
             },
 
             handleFeedScroll(el) {
+                closeCustomDropdown();
                 const fab = document.getElementById('extendedAddPdfFab');
                 if (!fab || !el) return;
                 const st = el.scrollTop;
@@ -2751,6 +2810,7 @@ CRITICAL RULES FOR ZERO CLUBBING & EXACT STITCHING:
             },
 
             toggleDrawer(force) {
+                closeCustomDropdown();
                 const d = document.getElementById('chaptersDrawer');
                 const b = document.getElementById('drawerBackdrop');
                 const open = typeof force === 'boolean' ? force : d.classList.contains('-translate-x-full');
@@ -2817,6 +2877,7 @@ CRITICAL RULES FOR ZERO CLUBBING & EXACT STITCHING:
 
             getActivePopupId: () => state.activePopupId,
             openImagePopup(id) {
+                closeCustomDropdown();
                 const q = state.questions.find(i => i.id === Number(id));
                 if (!q) return;
                 state.activePopupId = q.id;
@@ -2826,12 +2887,14 @@ CRITICAL RULES FOR ZERO CLUBBING & EXACT STITCHING:
                 document.getElementById('imagePopupModal').classList.remove('hidden');
             },
             closeImagePopup() {
+                closeCustomDropdown();
                 document.getElementById('imagePopupModal').classList.add('hidden');
                 document.getElementById('popupImageEl').src = '';
                 state.activePopupId = null;
             },
 
             openSettingsPage(pageKey = 'HOME') {
+                closeCustomDropdown();
                 state.activeSettingsPage = pageKey;
                 ['HOME', 'KEYS', 'THEME', 'BACKUP', 'SCANNER'].forEach(p => {
                     document.getElementById(`settingsPage_${p}`)?.classList.toggle('hidden', p !== pageKey);
@@ -2858,6 +2921,7 @@ CRITICAL RULES FOR ZERO CLUBBING & EXACT STITCHING:
             },
 
             openSettingsModal(showMissingAlert = false, initialPage = 'HOME') {
+                closeCustomDropdown();
                 document.getElementById('apiKeyInput').value = getApiKey();
                 const currentMod = GEMINI_MODELS.find(m => m.value === getSelectedModel()) || GEMINI_MODELS[0];
                 const modLbl = document.getElementById('geminiModelDropdownLabel');
@@ -2875,13 +2939,15 @@ CRITICAL RULES FOR ZERO CLUBBING & EXACT STITCHING:
                 document.getElementById('settingsModal').classList.remove('hidden');
             },
             closeSettingsModal() {
+                closeCustomDropdown();
                 document.getElementById('settingsModal').classList.add('hidden');
             },
             async saveSettings(closeModalAfter = true) {
+                closeCustomDropdown();
                 const key = document.getElementById('apiKeyInput').value.trim();
                 const model = getSelectedModel();
-                const padTop = Math.max(0, Number(document.getElementById('padTopInput').value) ?? 4);
-                const padBottom = Math.max(0, Number(document.getElementById('padBottomInput').value) ?? 6);
+                const padTop = Math.max(0, Number(document.getElementById('padTopInput').value) ?? 10);
+                const padBottom = Math.max(0, Number(document.getElementById('padBottomInput').value) ?? 10);
                 const ghToken = document.getElementById('githubTokenInput').value.trim();
                 const ghGistId = document.getElementById('githubGistIdInput').value.trim();
                 const autoSync = document.getElementById('cloudAutoSyncCheckbox').checked;
@@ -2924,8 +2990,8 @@ CRITICAL RULES FOR ZERO CLUBBING & EXACT STITCHING:
                 toast('Question deleted & syncing to Cloud');
             },
 
-            // Double Confirmation Dialog for Deleting All Questions
             confirmClearVault() {
+                closeCustomDropdown();
                 if (state.questions.length === 0) return toast('Question vault is already empty!', 'info');
                 document.getElementById('clearConfirmCount').textContent = state.questions.length;
                 const chk = document.getElementById('clearVaultDoubleCheck');
@@ -2964,6 +3030,7 @@ CRITICAL RULES FOR ZERO CLUBBING & EXACT STITCHING:
             importBackupJson,
 
             openUploadModal() {
+                closeCustomDropdown();
                 if (state.isExtracting && state.isUploadMinimized) {
                     this.restoreUploadModal();
                     return;
@@ -2975,6 +3042,7 @@ CRITICAL RULES FOR ZERO CLUBBING & EXACT STITCHING:
             },
             minimizeUploadModal() {
                 if (!state.isExtracting) return;
+                closeCustomDropdown();
                 state.isUploadMinimized = true;
                 document.getElementById('uploadModal').classList.add('hidden');
                 const minBar = document.getElementById('minimizedUploadBar');
@@ -2982,8 +3050,10 @@ CRITICAL RULES FOR ZERO CLUBBING & EXACT STITCHING:
                     minBar.classList.remove('hidden');
                     minBar.classList.add('flex');
                 }
+                if (!waveAnimFrame) waveAnimFrame = requestAnimationFrame(stepAllWavyBars);
             },
             restoreUploadModal() {
+                closeCustomDropdown();
                 state.isUploadMinimized = false;
                 const minBar = document.getElementById('minimizedUploadBar');
                 if (minBar) {
@@ -2991,8 +3061,10 @@ CRITICAL RULES FOR ZERO CLUBBING & EXACT STITCHING:
                     minBar.classList.remove('flex');
                 }
                 document.getElementById('uploadModal').classList.remove('hidden');
+                if (!waveAnimFrame) waveAnimFrame = requestAnimationFrame(stepAllWavyBars);
             },
             closeUploadModal() {
+                closeCustomDropdown();
                 if (!state.isExtracting) document.getElementById('uploadModal').classList.add('hidden');
             },
             onPdfSelected,
@@ -3000,6 +3072,7 @@ CRITICAL RULES FOR ZERO CLUBBING & EXACT STITCHING:
             cancelPdfExtraction,
 
             openSplitModal(id) {
+                closeCustomDropdown();
                 const q = state.questions.find(i => i.id === Number(id));
                 if (!q) return;
                 state.activeSplitId = Number(id);
@@ -3011,6 +3084,7 @@ CRITICAL RULES FOR ZERO CLUBBING & EXACT STITCHING:
                 document.getElementById('splitModal').classList.remove('hidden');
             },
             closeSplitModal() {
+                closeCustomDropdown();
                 document.getElementById('splitModal').classList.add('hidden');
                 state.activeSplitId = null;
             },
@@ -3096,6 +3170,7 @@ CRITICAL RULES FOR ZERO CLUBBING & EXACT STITCHING:
 
             getActivePadId: () => state.activePadId,
             openScratchpad(id) {
+                closeCustomDropdown();
                 const q = state.questions.find(i => i.id === Number(id));
                 if (!q) return;
                 state.activePadId = Number(id);
@@ -3105,6 +3180,7 @@ CRITICAL RULES FOR ZERO CLUBBING & EXACT STITCHING:
                 setTimeout(() => initStylusCanvas(), 50);
             },
             closeScratchpad() {
+                closeCustomDropdown();
                 document.getElementById('scratchpadModal').classList.add('hidden');
             },
             setInk(color, isEraser = false) {
