@@ -343,17 +343,31 @@
             border-radius: 10px 10px 23px 23px;
         }
 
-        /* M3 Expressive Dialogs */
-        @keyframes m3DialogIn {
-            from { opacity: 0; transform: scale(0.92) translateY(14px); }
-            to { opacity: 1; transform: scale(1) translateY(0); }
-        }
-        .m3-dialog {
-            background-color: var(--md-surface-container);
-            border-radius: 32px;
-            box-shadow: 0 28px 64px rgba(0, 0, 0, 0.6);
-            animation: m3DialogIn 0.32s var(--m3-spring);
-        }
+             /* M3 Expressive Dialogs (Always Dead-Center in Normal & Fullscreen Mode) */
+     #imagePopupModal:not(.hidden),
+     #settingsModal:not(.hidden),
+     #uploadModal:not(.hidden),
+     #splitModal:not(.hidden),
+     #clearConfirmModal:not(.hidden) {
+         display: flex !important;
+         align-items: center !important;
+         justify-content: center !important;
+         width: 100vw !important;
+         height: 100dvh !important;
+         inset: 0 !important;
+     }
+     @keyframes m3DialogIn {
+         from { opacity: 0; transform: scale(0.92) translateY(14px); }
+         to { opacity: 1; transform: scale(1) translateY(0); }
+     }
+     .m3-dialog {
+         background-color: var(--md-surface-container);
+         border-radius: 32px;
+         box-shadow: 0 28px 64px rgba(0, 0, 0, 0.6);
+         animation: m3DialogIn 0.32s var(--m3-spring);
+         margin: auto;
+         max-width: calc(100vw - 24px);
+     }
 
         /* Borderless Tonal Inputs */
         .m3-input {
@@ -1116,19 +1130,19 @@
         // - True circular rounded ends (lineCap = 'round') on both wave and empty track
         // - Crisp 3px visual gap between the wave tip cap and the empty track cap
         // - Smooth, slow damped length progression
-        const waveInstances = new Map();
+                const waveInstances = new Map();
         let waveAnimFrame = null;
 
         function renderM3WavyProgress(targetElOrId, targetPct = 50) {
             const el = typeof targetElOrId === 'string' ? document.getElementById(targetElOrId) : targetElOrId;
             if (!el) return;
-            const clamped = Math.max(5, Math.min(100, Number(targetPct) || 5));
+            const clamped = Math.max(6, Math.min(100, Number(targetPct) || 6));
 
             let inst = waveInstances.get(el);
             if (!inst || !el.contains(inst.canvas)) {
                 el.innerHTML = `<canvas class="w-full h-4 block"></canvas>`;
                 const canvas = el.querySelector('canvas');
-                inst = { canvas, currentPct: Math.min(clamped, 8), targetPct: clamped };
+                inst = { canvas, currentPct: Math.min(clamped, 8), targetPct: clamped, phase: 0 };
                 waveInstances.set(el, inst);
             } else {
                 inst.targetPct = clamped;
@@ -1143,19 +1157,28 @@
             const rootStyle = getComputedStyle(document.documentElement);
             const primaryColor = rootStyle.getPropertyValue('--md-primary').trim() || '#a78bfa';
             const trackColor = rootStyle.getPropertyValue('--md-secondary-container').trim() || '#312e52';
-            let anyNeedsNextFrame = false;
+            let anyVisible = false;
 
             for (const [el, inst] of waveInstances.entries()) {
-                if (!document.body.contains(el) || el.offsetParent === null) continue;
+                if (!document.body.contains(el)) {
+                    waveInstances.delete(el);
+                    continue;
+                }
+                if (el.offsetParent === null) continue;
+
+                // Keep animating 60fps as long as any wave bar is visible on screen
+                anyVisible = true;
 
                 // Smooth, slow damped length interpolation
                 const diff = inst.targetPct - inst.currentPct;
                 if (Math.abs(diff) > 0.04) {
                     inst.currentPct += diff * 0.038;
-                    anyNeedsNextFrame = true;
                 } else {
                     inst.currentPct = inst.targetPct;
                 }
+
+                // Continuous forward wave propagation
+                inst.phase += 0.055;
 
                 const canvas = inst.canvas;
                 const dpr = window.devicePixelRatio || 1;
@@ -1177,20 +1200,28 @@
                 const usableW = Math.max(24, w - strokeW * 2);
                 const waveEndX = r + (usableW * (inst.currentPct / 100));
 
-                // Draw Pure, Undistorted Sine Wave:
-                // Phase is locked to 0 at x === waveEndX so y === cy naturally at the intersection tip without any bunching!
                 ctx.beginPath();
                 ctx.strokeStyle = primaryColor;
                 ctx.lineWidth = strokeW;
                 ctx.lineCap = 'round';
                 ctx.lineJoin = 'round';
 
-                const wavelength = 32;
+                const wavelength = 34;
                 const k = (Math.PI * 2) / wavelength;
-                const amp = 3.4;
+                const amp = 3.3;
+                const taperLen = Math.min(14, (waveEndX - r) * 0.45);
+
+                // Smoothstep helper (zero derivative at 0 and 1 so there is NEVER a kink)
+                const smoothstep = (edge, dist) => {
+                    if (edge <= 0) return 0;
+                    const t = Math.max(0, Math.min(1, dist / edge));
+                    return t * t * (3 - 2 * t);
+                };
 
                 for (let x = r; x <= waveEndX; x += 1) {
-                    const y = cy - amp * Math.sin(k * (waveEndX - x));
+                    const envLeft = smoothstep(taperLen, x - r);
+                    const envRight = smoothstep(taperLen, waveEndX - x);
+                    const y = cy + amp * envLeft * envRight * Math.sin(k * (x - r) - inst.phase);
                     if (x === r) ctx.moveTo(x, y);
                     else ctx.lineTo(x, y);
                 }
@@ -1220,12 +1251,13 @@
                 ctx.restore();
             }
 
-            if (anyNeedsNextFrame) {
+            if (anyVisible) {
                 waveAnimFrame = requestAnimationFrame(stepAllWavyBars);
             } else {
                 waveAnimFrame = null;
             }
         }
+
 
         // 3. Growing Pie-Sector Circular Progress Indicator for Sync Button
         let syncSectorTimer = null;
