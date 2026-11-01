@@ -62,7 +62,7 @@
         .m3-spin-slow { animation: m3Spin 16s linear infinite; }
         @keyframes m3Spin { to { transform: rotate(360deg); } }
 
-        /* Connected Continuation Segmented Button Group (Smooth 10px inner radius, 9999px outer ends, zero sharp corners) */
+        /* Connected Continuation Segmented Button Group (Smooth 10px inner radius, 9999px outer ends) */
         .m3-segmented-group {
             display: inline-flex;
             align-items: center;
@@ -105,7 +105,7 @@
             padding: 0 13px;
         }
 
-        /* Connected Continuation Icon Button Group (Smooth 10px inner corners, 9999px outer ends) */
+        /* Connected Continuation Icon Button Group */
         .m3-icon-group {
             display: inline-flex;
             align-items: center;
@@ -156,7 +156,7 @@
             font-weight: 800;
         }
 
-        /* M3 Expressive Grouped List (26px outer corners, smooth 11px inner continuation corners, zero sharp edges) */
+        /* M3 Expressive Grouped List (26px outer corners, smooth 11px inner continuation corners) */
         .m3-group-list { display: flex; flex-direction: column; gap: 3px; }
         .m3-group-item {
             background-color: var(--md-surface-high);
@@ -217,7 +217,7 @@
         }
         .m3-dropdown-trigger:active { transform: scale(0.96); }
 
-        /* Connected Pair for Subject + Chapter Dropdowns Inside Cards (Smooth 9px inner meeting edge) */
+        /* Connected Pair for Subject + Chapter Dropdowns Inside Cards */
         .m3-card-dropdown-group {
             display: inline-flex;
             align-items: center;
@@ -343,31 +343,31 @@
             border-radius: 10px 10px 23px 23px;
         }
 
-             /* M3 Expressive Dialogs (Always Dead-Center in Normal & Fullscreen Mode) */
-     #imagePopupModal:not(.hidden),
-     #settingsModal:not(.hidden),
-     #uploadModal:not(.hidden),
-     #splitModal:not(.hidden),
-     #clearConfirmModal:not(.hidden) {
-         display: flex !important;
-         align-items: center !important;
-         justify-content: center !important;
-         width: 100vw !important;
-         height: 100dvh !important;
-         inset: 0 !important;
-     }
-     @keyframes m3DialogIn {
-         from { opacity: 0; transform: scale(0.92) translateY(14px); }
-         to { opacity: 1; transform: scale(1) translateY(0); }
-     }
-     .m3-dialog {
-         background-color: var(--md-surface-container);
-         border-radius: 32px;
-         box-shadow: 0 28px 64px rgba(0, 0, 0, 0.6);
-         animation: m3DialogIn 0.32s var(--m3-spring);
-         margin: auto;
-         max-width: calc(100vw - 24px);
-     }
+        /* M3 Expressive Dialogs (Always Dead-Center in Normal & Fullscreen Mode) */
+        #imagePopupModal:not(.hidden),
+        #settingsModal:not(.hidden),
+        #uploadModal:not(.hidden),
+        #splitModal:not(.hidden),
+        #clearConfirmModal:not(.hidden) {
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            width: 100vw !important;
+            height: 100dvh !important;
+            inset: 0 !important;
+        }
+        @keyframes m3DialogIn {
+            from { opacity: 0; transform: scale(0.92) translateY(14px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+        .m3-dialog {
+            background-color: var(--md-surface-container);
+            border-radius: 32px;
+            box-shadow: 0 28px 64px rgba(0, 0, 0, 0.6);
+            animation: m3DialogIn 0.32s var(--m3-spring);
+            margin: auto;
+            max-width: calc(100vw - 24px);
+        }
 
         /* Borderless Tonal Inputs */
         .m3-input {
@@ -459,11 +459,15 @@
             </button>
         </div>
 
-        <!-- 4. FLEX GAP -->
-        <div class="flex-1 min-w-[2px] flex items-center justify-center">
+        <!-- 4. FLEX GAP (Shows Background OCR or AI Solver Pill when active) -->
+        <div class="flex-1 min-w-[2px] flex items-center justify-center gap-1.5">
             <div id="ocrStatusBadge" class="hidden h-7 items-center gap-1 px-2.5 rounded-full text-[10px] font-extrabold m3-primary-pill shrink-0">
                 <i class="ph-bold ph-text-T animate-bounce text-xs"></i>
                 <span id="ocrStatusText">OCR: 0/0</span>
+            </div>
+            <div id="solverStatusBadge" onclick="window.app.openSettingsModal(false, 'SCANNER')" class="hidden h-7 items-center gap-1 px-2.5 rounded-full text-[10px] font-extrabold m3-primary-pill cursor-pointer shrink-0" title="Generating Answer Keys & 1-Line Hints in background">
+                <i class="ph-bold ph-lightbulb animate-pulse text-xs"></i>
+                <span id="solverStatusText">Hints: 0/0</span>
             </div>
         </div>
 
@@ -489,7 +493,6 @@
             </button>
             <button id="syncHeaderBtn" onclick="window.app.handleCloudBadgeClick()" class="m3-icon-group-btn gap-1" title="Click to Sync with GitHub Cloud">
                 <i id="cloudStatusIcon" class="ph-bold ph-cloud-arrow-up text-sm"></i>
-                <!-- Growing Sector Pie Circular Progress SVG (Shown While Syncing) -->
                 <svg id="syncSectorSvg" class="hidden w-4 h-4 shrink-0" viewBox="0 0 24 24">
                     <circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-opacity="0.25" stroke-width="2"></circle>
                     <path id="syncSectorPath" fill="currentColor" d=""></path>
@@ -504,7 +507,7 @@
     </header>
 
     <!-- =================================================================== -->
-    <!-- SECONDARY BACKGROUND TASK STATUS BAR (Fixed Text Width, Stationary Wave Tip) -->
+    <!-- SECONDARY BACKGROUND TASK STATUS BAR (Fixed Text Width, Propagating Wave) -->
     <!-- =================================================================== -->
     <div id="minimizedUploadBar" onclick="window.app.restoreUploadModal()" class="hidden m3-surface-high px-4 py-1.5 items-center justify-between gap-3 cursor-pointer hover:brightness-105 transition shrink-0 z-20" title="Click to reopen PDF Extraction Dialog">
         <div class="flex items-center gap-2 shrink-0">
@@ -702,11 +705,11 @@
                     <button type="button" onclick="window.app.openSettingsPage('SCANNER')" class="w-full p-4 m3-group-item flex items-center justify-between gap-3.5 text-left">
                         <div class="flex items-center gap-3.5 min-w-0">
                             <div class="w-12 h-12 m3-leaf-shape flex items-center justify-center shrink-0" style="background: var(--md-primary-container); color: var(--md-primary);">
-                                <i class="ph-bold ph-sliders-horizontal text-xl"></i>
+                                <i class="ph-bold ph-lightbulb text-xl"></i>
                             </div>
                             <div class="min-w-0">
-                                <div class="font-extrabold text-sm">AI Scanner & Crop Margins</div>
-                                <div class="text-xs m3-text-muted truncate">Gemini Vision model & vertical crop padding</div>
+                                <div class="font-extrabold text-sm">AI Answer Key, Hints & Scanner</div>
+                                <div class="text-xs m3-text-muted truncate">1-Req/Question Answer Key & 1-Line Hint Generator + Crop Margins</div>
                             </div>
                         </div>
                         <i class="ph-bold ph-caret-right m3-text-muted text-base shrink-0"></i>
@@ -862,16 +865,45 @@
                     </div>
                 </div>
 
-                <!-- PAGE 4: AI SCANNER & CROP MARGINS (With Custom M3 Dropdown) -->
+                <!-- PAGE 4: AI ANSWER KEY, 1-LINE HINTS & SCANNER MARGINS -->
                 <div id="settingsPage_SCANNER" class="hidden space-y-3">
                     <div class="m3-group-list">
+                        <!-- Per-Question Answer Key & 1-Line Hint Generator (1 Request Per Question) -->
+                        <div class="p-4 m3-group-item space-y-3">
+                            <div class="flex items-center justify-between gap-2">
+                                <div>
+                                    <span class="text-xs font-extrabold uppercase tracking-wider" style="color: var(--md-primary)">AI Answer Key & 1-Line Hint Generator</span>
+                                    <p class="text-[11px] m3-text-muted">Sends 1 dedicated Gemini API request per question for maximum accuracy & updates your Gist JSON.</p>
+                                </div>
+                                <label class="flex items-center gap-1.5 text-[11px] font-bold cursor-pointer shrink-0">
+                                    <input id="autoSolveHintsCheckbox" type="checkbox" checked onchange="window.app.saveSettings(false)" class="rounded focus:ring-0">
+                                    <span>Auto after PDF</span>
+                                </label>
+                            </div>
+
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                <button type="button" onclick="window.app.runBackgroundAnswerAndHintGenerator(true, false)" class="h-10 px-3 m3-btn-filled text-xs flex items-center justify-center gap-1.5 shadow">
+                                    <i class="ph-bold ph-lightbulb text-sm"></i>
+                                    <span id="settingsSolveMissingBtnLabel">Solve Missing Hints & Keys</span>
+                                </button>
+                                <button type="button" onclick="window.app.runBackgroundAnswerAndHintGenerator(true, true)" class="h-10 px-3 m3-btn-tonal text-xs flex items-center justify-center gap-1.5">
+                                    <i class="ph-bold ph-arrows-clockwise text-sm"></i>
+                                    <span>Re-Solve All Questions</span>
+                                </button>
+                            </div>
+
+                            <div id="settingsSolverWavyBar" class="hidden pt-1"></div>
+                            <p id="settingsSolverStatusInfo" class="text-[11px] m3-text-muted font-mono">Compatible with all existing Cloud Gist questions.</p>
+                        </div>
+
                         <div class="p-4 m3-group-item space-y-1.5">
-                            <label class="block text-xs font-bold">Gemini Vision Model</label>
+                            <label class="block text-xs font-bold">Gemini Vision & Solver Model</label>
                             <button type="button" id="geminiModelDropdownBtn" onclick="window.app.openGeminiModelMenu(this)" class="w-full h-10 px-4 m3-surface-low rounded-full flex items-center justify-between text-xs font-bold">
                                 <span id="geminiModelDropdownLabel" class="truncate">gemini-3.5-flash-lite (Default • Fast & Accurate)</span>
                                 <i class="ph-bold ph-caret-down text-xs m3-text-muted"></i>
                             </button>
                         </div>
+
                         <div class="p-4 m3-group-item grid grid-cols-2 gap-3">
                             <div>
                                 <label class="block text-[11px] font-bold m3-text-muted mb-1">Top Safe Margin (0-40)</label>
@@ -907,7 +939,7 @@
                     </div>
                     <div class="min-w-0">
                         <h3 class="font-extrabold text-sm sm:text-base truncate">Add Test Paper PDF</h3>
-                        <p class="text-[11px] m3-text-muted truncate">3-Stage Anti-Clip Guard • Whitespace Snapper • Clean Question OCR</p>
+                        <p class="text-[11px] m3-text-muted truncate">3-Stage Anti-Clip Guard • Auto Background Hints & Answer Keys</p>
                     </div>
                 </div>
 
@@ -948,7 +980,7 @@
                     </div>
                 </div>
 
-                <!-- Live Progress View with Seamless Undistorted Sine Wave -->
+                <!-- Live Progress View with Propagating Sine Wave -->
                 <div id="uploadProgressView" class="hidden space-y-3">
                     <div class="m3-surface-high rounded-3xl p-4 space-y-3">
                         <div class="flex items-center justify-between gap-2 text-xs">
@@ -1047,50 +1079,139 @@
     </div>
 
     <!-- =================================================================== -->
-    <!-- MODAL 4: FULLSCREEN TABLET STYLUS SCRATCHPAD                        -->
+    <!-- MODAL 4: MICROSOFT WHITEBOARD INFINITE SCRATCHPAD + HINT/ANS BAR    -->
     <!-- =================================================================== -->
     <div id="scratchpadModal" class="fixed inset-0 m3-surface z-50 hidden flex flex-col">
-        <div class="h-14 m3-surface-low px-3 sm:px-5 flex items-center justify-between gap-2 shrink-0 overflow-x-auto no-scrollbar">
+        <!-- Top Status Bar (Fixed — Only the scratchpad canvas region zooms/pans!) -->
+        <div class="h-14 m3-surface-low px-3 sm:px-4 flex items-center justify-between gap-2 shrink-0 overflow-x-auto no-scrollbar">
             <div class="flex items-center gap-2 min-w-0 shrink-0">
-                <button type="button" onclick="window.app.closeScratchpad()" class="h-9 px-4 m3-btn-tonal text-xs font-extrabold flex items-center gap-1.5 shrink-0">
+                <button type="button" onclick="window.app.closeScratchpad()" class="h-9 px-3.5 m3-btn-tonal text-xs font-extrabold flex items-center gap-1.5 shrink-0">
                     <i class="ph-bold ph-x"></i> Close Pad
                 </button>
-                <span id="padQTitle" class="font-bold text-xs sm:text-sm truncate max-w-[220px] sm:max-w-md">Q.1</span>
+                <span id="padQTitle" class="font-bold text-xs sm:text-sm truncate max-w-[160px] sm:max-w-[240px]">Q.1</span>
+
+                <!-- 1-Line Hint & Answer Key Pills in Scratchpad Status Bar -->
+                <div class="m3-icon-group shrink-0 ml-1">
+                    <button type="button" id="padHintToggleBtn" onclick="window.app.togglePadHint()" class="m3-icon-group-btn gap-1.5 text-xs font-bold" title="View 1-Line Hint">
+                        <i class="ph-bold ph-lightbulb text-amber-400"></i>
+                        <span>Hint</span>
+                    </button>
+                    <button type="button" id="padAnsToggleBtn" onclick="window.app.togglePadAnswer()" class="m3-icon-group-btn gap-1.5 text-xs font-bold" title="View Answer Key">
+                        <i class="ph-bold ph-key text-emerald-400"></i>
+                        <span>Ans Key</span>
+                    </button>
+                </div>
             </div>
 
-            <div class="flex items-center gap-2 shrink-0">
-                <button type="button" onclick="window.app.setInk('#f8fafc', false)" class="w-6 h-6 rounded-full bg-white border-2 border-indigo-500" title="White Pen"></button>
-                <button type="button" onclick="window.app.setInk('#38bdf8', false)" class="w-6 h-6 rounded-full bg-sky-400" title="Blue Pen"></button>
-                <button type="button" onclick="window.app.setInk('#fbbf24', false)" class="w-6 h-6 rounded-full bg-amber-400" title="Yellow Pen"></button>
-                <button type="button" onclick="window.app.setInk('#4ade80', false)" class="w-6 h-6 rounded-full bg-emerald-400" title="Green Pen"></button>
-                <button type="button" id="strokeWidthDropdownBtn" onclick="window.app.openStrokeWidthMenu(this)" class="h-8 px-3 m3-dropdown-trigger text-xs">
+            <!-- Microsoft Whiteboard Tool Controls -->
+            <div class="flex items-center gap-1.5 shrink-0">
+                <!-- Tool Mode Group: Pen, Pan Hand, Eraser, Auto-Shape Magic -->
+                <div class="m3-icon-group">
+                    <button type="button" id="wbToolPenBtn" onclick="window.app.setWhiteboardTool('PEN')" class="m3-icon-group-btn active-state gap-1 text-xs" title="Draw / Pen Tool">
+                        <i class="ph-bold ph-pencil-simple"></i>
+                        <span class="hidden md:inline">Pen</span>
+                    </button>
+                    <button type="button" id="wbToolPanBtn" onclick="window.app.setWhiteboardTool('PAN')" class="m3-icon-group-btn gap-1 text-xs" title="Pan / Move Infinite Canvas">
+                        <i class="ph-bold ph-hand-grabbing"></i>
+                        <span class="hidden md:inline">Pan</span>
+                    </button>
+                    <button type="button" id="eraserBtn" onclick="window.app.setWhiteboardTool('ERASER')" class="m3-icon-group-btn gap-1 text-xs" title="Stroke Eraser">
+                        <i class="ph-bold ph-eraser"></i>
+                        <span class="hidden md:inline">Erase</span>
+                    </button>
+                    <button type="button" id="wbAutoShapeBtn" onclick="window.app.toggleAutoShape()" class="m3-icon-group-btn active-state gap-1 text-xs" title="Auto-convert rough circles, squares, triangles & lines into crisp shapes">
+                        <i class="ph-bold ph-magic-wand"></i>
+                        <span class="hidden sm:inline">Shape</span>
+                    </button>
+                </div>
+
+                <!-- Ink Colors -->
+                <div class="flex items-center gap-1 px-1">
+                    <button type="button" onclick="window.app.setInk('#f8fafc')" class="w-6 h-6 rounded-full bg-white border-2 border-indigo-500" title="White Ink"></button>
+                    <button type="button" onclick="window.app.setInk('#38bdf8')" class="w-6 h-6 rounded-full bg-sky-400" title="Cyan Ink"></button>
+                    <button type="button" onclick="window.app.setInk('#fbbf24')" class="w-6 h-6 rounded-full bg-amber-400" title="Amber Ink"></button>
+                    <button type="button" onclick="window.app.setInk('#4ade80')" class="w-6 h-6 rounded-full bg-emerald-400" title="Emerald Ink"></button>
+                    <button type="button" onclick="window.app.setInk('#fb7185')" class="w-6 h-6 rounded-full bg-rose-400" title="Rose Ink"></button>
+                </div>
+
+                <!-- Stroke Width Custom Dropdown -->
+                <button type="button" id="strokeWidthDropdownBtn" onclick="window.app.openStrokeWidthMenu(this)" class="h-9 px-3 m3-dropdown-trigger text-xs">
                     <span id="strokeWidthDropdownLabel">Medium</span>
                     <i class="ph-bold ph-caret-down text-[10px] m3-text-muted"></i>
                 </button>
-                <button type="button" onclick="window.app.setInk('#090d16', true)" id="eraserBtn" class="h-8 px-3 m3-btn-tonal text-xs flex items-center gap-1">
-                    <i class="ph-bold ph-eraser"></i> <span class="hidden sm:inline">Eraser</span>
-                </button>
-                <button type="button" onclick="window.app.clearInk()" class="h-8 px-3 m3-btn-tonal text-xs font-bold">Clear Ink</button>
+
+                <!-- Undo / Redo / Clear Group -->
+                <div class="m3-icon-group">
+                    <button type="button" onclick="window.app.whiteboardUndo()" class="m3-icon-group-btn" title="Undo (Ctrl+Z)">
+                        <i class="ph-bold ph-arrow-u-up-left"></i>
+                    </button>
+                    <button type="button" onclick="window.app.whiteboardRedo()" class="m3-icon-group-btn" title="Redo (Ctrl+Y)">
+                        <i class="ph-bold ph-arrow-u-up-right"></i>
+                    </button>
+                    <button type="button" onclick="window.app.clearInk()" class="m3-icon-group-btn hover:!bg-rose-600 hover:!text-white" title="Clear Whiteboard">
+                        <i class="ph-bold ph-trash"></i>
+                    </button>
+                </div>
             </div>
         </div>
 
-        <div class="flex-1 flex flex-col lg:flex-row overflow-hidden">
-            <div class="w-full lg:w-1/2 h-2/5 lg:h-full overflow-y-auto p-3 m3-surface">
+        <!-- Collapsible Hint & Answer Key Reveal Strip (Below Status Bar) -->
+        <div id="padHintAnswerDrawer" class="hidden m3-surface-high px-4 py-2.5 items-center justify-between gap-3 shrink-0">
+            <div class="flex flex-wrap items-center gap-3 min-w-0 flex-1 text-xs">
+                <div id="padHintBox" class="hidden items-center gap-2 px-3.5 py-1.5 rounded-2xl m3-surface-low">
+                    <i class="ph-fill ph-lightbulb text-amber-400 text-sm shrink-0"></i>
+                    <span class="font-bold text-amber-300 shrink-0">1-Line Hint:</span>
+                    <span id="padHintText" class="font-medium">Not generated yet.</span>
+                </div>
+                <div id="padAnsBox" class="hidden items-center gap-2 px-3.5 py-1.5 rounded-2xl m3-primary-pill">
+                    <i class="ph-fill ph-key text-sm shrink-0"></i>
+                    <span class="font-bold shrink-0">Answer Key:</span>
+                    <span id="padAnsText" class="font-extrabold font-mono">Not generated yet.</span>
+                </div>
+            </div>
+            <button type="button" id="padSolveNowBtn" onclick="window.app.solveActivePadQuestionNow()" class="h-8 px-3.5 m3-btn-filled text-[11px] flex items-center gap-1.5 shrink-0">
+                <i class="ph-bold ph-sparkle"></i>
+                <span id="padSolveNowBtnLabel">Generate with Gemini</span>
+            </button>
+        </div>
+
+        <!-- Split Workspace: Fixed Question View on Left + Infinite Zoomable Whiteboard on Right -->
+        <div class="flex-1 flex flex-col lg:flex-row overflow-hidden min-h-0">
+            <!-- Question Image Region (Normal Scroll, Unaffected by Whiteboard Zoom) -->
+            <div class="w-full lg:w-5/12 h-2/5 lg:h-full overflow-y-auto p-3 m3-surface">
                 <div class="bg-white rounded-3xl p-2 shadow">
                     <img id="padQuestionImg" src="" alt="Question" class="w-full h-auto block">
                 </div>
             </div>
-            <div id="padCanvasWrap" class="w-full lg:w-1/2 h-3/5 lg:h-full bg-[#070a12] relative overflow-hidden">
-                <div class="absolute top-2.5 left-3 pointer-events-none text-[11px] m3-text-muted font-medium">
-                    Stylus / Touch Rough Work Pad (Zero-scroll interference)
+
+            <!-- Infinite Zoomable & Pannable Microsoft Whiteboard Region (#padCanvasWrap ONLY) -->
+            <div id="padCanvasWrap" class="w-full lg:w-7/12 h-3/5 lg:h-full bg-[#070a12] relative overflow-hidden select-none">
+                <div class="absolute top-3 left-3.5 pointer-events-none z-10 flex items-center gap-2">
+                    <span class="px-2.5 py-1 rounded-full bg-black/55 text-[10px] m3-text-muted font-mono">
+                        Infinite Whiteboard • Pinch/Wheel to Zoom • 2-Finger/Space Drag to Pan • Auto-Shape Active
+                    </span>
                 </div>
-                <canvas id="stylusCanvas" class="w-full h-full cursor-crosshair"></canvas>
+
+                <!-- Floating Bottom-Right Whiteboard Zoom & Reset HUD -->
+                <div class="absolute bottom-4 right-4 z-10 m3-icon-group shadow-xl">
+                    <button type="button" onclick="window.app.zoomWhiteboard(-0.2)" class="m3-icon-group-btn" title="Zoom Out">
+                        <i class="ph-bold ph-minus"></i>
+                    </button>
+                    <button type="button" onclick="window.app.resetWhiteboardView()" class="m3-icon-group-btn !px-3 font-mono text-[11px] font-extrabold" title="Reset Zoom & Center">
+                        <span id="wbZoomBadge">100%</span>
+                    </button>
+                    <button type="button" onclick="window.app.zoomWhiteboard(0.2)" class="m3-icon-group-btn" title="Zoom In">
+                        <i class="ph-bold ph-plus"></i>
+                    </button>
+                </div>
+
+                <canvas id="stylusCanvas" class="w-full h-full cursor-crosshair block"></canvas>
             </div>
         </div>
     </div>
 
     <!-- =================================================================== -->
-    <!-- GLOBAL CUSTOM DROPDOWN AT VERY END OF BODY WITH Z-[100] (Always Above Modals!) -->
+    <!-- GLOBAL CUSTOM DROPDOWN AT VERY END OF BODY WITH Z-[100]             -->
     <!-- =================================================================== -->
     <div id="customDropdownBackdrop" onclick="window.app.closeCustomDropdown()" class="fixed inset-0 z-[95] hidden"></div>
     <div id="customDropdownMenu" class="fixed z-[100] hidden m3-custom-menu max-h-72 overflow-y-auto min-w-[165px] max-w-[300px]"></div>
@@ -1098,7 +1219,7 @@
     <!-- M3 THEME-MATCHED TOAST NOTIFICATIONS -->
     <div id="toastBox" class="fixed bottom-24 right-6 z-[110] flex flex-col gap-2 pointer-events-none"></div>
     <!-- =================================================================== -->
-    <!-- CORE APPLICATION LOGIC (M3 EXPRESSIVE + CLOUD GIST + LOCAL OCR)     -->
+    <!-- CORE APPLICATION LOGIC (M3 EXPRESSIVE + WHITEBOARD + AI HINTS)      -->
     <!-- =================================================================== -->
     <script>
         try { indexedDB.deleteDatabase('JEEQuestionVaultDB'); } catch (_) {}
@@ -1125,12 +1246,8 @@
             if (p8) p8.setAttribute('d', makeSoftStarburst(8, 0.445, 0.495));
         }
 
-        // 2. Seamless Undistorted HTML5 Canvas Sine Wave Progress Bar
-        // - Pure sine wave anchored at phase 0 at the right intersection tip (y = cy at x = waveEndX with ZERO pinching/bunching)
-        // - True circular rounded ends (lineCap = 'round') on both wave and empty track
-        // - Crisp 3px visual gap between the wave tip cap and the empty track cap
-        // - Smooth, slow damped length progression
-                const waveInstances = new Map();
+        // 2. Smoothly Propagating 60fps HTML5 Canvas Sine Wave Progress Bar
+        const waveInstances = new Map();
         let waveAnimFrame = null;
 
         function renderM3WavyProgress(targetElOrId, targetPct = 50) {
@@ -1165,11 +1282,8 @@
                     continue;
                 }
                 if (el.offsetParent === null) continue;
-
-                // Keep animating 60fps as long as any wave bar is visible on screen
                 anyVisible = true;
 
-                // Smooth, slow damped length interpolation
                 const diff = inst.targetPct - inst.currentPct;
                 if (Math.abs(diff) > 0.04) {
                     inst.currentPct += diff * 0.038;
@@ -1177,7 +1291,6 @@
                     inst.currentPct = inst.targetPct;
                 }
 
-                // Continuous forward wave propagation
                 inst.phase += 0.055;
 
                 const canvas = inst.canvas;
@@ -1211,7 +1324,6 @@
                 const amp = 3.3;
                 const taperLen = Math.min(14, (waveEndX - r) * 0.45);
 
-                // Smoothstep helper (zero derivative at 0 and 1 so there is NEVER a kink)
                 const smoothstep = (edge, dist) => {
                     if (edge <= 0) return 0;
                     const t = Math.max(0, Math.min(1, dist / edge));
@@ -1228,7 +1340,6 @@
                 ctx.lineTo(waveEndX, cy);
                 ctx.stroke();
 
-                // Draw Empty Track with Circular Ends and an Exact 3px Visual Gap from the Wave Tip Cap
                 const trackStartX = waveEndX + strokeW + 3;
                 const trackEndX = w - r;
 
@@ -1241,7 +1352,6 @@
                     ctx.lineTo(trackEndX, cy);
                     ctx.stroke();
 
-                    // Stop Indicator Dot at the far right of the empty track
                     ctx.beginPath();
                     ctx.fillStyle = primaryColor;
                     ctx.arc(trackEndX, cy, 1.8, 0, Math.PI * 2);
@@ -1257,7 +1367,6 @@
                 waveAnimFrame = null;
             }
         }
-
 
         // 3. Growing Pie-Sector Circular Progress Indicator for Sync Button
         let syncSectorTimer = null;
@@ -1349,15 +1458,24 @@
             currentUploadBatchIds: [],
             activeSplitId: null,
             splitMode: 'SPLIT',
+            // Microsoft Whiteboard Infinite Scratchpad State
             activePadId: null,
+            wbTool: 'PEN', // 'PEN' | 'PAN' | 'ERASER'
+            wbAutoShape: true,
             inkColor: '#f8fafc',
-            isEraser: false,
             strokeWidth: 3.5,
-            isDrawing: false,
+            wbScale: 1.0,
+            wbPanX: 0,
+            wbPanY: 0,
+            wbBoards: {}, // Per-question infinite vector stroke history: { [qId]: { strokes: [], redoStack: [] } }
+            padShowHint: false,
+            padShowAns: false,
+            // Cloud & Background Task States
             isSyncingCloud: false,
             hasPendingCloudPush: false,
             ocrWorker: null,
             isRunningBackgroundOcr: false,
+            isRunningBackgroundSolver: false,
             lastScrollTop: 0
         };
 
@@ -1371,6 +1489,7 @@
         const getGithubToken = () => (localStorage.getItem('jee_github_pat') || '').trim();
         const getGithubGistId = () => (localStorage.getItem('jee_github_gist_id') || '').trim();
         const isCloudAutoSyncEnabled = () => localStorage.getItem('jee_cloud_autosync') !== 'false';
+        const isAutoSolveHintsEnabled = () => localStorage.getItem('jee_auto_solve_hints') !== 'false';
         const getThemeMode = () => localStorage.getItem('jee_m3_theme_mode') || 'dark';
 
         // ===================================================================
@@ -1425,7 +1544,7 @@
         }
 
         // ===================================================================
-        // MATERIAL 3 EXPRESSIVE DYNAMIC COLOR ENGINE (VIBRANT LIGHT & DARK)
+        // MATERIAL 3 EXPRESSIVE DYNAMIC COLOR ENGINE
         // ===================================================================
         function hexToHsl(hex) {
             hex = String(hex || '#7c3aed').replace('#', '');
@@ -1504,7 +1623,7 @@
             const picker = document.getElementById('customThemeColorPicker');
             if (picker) picker.value = cleanHex;
             renderDrawerChapters();
-            if (! waveAnimFrame && waveInstances.size > 0) {
+            if (!waveAnimFrame && waveInstances.size > 0) {
                 waveAnimFrame = requestAnimationFrame(stepAllWavyBars);
             }
         }
@@ -1557,6 +1676,145 @@
         }
 
         // ===================================================================
+        // PER-QUESTION GEMINI AI ANSWER KEY & 1-LINE HINT ENGINE (1 REQ / Q)
+        // ===================================================================
+        async function fetchSingleQuestionAnswerAndHint(q) {
+            const apiKey = getApiKey();
+            if (!apiKey || !q || !q.imageDataUrl) return null;
+            const selectedModel = getSelectedModel();
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${selectedModel}:generateContent?key=${apiKey}`;
+            const base64Jpeg = q.imageDataUrl.split(',')[1];
+
+            const promptText = `You are an expert IIT-JEE Advanced faculty solver.
+Analyze this JEE question image (${q.subject} - ${q.chapter}).
+1. Determine the exact final \`answerKey\` (e.g., "(B)", "(A, C)", "42", or concise final expression).
+2. Write a sharp, high-yield \`hint\` in strictly 1 single sentence that gives the core physical/chemical/mathematical principle or setup without giving away the full step-by-step algebra.`;
+
+            const payload = {
+                contents: [{
+                    role: "user",
+                    parts: [
+                        { text: promptText },
+                        { inlineData: { mimeType: "image/jpeg", data: base64Jpeg } }
+                    ]
+                }],
+                generationConfig: {
+                    temperature: 0.1,
+                    responseMimeType: "application/json",
+                    responseSchema: {
+                        type: "OBJECT",
+                        properties: {
+                            answerKey: { type: "STRING" },
+                            hint: { type: "STRING" }
+                        },
+                        required: ["answerKey", "hint"]
+                    }
+                }
+            };
+
+            let delay = 1000;
+            for (let attempt = 0; attempt < 3; attempt++) {
+                try {
+                    const res = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                    const data = await res.json();
+                    const txt = data.candidates?.[0]?.content?.parts?.[0]?.text;
+                    if (!txt) return null;
+                    const parsed = JSON.parse(txt);
+                    return {
+                        answerKey: String(parsed.answerKey || '').trim(),
+                        hint: String(parsed.hint || '').trim()
+                    };
+                } catch (e) {
+                    if (attempt === 2) throw e;
+                    await new Promise(r => setTimeout(r, delay));
+                    delay *= 2;
+                }
+            }
+            return null;
+        }
+
+        async function runBackgroundAnswerAndHintGenerator(manualNotify = false, forceAll = false) {
+            if (state.isRunningBackgroundSolver) {
+                if (manualNotify) toast('AI Answer Key & Hint generator is already running in background!', 'info');
+                return;
+            }
+            if (!getApiKey()) {
+                if (manualNotify) {
+                    window.app.openSettingsModal(true, 'KEYS');
+                    toast('Please save your Gemini API Key first!', 'warn');
+                }
+                return;
+            }
+
+            const targets = forceAll
+                ? [...state.questions]
+                : state.questions.filter(q => !q.hint || !q.answerKey || String(q.hint).trim().length < 5);
+
+            if (targets.length === 0) {
+                if (manualNotify) toast('All questions already have Answer Keys & 1-Line Hints ✓', 'success');
+                return;
+            }
+
+            state.isRunningBackgroundSolver = true;
+            const badge = document.getElementById('solverStatusBadge');
+            const badgeTxt = document.getElementById('solverStatusText');
+            const btnLbl = document.getElementById('settingsSolveMissingBtnLabel');
+            const waveWrap = document.getElementById('settingsSolverWavyBar');
+            const infoEl = document.getElementById('settingsSolverStatusInfo');
+
+            if (badge) { badge.classList.remove('hidden'); badge.classList.add('inline-flex'); }
+            if (waveWrap) waveWrap.classList.remove('hidden');
+            if (manualNotify) toast(`Generating Answer Keys & 1-Line Hints (1 req/question) for ${targets.length} questions...`, 'info');
+
+            let completed = 0;
+            let updatedAny = false;
+
+            try {
+                for (const q of targets) {
+                    const liveQ = state.questions.find(item => item.id === q.id);
+                    if (!liveQ) continue;
+                    completed++;
+                    const pct = Math.round((completed / targets.length) * 100);
+                    if (badgeTxt) badgeTxt.textContent = `Hints: ${completed}/${targets.length}`;
+                    if (btnLbl) btnLbl.textContent = `Solving ${completed} of ${targets.length} (${pct}%)...`;
+                    if (infoEl) infoEl.textContent = `Sending 1 dedicated request for Q.${liveQ.questionNumber} (${liveQ.subject})...`;
+                    if (waveWrap) renderM3WavyProgress(waveWrap, pct);
+
+                    try {
+                        const res = await fetchSingleQuestionAnswerAndHint(liveQ);
+                        if (res && (res.answerKey || res.hint)) {
+                            liveQ.answerKey = res.answerKey || 'N/A';
+                            liveQ.hint = res.hint || 'Apply fundamental chapter conservation/equilibrium equations.';
+                            updatedAny = true;
+                            if (state.activePadId === liveQ.id) refreshScratchpadHintAndAnswerUI();
+                        }
+                    } catch (err) {
+                        console.warn(`Solver skipped Q.${liveQ.questionNumber}:`, err);
+                    }
+                }
+
+                if (updatedAny) {
+                    scheduleCloudAutoSync();
+                    if (manualNotify) toast(`Generated Answer Keys & 1-Line Hints for ${completed} questions & synced to Gist!`, 'success');
+                }
+            } finally {
+                state.isRunningBackgroundSolver = false;
+                if (badge) { badge.classList.add('hidden'); badge.classList.remove('inline-flex'); }
+                if (waveWrap) waveWrap.classList.add('hidden');
+                if (btnLbl) btnLbl.textContent = 'Solve Missing Hints & Keys';
+                if (infoEl) {
+                    const withHints = state.questions.filter(q => q.hint && q.answerKey).length;
+                    infoEl.textContent = `Solved: ${withHints} / ${state.questions.length} questions have Answer Keys & 1-Line Hints in Cloud Gist.`;
+                }
+            }
+        }
+
+        // ===================================================================
         // DIAGRAM-NOISE FILTERED LOCAL OCR ENGINE (PDF.JS + TESSERACT.JS V5)
         // ===================================================================
         function cleanQuestionTextOnly(rawText) {
@@ -1597,7 +1855,6 @@
             }
         }
 
-        // Extracts PDF.js text items with their exact normalized top & bottom vertical bounds (0..1000)
         async function getPageTextLineIntervals(page) {
             try {
                 const vp = page.getViewport({ scale: 1.0 });
@@ -1610,7 +1867,6 @@
                     if (!str || !item.transform) continue;
                     const fontH = Math.max(8, Math.hypot(item.transform[2] || 0, item.transform[3] || 10));
                     const baselineY = item.transform[5];
-                    // In PDF coordinates, y=0 is bottom, y=pageH is top
                     const botNorm = Math.min(1000, ((pageH - baselineY + fontH * 0.35) / pageH) * 1000);
                     const topNorm = Math.max(0, ((pageH - (baselineY + fontH * 1.15)) / pageH) * 1000);
                     lines.push({ topNorm, botNorm, str });
@@ -1771,6 +2027,8 @@
         function sortAndRefreshQuestions(skipRender = false) {
             state.questions.forEach(q => {
                 if (q.id === undefined || q.id === null) q.id = generateUniqueId();
+                if (q.hint === undefined) q.hint = '';
+                if (q.answerKey === undefined) q.answerKey = '';
                 ensureQuestionAspectRatio(q);
             });
             state.questions.sort((a, b) => {
@@ -1962,7 +2220,13 @@
                     }
                 }
 
-                state.questions = restoredQuestions.map(r => ({ ...r, id: r.id || generateUniqueId() }));
+                // Backward-compatible with existing Gist JSON records (initializes hint & answerKey if missing)
+                state.questions = restoredQuestions.map(r => ({
+                    ...r,
+                    id: r.id || generateUniqueId(),
+                    hint: r.hint || '',
+                    answerKey: r.answerKey || ''
+                }));
                 setSyncButtonSectorProgress(true, 359);
                 localStorage.setItem('jee_cloud_last_sync', new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }));
                 state.isSyncingCloud = false;
@@ -2005,7 +2269,12 @@
                 const parsed = JSON.parse(await file.text());
                 const records = Array.isArray(parsed) ? parsed : (parsed.questions || []);
                 if (!records.length) return toast('Invalid or empty backup JSON file', 'warn');
-                state.questions.push(...records.map(r => ({ ...r, id: generateUniqueId() })));
+                state.questions.push(...records.map(r => ({
+                    ...r,
+                    id: generateUniqueId(),
+                    hint: r.hint || '',
+                    answerKey: r.answerKey || ''
+                })));
                 scheduleCloudAutoSync();
                 toast(`Imported ${records.length} questions & syncing to Cloud!`, 'success');
                 runBackgroundLocalOcrForExistingQuestions(false);
@@ -2019,12 +2288,9 @@
         // ===================================================================
         // 3-STAGE BULLETPROOF ANTI-TEXT-CLIP BOUNDARY GUARD & AUTO-TRIMMER
         // ===================================================================
-        // Stage 1: Uses PDF.js vector text bounding boxes so ymin/ymax NEVER slice through a text line!
-        // Stage 2: Uses pixel ink-climbing so if a boundary lands on dark pixels, it walks outward until clean whitespace!
         function snapBoundaryOutOfTextAndInk(sourceCanvas, pageLines, targetNormY, minAllowedNorm, maxAllowedNorm, preferDirection = 'UP') {
             let yNorm = Math.max(minAllowedNorm, Math.min(maxAllowedNorm, targetNormY));
 
-            // 1. PDF.js Vector Line Guard: If yNorm cuts through or is within 6 units of any text line, push it outside that line!
             for (let pass = 0; pass < 3; pass++) {
                 let adjusted = false;
                 for (const line of pageLines) {
@@ -2041,7 +2307,6 @@
                 if (!adjusted) break;
             }
 
-            // 2. Pixel Ink-Climbing Guard: Scan horizontal rows around yNorm; if on ink, climb UP (for ymin) or DOWN (for ymax)
             const w = sourceCanvas.width, h = sourceCanvas.height;
             const searchUpNorm = preferDirection === 'UP' ? 50 : 18;
             const searchDownNorm = preferDirection === 'DOWN' ? 50 : 18;
@@ -2068,7 +2333,6 @@
             }
 
             const startIdx = centerPx - minPx;
-            // Walk in preferred direction first to find a clean whitespace band of at least 4 consecutive white rows
             if (preferDirection === 'UP') {
                 for (let r = startIdx; r >= 2; r--) {
                     if (isRowWhite[r] && isRowWhite[r - 1] && isRowWhite[r - 2]) {
@@ -2083,7 +2347,6 @@
                 }
             }
 
-            // Fallback: pick widest whitespace band in range
             let bestRowPx = centerPx, bestScore = -999999;
             for (let r = 0; r < sliceH; r++) {
                 if (!isRowWhite[r]) continue;
@@ -2097,7 +2360,6 @@
             return Math.round((bestRowPx / h) * 1000);
         }
 
-        // Stage 3: Generous 24px vertical breathing margin so top ascenders/fractions are never shaved
         function autoTrimVerticalWhitespace(canvas) {
             const ctx = canvas.getContext('2d'), w = canvas.width, h = canvas.height;
             if (h < 70) return canvas;
@@ -2174,7 +2436,7 @@
         }
 
         // ===================================================================
-        // GEMINI VISION API CALL (WITH ABORT SIGNAL FOR INSTANT CANCEL)
+        // GEMINI VISION API CALL FOR PAGE LAYOUT
         // ===================================================================
         async function analyzePageLayoutWithGemini(base64Jpeg, pageNum, abortSignal) {
             const apiKey = getApiKey();
@@ -2413,7 +2675,6 @@ CRITICAL RULES FOR ZERO TEXT CLIPPING & ZERO CLUBBING:
                     const blocks = aiResult.questions || [];
                     blocks.sort((a, b) => (a.ymin || 0) - (b.ymin || 0));
 
-                    // Apply 3-Stage Anti-Clip Boundary Guard to every question block
                     for (let i = 0; i < blocks.length; i++) {
                         const minAllowed = i === 0 ? 2 : Math.min(blocks[i].ymin, blocks[i - 1].ymax + 2);
                         blocks[i].ymin = snapBoundaryOutOfTextAndInk(
@@ -2498,6 +2759,8 @@ CRITICAL RULES FOR ZERO TEXT CLIPPING & ZERO CLUBBING:
                             ocrText: combinedOcrText,
                             firstLineSnippet: b.firstLineSnippet || '',
                             lastLineSnippet: b.lastLineSnippet || '',
+                            hint: '',
+                            answerKey: '',
                             solved: false,
                             starred: false,
                             isStitched: false,
@@ -2526,9 +2789,14 @@ CRITICAL RULES FOR ZERO TEXT CLIPPING & ZERO CLUBBING:
                 updateUploadProgressEverywhere(100, `Done`, `Extracted ${extractedCount} questions!`);
                 sortAndRefreshQuestions(false);
 
-                toast(`Extracted ${extractedCount} questions! Syncing to Cloud...`, 'success');
+                toast(`Extracted ${extractedCount} questions! Syncing & generating hints in background...`, 'success');
                 window.app.closeUploadModal();
                 await pushToCloudGist(false);
+
+                // Automatically generate Answer Keys & 1-Line Hints (1 request per question) in the background!
+                if (isAutoSolveHintsEnabled()) {
+                    runBackgroundAnswerAndHintGenerator(false, false);
+                }
             } catch (err) {
                 if (err.name === 'AbortError' || state.cancelExtractionRequested) return;
                 state.isExtracting = false;
@@ -2557,7 +2825,7 @@ CRITICAL RULES FOR ZERO TEXT CLIPPING & ZERO CLUBBING:
                 if (state.status === 'STARRED' && !q.starred) return false;
                 if (queryTokens.length > 0) {
                     const haystack = normalizeForSearch(
-                        `q.${q.questionNumber} ${q.questionNumber} ${q.subject || ''} ${q.chapter || ''} ${q.paperName || ''} ${q.ocrText || ''} ${q.firstLineSnippet || ''} ${q.lastLineSnippet || ''}`
+                        `q.${q.questionNumber} ${q.questionNumber} ${q.subject || ''} ${q.chapter || ''} ${q.paperName || ''} ${q.ocrText || ''} ${q.hint || ''} ${q.firstLineSnippet || ''} ${q.lastLineSnippet || ''}`
                     );
                     for (const token of queryTokens) if (!haystack.includes(token)) return false;
                 }
@@ -2738,7 +3006,7 @@ CRITICAL RULES FOR ZERO TEXT CLIPPING & ZERO CLUBBING:
                             ${state.isSyncingCloud
                                 ? 'Fetching your latest question bank from your GitHub Secret Gist...'
                                 : state.questions.length === 0
-                                ? 'Tap the floating "+ Add Test PDF" button to extract questions with 100% full-width crops, precision multi-page stitching, and clean question-text OCR!'
+                                ? 'Tap the floating "+ Add Test PDF" button to extract questions with 100% full-width crops, precision multi-page stitching, and automatic AI Answer Keys & 1-Line Hints!'
                                 : 'Try clearing the search box, swiping the Status pill to "All", or selecting "All Subjects & Chapters" inside the Chapters drawer.'}
                         </p>
                         <div class="flex flex-wrap items-center justify-center gap-3 pt-2">
@@ -2778,6 +3046,407 @@ CRITICAL RULES FOR ZERO TEXT CLIPPING & ZERO CLUBBING:
                     </div>
                 `;
             }
+        }
+
+        // ===================================================================
+        // MICROSOFT WHITEBOARD INFINITE SCRATCHPAD + AUTO-SHAPE RECOGNIZER
+        // ===================================================================
+        function getActiveBoard() {
+            const id = state.activePadId || 'default';
+            if (!state.wbBoards[id]) {
+                state.wbBoards[id] = { strokes: [], redoStack: [] };
+            }
+            return state.wbBoards[id];
+        }
+
+        function refreshScratchpadHintAndAnswerUI() {
+            const q = state.questions.find(i => i.id === Number(state.activePadId));
+            const drawer = document.getElementById('padHintAnswerDrawer');
+            const hintBox = document.getElementById('padHintBox');
+            const ansBox = document.getElementById('padAnsBox');
+            const hintTxt = document.getElementById('padHintText');
+            const ansTxt = document.getElementById('padAnsText');
+            const hintBtn = document.getElementById('padHintToggleBtn');
+            const ansBtn = document.getElementById('padAnsToggleBtn');
+            const solveBtn = document.getElementById('padSolveNowBtn');
+
+            if (!q || !drawer) return;
+
+            hintBtn?.classList.toggle('active-state', state.padShowHint);
+            ansBtn?.classList.toggle('active-state', state.padShowAns);
+
+            const showAny = state.padShowHint || state.padShowAns;
+            drawer.classList.toggle('hidden', !showAny);
+            drawer.classList.toggle('flex', showAny);
+
+            if (hintBox) {
+                hintBox.classList.toggle('hidden', !state.padShowHint);
+                hintBox.classList.toggle('inline-flex', state.padShowHint);
+            }
+            if (ansBox) {
+                ansBox.classList.toggle('hidden', !state.padShowAns);
+                ansBox.classList.toggle('inline-flex', state.padShowAns);
+            }
+
+            if (hintTxt) hintTxt.textContent = q.hint || 'Click "Generate with Gemini" to get a 1-line hint →';
+            if (ansTxt) ansTxt.textContent = q.answerKey || 'Not solved yet';
+            if (solveBtn) {
+                solveBtn.classList.toggle('hidden', Boolean(q.hint && q.answerKey));
+            }
+        }
+
+        // Ramer-Douglas-Peucker Polyline Simplification for Shape Corner Detection
+        function rdpSimplify(points, epsilon) {
+            if (points.length < 3) return points;
+            let dmax = 0, index = 0;
+            const end = points.length - 1;
+            const p1 = points[0], p2 = points[end];
+            const dx = p2.x - p1.x, dy = p2.y - p1.y;
+            const lenSq = dx * dx + dy * dy;
+
+            for (let i = 1; i < end; i++) {
+                let d = 0;
+                if (lenSq === 0) {
+                    d = Math.hypot(points[i].x - p1.x, points[i].y - p1.y);
+                } else {
+                    const t = Math.max(0, Math.min(1, ((points[i].x - p1.x) * dx + (points[i].y - p1.y) * dy) / lenSq));
+                    d = Math.hypot(points[i].x - (p1.x + t * dx), points[i].y - (p1.y + t * dy));
+                }
+                if (d > dmax) { index = i; dmax = d; }
+            }
+
+            if (dmax > epsilon) {
+                const rec1 = rdpSimplify(points.slice(0, index + 1), epsilon);
+                const rec2 = rdpSimplify(points.slice(index), epsilon);
+                return rec1.slice(0, rec1.length - 1).concat(rec2);
+            }
+            return [p1, p2];
+        }
+
+        // Automatic Ink-to-Shape Recognizer (Lines, Circles/Ellipses, Triangles, Rectangles/Squares)
+        function recognizeAndConvertStrokeToShape(rawPts) {
+            if (!state.wbAutoShape || !rawPts || rawPts.length < 10) return null;
+
+            let pathLen = 0;
+            let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+            for (let i = 0; i < rawPts.length; i++) {
+                const p = rawPts[i];
+                if (p.x < minX) minX = p.x;
+                if (p.y < minY) minY = p.y;
+                if (p.x > maxX) maxX = p.x;
+                if (p.y > maxY) maxY = p.y;
+                if (i > 0) pathLen += Math.hypot(p.x - rawPts[i - 1].x, p.y - rawPts[i - 1].y);
+            }
+
+            const w = maxX - minX, h = maxY - minY;
+            const diag = Math.hypot(w, h);
+            const minSize = 24 / state.wbScale;
+            if (diag < minSize) return null;
+
+            const startPt = rawPts[0];
+            const endPt = rawPts[rawPts.length - 1];
+            const endDist = Math.hypot(endPt.x - startPt.x, endPt.y - startPt.y);
+
+            // 1. Straight Line Detection
+            if (endDist > minSize && (pathLen / endDist) < 1.085) {
+                return [startPt, endPt];
+            }
+
+            // Closed Shape Check (Start and end points must be reasonably close)
+            const isClosed = endDist < Math.max(38 / state.wbScale, pathLen * 0.23) && w > minSize * 0.45 && h > minSize * 0.45;
+            if (!isClosed) return null;
+
+            const closedPts = [...rawPts, startPt];
+            const simplified = rdpSimplify(closedPts, diag * 0.085);
+
+            // Filter out tiny duplicate vertices or near-180° collinear vertices
+            const corners = [simplified[0]];
+            for (let i = 1; i < simplified.length - 1; i++) {
+                const prev = corners[corners.length - 1];
+                const curr = simplified[i];
+                const next = simplified[i + 1];
+                if (Math.hypot(curr.x - prev.x, curr.y - prev.y) < diag * 0.12) continue;
+                const a1 = Math.atan2(curr.y - prev.y, curr.x - prev.x);
+                const a2 = Math.atan2(next.y - curr.y, next.x - curr.x);
+                let diff = Math.abs(a2 - a1) * (180 / Math.PI);
+                if (diff > 180) diff = 360 - diff;
+                if (diff > 26) corners.push(curr);
+            }
+
+            // 2. Triangle Detection (3 distinct corners)
+            if (corners.length === 3) {
+                return [corners[0], corners[1], corners[2], corners[0]];
+            }
+
+            // 3. Circle / Ellipse Fit Check
+            const cx = (minX + maxX) / 2, cy = (minY + maxY) / 2;
+            let rx = w / 2, ry = h / 2;
+            let radialErrSum = 0;
+            for (const p of rawPts) {
+                const normDist = Math.hypot((p.x - cx) / rx, (p.y - cy) / ry);
+                radialErrSum += Math.abs(normDist - 1);
+            }
+            const meanRadialErr = radialErrSum / rawPts.length;
+
+            // If corners >= 5 or radial error to ellipse is very small (< 0.135), snap to Circle/Ellipse
+            if (meanRadialErr < 0.135 && corners.length !== 4) {
+                if (Math.abs(rx - ry) / Math.max(rx, ry) < 0.2) {
+                    rx = ry = (rx + ry) / 2; // Snap to perfect circle
+                }
+                const circlePts = [];
+                const steps = 64;
+                for (let i = 0; i <= steps; i++) {
+                    const a = (i / steps) * Math.PI * 2;
+                    circlePts.push({ x: cx + rx * Math.cos(a), y: cy + ry * Math.sin(a) });
+                }
+                return circlePts;
+            }
+
+            // 4. Rectangle / Square Detection (4 corners or rectangular bounding fit)
+            if (corners.length === 4 || (meanRadialErr >= 0.135 && corners.length >= 4 && corners.length <= 5)) {
+                let halfW = w / 2, halfH = h / 2;
+                if (Math.abs(w - h) / Math.max(w, h) < 0.16) {
+                    halfW = halfH = (halfW + halfH) / 2; // Snap to perfect square
+                }
+                return [
+                    { x: cx - halfW, y: cy - halfH },
+                    { x: cx + halfW, y: cy - halfH },
+                    { x: cx + halfW, y: cy + halfH },
+                    { x: cx - halfW, y: cy + halfH },
+                    { x: cx - halfW, y: cy - halfH }
+                ];
+            }
+
+            return null;
+        }
+
+        function renderWhiteboardCanvas() {
+            const wrap = document.getElementById('padCanvasWrap');
+            const canvas = document.getElementById('stylusCanvas');
+            if (!wrap || !canvas) return;
+
+            const dpr = window.devicePixelRatio || 1;
+            const cw = wrap.clientWidth || 600;
+            const ch = wrap.clientHeight || 500;
+            if (canvas.width !== Math.round(cw * dpr) || canvas.height !== Math.round(ch * dpr)) {
+                canvas.width = Math.round(cw * dpr);
+                canvas.height = Math.round(ch * dpr);
+            }
+
+            const ctx = canvas.getContext('2d');
+            ctx.save();
+            ctx.scale(dpr, dpr);
+            ctx.fillStyle = '#070a12';
+            ctx.fillRect(0, 0, cw, ch);
+
+            // 1. Draw Infinite Microsoft Whiteboard Dot Grid
+            const baseStep = 36;
+            const screenStep = baseStep * state.wbScale;
+            if (screenStep >= 12) {
+                const offsetX = ((state.wbPanX % screenStep) + screenStep) % screenStep;
+                const offsetY = ((state.wbPanY % screenStep) + screenStep) % screenStep;
+                ctx.fillStyle = 'rgba(148, 163, 184, 0.22)';
+                const dotR = Math.max(1, Math.min(2, 1.2 * state.wbScale));
+                for (let x = offsetX; x < cw; x += screenStep) {
+                    for (let y = offsetY; y < ch; y += screenStep) {
+                        ctx.beginPath();
+                        ctx.arc(x, y, dotR, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                }
+            }
+
+            // 2. Apply Infinite Camera Transform (panX, panY, scale)
+            ctx.translate(state.wbPanX, state.wbPanY);
+            ctx.scale(state.wbScale, state.wbScale);
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+
+            const board = getActiveBoard();
+            for (const stroke of board.strokes) {
+                if (!stroke.points || stroke.points.length === 0) continue;
+                ctx.beginPath();
+                ctx.strokeStyle = stroke.color;
+                ctx.lineWidth = stroke.width;
+                ctx.moveTo(stroke.points[0].x, stroke.points[0].y);
+                for (let i = 1; i < stroke.points.length; i++) {
+                    ctx.lineTo(stroke.points[i].x, stroke.points[i].y);
+                }
+                ctx.stroke();
+            }
+
+            ctx.restore();
+
+            const zoomBadge = document.getElementById('wbZoomBadge');
+            if (zoomBadge) zoomBadge.textContent = `${Math.round(state.wbScale * 100)}%`;
+        }
+
+        function initStylusCanvas() {
+            const wrap = document.getElementById('padCanvasWrap');
+            const canvas = document.getElementById('stylusCanvas');
+            if (!wrap || !canvas) return;
+
+            renderWhiteboardCanvas();
+
+            const activePointers = new Map();
+            let currentStroke = null;
+            let lastPanMid = null;
+            let lastPinchDist = null;
+            let isSpacePressed = false;
+
+            window.onkeydown = (e) => {
+                if (e.code === 'Space' && !document.getElementById('scratchpadModal').classList.contains('hidden')) {
+                    isSpacePressed = true;
+                }
+                if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z' && !document.getElementById('scratchpadModal').classList.contains('hidden')) {
+                    e.preventDefault();
+                    window.app.whiteboardUndo();
+                }
+                if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'y' && !document.getElementById('scratchpadModal').classList.contains('hidden')) {
+                    e.preventDefault();
+                    window.app.whiteboardRedo();
+                }
+            };
+            window.onkeyup = (e) => {
+                if (e.code === 'Space') isSpacePressed = false;
+            };
+
+            const screenToWorld = (sx, sy) => ({
+                x: (sx - state.wbPanX) / state.wbScale,
+                y: (sy - state.wbPanY) / state.wbScale
+            });
+
+            const eraseStrokesNearWorldPt = (wx, wy) => {
+                const board = getActiveBoard();
+                const hitRadius = 16 / state.wbScale;
+                const beforeLen = board.strokes.length;
+                board.strokes = board.strokes.filter(st => {
+                    return !st.points.some(p => Math.hypot(p.x - wx, p.y - wy) <= hitRadius);
+                });
+                if (board.strokes.length !== beforeLen) renderWhiteboardCanvas();
+            };
+
+            canvas.onpointerdown = (e) => {
+                e.preventDefault();
+                canvas.setPointerCapture(e.pointerId);
+                const r = canvas.getBoundingClientRect();
+                const sx = e.clientX - r.left, sy = e.clientY - r.top;
+                activePointers.set(e.pointerId, { x: sx, y: sy });
+
+                // 2-Finger Touch Pinch/Pan Gesture
+                if (activePointers.size === 2) {
+                    currentStroke = null;
+                    const pts = Array.from(activePointers.values());
+                    lastPanMid = { x: (pts[0].x + pts[1].x) / 2, y: (pts[0].y + pts[1].y) / 2 };
+                    lastPinchDist = Math.hypot(pts[1].x - pts[0].x, pts[1].y - pts[0].y);
+                    return;
+                }
+
+                if (state.wbTool === 'PAN' || isSpacePressed || e.button === 1) {
+                    lastPanMid = { x: sx, y: sy };
+                    return;
+                }
+
+                const wPt = screenToWorld(sx, sy);
+                if (state.wbTool === 'ERASER') {
+                    eraseStrokesNearWorldPt(wPt.x, wPt.y);
+                    return;
+                }
+
+                const board = getActiveBoard();
+                board.redoStack = [];
+                currentStroke = {
+                    color: state.inkColor,
+                    width: state.strokeWidth,
+                    points: [wPt]
+                };
+                board.strokes.push(currentStroke);
+                renderWhiteboardCanvas();
+            };
+
+            canvas.onpointermove = (e) => {
+                if (!activePointers.has(e.pointerId)) return;
+                e.preventDefault();
+                const r = canvas.getBoundingClientRect();
+                const sx = e.clientX - r.left, sy = e.clientY - r.top;
+                activePointers.set(e.pointerId, { x: sx, y: sy });
+
+                // 2-Finger Pinch-to-Zoom & Pan
+                if (activePointers.size === 2) {
+                    const pts = Array.from(activePointers.values());
+                    const mid = { x: (pts[0].x + pts[1].x) / 2, y: (pts[0].y + pts[1].y) / 2 };
+                    const dist = Math.hypot(pts[1].x - pts[0].x, pts[1].y - pts[0].y);
+
+                    if (lastPanMid && lastPinchDist > 10) {
+                        const zoomFactor = dist / lastPinchDist;
+                        const newScale = Math.max(0.2, Math.min(5.0, state.wbScale * zoomFactor));
+                        const worldMid = screenToWorld(lastPanMid.x, lastPanMid.y);
+                        state.wbScale = newScale;
+                        state.wbPanX = mid.x - worldMid.x * state.wbScale;
+                        state.wbPanY = mid.y - worldMid.y * state.wbScale;
+                    }
+                    lastPanMid = mid;
+                    lastPinchDist = dist;
+                    renderWhiteboardCanvas();
+                    return;
+                }
+
+                if (state.wbTool === 'PAN' || isSpacePressed || (e.buttons & 4)) {
+                    if (lastPanMid) {
+                        state.wbPanX += sx - lastPanMid.x;
+                        state.wbPanY += sy - lastPanMid.y;
+                        renderWhiteboardCanvas();
+                    }
+                    lastPanMid = { x: sx, y: sy };
+                    return;
+                }
+
+                const wPt = screenToWorld(sx, sy);
+                if (state.wbTool === 'ERASER') {
+                    eraseStrokesNearWorldPt(wPt.x, wPt.y);
+                    return;
+                }
+
+                if (currentStroke) {
+                    currentStroke.points.push(wPt);
+                    renderWhiteboardCanvas();
+                }
+            };
+
+            const stopPointer = (e) => {
+                activePointers.delete(e.pointerId);
+                try { canvas.releasePointerCapture(e.pointerId); } catch (_) {}
+
+                if (activePointers.size < 2) {
+                    lastPinchDist = null;
+                    lastPanMid = null;
+                }
+
+                if (currentStroke) {
+                    const snappedShapePts = recognizeAndConvertStrokeToShape(currentStroke.points);
+                    if (snappedShapePts) {
+                        currentStroke.points = snappedShapePts;
+                    }
+                    currentStroke = null;
+                    renderWhiteboardCanvas();
+                }
+            };
+
+            canvas.onpointerup = stopPointer;
+            canvas.onpointercancel = stopPointer;
+
+            // Mouse Wheel / Trackpad Zoom Centered on Cursor
+            canvas.onwheel = (e) => {
+                e.preventDefault();
+                const r = canvas.getBoundingClientRect();
+                const sx = e.clientX - r.left, sy = e.clientY - r.top;
+                const worldBefore = screenToWorld(sx, sy);
+                const factor = e.deltaY < 0 ? 1.12 : 0.89;
+                state.wbScale = Math.max(0.2, Math.min(5.0, state.wbScale * factor));
+                state.wbPanX = sx - worldBefore.x * state.wbScale;
+                state.wbPanY = sy - worldBefore.y * state.wbScale;
+                renderWhiteboardCanvas();
+            };
         }
 
         // ===================================================================
@@ -2871,6 +3540,7 @@ CRITICAL RULES FOR ZERO TEXT CLIPPING & ZERO CLUBBING:
             },
             renderDrawerChapters,
             runBackgroundLocalOcrForExistingQuestions,
+            runBackgroundAnswerAndHintGenerator,
 
             setMaterialTheme(hexColor) {
                 applyMaterialThemeFromSeed(hexColor, getThemeMode());
@@ -2946,7 +3616,7 @@ CRITICAL RULES FOR ZERO TEXT CLIPPING & ZERO CLUBBING:
                         KEYS: 'API Keys & Cloud Credentials',
                         THEME: 'Appearance & Material You Theme',
                         BACKUP: 'Cloud Sync, Export & Vault Tools',
-                        SCANNER: 'AI Scanner & Crop Margins'
+                        SCANNER: 'AI Answer Key, Hints & Scanner'
                     };
                     titleEl.textContent = titles[pageKey] || 'Settings';
                 }
@@ -2965,6 +3635,15 @@ CRITICAL RULES FOR ZERO TEXT CLIPPING & ZERO CLUBBING:
                 document.getElementById('githubTokenInput').value = getGithubToken();
                 document.getElementById('githubGistIdInput').value = getGithubGistId();
                 document.getElementById('cloudAutoSyncCheckbox').checked = isCloudAutoSyncEnabled();
+                const autoSolveChk = document.getElementById('autoSolveHintsCheckbox');
+                if (autoSolveChk) autoSolveChk.checked = isAutoSolveHintsEnabled();
+
+                const infoEl = document.getElementById('settingsSolverStatusInfo');
+                if (infoEl && !state.isRunningBackgroundSolver) {
+                    const withHints = state.questions.filter(q => q.hint && q.answerKey).length;
+                    infoEl.textContent = `Solved: ${withHints} / ${state.questions.length} questions have Answer Keys & 1-Line Hints in Cloud Gist.`;
+                }
+
                 document.getElementById('apiKeyMissingAlert').classList.toggle('hidden', !showMissingAlert);
                 updateCloudStatusUI(state.isSyncingCloud ? 'syncing' : 'idle');
                 this.openSettingsPage(showMissingAlert ? 'KEYS' : initialPage);
@@ -2983,6 +3662,7 @@ CRITICAL RULES FOR ZERO TEXT CLIPPING & ZERO CLUBBING:
                 const ghToken = document.getElementById('githubTokenInput').value.trim();
                 const ghGistId = document.getElementById('githubGistIdInput').value.trim();
                 const autoSync = document.getElementById('cloudAutoSyncCheckbox').checked;
+                const autoSolve = document.getElementById('autoSolveHintsCheckbox')?.checked ?? true;
 
                 localStorage.setItem('jee_gemini_api_key', key);
                 localStorage.setItem('jee_gemini_model', model);
@@ -2991,6 +3671,7 @@ CRITICAL RULES FOR ZERO TEXT CLIPPING & ZERO CLUBBING:
                 localStorage.setItem('jee_github_pat', ghToken);
                 localStorage.setItem('jee_github_gist_id', ghGistId);
                 localStorage.setItem('jee_cloud_autosync', String(autoSync));
+                localStorage.setItem('jee_auto_solve_hints', String(autoSolve));
 
                 updateApiKeyIndicator();
                 updateCloudStatusUI('idle');
@@ -3170,6 +3851,8 @@ CRITICAL RULES FOR ZERO TEXT CLIPPING & ZERO CLUBBING:
                     q.imageDataUrl = c1.toDataURL('image/jpeg', 0.88);
                     q.aspectRatio = c1.height / c1.width;
                     q.ocrText = '';
+                    q.hint = '';
+                    q.answerKey = '';
 
                     state.questions.push({
                         ...q,
@@ -3178,12 +3861,15 @@ CRITICAL RULES FOR ZERO TEXT CLIPPING & ZERO CLUBBING:
                         imageDataUrl: c2.toDataURL('image/jpeg', 0.88),
                         aspectRatio: c2.height / c2.width,
                         ocrText: '',
+                        hint: '',
+                        answerKey: '',
                         solved: false,
                         createdAt: (q.createdAt || Date.now()) + 1
                     });
                     scheduleCloudAutoSync();
                     toast(`Split into Q.${baseNum}a & Q.${baseNum}b!`, 'success');
                     runBackgroundLocalOcrForExistingQuestions(false);
+                    if (isAutoSolveHintsEnabled()) runBackgroundAnswerAndHintGenerator(false, false);
                 } else {
                     const t = Number(document.getElementById('trimTopSlider').value) / 100;
                     const b = Number(document.getElementById('trimBotSlider').value) / 100;
@@ -3200,76 +3886,120 @@ CRITICAL RULES FOR ZERO TEXT CLIPPING & ZERO CLUBBING:
                 this.closeSplitModal();
             },
 
+            // Microsoft Whiteboard & Hint/Answer Controls
             getActivePadId: () => state.activePadId,
             openScratchpad(id) {
                 closeCustomDropdown();
                 const q = state.questions.find(i => i.id === Number(id));
                 if (!q) return;
                 state.activePadId = Number(id);
+                state.padShowHint = false;
+                state.padShowAns = false;
+                state.wbScale = 1.0;
+                state.wbPanX = 0;
+                state.wbPanY = 0;
+
                 document.getElementById('padQTitle').textContent = `Q.${q.questionNumber} • ${q.subject} (${q.chapter})`;
                 document.getElementById('padQuestionImg').src = q.imageDataUrl;
+                refreshScratchpadHintAndAnswerUI();
                 document.getElementById('scratchpadModal').classList.remove('hidden');
-                setTimeout(() => initStylusCanvas(), 50);
+                setTimeout(() => initStylusCanvas(), 40);
             },
             closeScratchpad() {
                 closeCustomDropdown();
                 document.getElementById('scratchpadModal').classList.add('hidden');
             },
-            setInk(color, isEraser = false) {
+            togglePadHint() {
+                state.padShowHint = !state.padShowHint;
+                refreshScratchpadHintAndAnswerUI();
+            },
+            togglePadAnswer() {
+                state.padShowAns = !state.padShowAns;
+                refreshScratchpadHintAndAnswerUI();
+            },
+            async solveActivePadQuestionNow() {
+                const q = state.questions.find(i => i.id === Number(state.activePadId));
+                if (!q) return;
+                if (!getApiKey()) {
+                    this.openSettingsModal(true, 'KEYS');
+                    return toast('Please save your Gemini API Key first!', 'warn');
+                }
+                const btnLbl = document.getElementById('padSolveNowBtnLabel');
+                if (btnLbl) btnLbl.textContent = 'Solving with Gemini...';
+                try {
+                    const res = await fetchSingleQuestionAnswerAndHint(q);
+                    if (res) {
+                        q.answerKey = res.answerKey || 'N/A';
+                        q.hint = res.hint || 'Use core conservation laws.';
+                        state.padShowHint = true;
+                        refreshScratchpadHintAndAnswerUI();
+                        scheduleCloudAutoSync();
+                        toast(`Generated Answer Key & 1-Line Hint for Q.${q.questionNumber}!`, 'success');
+                    }
+                } catch (err) {
+                    toast(`Failed to generate hint: ${err.message}`, 'warn');
+                } finally {
+                    if (btnLbl) btnLbl.textContent = 'Generate with Gemini';
+                }
+            },
+            setWhiteboardTool(tool) {
+                state.wbTool = tool;
+                document.getElementById('wbToolPenBtn')?.classList.toggle('active-state', tool === 'PEN');
+                document.getElementById('wbToolPanBtn')?.classList.toggle('active-state', tool === 'PAN');
+                document.getElementById('eraserBtn')?.classList.toggle('active-state', tool === 'ERASER');
+                const canvas = document.getElementById('stylusCanvas');
+                if (canvas) {
+                    canvas.style.cursor = tool === 'PAN' ? 'grab' : (tool === 'ERASER' ? 'cell' : 'crosshair');
+                }
+            },
+            toggleAutoShape() {
+                state.wbAutoShape = !state.wbAutoShape;
+                document.getElementById('wbAutoShapeBtn')?.classList.toggle('active-state', state.wbAutoShape);
+                toast(`Auto-Shape Recognition ${state.wbAutoShape ? 'ON (Circles, Squares, Triangles, Lines)' : 'OFF'}`, 'info');
+            },
+            setInk(color) {
                 state.inkColor = color;
-                state.isEraser = isEraser;
-                const erBtn = document.getElementById('eraserBtn');
-                if (erBtn) erBtn.className = isEraser ? "h-8 px-3 m3-btn-filled text-xs flex items-center gap-1" : "h-8 px-3 m3-btn-tonal text-xs flex items-center gap-1";
+                if (state.wbTool === 'ERASER' || state.wbTool === 'PAN') {
+                    this.setWhiteboardTool('PEN');
+                }
             },
             setStrokeWidth(w) { state.strokeWidth = Number(w) || 3.5; },
+            whiteboardUndo() {
+                const board = getActiveBoard();
+                if (board.strokes.length === 0) return;
+                board.redoStack.push(board.strokes.pop());
+                renderWhiteboardCanvas();
+            },
+            whiteboardRedo() {
+                const board = getActiveBoard();
+                if (board.redoStack.length === 0) return;
+                board.strokes.push(board.redoStack.pop());
+                renderWhiteboardCanvas();
+            },
             clearInk() {
-                const c = document.getElementById('stylusCanvas');
-                c.getContext('2d').clearRect(0, 0, c.width, c.height);
+                const board = getActiveBoard();
+                board.strokes = [];
+                board.redoStack = [];
+                renderWhiteboardCanvas();
+            },
+            zoomWhiteboard(delta) {
+                const wrap = document.getElementById('padCanvasWrap');
+                if (!wrap) return;
+                const cx = wrap.clientWidth / 2, cy = wrap.clientHeight / 2;
+                const wx = (cx - state.wbPanX) / state.wbScale;
+                const wy = (cy - state.wbPanY) / state.wbScale;
+                state.wbScale = Math.max(0.2, Math.min(5.0, +(state.wbScale + delta).toFixed(2)));
+                state.wbPanX = cx - wx * state.wbScale;
+                state.wbPanY = cy - wy * state.wbScale;
+                renderWhiteboardCanvas();
+            },
+            resetWhiteboardView() {
+                state.wbScale = 1.0;
+                state.wbPanX = 0;
+                state.wbPanY = 0;
+                renderWhiteboardCanvas();
             }
         };
-
-        function initStylusCanvas() {
-            const wrap = document.getElementById('padCanvasWrap');
-            const canvas = document.getElementById('stylusCanvas');
-            canvas.width = wrap.clientWidth;
-            canvas.height = wrap.clientHeight;
-            const ctx = canvas.getContext('2d');
-            ctx.lineCap = 'round';
-            ctx.lineJoin = 'round';
-            let lx = 0, ly = 0;
-
-            const getPos = (e) => {
-                const r = canvas.getBoundingClientRect();
-                return { x: e.clientX - r.left, y: e.clientY - r.top };
-            };
-
-            canvas.onpointerdown = (e) => {
-                e.preventDefault();
-                canvas.setPointerCapture(e.pointerId);
-                state.isDrawing = true;
-                const p = getPos(e);
-                lx = p.x; ly = p.y;
-            };
-            canvas.onpointermove = (e) => {
-                if (!state.isDrawing) return;
-                e.preventDefault();
-                const p = getPos(e);
-                ctx.beginPath();
-                ctx.moveTo(lx, ly);
-                ctx.lineTo(p.x, p.y);
-                ctx.strokeStyle = state.inkColor;
-                ctx.lineWidth = state.isEraser ? 22 : state.strokeWidth;
-                ctx.stroke();
-                lx = p.x; ly = p.y;
-            };
-            const stopDraw = (e) => {
-                if (!state.isDrawing) return;
-                state.isDrawing = false;
-                try { canvas.releasePointerCapture(e.pointerId); } catch (_) {}
-            };
-            canvas.onpointerup = stopDraw;
-            canvas.onpointercancel = stopDraw;
-        }
 
         window.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
@@ -3285,6 +4015,9 @@ CRITICAL RULES FOR ZERO TEXT CLIPPING & ZERO CLUBBING:
         let resizeTimer = null;
         window.addEventListener('resize', () => {
             window.app.closeCustomDropdown();
+            if (!document.getElementById('scratchpadModal').classList.contains('hidden')) {
+                renderWhiteboardCanvas();
+            }
             clearTimeout(resizeTimer);
             resizeTimer = setTimeout(() => {
                 if (!state.isExtracting) renderFeed();
