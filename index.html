@@ -110,7 +110,7 @@
             display: inline-flex;
             align-items: center;
             height: 36px;
-            gap: 2.5px;
+            gap: 2px;
             background-color: var(--md-surface-low);
             padding: 3px;
             border-radius: 9999px;
@@ -133,6 +133,7 @@
             font-size: 13px;
             transition: all 0.24s var(--m3-spring);
             position: relative;
+            white-space: nowrap;
         }
         .m3-icon-group-card .m3-icon-group-btn {
             height: 26px;
@@ -143,12 +144,12 @@
         }
         .m3-icon-group-btn:first-child { border-top-left-radius: 9999px !important; border-bottom-left-radius: 9999px !important; padding-left: 10px; }
         .m3-icon-group-btn:last-child { border-top-right-radius: 9999px !important; border-bottom-right-radius: 9999px !important; padding-right: 10px; }
-        .m3-icon-group-btn:hover {
+        .m3-icon-group-btn:hover:not(:disabled) {
             background-color: var(--md-primary-container);
             color: var(--md-on-primary-container);
             border-radius: 14px;
         }
-        .m3-icon-group-btn:active { transform: scale(0.92); }
+        .m3-icon-group-btn:active:not(:disabled) { transform: scale(0.92); }
         .m3-icon-group-btn.active-state {
             background-color: var(--md-primary);
             color: var(--md-on-primary);
@@ -459,7 +460,7 @@
             </button>
         </div>
 
-        <!-- 4. FLEX GAP (Shows Background OCR or AI Solver Pill when active) -->
+        <!-- 4. FLEX GAP -->
         <div class="flex-1 min-w-[2px] flex items-center justify-center gap-1.5">
             <div id="ocrStatusBadge" class="hidden h-7 items-center gap-1 px-2.5 rounded-full text-[10px] font-extrabold m3-primary-pill shrink-0">
                 <i class="ph-bold ph-text-T animate-bounce text-xs"></i>
@@ -507,7 +508,7 @@
     </header>
 
     <!-- =================================================================== -->
-    <!-- SECONDARY BACKGROUND TASK STATUS BAR (Fixed Text Width, Propagating Wave) -->
+    <!-- SECONDARY BACKGROUND TASK STATUS BAR                                -->
     <!-- =================================================================== -->
     <div id="minimizedUploadBar" onclick="window.app.restoreUploadModal()" class="hidden m3-surface-high px-4 py-1.5 items-center justify-between gap-3 cursor-pointer hover:brightness-105 transition shrink-0 z-20" title="Click to reopen PDF Extraction Dialog">
         <div class="flex items-center gap-2 shrink-0">
@@ -602,7 +603,7 @@
     </button>
 
     <!-- =================================================================== -->
-    <!-- IMAGE POPUP LIGHTBOX DIALOG (Access Solve Pad & Split Here)         -->
+    <!-- IMAGE POPUP LIGHTBOX DIALOG                                         -->
     <!-- =================================================================== -->
     <div id="imagePopupModal" onclick="if(event.target === this) window.app.closeImagePopup()" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-3 sm:p-5">
         <div class="relative max-w-5xl w-full max-h-[92vh] m3-dialog flex flex-col overflow-hidden">
@@ -619,7 +620,7 @@
                     </button>
                     <button type="button" onclick="const id = window.app.getActivePopupId(); window.app.closeImagePopup(); window.app.openScratchpad(id);" class="m3-icon-group-btn gap-1.5 text-xs font-bold">
                         <i class="ph-bold ph-pencil-line"></i>
-                        <span>Solve Pad</span>
+                        <span>Whiteboard</span>
                     </button>
                     <button type="button" onclick="window.app.closeImagePopup()" class="m3-icon-group-btn gap-1.5 text-xs font-extrabold active-state">
                         <i class="ph-bold ph-x"></i>
@@ -868,7 +869,6 @@
                 <!-- PAGE 4: AI ANSWER KEY, 1-LINE HINTS & SCANNER MARGINS -->
                 <div id="settingsPage_SCANNER" class="hidden space-y-3">
                     <div class="m3-group-list">
-                        <!-- Per-Question Answer Key & 1-Line Hint Generator (1 Request Per Question) -->
                         <div class="p-4 m3-group-item space-y-3">
                             <div class="flex items-center justify-between gap-2">
                                 <div>
@@ -1079,68 +1079,91 @@
     </div>
 
     <!-- =================================================================== -->
-    <!-- MODAL 4: MICROSOFT WHITEBOARD INFINITE SCRATCHPAD + HINT/ANS BAR    -->
+    <!-- MODAL 4: FULLSCREEN WHITE WHITEBOARD + EMBEDDED QUESTION + SHAPES   -->
     <!-- =================================================================== -->
     <div id="scratchpadModal" class="fixed inset-0 m3-surface z-50 hidden flex flex-col">
-        <!-- Top Status Bar (Fixed — Only the scratchpad canvas region zooms/pans!) -->
-        <div class="h-14 m3-surface-low px-3 sm:px-4 flex items-center justify-between gap-2 shrink-0 overflow-x-auto no-scrollbar">
-            <div class="flex items-center gap-2 min-w-0 shrink-0">
-                <button type="button" onclick="window.app.closeScratchpad()" class="h-9 px-3.5 m3-btn-tonal text-xs font-extrabold flex items-center gap-1.5 shrink-0">
-                    <i class="ph-bold ph-x"></i> Close Pad
+        <!-- Optimized Single-Row Status Bar (Zero Horizontal Scroll) -->
+        <div class="h-13 m3-surface-low px-2.5 sm:px-3.5 py-1.5 flex items-center justify-between gap-1.5 shrink-0">
+            <!-- Left Group: Close + Prev/Next Context Navigator + Star/Solved + Hint/Ans -->
+            <div class="flex items-center gap-1.5 min-w-0 shrink-0">
+                <button type="button" onclick="window.app.closeScratchpad()" class="h-9 px-3 m3-btn-tonal text-xs font-extrabold flex items-center gap-1 shrink-0" title="Close Whiteboard (Esc)">
+                    <i class="ph-bold ph-x text-sm"></i>
+                    <span class="hidden sm:inline">Close</span>
                 </button>
-                <span id="padQTitle" class="font-bold text-xs sm:text-sm truncate max-w-[160px] sm:max-w-[240px]">Q.1</span>
 
-                <!-- 1-Line Hint & Answer Key Pills in Scratchpad Status Bar -->
-                <div class="m3-icon-group shrink-0 ml-1">
-                    <button type="button" id="padHintToggleBtn" onclick="window.app.togglePadHint()" class="m3-icon-group-btn gap-1.5 text-xs font-bold" title="View 1-Line Hint">
-                        <i class="ph-bold ph-lightbulb text-amber-400"></i>
-                        <span>Hint</span>
+                <!-- Context-Aware Prev / Q# / Next Navigator -->
+                <div class="m3-icon-group shrink-0">
+                    <button type="button" id="padPrevBtn" onclick="window.app.navigatePadQuestion(-1)" class="m3-icon-group-btn" title="Previous Question in Current Filter">
+                        <i class="ph-bold ph-caret-left"></i>
                     </button>
-                    <button type="button" id="padAnsToggleBtn" onclick="window.app.togglePadAnswer()" class="m3-icon-group-btn gap-1.5 text-xs font-bold" title="View Answer Key">
+                    <span id="padQTitle" class="px-2.5 text-[11px] font-extrabold truncate max-w-[130px] sm:max-w-[175px]" title="Current Question">Q.1 (1/1)</span>
+                    <button type="button" id="padNextBtn" onclick="window.app.navigatePadQuestion(1)" class="m3-icon-group-btn" title="Next Question in Current Filter">
+                        <i class="ph-bold ph-caret-right"></i>
+                    </button>
+                </div>
+
+                <!-- Star & Solved Toggles for Current Question -->
+                <div class="m3-icon-group shrink-0">
+                    <button type="button" id="padStarBtn" onclick="window.app.togglePadQuestionBool('starred')" class="m3-icon-group-btn" title="Toggle Starred">
+                        <i id="padStarIcon" class="ph-bold ph-star"></i>
+                    </button>
+                    <button type="button" id="padSolvedBtn" onclick="window.app.togglePadQuestionBool('solved')" class="m3-icon-group-btn" title="Toggle Solved">
+                        <i id="padSolvedIcon" class="ph-bold ph-circle"></i>
+                    </button>
+                </div>
+
+                <!-- Hint & Answer Key Toggles -->
+                <div class="m3-icon-group shrink-0">
+                    <button type="button" id="padHintToggleBtn" onclick="window.app.togglePadHint()" class="m3-icon-group-btn gap-1 text-[11px] font-bold" title="Toggle 1-Line Hint">
+                        <i class="ph-bold ph-lightbulb text-amber-400"></i>
+                        <span class="hidden md:inline">Hint</span>
+                    </button>
+                    <button type="button" id="padAnsToggleBtn" onclick="window.app.togglePadAnswer()" class="m3-icon-group-btn gap-1 text-[11px] font-bold" title="Toggle Answer Key">
                         <i class="ph-bold ph-key text-emerald-400"></i>
-                        <span>Ans Key</span>
+                        <span class="hidden md:inline">Ans</span>
                     </button>
                 </div>
             </div>
 
-            <!-- Microsoft Whiteboard Tool Controls -->
-            <div class="flex items-center gap-1.5 shrink-0">
-                <!-- Tool Mode Group: Pen, Pan Hand, Eraser, Auto-Shape Magic -->
+            <!-- Right Group: Select/Pen/Pan/Erase/AutoShape + Insert Shape Menu + Ink/Size Menu + Undo/Redo/Clear -->
+            <div class="flex items-center gap-1.5 shrink-0 ml-auto">
+                <!-- Whiteboard Mode Tools -->
                 <div class="m3-icon-group">
-                    <button type="button" id="wbToolPenBtn" onclick="window.app.setWhiteboardTool('PEN')" class="m3-icon-group-btn active-state gap-1 text-xs" title="Draw / Pen Tool">
+                    <button type="button" id="wbToolSelectBtn" onclick="window.app.setWhiteboardTool('SELECT')" class="m3-icon-group-btn gap-1 text-[11px]" title="Select, Move & Resize Shapes or Question Image">
+                        <i class="ph-bold ph-cursor"></i>
+                        <span class="hidden xl:inline">Select</span>
+                    </button>
+                    <button type="button" id="wbToolPenBtn" onclick="window.app.setWhiteboardTool('PEN')" class="m3-icon-group-btn active-state gap-1 text-[11px]" title="Pen Tool">
                         <i class="ph-bold ph-pencil-simple"></i>
-                        <span class="hidden md:inline">Pen</span>
+                        <span class="hidden xl:inline">Pen</span>
                     </button>
-                    <button type="button" id="wbToolPanBtn" onclick="window.app.setWhiteboardTool('PAN')" class="m3-icon-group-btn gap-1 text-xs" title="Pan / Move Infinite Canvas">
+                    <button type="button" id="wbToolPanBtn" onclick="window.app.setWhiteboardTool('PAN')" class="m3-icon-group-btn gap-1 text-[11px]" title="Pan / Move Infinite Whiteboard">
                         <i class="ph-bold ph-hand-grabbing"></i>
-                        <span class="hidden md:inline">Pan</span>
+                        <span class="hidden xl:inline">Pan</span>
                     </button>
-                    <button type="button" id="eraserBtn" onclick="window.app.setWhiteboardTool('ERASER')" class="m3-icon-group-btn gap-1 text-xs" title="Stroke Eraser">
+                    <button type="button" id="eraserBtn" onclick="window.app.setWhiteboardTool('ERASER')" class="m3-icon-group-btn gap-1 text-[11px]" title="Eraser Tool">
                         <i class="ph-bold ph-eraser"></i>
-                        <span class="hidden md:inline">Erase</span>
                     </button>
-                    <button type="button" id="wbAutoShapeBtn" onclick="window.app.toggleAutoShape()" class="m3-icon-group-btn active-state gap-1 text-xs" title="Auto-convert rough circles, squares, triangles & lines into crisp shapes">
+                    <button type="button" id="wbAutoShapeBtn" onclick="window.app.toggleAutoShape()" class="m3-icon-group-btn active-state gap-1 text-[11px]" title="Auto-convert hand-drawn shapes">
                         <i class="ph-bold ph-magic-wand"></i>
-                        <span class="hidden sm:inline">Shape</span>
                     </button>
                 </div>
 
-                <!-- Ink Colors -->
-                <div class="flex items-center gap-1 px-1">
-                    <button type="button" onclick="window.app.setInk('#f8fafc')" class="w-6 h-6 rounded-full bg-white border-2 border-indigo-500" title="White Ink"></button>
-                    <button type="button" onclick="window.app.setInk('#38bdf8')" class="w-6 h-6 rounded-full bg-sky-400" title="Cyan Ink"></button>
-                    <button type="button" onclick="window.app.setInk('#fbbf24')" class="w-6 h-6 rounded-full bg-amber-400" title="Amber Ink"></button>
-                    <button type="button" onclick="window.app.setInk('#4ade80')" class="w-6 h-6 rounded-full bg-emerald-400" title="Emerald Ink"></button>
-                    <button type="button" onclick="window.app.setInk('#fb7185')" class="w-6 h-6 rounded-full bg-rose-400" title="Rose Ink"></button>
-                </div>
-
-                <!-- Stroke Width Custom Dropdown -->
-                <button type="button" id="strokeWidthDropdownBtn" onclick="window.app.openStrokeWidthMenu(this)" class="h-9 px-3 m3-dropdown-trigger text-xs">
-                    <span id="strokeWidthDropdownLabel">Medium</span>
-                    <i class="ph-bold ph-caret-down text-[10px] m3-text-muted"></i>
+                <!-- Insert Preset Shape Dropdown Menu -->
+                <button type="button" id="insertShapeMenuBtn" onclick="window.app.openInsertShapeMenu(this)" class="h-9 px-2.5 m3-dropdown-trigger text-[11px]" title="Insert Preset Geometric Shape">
+                    <i class="ph-bold ph-shapes text-sm" style="color: var(--md-primary)"></i>
+                    <span class="hidden lg:inline">+ Shape</span>
+                    <i class="ph-bold ph-caret-down text-[9px] m3-text-muted"></i>
                 </button>
 
-                <!-- Undo / Redo / Clear Group -->
+                <!-- Consolidated Ink Color & Stroke Width Popover Trigger -->
+                <button type="button" id="inkStyleMenuBtn" onclick="window.app.openInkStyleMenu(this)" class="h-9 px-2.5 m3-dropdown-trigger text-[11px]" title="Pen Color & Thickness">
+                    <span id="activeInkColorDot" class="w-3.5 h-3.5 rounded-full border border-white/40 shrink-0" style="background: #0f172a;"></span>
+                    <span id="strokeWidthDropdownLabel" class="hidden sm:inline">Med</span>
+                    <i class="ph-bold ph-caret-down text-[9px] m3-text-muted"></i>
+                </button>
+
+                <!-- Undo / Redo / Delete Selected / Clear Group -->
                 <div class="m3-icon-group">
                     <button type="button" onclick="window.app.whiteboardUndo()" class="m3-icon-group-btn" title="Undo (Ctrl+Z)">
                         <i class="ph-bold ph-arrow-u-up-left"></i>
@@ -1148,7 +1171,7 @@
                     <button type="button" onclick="window.app.whiteboardRedo()" class="m3-icon-group-btn" title="Redo (Ctrl+Y)">
                         <i class="ph-bold ph-arrow-u-up-right"></i>
                     </button>
-                    <button type="button" onclick="window.app.clearInk()" class="m3-icon-group-btn hover:!bg-rose-600 hover:!text-white" title="Clear Whiteboard">
+                    <button type="button" onclick="window.app.clearInk()" class="m3-icon-group-btn hover:!bg-rose-600 hover:!text-white" title="Clear All Drawings (Keeps Question Image)">
                         <i class="ph-bold ph-trash"></i>
                     </button>
                 </div>
@@ -1156,14 +1179,14 @@
         </div>
 
         <!-- Collapsible Hint & Answer Key Reveal Strip (Below Status Bar) -->
-        <div id="padHintAnswerDrawer" class="hidden m3-surface-high px-4 py-2.5 items-center justify-between gap-3 shrink-0">
+        <div id="padHintAnswerDrawer" class="hidden m3-surface-high px-4 py-2 items-center justify-between gap-3 shrink-0">
             <div class="flex flex-wrap items-center gap-3 min-w-0 flex-1 text-xs">
-                <div id="padHintBox" class="hidden items-center gap-2 px-3.5 py-1.5 rounded-2xl m3-surface-low">
+                <div id="padHintBox" class="hidden items-center gap-2 px-3.5 py-1 rounded-2xl m3-surface-low">
                     <i class="ph-fill ph-lightbulb text-amber-400 text-sm shrink-0"></i>
                     <span class="font-bold text-amber-300 shrink-0">1-Line Hint:</span>
                     <span id="padHintText" class="font-medium">Not generated yet.</span>
                 </div>
-                <div id="padAnsBox" class="hidden items-center gap-2 px-3.5 py-1.5 rounded-2xl m3-primary-pill">
+                <div id="padAnsBox" class="hidden items-center gap-2 px-3.5 py-1 rounded-2xl m3-primary-pill">
                     <i class="ph-fill ph-key text-sm shrink-0"></i>
                     <span class="font-bold shrink-0">Answer Key:</span>
                     <span id="padAnsText" class="font-extrabold font-mono">Not generated yet.</span>
@@ -1175,38 +1198,41 @@
             </button>
         </div>
 
-        <!-- Split Workspace: Fixed Question View on Left + Infinite Zoomable Whiteboard on Right -->
-        <div class="flex-1 flex flex-col lg:flex-row overflow-hidden min-h-0">
-            <!-- Question Image Region (Normal Scroll, Unaffected by Whiteboard Zoom) -->
-            <div class="w-full lg:w-5/12 h-2/5 lg:h-full overflow-y-auto p-3 m3-surface">
-                <div class="bg-white rounded-3xl p-2 shadow">
-                    <img id="padQuestionImg" src="" alt="Question" class="w-full h-auto block">
-                </div>
+        <!-- 100% FULLSCREEN WHITE WHITEBOARD WITH EMBEDDED QUESTION IMAGE -->
+        <div id="padCanvasWrap" class="flex-1 w-full bg-white relative overflow-hidden select-none min-h-0">
+            <!-- Subtle Floating Helper Pill -->
+            <div class="absolute top-3 left-3.5 pointer-events-none z-10 flex items-center gap-2">
+                <span id="wbHelperBanner" class="px-3 py-1 rounded-full bg-slate-900/80 text-white text-[10px] font-mono shadow">
+                    Whiteboard • Question embedded on canvas • Use "Select" to move/resize shapes or question
+                </span>
             </div>
 
-            <!-- Infinite Zoomable & Pannable Microsoft Whiteboard Region (#padCanvasWrap ONLY) -->
-            <div id="padCanvasWrap" class="w-full lg:w-7/12 h-3/5 lg:h-full bg-[#070a12] relative overflow-hidden select-none">
-                <div class="absolute top-3 left-3.5 pointer-events-none z-10 flex items-center gap-2">
-                    <span class="px-2.5 py-1 rounded-full bg-black/55 text-[10px] m3-text-muted font-mono">
-                        Infinite Whiteboard • Pinch/Wheel to Zoom • 2-Finger/Space Drag to Pan • Auto-Shape Active
-                    </span>
-                </div>
-
-                <!-- Floating Bottom-Right Whiteboard Zoom & Reset HUD -->
-                <div class="absolute bottom-4 right-4 z-10 m3-icon-group shadow-xl">
-                    <button type="button" onclick="window.app.zoomWhiteboard(-0.2)" class="m3-icon-group-btn" title="Zoom Out">
-                        <i class="ph-bold ph-minus"></i>
-                    </button>
-                    <button type="button" onclick="window.app.resetWhiteboardView()" class="m3-icon-group-btn !px-3 font-mono text-[11px] font-extrabold" title="Reset Zoom & Center">
-                        <span id="wbZoomBadge">100%</span>
-                    </button>
-                    <button type="button" onclick="window.app.zoomWhiteboard(0.2)" class="m3-icon-group-btn" title="Zoom In">
-                        <i class="ph-bold ph-plus"></i>
-                    </button>
-                </div>
-
-                <canvas id="stylusCanvas" class="w-full h-full cursor-crosshair block"></canvas>
+            <!-- Floating Selected Object Action Bar (Shows when a shape or question is selected) -->
+            <div id="wbSelectionHud" class="hidden absolute top-3 right-4 z-10 m3-icon-group shadow-xl">
+                <button type="button" onclick="window.app.duplicateSelectedWhiteboardItem()" class="m3-icon-group-btn gap-1 text-[11px] font-bold" title="Duplicate Selected Shape">
+                    <i class="ph-bold ph-copy"></i>
+                    <span>Duplicate</span>
+                </button>
+                <button type="button" onclick="window.app.deleteSelectedWhiteboardItem()" class="m3-icon-group-btn hover:!bg-rose-600 hover:!text-white gap-1 text-[11px] font-bold" title="Delete Selected Shape (Del)">
+                    <i class="ph-bold ph-trash"></i>
+                    <span>Delete</span>
+                </button>
             </div>
+
+            <!-- Floating Bottom-Right Whiteboard Zoom & Reset HUD -->
+            <div class="absolute bottom-4 right-4 z-10 m3-icon-group shadow-xl">
+                <button type="button" onclick="window.app.zoomWhiteboard(-0.2)" class="m3-icon-group-btn" title="Zoom Out">
+                    <i class="ph-bold ph-minus"></i>
+                </button>
+                <button type="button" onclick="window.app.resetWhiteboardView()" class="m3-icon-group-btn !px-3 font-mono text-[11px] font-extrabold" title="Reset Zoom & Center">
+                    <span id="wbZoomBadge">100%</span>
+                </button>
+                <button type="button" onclick="window.app.zoomWhiteboard(0.2)" class="m3-icon-group-btn" title="Zoom In">
+                    <i class="ph-bold ph-plus"></i>
+                </button>
+            </div>
+
+            <canvas id="stylusCanvas" class="w-full h-full cursor-crosshair block"></canvas>
         </div>
     </div>
 
@@ -1214,7 +1240,7 @@
     <!-- GLOBAL CUSTOM DROPDOWN AT VERY END OF BODY WITH Z-[100]             -->
     <!-- =================================================================== -->
     <div id="customDropdownBackdrop" onclick="window.app.closeCustomDropdown()" class="fixed inset-0 z-[95] hidden"></div>
-    <div id="customDropdownMenu" class="fixed z-[100] hidden m3-custom-menu max-h-72 overflow-y-auto min-w-[165px] max-w-[300px]"></div>
+    <div id="customDropdownMenu" class="fixed z-[100] hidden m3-custom-menu max-h-80 overflow-y-auto min-w-[175px] max-w-[300px]"></div>
 
     <!-- M3 THEME-MATCHED TOAST NOTIFICATIONS -->
     <div id="toastBox" class="fixed bottom-24 right-6 z-[110] flex flex-col gap-2 pointer-events-none"></div>
@@ -1433,10 +1459,28 @@
             { value: 'gemini-2.5-flash', label: 'gemini-2.5-flash (Balanced Speed & Vision Precision)' }
         ];
 
+        const WHITEBOARD_COLORS = [
+            { value: '#0f172a', label: ' Ink Black' },
+            { value: '#2563eb', label: 'Cobalt Blue' },
+            { value: '#e11d48', label: 'Crimson Red' },
+            { value: '#059669', label: 'Emerald Green' },
+            { value: '#7c3aed', label: 'Royal Violet' },
+            { value: '#d97706', label: 'Deep Amber' }
+        ];
+
         const STROKE_WIDTHS = [
-            { value: 2.2, label: 'Fine' },
-            { value: 3.5, label: 'Medium' },
-            { value: 6, label: 'Bold' }
+            { value: 2.2, short: 'Fine', label: 'Fine Pen (2.2px)' },
+            { value: 3.5, short: 'Med', label: 'Medium Pen (3.5px)' },
+            { value: 6.0, short: 'Bold', label: 'Bold Marker (6.0px)' }
+        ];
+
+        const PRESET_SHAPES = [
+            { value: 'RECT', label: '⬛ Rectangle / Square' },
+            { value: 'CIRCLE', label: '⚪ Circle' },
+            { value: 'TRIANGLE', label: '🔺 Equilateral Triangle' },
+            { value: 'RIGHT_TRIANGLE', label: '📐 Right Triangle' },
+            { value: 'LINE', label: '📏 Straight Line' },
+            { value: 'AXES', label: '➕ X-Y Coordinate Axes' }
         ];
 
         const state = {
@@ -1458,16 +1502,17 @@
             currentUploadBatchIds: [],
             activeSplitId: null,
             splitMode: 'SPLIT',
-            // Microsoft Whiteboard Infinite Scratchpad State
+            // Fullscreen White Whiteboard State
             activePadId: null,
-            wbTool: 'PEN', // 'PEN' | 'PAN' | 'ERASER'
+            wbTool: 'PEN', // 'SELECT' | 'PEN' | 'PAN' | 'ERASER'
             wbAutoShape: true,
-            inkColor: '#f8fafc',
+            inkColor: '#0f172a',
             strokeWidth: 3.5,
             wbScale: 1.0,
             wbPanX: 0,
             wbPanY: 0,
-            wbBoards: {}, // Per-question infinite vector stroke history: { [qId]: { strokes: [], redoStack: [] } }
+            wbBoards: {}, // { [qId]: { strokes: [], redoStack: [], qImg: { x, y, w, h, imgEl } } }
+            wbSelectedItem: null, // { type: 'STROKE', index: number } | { type: 'QIMG' } | null
             padShowHint: false,
             padShowAns: false,
             // Cloud & Background Task States
@@ -1504,7 +1549,10 @@
                 const isSel = String(opt.value) === String(currentVal);
                 return `
                     <button type="button" data-idx="${idx}" class="m3-custom-menu-item ${isSel ? 'selected' : ''}">
-                        <span class="truncate">${opt.label}</span>
+                        <span class="truncate flex items-center gap-2">
+                            ${opt.colorDot ? `<span class="w-3.5 h-3.5 rounded-full inline-block shrink-0 border border-black/20" style="background:${opt.colorDot}"></span>` : ''}
+                            ${opt.label}
+                        </span>
                         ${isSel ? `<i class="ph-bold ph-check text-xs shrink-0"></i>` : ''}
                     </button>
                 `;
@@ -1515,7 +1563,7 @@
                     e.stopPropagation();
                     const picked = options[Number(btn.getAttribute('data-idx'))];
                     closeCustomDropdown();
-                    if (picked && onSelectCallback) onSelectCallback(picked.value, picked.label);
+                    if (picked && onSelectCallback) onSelectCallback(picked.value, picked.label, picked);
                 };
             });
 
@@ -1523,7 +1571,7 @@
             menu.classList.remove('hidden');
 
             const rect = anchorEl.getBoundingClientRect();
-            const menuW = Math.max(rect.width, 190);
+            const menuW = Math.max(rect.width, 195);
             menu.style.width = `${Math.min(320, menuW)}px`;
 
             let left = rect.left;
@@ -1791,7 +1839,7 @@ Analyze this JEE question image (${q.subject} - ${q.chapter}).
                             liveQ.answerKey = res.answerKey || 'N/A';
                             liveQ.hint = res.hint || 'Apply fundamental chapter conservation/equilibrium equations.';
                             updatedAny = true;
-                            if (state.activePadId === liveQ.id) refreshScratchpadHintAndAnswerUI();
+                            if (state.activePadId === liveQ.id) refreshScratchpadTopBarAndHints();
                         }
                     } catch (err) {
                         console.warn(`Solver skipped Q.${liveQ.questionNumber}:`, err);
@@ -2220,7 +2268,6 @@ Analyze this JEE question image (${q.subject} - ${q.chapter}).
                     }
                 }
 
-                // Backward-compatible with existing Gist JSON records (initializes hint & answerKey if missing)
                 state.questions = restoredQuestions.map(r => ({
                     ...r,
                     id: r.id || generateUniqueId(),
@@ -2793,7 +2840,6 @@ CRITICAL RULES FOR ZERO TEXT CLIPPING & ZERO CLUBBING:
                 window.app.closeUploadModal();
                 await pushToCloudGist(false);
 
-                // Automatically generate Answer Keys & 1-Line Hints (1 request per question) in the background!
                 if (isAutoSolveHintsEnabled()) {
                     runBackgroundAnswerAndHintGenerator(false, false);
                 }
@@ -2978,7 +3024,7 @@ CRITICAL RULES FOR ZERO TEXT CLIPPING & ZERO CLUBBING:
                 </div>
 
                 <div class="p-2.5 m3-card-img-segment flex items-center justify-center min-w-0">
-                    <img src="${q.imageDataUrl}" onclick="event.stopPropagation(); window.app.openImagePopup(${q.id})" alt="Q.${q.questionNumber}" class="question-slice-img rounded-xl w-full h-auto object-contain cursor-zoom-in" loading="lazy" title="Click image to view or open Solve Pad">
+                    <img src="${q.imageDataUrl}" onclick="event.stopPropagation(); window.app.openImagePopup(${q.id})" alt="Q.${q.questionNumber}" class="question-slice-img rounded-xl w-full h-auto object-contain cursor-zoom-in" loading="lazy" title="Click image to view or open Fullscreen Whiteboard">
                 </div>
             </article>
             `;
@@ -3049,18 +3095,114 @@ CRITICAL RULES FOR ZERO TEXT CLIPPING & ZERO CLUBBING:
         }
 
         // ===================================================================
-        // MICROSOFT WHITEBOARD INFINITE SCRATCHPAD + AUTO-SHAPE RECOGNIZER
+        // FULLSCREEN WHITE WHITEBOARD + EMBEDDED QUESTION + MOVABLE SHAPES
         // ===================================================================
         function getActiveBoard() {
             const id = state.activePadId || 'default';
             if (!state.wbBoards[id]) {
-                state.wbBoards[id] = { strokes: [], redoStack: [] };
+                state.wbBoards[id] = { strokes: [], redoStack: [], qImg: null };
             }
             return state.wbBoards[id];
         }
 
-        function refreshScratchpadHintAndAnswerUI() {
+        function ensureQuestionImageOnBoard(q, callback) {
+            const board = getActiveBoard();
+            if (board.qImg && board.qImg.imgEl && board.qImg.src === q.imageDataUrl) {
+                if (callback) callback();
+                return;
+            }
+            const img = new Image();
+            img.onload = () => {
+                const targetW = Math.min(680, Math.max(420, Math.round(window.innerWidth * 0.46)));
+                const ratio = img.height / (img.width || 1);
+                const targetH = Math.round(targetW * ratio);
+                board.qImg = {
+                    x: 36,
+                    y: 44,
+                    w: targetW,
+                    h: targetH,
+                    src: q.imageDataUrl,
+                    imgEl: img
+                };
+                if (callback) callback();
+            };
+            img.src = q.imageDataUrl;
+        }
+
+        function getStrokeBounds(stroke) {
+            let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+            for (const p of (stroke.points || [])) {
+                if (p.x < minX) minX = p.x;
+                if (p.y < minY) minY = p.y;
+                if (p.x > maxX) maxX = p.x;
+                if (p.y > maxY) maxY = p.y;
+            }
+            const pad = Math.max(6, (stroke.width || 3.5));
+            return { minX: minX - pad, minY: minY - pad, maxX: maxX + pad, maxY: maxY + pad };
+        }
+
+        function getSelectedBounds() {
+            const board = getActiveBoard();
+            const sel = state.wbSelectedItem;
+            if (!sel) return null;
+            if (sel.type === 'QIMG' && board.qImg) {
+                return {
+                    minX: board.qImg.x,
+                    minY: board.qImg.y,
+                    maxX: board.qImg.x + board.qImg.w,
+                    maxY: board.qImg.y + board.qImg.h
+                };
+            }
+            if (sel.type === 'STROKE' && board.strokes[sel.index]) {
+                return getStrokeBounds(board.strokes[sel.index]);
+            }
+            return null;
+        }
+
+        function updateSelectionHudVisibility() {
+            const hud = document.getElementById('wbSelectionHud');
+            if (!hud) return;
+            const hasSel = Boolean(state.wbSelectedItem && getSelectedBounds());
+            hud.classList.toggle('hidden', !hasSel);
+            hud.classList.toggle('inline-flex', hasSel);
+        }
+
+        function refreshScratchpadTopBarAndHints() {
             const q = state.questions.find(i => i.id === Number(state.activePadId));
+            if (!q) return;
+
+            // Context-aware Prev/Next index within current filtered list
+            const filtered = getFiltered();
+            const activeList = filtered.some(item => item.id === q.id) ? filtered : state.questions;
+            const idx = activeList.findIndex(item => item.id === q.id);
+
+            const titleEl = document.getElementById('padQTitle');
+            if (titleEl) {
+                const shortSubj = q.subject === 'Mathematics' ? 'Maths' : q.subject;
+                titleEl.textContent = `Q.${q.questionNumber} (${idx + 1}/${activeList.length}) • ${shortSubj}`;
+            }
+
+            const prevBtn = document.getElementById('padPrevBtn');
+            const nextBtn = document.getElementById('padNextBtn');
+            if (prevBtn) prevBtn.disabled = idx <= 0;
+            if (nextBtn) nextBtn.disabled = idx < 0 || idx >= activeList.length - 1;
+
+            // Star & Solved status in Whiteboard bar
+            const starBtn = document.getElementById('padStarBtn');
+            const starIcon = document.getElementById('padStarIcon');
+            const solvedBtn = document.getElementById('padSolvedBtn');
+            const solvedIcon = document.getElementById('padSolvedIcon');
+
+            if (starBtn && starIcon) {
+                starBtn.classList.toggle('active-state', Boolean(q.starred));
+                starIcon.className = q.starred ? 'ph-fill ph-star' : 'ph-bold ph-star';
+            }
+            if (solvedBtn && solvedIcon) {
+                solvedBtn.classList.toggle('active-state', Boolean(q.solved));
+                solvedIcon.className = q.solved ? 'ph-fill ph-check-circle' : 'ph-bold ph-circle';
+            }
+
+            // Hint & Answer Key drawer
             const drawer = document.getElementById('padHintAnswerDrawer');
             const hintBox = document.getElementById('padHintBox');
             const ansBox = document.getElementById('padAnsBox');
@@ -3070,15 +3212,14 @@ CRITICAL RULES FOR ZERO TEXT CLIPPING & ZERO CLUBBING:
             const ansBtn = document.getElementById('padAnsToggleBtn');
             const solveBtn = document.getElementById('padSolveNowBtn');
 
-            if (!q || !drawer) return;
-
             hintBtn?.classList.toggle('active-state', state.padShowHint);
             ansBtn?.classList.toggle('active-state', state.padShowAns);
 
             const showAny = state.padShowHint || state.padShowAns;
-            drawer.classList.toggle('hidden', !showAny);
-            drawer.classList.toggle('flex', showAny);
-
+            if (drawer) {
+                drawer.classList.toggle('hidden', !showAny);
+                drawer.classList.toggle('flex', showAny);
+            }
             if (hintBox) {
                 hintBox.classList.toggle('hidden', !state.padShowHint);
                 hintBox.classList.toggle('inline-flex', state.padShowHint);
@@ -3087,15 +3228,11 @@ CRITICAL RULES FOR ZERO TEXT CLIPPING & ZERO CLUBBING:
                 ansBox.classList.toggle('hidden', !state.padShowAns);
                 ansBox.classList.toggle('inline-flex', state.padShowAns);
             }
-
             if (hintTxt) hintTxt.textContent = q.hint || 'Click "Generate with Gemini" to get a 1-line hint →';
             if (ansTxt) ansTxt.textContent = q.answerKey || 'Not solved yet';
-            if (solveBtn) {
-                solveBtn.classList.toggle('hidden', Boolean(q.hint && q.answerKey));
-            }
+            if (solveBtn) solveBtn.classList.toggle('hidden', Boolean(q.hint && q.answerKey));
         }
 
-        // Ramer-Douglas-Peucker Polyline Simplification for Shape Corner Detection
         function rdpSimplify(points, epsilon) {
             if (points.length < 3) return points;
             let dmax = 0, index = 0;
@@ -3123,7 +3260,6 @@ CRITICAL RULES FOR ZERO TEXT CLIPPING & ZERO CLUBBING:
             return [p1, p2];
         }
 
-        // Automatic Ink-to-Shape Recognizer (Lines, Circles/Ellipses, Triangles, Rectangles/Squares)
         function recognizeAndConvertStrokeToShape(rawPts) {
             if (!state.wbAutoShape || !rawPts || rawPts.length < 10) return null;
 
@@ -3147,19 +3283,16 @@ CRITICAL RULES FOR ZERO TEXT CLIPPING & ZERO CLUBBING:
             const endPt = rawPts[rawPts.length - 1];
             const endDist = Math.hypot(endPt.x - startPt.x, endPt.y - startPt.y);
 
-            // 1. Straight Line Detection
             if (endDist > minSize && (pathLen / endDist) < 1.085) {
                 return [startPt, endPt];
             }
 
-            // Closed Shape Check (Start and end points must be reasonably close)
             const isClosed = endDist < Math.max(38 / state.wbScale, pathLen * 0.23) && w > minSize * 0.45 && h > minSize * 0.45;
             if (!isClosed) return null;
 
             const closedPts = [...rawPts, startPt];
             const simplified = rdpSimplify(closedPts, diag * 0.085);
 
-            // Filter out tiny duplicate vertices or near-180° collinear vertices
             const corners = [simplified[0]];
             for (let i = 1; i < simplified.length - 1; i++) {
                 const prev = corners[corners.length - 1];
@@ -3173,12 +3306,10 @@ CRITICAL RULES FOR ZERO TEXT CLIPPING & ZERO CLUBBING:
                 if (diff > 26) corners.push(curr);
             }
 
-            // 2. Triangle Detection (3 distinct corners)
             if (corners.length === 3) {
                 return [corners[0], corners[1], corners[2], corners[0]];
             }
 
-            // 3. Circle / Ellipse Fit Check
             const cx = (minX + maxX) / 2, cy = (minY + maxY) / 2;
             let rx = w / 2, ry = h / 2;
             let radialErrSum = 0;
@@ -3188,10 +3319,9 @@ CRITICAL RULES FOR ZERO TEXT CLIPPING & ZERO CLUBBING:
             }
             const meanRadialErr = radialErrSum / rawPts.length;
 
-            // If corners >= 5 or radial error to ellipse is very small (< 0.135), snap to Circle/Ellipse
             if (meanRadialErr < 0.135 && corners.length !== 4) {
                 if (Math.abs(rx - ry) / Math.max(rx, ry) < 0.2) {
-                    rx = ry = (rx + ry) / 2; // Snap to perfect circle
+                    rx = ry = (rx + ry) / 2;
                 }
                 const circlePts = [];
                 const steps = 64;
@@ -3202,11 +3332,10 @@ CRITICAL RULES FOR ZERO TEXT CLIPPING & ZERO CLUBBING:
                 return circlePts;
             }
 
-            // 4. Rectangle / Square Detection (4 corners or rectangular bounding fit)
             if (corners.length === 4 || (meanRadialErr >= 0.135 && corners.length >= 4 && corners.length <= 5)) {
                 let halfW = w / 2, halfH = h / 2;
                 if (Math.abs(w - h) / Math.max(w, h) < 0.16) {
-                    halfW = halfH = (halfW + halfH) / 2; // Snap to perfect square
+                    halfW = halfH = (halfW + halfH) / 2;
                 }
                 return [
                     { x: cx - halfW, y: cy - halfH },
@@ -3220,14 +3349,67 @@ CRITICAL RULES FOR ZERO TEXT CLIPPING & ZERO CLUBBING:
             return null;
         }
 
+        function createPresetShapePoints(shapeType, cx, cy) {
+            const r = 85 / state.wbScale;
+            if (shapeType === 'RECT') {
+                return [
+                    { x: cx - r * 1.2, y: cy - r * 0.85 },
+                    { x: cx + r * 1.2, y: cy - r * 0.85 },
+                    { x: cx + r * 1.2, y: cy + r * 0.85 },
+                    { x: cx - r * 1.2, y: cy + r * 0.85 },
+                    { x: cx - r * 1.2, y: cy - r * 0.85 }
+                ];
+            }
+            if (shapeType === 'CIRCLE') {
+                const pts = [];
+                for (let i = 0; i <= 64; i++) {
+                    const a = (i / 64) * Math.PI * 2;
+                    pts.push({ x: cx + r * Math.cos(a), y: cy + r * Math.sin(a) });
+                }
+                return pts;
+            }
+            if (shapeType === 'TRIANGLE') {
+                return [
+                    { x: cx, y: cy - r },
+                    { x: cx + r * 0.95, y: cy + r * 0.8 },
+                    { x: cx - r * 0.95, y: cy + r * 0.8 },
+                    { x: cx, y: cy - r }
+                ];
+            }
+            if (shapeType === 'RIGHT_TRIANGLE') {
+                return [
+                    { x: cx - r, y: cy - r },
+                    { x: cx - r, y: cy + r },
+                    { x: cx + r * 1.1, y: cy + r },
+                    { x: cx - r, y: cy - r }
+                ];
+            }
+            if (shapeType === 'LINE') {
+                return [
+                    { x: cx - r * 1.3, y: cy },
+                    { x: cx + r * 1.3, y: cy }
+                ];
+            }
+            if (shapeType === 'AXES') {
+                return [
+                    { x: cx - r * 1.3, y: cy },
+                    { x: cx + r * 1.3, y: cy },
+                    { x: cx, y: cy },
+                    { x: cx, y: cy - r * 1.3 },
+                    { x: cx, y: cy + r * 1.3 }
+                ];
+            }
+            return null;
+        }
+
         function renderWhiteboardCanvas() {
             const wrap = document.getElementById('padCanvasWrap');
             const canvas = document.getElementById('stylusCanvas');
             if (!wrap || !canvas) return;
 
             const dpr = window.devicePixelRatio || 1;
-            const cw = wrap.clientWidth || 600;
-            const ch = wrap.clientHeight || 500;
+            const cw = wrap.clientWidth || 800;
+            const ch = wrap.clientHeight || 600;
             if (canvas.width !== Math.round(cw * dpr) || canvas.height !== Math.round(ch * dpr)) {
                 canvas.width = Math.round(cw * dpr);
                 canvas.height = Math.round(ch * dpr);
@@ -3236,17 +3418,19 @@ CRITICAL RULES FOR ZERO TEXT CLIPPING & ZERO CLUBBING:
             const ctx = canvas.getContext('2d');
             ctx.save();
             ctx.scale(dpr, dpr);
-            ctx.fillStyle = '#070a12';
+
+            // 1. Pure White Whiteboard Background
+            ctx.fillStyle = '#ffffff';
             ctx.fillRect(0, 0, cw, ch);
 
-            // 1. Draw Infinite Microsoft Whiteboard Dot Grid
-            const baseStep = 36;
+            // 2. Subtle Infinite Dot Grid on White Background
+            const baseStep = 34;
             const screenStep = baseStep * state.wbScale;
-            if (screenStep >= 12) {
+            if (screenStep >= 11) {
                 const offsetX = ((state.wbPanX % screenStep) + screenStep) % screenStep;
                 const offsetY = ((state.wbPanY % screenStep) + screenStep) % screenStep;
-                ctx.fillStyle = 'rgba(148, 163, 184, 0.22)';
-                const dotR = Math.max(1, Math.min(2, 1.2 * state.wbScale));
+                ctx.fillStyle = 'rgba(15, 23, 42, 0.15)';
+                const dotR = Math.max(0.9, Math.min(1.8, 1.15 * state.wbScale));
                 for (let x = offsetX; x < cw; x += screenStep) {
                     for (let y = offsetY; y < ch; y += screenStep) {
                         ctx.beginPath();
@@ -3256,17 +3440,34 @@ CRITICAL RULES FOR ZERO TEXT CLIPPING & ZERO CLUBBING:
                 }
             }
 
-            // 2. Apply Infinite Camera Transform (panX, panY, scale)
+            // 3. Apply Infinite Camera Transform
             ctx.translate(state.wbPanX, state.wbPanY);
             ctx.scale(state.wbScale, state.wbScale);
             ctx.lineCap = 'round';
             ctx.lineJoin = 'round';
 
             const board = getActiveBoard();
+
+            // 4. Draw Embedded Question Image Directly on the Whiteboard Canvas
+            if (board.qImg && board.qImg.imgEl) {
+                const qi = board.qImg;
+                ctx.save();
+                ctx.shadowColor = 'rgba(15, 23, 42, 0.12)';
+                ctx.shadowBlur = 18 / state.wbScale;
+                ctx.strokeStyle = 'rgba(148, 163, 184, 0.45)';
+                ctx.lineWidth = 1.2 / state.wbScale;
+                ctx.fillStyle = '#ffffff';
+                ctx.fillRect(qi.x, qi.y, qi.w, qi.h);
+                ctx.strokeRect(qi.x, qi.y, qi.w, qi.h);
+                ctx.drawImage(qi.imgEl, qi.x, qi.y, qi.w, qi.h);
+                ctx.restore();
+            }
+
+            // 5. Draw Vector Strokes & Shapes
             for (const stroke of board.strokes) {
                 if (!stroke.points || stroke.points.length === 0) continue;
                 ctx.beginPath();
-                ctx.strokeStyle = stroke.color;
+                ctx.strokeStyle = stroke.color === '#f8fafc' ? '#0f172a' : stroke.color;
                 ctx.lineWidth = stroke.width;
                 ctx.moveTo(stroke.points[0].x, stroke.points[0].y);
                 for (let i = 1; i < stroke.points.length; i++) {
@@ -3275,10 +3476,43 @@ CRITICAL RULES FOR ZERO TEXT CLIPPING & ZERO CLUBBING:
                 ctx.stroke();
             }
 
+            // 6. Draw Selection Box & 4 Corner Resize Handles if an Item is Selected
+            const selBounds = getSelectedBounds();
+            if (selBounds) {
+                const bw = selBounds.maxX - selBounds.minX;
+                const bh = selBounds.maxY - selBounds.minY;
+                const handleSize = 9 / state.wbScale;
+
+                ctx.save();
+                ctx.strokeStyle = '#2563eb';
+                ctx.lineWidth = 1.8 / state.wbScale;
+                ctx.setLineDash([6 / state.wbScale, 4 / state.wbScale]);
+                ctx.strokeRect(selBounds.minX, selBounds.minY, bw, bh);
+                ctx.setLineDash([]);
+
+                const corners = [
+                    { x: selBounds.minX, y: selBounds.minY },
+                    { x: selBounds.maxX, y: selBounds.minY },
+                    { x: selBounds.maxX, y: selBounds.maxY },
+                    { x: selBounds.minX, y: selBounds.maxY }
+                ];
+                ctx.fillStyle = '#ffffff';
+                ctx.strokeStyle = '#2563eb';
+                ctx.lineWidth = 2 / state.wbScale;
+                for (const c of corners) {
+                    ctx.beginPath();
+                    ctx.arc(c.x, c.y, handleSize * 0.65, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.stroke();
+                }
+                ctx.restore();
+            }
+
             ctx.restore();
 
             const zoomBadge = document.getElementById('wbZoomBadge');
             if (zoomBadge) zoomBadge.textContent = `${Math.round(state.wbScale * 100)}%`;
+            updateSelectionHudVisibility();
         }
 
         function initStylusCanvas() {
@@ -3293,16 +3527,22 @@ CRITICAL RULES FOR ZERO TEXT CLIPPING & ZERO CLUBBING:
             let lastPanMid = null;
             let lastPinchDist = null;
             let isSpacePressed = false;
+            let dragAction = null; // { mode: 'MOVE' | 'RESIZE', handle: 'NW'|'NE'|'SE'|'SW', startWorld: {x,y}, origPoints: [], origQImg: {}, origBounds: {} }
 
             window.onkeydown = (e) => {
-                if (e.code === 'Space' && !document.getElementById('scratchpadModal').classList.contains('hidden')) {
-                    isSpacePressed = true;
+                if (document.getElementById('scratchpadModal').classList.contains('hidden')) return;
+                if (e.code === 'Space') isSpacePressed = true;
+                if (e.key === 'Delete' || e.key === 'Backspace') {
+                    if (state.wbSelectedItem && state.wbSelectedItem.type === 'STROKE') {
+                        e.preventDefault();
+                        window.app.deleteSelectedWhiteboardItem();
+                    }
                 }
-                if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z' && !document.getElementById('scratchpadModal').classList.contains('hidden')) {
+                if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z') {
                     e.preventDefault();
                     window.app.whiteboardUndo();
                 }
-                if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'y' && !document.getElementById('scratchpadModal').classList.contains('hidden')) {
+                if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'y') {
                     e.preventDefault();
                     window.app.whiteboardRedo();
                 }
@@ -3316,26 +3556,88 @@ CRITICAL RULES FOR ZERO TEXT CLIPPING & ZERO CLUBBING:
                 y: (sy - state.wbPanY) / state.wbScale
             });
 
+            const distToSegment = (p, v, wPt) => {
+                const l2 = (wPt.x - v.x) ** 2 + (wPt.y - v.y) ** 2;
+                if (l2 === 0) return Math.hypot(p.x - v.x, p.y - v.y);
+                const t = Math.max(0, Math.min(1, ((p.x - v.x) * (wPt.x - v.x) + (p.y - v.y) * (wPt.y - v.y)) / l2));
+                return Math.hypot(p.x - (v.x + t * (wPt.x - v.x)), p.y - (v.y + t * (wPt.y - v.y)));
+            };
+
+            const hitTestCornerHandle = (wx, wy, bounds) => {
+                if (!bounds) return null;
+                const tol = 14 / state.wbScale;
+                const handles = {
+                    NW: { x: bounds.minX, y: bounds.minY },
+                    NE: { x: bounds.maxX, y: bounds.minY },
+                    SE: { x: bounds.maxX, y: bounds.maxY },
+                    SW: { x: bounds.minX, y: bounds.maxY }
+                };
+                for (const [k, pt] of Object.entries(handles)) {
+                    if (Math.hypot(wx - pt.x, wy - pt.y) <= tol) return k;
+                }
+                return null;
+            };
+
+            const hitTestWhiteboardItem = (wx, wy) => {
+                const board = getActiveBoard();
+                const hitTol = 12 / state.wbScale;
+
+                // 1. Check strokes from top-most to bottom-most
+                for (let i = board.strokes.length - 1; i >= 0; i--) {
+                    const st = board.strokes[i];
+                    const pts = st.points || [];
+                    for (let j = 0; j < pts.length; j++) {
+                        if (j > 0 && distToSegment({ x: wx, y: wy }, pts[j - 1], pts[j]) <= hitTol + st.width / 2) {
+                            return { type: 'STROKE', index: i };
+                        } else if (Math.hypot(wx - pts[j].x, wy - pts[j].y) <= hitTol) {
+                            return { type: 'STROKE', index: i };
+                        }
+                    }
+                    // Also allow clicking inside a closed shape's bounding box
+                    const b = getStrokeBounds(st);
+                    if (pts.length >= 4 && wx >= b.minX && wx <= b.maxX && wy >= b.minY && wy <= b.maxY) {
+                        return { type: 'STROKE', index: i };
+                    }
+                }
+
+                // 2. Check embedded Question Image
+                if (board.qImg) {
+                    const qi = board.qImg;
+                    if (wx >= qi.x && wx <= qi.x + qi.w && wy >= qi.y && wy <= qi.y + qi.h) {
+                        return { type: 'QIMG' };
+                    }
+                }
+                return null;
+            };
+
             const eraseStrokesNearWorldPt = (wx, wy) => {
                 const board = getActiveBoard();
-                const hitRadius = 16 / state.wbScale;
+                const hitRadius = 15 / state.wbScale;
                 const beforeLen = board.strokes.length;
                 board.strokes = board.strokes.filter(st => {
-                    return !st.points.some(p => Math.hypot(p.x - wx, p.y - wy) <= hitRadius);
+                    return !st.points.some((p, idx) => {
+                        if (idx > 0) return distToSegment({ x: wx, y: wy }, st.points[idx - 1], p) <= hitRadius;
+                        return Math.hypot(p.x - wx, p.y - wy) <= hitRadius;
+                    });
                 });
-                if (board.strokes.length !== beforeLen) renderWhiteboardCanvas();
+                if (board.strokes.length !== beforeLen) {
+                    state.wbSelectedItem = null;
+                    renderWhiteboardCanvas();
+                }
             };
 
             canvas.onpointerdown = (e) => {
+                closeCustomDropdown();
                 e.preventDefault();
                 canvas.setPointerCapture(e.pointerId);
                 const r = canvas.getBoundingClientRect();
                 const sx = e.clientX - r.left, sy = e.clientY - r.top;
                 activePointers.set(e.pointerId, { x: sx, y: sy });
 
-                // 2-Finger Touch Pinch/Pan Gesture
+                // 2-Finger Pinch-to-Zoom & Pan
                 if (activePointers.size === 2) {
                     currentStroke = null;
+                    dragAction = null;
                     const pts = Array.from(activePointers.values());
                     lastPanMid = { x: (pts[0].x + pts[1].x) / 2, y: (pts[0].y + pts[1].y) / 2 };
                     lastPinchDist = Math.hypot(pts[1].x - pts[0].x, pts[1].y - pts[0].y);
@@ -3348,6 +3650,44 @@ CRITICAL RULES FOR ZERO TEXT CLIPPING & ZERO CLUBBING:
                 }
 
                 const wPt = screenToWorld(sx, sy);
+
+                // SELECT / MOVE / RESIZE MODE
+                if (state.wbTool === 'SELECT') {
+                    const board = getActiveBoard();
+                    const currBounds = getSelectedBounds();
+                    const handle = hitTestCornerHandle(wPt.x, wPt.y, currBounds);
+
+                    if (handle && state.wbSelectedItem) {
+                        const sel = state.wbSelectedItem;
+                        dragAction = {
+                            mode: 'RESIZE',
+                            handle,
+                            origBounds: { ...currBounds },
+                            origPoints: sel.type === 'STROKE' ? board.strokes[sel.index].points.map(p => ({ ...p })) : null,
+                            origQImg: sel.type === 'QIMG' ? { ...board.qImg } : null
+                        };
+                        return;
+                    }
+
+                    const hit = hitTestWhiteboardItem(wPt.x, wPt.y);
+                    state.wbSelectedItem = hit;
+                    renderWhiteboardCanvas();
+
+                    if (hit) {
+                        const newBounds = getSelectedBounds();
+                        dragAction = {
+                            mode: 'MOVE',
+                            startWorld: wPt,
+                            origBounds: { ...newBounds },
+                            origPoints: hit.type === 'STROKE' ? board.strokes[hit.index].points.map(p => ({ ...p })) : null,
+                            origQImg: hit.type === 'QIMG' ? { ...board.qImg } : null
+                        };
+                    }
+                    return;
+                }
+
+                state.wbSelectedItem = null;
+
                 if (state.wbTool === 'ERASER') {
                     eraseStrokesNearWorldPt(wPt.x, wPt.y);
                     return;
@@ -3371,7 +3711,6 @@ CRITICAL RULES FOR ZERO TEXT CLIPPING & ZERO CLUBBING:
                 const sx = e.clientX - r.left, sy = e.clientY - r.top;
                 activePointers.set(e.pointerId, { x: sx, y: sy });
 
-                // 2-Finger Pinch-to-Zoom & Pan
                 if (activePointers.size === 2) {
                     const pts = Array.from(activePointers.values());
                     const mid = { x: (pts[0].x + pts[1].x) / 2, y: (pts[0].y + pts[1].y) / 2 };
@@ -3402,6 +3741,57 @@ CRITICAL RULES FOR ZERO TEXT CLIPPING & ZERO CLUBBING:
                 }
 
                 const wPt = screenToWorld(sx, sy);
+
+                // Handle Moving or Resizing Selected Shape / Question Image
+                if (state.wbTool === 'SELECT' && dragAction && state.wbSelectedItem) {
+                    const board = getActiveBoard();
+                    const sel = state.wbSelectedItem;
+
+                    if (dragAction.mode === 'MOVE') {
+                        const dx = wPt.x - dragAction.startWorld.x;
+                        const dy = wPt.y - dragAction.startWorld.y;
+                        if (sel.type === 'QIMG' && board.qImg && dragAction.origQImg) {
+                            board.qImg.x = dragAction.origQImg.x + dx;
+                            board.qImg.y = dragAction.origQImg.y + dy;
+                        } else if (sel.type === 'STROKE' && board.strokes[sel.index] && dragAction.origPoints) {
+                            board.strokes[sel.index].points = dragAction.origPoints.map(p => ({
+                                x: p.x + dx,
+                                y: p.y + dy
+                            }));
+                        }
+                        renderWhiteboardCanvas();
+                        return;
+                    }
+
+                    if (dragAction.mode === 'RESIZE') {
+                        const ob = dragAction.origBounds;
+                        let newMinX = ob.minX, newMinY = ob.minY, newMaxX = ob.maxX, newMaxY = ob.maxY;
+                        if (dragAction.handle.includes('W')) newMinX = Math.min(wPt.x, ob.maxX - 24);
+                        if (dragAction.handle.includes('E')) newMaxX = Math.max(wPt.x, ob.minX + 24);
+                        if (dragAction.handle.includes('N')) newMinY = Math.min(wPt.y, ob.maxY - 24);
+                        if (dragAction.handle.includes('S')) newMaxY = Math.max(wPt.y, ob.minY + 24);
+
+                        const oldW = Math.max(1, ob.maxX - ob.minX);
+                        const oldH = Math.max(1, ob.maxY - ob.minY);
+                        const newW = Math.max(24, newMaxX - newMinX);
+                        const newH = Math.max(24, newMaxY - newMinY);
+
+                        if (sel.type === 'QIMG' && board.qImg) {
+                            board.qImg.x = newMinX;
+                            board.qImg.y = newMinY;
+                            board.qImg.w = newW;
+                            board.qImg.h = newH;
+                        } else if (sel.type === 'STROKE' && board.strokes[sel.index] && dragAction.origPoints) {
+                            board.strokes[sel.index].points = dragAction.origPoints.map(p => ({
+                                x: newMinX + ((p.x - ob.minX) / oldW) * newW,
+                                y: newMinY + ((p.y - ob.minY) / oldH) * newH
+                            }));
+                        }
+                        renderWhiteboardCanvas();
+                        return;
+                    }
+                }
+
                 if (state.wbTool === 'ERASER') {
                     eraseStrokesNearWorldPt(wPt.x, wPt.y);
                     return;
@@ -3421,6 +3811,7 @@ CRITICAL RULES FOR ZERO TEXT CLIPPING & ZERO CLUBBING:
                     lastPinchDist = null;
                     lastPanMid = null;
                 }
+                dragAction = null;
 
                 if (currentStroke) {
                     const snappedShapePts = recognizeAndConvertStrokeToShape(currentStroke.points);
@@ -3435,7 +3826,6 @@ CRITICAL RULES FOR ZERO TEXT CLIPPING & ZERO CLUBBING:
             canvas.onpointerup = stopPointer;
             canvas.onpointercancel = stopPointer;
 
-            // Mouse Wheel / Trackpad Zoom Centered on Cursor
             canvas.onwheel = (e) => {
                 e.preventDefault();
                 const r = canvas.getBoundingClientRect();
@@ -3489,11 +3879,25 @@ CRITICAL RULES FOR ZERO TEXT CLIPPING & ZERO CLUBBING:
                     if (labelEl) labelEl.textContent = lbl;
                 });
             },
-            openStrokeWidthMenu(anchorEl) {
-                openCustomDropdown(anchorEl, STROKE_WIDTHS, state.strokeWidth, (val, lbl) => {
-                    this.setStrokeWidth(val);
-                    const labelEl = document.getElementById('strokeWidthDropdownLabel');
-                    if (labelEl) labelEl.textContent = lbl;
+            openInsertShapeMenu(anchorEl) {
+                openCustomDropdown(anchorEl, PRESET_SHAPES, '', (shapeType) => {
+                    this.insertPresetShape(shapeType);
+                });
+            },
+            openInkStyleMenu(anchorEl) {
+                const opts = [
+                    ...WHITEBOARD_COLORS.map(c => ({ value: `COLOR:${c.value}`, label: c.label, colorDot: c.value })),
+                    ...STROKE_WIDTHS.map(w => ({ value: `WIDTH:${w.value}`, label: `Thickness: ${w.label}` }))
+                ];
+                const currKey = `COLOR:${state.inkColor}`;
+                openCustomDropdown(anchorEl, opts, currKey, (val) => {
+                    if (String(val).startsWith('COLOR:')) {
+                        const col = val.replace('COLOR:', '');
+                        this.setInk(col);
+                    } else if (String(val).startsWith('WIDTH:')) {
+                        const w = Number(val.replace('WIDTH:', ''));
+                        this.setStrokeWidth(w);
+                    }
                 });
             },
 
@@ -3886,7 +4290,7 @@ CRITICAL RULES FOR ZERO TEXT CLIPPING & ZERO CLUBBING:
                 this.closeSplitModal();
             },
 
-            // Microsoft Whiteboard & Hint/Answer Controls
+            // Fullscreen White Whiteboard + Context Navigation + Preset Shapes
             getActivePadId: () => state.activePadId,
             openScratchpad(id) {
                 closeCustomDropdown();
@@ -3895,27 +4299,47 @@ CRITICAL RULES FOR ZERO TEXT CLIPPING & ZERO CLUBBING:
                 state.activePadId = Number(id);
                 state.padShowHint = false;
                 state.padShowAns = false;
+                state.wbSelectedItem = null;
                 state.wbScale = 1.0;
                 state.wbPanX = 0;
                 state.wbPanY = 0;
 
-                document.getElementById('padQTitle').textContent = `Q.${q.questionNumber} • ${q.subject} (${q.chapter})`;
-                document.getElementById('padQuestionImg').src = q.imageDataUrl;
-                refreshScratchpadHintAndAnswerUI();
+                refreshScratchpadTopBarAndHints();
                 document.getElementById('scratchpadModal').classList.remove('hidden');
-                setTimeout(() => initStylusCanvas(), 40);
+                ensureQuestionImageOnBoard(q, () => {
+                    initStylusCanvas();
+                });
             },
             closeScratchpad() {
                 closeCustomDropdown();
+                state.wbSelectedItem = null;
                 document.getElementById('scratchpadModal').classList.add('hidden');
+            },
+            navigatePadQuestion(dir) {
+                closeCustomDropdown();
+                const q = state.questions.find(i => i.id === Number(state.activePadId));
+                if (!q) return;
+                const filtered = getFiltered();
+                const activeList = filtered.some(item => item.id === q.id) ? filtered : state.questions;
+                const idx = activeList.findIndex(item => item.id === q.id);
+                const nextQ = activeList[idx + dir];
+                if (!nextQ) return;
+                this.openScratchpad(nextQ.id);
+            },
+            togglePadQuestionBool(field) {
+                const q = state.questions.find(i => i.id === Number(state.activePadId));
+                if (!q) return;
+                q[field] = !q[field];
+                refreshScratchpadTopBarAndHints();
+                scheduleCloudAutoSync();
             },
             togglePadHint() {
                 state.padShowHint = !state.padShowHint;
-                refreshScratchpadHintAndAnswerUI();
+                refreshScratchpadTopBarAndHints();
             },
             togglePadAnswer() {
                 state.padShowAns = !state.padShowAns;
-                refreshScratchpadHintAndAnswerUI();
+                refreshScratchpadTopBarAndHints();
             },
             async solveActivePadQuestionNow() {
                 const q = state.questions.find(i => i.id === Number(state.activePadId));
@@ -3932,7 +4356,7 @@ CRITICAL RULES FOR ZERO TEXT CLIPPING & ZERO CLUBBING:
                         q.answerKey = res.answerKey || 'N/A';
                         q.hint = res.hint || 'Use core conservation laws.';
                         state.padShowHint = true;
-                        refreshScratchpadHintAndAnswerUI();
+                        refreshScratchpadTopBarAndHints();
                         scheduleCloudAutoSync();
                         toast(`Generated Answer Key & 1-Line Hint for Q.${q.questionNumber}!`, 'success');
                     }
@@ -3944,12 +4368,63 @@ CRITICAL RULES FOR ZERO TEXT CLIPPING & ZERO CLUBBING:
             },
             setWhiteboardTool(tool) {
                 state.wbTool = tool;
+                if (tool !== 'SELECT') state.wbSelectedItem = null;
+                document.getElementById('wbToolSelectBtn')?.classList.toggle('active-state', tool === 'SELECT');
                 document.getElementById('wbToolPenBtn')?.classList.toggle('active-state', tool === 'PEN');
                 document.getElementById('wbToolPanBtn')?.classList.toggle('active-state', tool === 'PAN');
                 document.getElementById('eraserBtn')?.classList.toggle('active-state', tool === 'ERASER');
                 const canvas = document.getElementById('stylusCanvas');
                 if (canvas) {
-                    canvas.style.cursor = tool === 'PAN' ? 'grab' : (tool === 'ERASER' ? 'cell' : 'crosshair');
+                    canvas.style.cursor = tool === 'PAN' ? 'grab' : (tool === 'ERASER' ? 'cell' : (tool === 'SELECT' ? 'default' : 'crosshair'));
+                }
+                renderWhiteboardCanvas();
+            },
+            insertPresetShape(shapeType) {
+                const wrap = document.getElementById('padCanvasWrap');
+                if (!wrap) return;
+                const cx = (wrap.clientWidth * 0.65 - state.wbPanX) / state.wbScale;
+                const cy = (wrap.clientHeight * 0.45 - state.wbPanY) / state.wbScale;
+                const pts = createPresetShapePoints(shapeType, cx, cy);
+                if (!pts) return;
+
+                const board = getActiveBoard();
+                board.redoStack = [];
+                board.strokes.push({
+                    color: state.inkColor,
+                    width: state.strokeWidth,
+                    points: pts
+                });
+                state.wbSelectedItem = { type: 'STROKE', index: board.strokes.length - 1 };
+                this.setWhiteboardTool('SELECT');
+                renderWhiteboardCanvas();
+            },
+            duplicateSelectedWhiteboardItem() {
+                const board = getActiveBoard();
+                const sel = state.wbSelectedItem;
+                if (!sel || sel.type !== 'STROKE' || !board.strokes[sel.index]) {
+                    return toast('Select a drawn shape first to duplicate it', 'info');
+                }
+                const orig = board.strokes[sel.index];
+                const offset = 24 / state.wbScale;
+                board.strokes.push({
+                    color: orig.color,
+                    width: orig.width,
+                    points: orig.points.map(p => ({ x: p.x + offset, y: p.y + offset }))
+                });
+                state.wbSelectedItem = { type: 'STROKE', index: board.strokes.length - 1 };
+                renderWhiteboardCanvas();
+            },
+            deleteSelectedWhiteboardItem() {
+                const board = getActiveBoard();
+                const sel = state.wbSelectedItem;
+                if (!sel) return;
+                if (sel.type === 'QIMG') {
+                    return toast('The Question Image stays on the board (drag to move or resize it!)', 'info');
+                }
+                if (sel.type === 'STROKE' && board.strokes[sel.index]) {
+                    board.redoStack.push(board.strokes.splice(sel.index, 1)[0]);
+                    state.wbSelectedItem = null;
+                    renderWhiteboardCanvas();
                 }
             },
             toggleAutoShape() {
@@ -3959,20 +4434,40 @@ CRITICAL RULES FOR ZERO TEXT CLIPPING & ZERO CLUBBING:
             },
             setInk(color) {
                 state.inkColor = color;
+                const dot = document.getElementById('activeInkColorDot');
+                if (dot) dot.style.background = color;
+                if (state.wbSelectedItem && state.wbSelectedItem.type === 'STROKE') {
+                    const board = getActiveBoard();
+                    const st = board.strokes[state.wbSelectedItem.index];
+                    if (st) { st.color = color; renderWhiteboardCanvas(); }
+                    return;
+                }
                 if (state.wbTool === 'ERASER' || state.wbTool === 'PAN') {
                     this.setWhiteboardTool('PEN');
                 }
             },
-            setStrokeWidth(w) { state.strokeWidth = Number(w) || 3.5; },
+            setStrokeWidth(w) {
+                state.strokeWidth = Number(w) || 3.5;
+                const swObj = STROKE_WIDTHS.find(item => item.value === state.strokeWidth) || STROKE_WIDTHS[1];
+                const lbl = document.getElementById('strokeWidthDropdownLabel');
+                if (lbl) lbl.textContent = swObj.short;
+                if (state.wbSelectedItem && state.wbSelectedItem.type === 'STROKE') {
+                    const board = getActiveBoard();
+                    const st = board.strokes[state.wbSelectedItem.index];
+                    if (st) { st.width = state.strokeWidth; renderWhiteboardCanvas(); }
+                }
+            },
             whiteboardUndo() {
                 const board = getActiveBoard();
                 if (board.strokes.length === 0) return;
+                state.wbSelectedItem = null;
                 board.redoStack.push(board.strokes.pop());
                 renderWhiteboardCanvas();
             },
             whiteboardRedo() {
                 const board = getActiveBoard();
                 if (board.redoStack.length === 0) return;
+                state.wbSelectedItem = null;
                 board.strokes.push(board.redoStack.pop());
                 renderWhiteboardCanvas();
             },
@@ -3980,6 +4475,7 @@ CRITICAL RULES FOR ZERO TEXT CLIPPING & ZERO CLUBBING:
                 const board = getActiveBoard();
                 board.strokes = [];
                 board.redoStack = [];
+                state.wbSelectedItem = null;
                 renderWhiteboardCanvas();
             },
             zoomWhiteboard(delta) {
