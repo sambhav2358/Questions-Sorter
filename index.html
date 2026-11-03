@@ -1485,11 +1485,11 @@
             }
         }
 
-        // 3. Expressive Dual-Orbit + Rising Liquid-Wave Sync Button Animation
+        // 3. Expressive Dual-Orbit + Rising Liquid Wave Sync Button Animation
         let syncWaveTimer = null;
-        let syncWaveLevel = 15;
+        let syncWaveLevel = 16;
 
-        function setSyncButtonExpressiveState(active, progressPct = null) {
+        function setSyncButtonExpressiveProgress(active, completed = false) {
             const syncBtn = document.getElementById('syncHeaderBtn');
             const icon = document.getElementById('cloudStatusIcon');
             const svg = document.getElementById('syncExpressiveSvg');
@@ -1499,32 +1499,32 @@
             if (!active) {
                 clearInterval(syncWaveTimer);
                 syncWaveTimer = null;
+                syncBtn.classList.remove('sync-btn-syncing');
                 svg.classList.add('hidden');
                 icon.classList.remove('hidden');
-                syncBtn.classList.remove('sync-btn-syncing');
                 return;
             }
 
+            syncBtn.classList.add('sync-btn-syncing');
             icon.classList.add('hidden');
             svg.classList.remove('hidden');
-            syncBtn.classList.add('sync-btn-syncing');
 
-            const setWaveY = (pct) => {
-                const clamped = Math.max(10, Math.min(96, pct));
-                // Map 10%..96% to y = 17.5 .. 6.5 inside the 24x24 viewBox orb
-                const y = (18 - (clamped / 100) * 11.5).toFixed(2);
-                const peak = (Number(y) - 2.2).toFixed(2);
-                wavePath.setAttribute('d', `M 0 ${y} Q 3 ${peak}, 6 ${y} T 12 ${y} T 18 ${y} T 24 ${y} T 30 ${y} T 36 ${y} L 36 24 L 0 24 Z`);
+            const setWaveY = (yVal) => {
+                const y = Number(yVal).toFixed(2);
+                const yPeak = (yVal - 2.2).toFixed(2);
+                wavePath.setAttribute('d', `M 0 ${y} Q 3 ${yPeak}, 6 ${y} T 12 ${y} T 18 ${y} T 24 ${y} T 30 ${y} T 36 ${y} L 36 24 L 0 24 Z`);
             };
 
-            if (progressPct !== null) {
-                syncWaveLevel = progressPct;
-                setWaveY(syncWaveLevel);
-            } else if (!syncWaveTimer) {
-                syncWaveLevel = 18;
+            if (completed) {
+                setWaveY(5.5);
+                return;
+            }
+
+            if (!syncWaveTimer) {
+                syncWaveLevel = 17.5;
                 setWaveY(syncWaveLevel);
                 syncWaveTimer = setInterval(() => {
-                    syncWaveLevel = syncWaveLevel < 88 ? syncWaveLevel + (92 - syncWaveLevel) * 0.08 : 22;
+                    syncWaveLevel = syncWaveLevel > 7.2 ? syncWaveLevel - (syncWaveLevel - 6.8) * 0.08 : 16.5;
                     setWaveY(syncWaveLevel);
                 }, 70);
             }
@@ -1594,7 +1594,7 @@
             currentUploadBatchIds: [],
             activeSplitId: null,
             splitMode: 'SPLIT',
-            // Fullscreen White Whiteboard State (Unified Objects + Grouping + Crop & Dup)
+            // Fullscreen White Whiteboard State
             activePadId: null,
             wbTool: 'PEN', // 'SELECT' | 'CROP_DUP' | 'PEN' | 'PAN' | 'ERASER'
             wbAutoShape: true,
@@ -1603,8 +1603,8 @@
             wbScale: 1.0,
             wbPanX: 0,
             wbPanY: 0,
-            wbBoards: {}, // { [qId]: { items: [], undoStack: [], redoStack: [], initializedQImg: false } }
-            wbSelectedIds: [], // Array of selected item IDs
+            wbBoards: {}, // { [qId]: { items: [], undoStack: [], redoStack: [], initialized: boolean } }
+            wbSelectedIds: [], // Array of selected item IDs (supports single, multi, and grouped selection!)
             padShowHint: false,
             padShowAns: false,
             // Cloud & Background Task States
@@ -1768,11 +1768,12 @@
             }
         }
 
-        // Swipeable Status Segmented Bar (Only triggers on drag-move so single tap never double-fires with onclick)
+        // Fixed Swipeable Segmented Bar (Only switches on drag move so normal click never double-fires)
         function initSwipeableStatusSegmentedBar() {
             const bar = document.getElementById('statusSegmentedBar');
             if (!bar) return;
-            let isDragging = false;
+            let isPointerDown = false;
+            let startX = 0;
 
             const pickStatusAtPoint = (clientX, clientY) => {
                 const el = document.elementFromPoint(clientX, clientY);
@@ -1783,13 +1784,16 @@
                 }
             };
 
-            bar.addEventListener('pointerdown', () => { isDragging = true; });
+            bar.addEventListener('pointerdown', (e) => {
+                isPointerDown = true;
+                startX = e.clientX;
+            });
             bar.addEventListener('pointermove', (e) => {
-                if (!isDragging) return;
+                if (!isPointerDown || Math.abs(e.clientX - startX) < 8) return;
                 pickStatusAtPoint(e.clientX, e.clientY);
             });
-            window.addEventListener('pointerup', () => { isDragging = false; });
-            window.addEventListener('pointercancel', () => { isDragging = false; });
+            window.addEventListener('pointerup', () => { isPointerDown = false; });
+            window.addEventListener('pointercancel', () => { isPointerDown = false; });
         }
 
         function toast(msg, type = 'info') {
@@ -2093,7 +2097,7 @@ Analyze this JEE question image (${q.subject} - ${q.chapter}).
             }
         }
 
-        function updateCloudStatusUI(status = 'idle', detail = '', wavePct = null) {
+        function updateCloudStatusUI(status = 'idle', detail = '', completed = false) {
             const syncBtn = document.getElementById('syncHeaderBtn');
             const icon = document.getElementById('cloudStatusIcon');
             const txt = document.getElementById('cloudStatusText');
@@ -2105,7 +2109,7 @@ Analyze this JEE question image (${q.subject} - ${q.chapter}).
             const lastSync = localStorage.getItem('jee_cloud_last_sync') || '';
 
             if (!hasToken) {
-                setSyncButtonExpressiveState(false);
+                setSyncButtonExpressiveProgress(false);
                 if (settingsCloudWave) settingsCloudWave.classList.add('hidden');
                 syncBtn.classList.remove('active-state');
                 icon.className = 'ph-bold ph-cloud-slash text-sm';
@@ -2115,21 +2119,21 @@ Analyze this JEE question image (${q.subject} - ${q.chapter}).
             }
 
             if (status === 'syncing') {
-                setSyncButtonExpressiveState(true, wavePct);
+                setSyncButtonExpressiveProgress(true, completed);
                 if (settingsCloudWave) {
                     settingsCloudWave.classList.remove('hidden');
                     renderM3WavyProgress(settingsCloudWave, 75);
                 }
                 txt.textContent = detail || 'Sync';
             } else if (status === 'error') {
-                setSyncButtonExpressiveState(false);
+                setSyncButtonExpressiveProgress(false);
                 if (settingsCloudWave) settingsCloudWave.classList.add('hidden');
                 syncBtn.classList.remove('active-state');
                 icon.className = 'ph-bold ph-cloud-warning text-rose-400 text-sm';
                 txt.textContent = 'Err';
                 if (infoEl && detail) infoEl.textContent = `Last Cloud Error: ${detail}`;
             } else {
-                setSyncButtonExpressiveState(false);
+                setSyncButtonExpressiveProgress(false);
                 if (settingsCloudWave) settingsCloudWave.classList.add('hidden');
                 syncBtn.classList.remove('active-state');
                 icon.className = 'ph-bold ph-cloud-check text-sm';
@@ -2182,8 +2186,12 @@ Analyze this JEE question image (${q.subject} - ${q.chapter}).
         // GITHUB SECRET GIST CLOUD SYNC ENGINE
         // ===================================================================
         let cloudSyncTimer = null;
-        function scheduleCloudAutoSync() {
-            sortAndRefreshQuestions();
+        function scheduleCloudAutoSync(skipFullRender = false) {
+            if (!skipFullRender) {
+                sortAndRefreshQuestions();
+            } else {
+                refreshCountsAndDrawerOnly();
+            }
             if (!getGithubToken() || !isCloudAutoSyncEnabled() || state.isExtracting) return;
             clearTimeout(cloudSyncTimer);
             cloudSyncTimer = setTimeout(() => pushToCloudGist(false), 1200);
@@ -2290,9 +2298,9 @@ Analyze this JEE question image (${q.subject} - ${q.chapter}).
                     if (gistInp) gistInp.value = data.id;
                 }
 
-                setSyncButtonExpressiveState(true, 95);
+                setSyncButtonExpressiveProgress(true, true);
                 localStorage.setItem('jee_cloud_last_sync', new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }));
-                setTimeout(() => updateCloudStatusUI('idle'), 220);
+                setTimeout(() => updateCloudStatusUI('idle'), 260);
                 if (manualNotify) toast(`Synced ${state.questions.length} questions to GitHub Secret Gist!`, 'success');
             } catch (err) {
                 updateCloudStatusUI('error', err.message);
@@ -2362,7 +2370,7 @@ Analyze this JEE question image (${q.subject} - ${q.chapter}).
                     hint: r.hint || '',
                     answerKey: r.answerKey || ''
                 }));
-                setSyncButtonExpressiveState(true, 95);
+                setSyncButtonExpressiveProgress(true, true);
                 localStorage.setItem('jee_cloud_last_sync', new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }));
                 state.isSyncingCloud = false;
                 sortAndRefreshQuestions();
@@ -2967,7 +2975,7 @@ CRITICAL RULES FOR ZERO TEXT CLIPPING & ZERO CLUBBING:
             });
         }
 
-        function updateTopBarCountsAndPills() {
+        function refreshCountsAndDrawerOnly() {
             const all = state.questions;
             const scoped = all.filter(q => (state.subject === 'ALL' || q.subject === state.subject) && (state.chapter === 'ALL' || q.chapter === state.chapter));
             document.getElementById('status-count-UNSOLVED').textContent = scoped.filter(q => !q.solved).length;
@@ -2987,11 +2995,11 @@ CRITICAL RULES FOR ZERO TEXT CLIPPING & ZERO CLUBBING:
             if (paperLbl) {
                 paperLbl.textContent = state.paper === 'ALL' ? `All Papers (${papers.length})` : state.paper;
             }
+            renderDrawerChapters();
         }
 
         function renderAll() {
-            updateTopBarCountsAndPills();
-            renderDrawerChapters();
+            refreshCountsAndDrawerOnly();
             renderFeed();
         }
 
@@ -3076,18 +3084,18 @@ CRITICAL RULES FOR ZERO TEXT CLIPPING & ZERO CLUBBING:
             const shortSubj = q.subject === 'Mathematics' ? 'Maths' : q.subject;
 
             return `
-            <article id="qcard-${q.id}" class="m3-card min-w-0" style="${borderStyle}">
+            <article data-card-id="${q.id}" class="m3-card min-w-0" style="${borderStyle}">
                 <div class="px-2.5 py-1.5 m3-card-top-segment flex items-center justify-between gap-1.5 flex-nowrap overflow-x-auto no-scrollbar">
                     <div class="flex items-center gap-1.5 min-w-0 flex-nowrap">
                         <span class="w-7 h-7 m3-cookie-12 font-extrabold text-[10px] flex items-center justify-center shrink-0" style="background: var(--md-primary); color: var(--md-on-primary);">Q.${q.questionNumber}</span>
 
                         <div class="m3-card-dropdown-group shrink-0">
                             <button type="button" onclick="window.app.openCardSubjMenu(${q.id}, this)" class="m3-card-dropdown-btn">
-                                <span id="qcard-subj-${q.id}">${shortSubj}</span>
+                                <span class="card-subj-label">${shortSubj}</span>
                                 <i class="ph-bold ph-caret-down text-[9px] opacity-75"></i>
                             </button>
                             <button type="button" onclick="window.app.openCardChapMenu(${q.id}, this)" class="m3-card-dropdown-btn max-w-[135px] sm:max-w-[185px]">
-                                <span id="qcard-chap-${q.id}" class="truncate">${q.chapter}</span>
+                                <span class="card-chap-label truncate">${q.chapter}</span>
                                 <i class="ph-bold ph-caret-down text-[9px] opacity-75 shrink-0"></i>
                             </button>
                         </div>
@@ -3096,12 +3104,12 @@ CRITICAL RULES FOR ZERO TEXT CLIPPING & ZERO CLUBBING:
                     </div>
 
                     <div class="m3-icon-group m3-icon-group-card shrink-0 ml-auto">
-                        <button id="qcard-star-btn-${q.id}" onclick="window.app.toggleQBool(${q.id}, 'starred')" class="m3-icon-group-btn ${q.starred ? 'active-state' : ''}" title="Star">
-                            <i id="qcard-star-icon-${q.id}" class="${q.starred ? 'ph-fill ph-star' : 'ph-bold ph-star'}"></i>
+                        <button onclick="window.app.toggleQBool(${q.id}, 'starred')" class="card-star-btn m3-icon-group-btn ${q.starred ? 'active-state' : ''}" title="Star">
+                            <i class="${q.starred ? 'ph-fill ph-star' : 'ph-bold ph-star'}"></i>
                         </button>
 
-                        <button id="qcard-solved-btn-${q.id}" onclick="window.app.toggleQBool(${q.id}, 'solved')" class="m3-icon-group-btn ${q.solved ? 'active-state' : ''}" title="${q.solved ? 'Solved' : 'Unsolved'}">
-                            <i id="qcard-solved-icon-${q.id}" class="${q.solved ? 'ph-fill ph-check-circle' : 'ph-bold ph-circle'}"></i>
+                        <button onclick="window.app.toggleQBool(${q.id}, 'solved')" class="card-solved-btn m3-icon-group-btn ${q.solved ? 'active-state' : ''}" title="${q.solved ? 'Solved' : 'Unsolved'}">
+                            <i class="${q.solved ? 'ph-fill ph-check-circle' : 'ph-bold ph-circle'}"></i>
                         </button>
 
                         <button onclick="window.app.openSplitModal(${q.id})" class="m3-icon-group-btn" title="Split or Trim">
@@ -3186,12 +3194,16 @@ CRITICAL RULES FOR ZERO TEXT CLIPPING & ZERO CLUBBING:
         }
 
         // ===================================================================
-        // FULLSCREEN WHITE WHITEBOARD: UNIFIED ITEMS, GROUPING & CROP+DUP
+        // FULLSCREEN WHITE WHITEBOARD ENGINE:
+        // - Unified Object Model (Images, Cropped Regions, Strokes, Preset Shapes)
+        // - Duplicate Original Question Image or Any Object
+        // - Group / Ungroup Multiple Objects (`🔗 Group` / `Ungroup`)
+        // - Crop & Duplicate Tool (`✂️ Crop & Dup`)
         // ===================================================================
         function getActiveBoard() {
             const id = state.activePadId || 'default';
             if (!state.wbBoards[id]) {
-                state.wbBoards[id] = { items: [], undoStack: [], redoStack: [], initializedQImg: false };
+                state.wbBoards[id] = { items: [], undoStack: [], redoStack: [], initialized: false };
             }
             return state.wbBoards[id];
         }
@@ -3208,7 +3220,7 @@ CRITICAL RULES FOR ZERO TEXT CLIPPING & ZERO CLUBBING:
             });
         }
 
-        function pushBoardUndoSnapshot() {
+        function pushBoardUndoState() {
             const board = getActiveBoard();
             board.undoStack.push(cloneBoardItems(board.items));
             if (board.undoStack.length > 40) board.undoStack.shift();
@@ -3217,8 +3229,7 @@ CRITICAL RULES FOR ZERO TEXT CLIPPING & ZERO CLUBBING:
 
         function ensureQuestionImageOnBoard(q, callback) {
             const board = getActiveBoard();
-            const existingOrig = board.items.find(it => it.type === 'IMAGE' && it.isOriginalQuestion);
-            if (existingOrig && existingOrig.imgEl && existingOrig.src === q.imageDataUrl) {
+            if (board.initialized && board.items.some(it => it.isOriginalQ)) {
                 if (callback) callback();
                 return;
             }
@@ -3227,26 +3238,19 @@ CRITICAL RULES FOR ZERO TEXT CLIPPING & ZERO CLUBBING:
                 const targetW = Math.min(680, Math.max(400, Math.round(window.innerWidth * 0.45)));
                 const ratio = img.height / (img.width || 1);
                 const targetH = Math.round(targetW * ratio);
-                if (existingOrig) {
-                    existingOrig.src = q.imageDataUrl;
-                    existingOrig.imgEl = img;
-                    existingOrig.w = targetW;
-                    existingOrig.h = targetH;
-                } else {
-                    board.items.unshift({
-                        id: generateUniqueId(),
-                        type: 'IMAGE',
-                        isOriginalQuestion: true,
-                        x: 36,
-                        y: 44,
-                        w: targetW,
-                        h: targetH,
-                        src: q.imageDataUrl,
-                        imgEl: img,
-                        groupId: null
-                    });
-                }
-                board.initializedQImg = true;
+                board.items.unshift({
+                    id: generateUniqueId(),
+                    type: 'IMAGE',
+                    isOriginalQ: true,
+                    groupId: null,
+                    x: 36,
+                    y: 44,
+                    w: targetW,
+                    h: targetH,
+                    src: q.imageDataUrl,
+                    imgEl: img
+                });
+                board.initialized = true;
                 if (callback) callback();
             };
             img.src = q.imageDataUrl;
@@ -3255,12 +3259,7 @@ CRITICAL RULES FOR ZERO TEXT CLIPPING & ZERO CLUBBING:
         function getItemBounds(item) {
             if (!item) return null;
             if (item.type === 'IMAGE') {
-                return {
-                    minX: item.x,
-                    minY: item.y,
-                    maxX: item.x + item.w,
-                    maxY: item.y + item.h
-                };
+                return { minX: item.x, minY: item.y, maxX: item.x + item.w, maxY: item.y + item.h };
             }
             let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
             for (const p of (item.points || [])) {
@@ -3269,26 +3268,43 @@ CRITICAL RULES FOR ZERO TEXT CLIPPING & ZERO CLUBBING:
                 if (p.x > maxX) maxX = p.x;
                 if (p.y > maxY) maxY = p.y;
             }
-            const pad = Math.max(5, (item.width || 3.5));
+            const pad = Math.max(6, (item.width || 3.5));
             return { minX: minX - pad, minY: minY - pad, maxX: maxX + pad, maxY: maxY + pad };
         }
 
         function getCombinedSelectedBounds() {
             const board = getActiveBoard();
-            const selSet = new Set(state.wbSelectedIds);
-            const selectedItems = board.items.filter(it => selSet.has(it.id));
-            if (selectedItems.length === 0) return null;
-
+            if (!state.wbSelectedIds || state.wbSelectedIds.length === 0) return null;
             let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
-            for (const it of selectedItems) {
+            let found = false;
+
+            for (const id of state.wbSelectedIds) {
+                const it = board.items.find(i => i.id === id);
+                if (!it) continue;
                 const b = getItemBounds(it);
                 if (!b) continue;
+                found = true;
                 if (b.minX < minX) minX = b.minX;
                 if (b.minY < minY) minY = b.minY;
                 if (b.maxX > maxX) maxX = b.maxX;
                 if (b.maxY > maxY) maxY = b.maxY;
             }
-            return minX < Infinity ? { minX, minY, maxX, maxY } : null;
+            return found ? { minX, minY, maxX, maxY } : null;
+        }
+
+        function expandSelectionWithGroups(ids) {
+            const board = getActiveBoard();
+            const groupSet = new Set();
+            for (const id of ids) {
+                const it = board.items.find(i => i.id === id);
+                if (it && it.groupId) groupSet.add(it.groupId);
+            }
+            if (groupSet.size === 0) return Array.from(new Set(ids));
+            const finalIds = new Set(ids);
+            for (const it of board.items) {
+                if (it.groupId && groupSet.has(it.groupId)) finalIds.add(it.id);
+            }
+            return Array.from(finalIds);
         }
 
         function updateSelectionHudVisibility() {
@@ -3298,8 +3314,7 @@ CRITICAL RULES FOR ZERO TEXT CLIPPING & ZERO CLUBBING:
             if (!hud) return;
 
             const board = getActiveBoard();
-            const selSet = new Set(state.wbSelectedIds);
-            const selectedItems = board.items.filter(it => selSet.has(it.id));
+            const selectedItems = board.items.filter(it => state.wbSelectedIds.includes(it.id));
             const hasSel = selectedItems.length > 0;
 
             hud.classList.toggle('hidden', !hasSel);
@@ -3489,7 +3504,7 @@ CRITICAL RULES FOR ZERO TEXT CLIPPING & ZERO CLUBBING:
                     { x: cx + halfW, y: cy - halfH },
                     { x: cx + halfW, y: cy + halfH },
                     { x: cx - halfW, y: cy + halfH },
-                    { x: cx - halfW, y: cy - r * 0 || cy - halfH }
+                    { x: cx - halfW, y: cy - halfH }
                 ];
             }
 
@@ -3549,9 +3564,1369 @@ CRITICAL RULES FOR ZERO TEXT CLIPPING & ZERO CLUBBING:
             return null;
         }
 
-        // Crop a world-space rectangle (cropX, cropY, cropW, cropH) from the whiteboard and duplicate it as a movable IMAGE item!
-        function cropAndDuplicateWorldRect(cropX, cropY, cropW, cropH) {
+        // Helper to draw all board items onto any 2D context (used for both screen render & Crop-and-Duplicate!)
+        function drawBoardItemsToContext(ctx, items) {
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+            for (const item of items) {
+                if (item.type === 'IMAGE' && item.imgEl) {
+                    ctx.save();
+                    ctx.shadowColor = 'rgba(15, 23, 42, 0.1)';
+                    ctx.shadowBlur = 14 / state.wbScale;
+                    ctx.strokeStyle = 'rgba(148, 163, 184, 0.45)';
+                    ctx.lineWidth = 1.2 / state.wbScale;
+                    ctx.fillStyle = '#ffffff';
+                    ctx.fillRect(item.x, item.y, item.w, item.h);
+                    ctx.strokeRect(item.x, item.y, item.w, item.h);
+                    ctx.drawImage(item.imgEl, item.x, item.y, item.w, item.h);
+                    ctx.restore();
+                } else if (item.type === 'STROKE' && item.points && item.points.length > 0) {
+                    ctx.beginPath();
+                    ctx.strokeStyle = item.color === '#f8fafc' ? '#0f172a' : item.color;
+                    ctx.lineWidth = item.width;
+                    ctx.moveTo(item.points[0].x, item.points[0].y);
+                    for (let i = 1; i < item.points.length; i++) {
+                        ctx.lineTo(item.points[i].x, item.points[i].y);
+                    }
+                    ctx.stroke();
+                }
+            }
+        }
+
+        let activeOverlayRect = null; // { minX, minY, maxX, maxY, mode: 'MARQUEE' | 'CROP_DUP' }
+
+        function renderWhiteboardCanvas() {
+            const wrap = document.getElementById('padCanvasWrap');
+            const canvas = document.getElementById('stylusCanvas');
+            if (!wrap || !canvas) return;
+
+            const dpr = window.devicePixelRatio || 1;
+            const cw = wrap.clientWidth || 800;
+            const ch = wrap.clientHeight || 600;
+            if (canvas.width !== Math.round(cw * dpr) || canvas.height !== Math.round(ch * dpr)) {
+                canvas.width = Math.round(cw * dpr);
+                canvas.height = Math.round(ch * dpr);
+            }
+
+            const ctx = canvas.getContext('2d');
+            ctx.save();
+            ctx.scale(dpr, dpr);
+
+            // 1. Pure White Whiteboard Background
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, cw, ch);
+
+            // 2. Subtle Infinite Dot Grid
+            const baseStep = 34;
+            const screenStep = baseStep * state.wbScale;
+            if (screenStep >= 11) {
+                const offsetX = ((state.wbPanX % screenStep) + screenStep) % screenStep;
+                const offsetY = ((state.wbPanY % screenStep) + screenStep) % screenStep;
+                ctx.fillStyle = 'rgba(15, 23, 42, 0.14)';
+                const dotR = Math.max(0.9, Math.min(1.8, 1.15 * state.wbScale));
+                for (let x = offsetX; x < cw; x += screenStep) {
+                    for (let y = offsetY; y < ch; y += screenStep) {
+                        ctx.beginPath();
+                        ctx.arc(x, y, dotR, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                }
+            }
+
+            // 3. Apply Infinite Camera Transform
+            ctx.translate(state.wbPanX, state.wbPanY);
+            ctx.scale(state.wbScale, state.wbScale);
+
             const board = getActiveBoard();
-            const scale = 2.0;
-            const offCanvas = document.createElement('canvas');
-            offCanvas.width = Math.max(40, Math.round(cropW * scale));
+            drawBoardItemsToContext(ctx, board.items);
+
+            // 4. Draw Selection Box & 4 Corner Resize Handles
+            const selBounds = getCombinedSelectedBounds();
+            if (selBounds) {
+                const bw = selBounds.maxX - selBounds.minX;
+                const bh = selBounds.maxY - selBounds.minY;
+                const handleSize = 9 / state.wbScale;
+
+                ctx.save();
+                ctx.strokeStyle = '#2563eb';
+                ctx.lineWidth = 1.8 / state.wbScale;
+                ctx.setLineDash([6 / state.wbScale, 4 / state.wbScale]);
+                ctx.strokeRect(selBounds.minX, selBounds.minY, bw, bh);
+                ctx.setLineDash([]);
+
+                const corners = [
+                    { x: selBounds.minX, y: selBounds.minY },
+                    { x: selBounds.maxX, y: selBounds.minY },
+                    { x: selBounds.maxX, y: selBounds.maxY },
+                    { x: selBounds.minX, y: selBounds.maxY }
+                ];
+                ctx.fillStyle = '#ffffff';
+                ctx.strokeStyle = '#2563eb';
+                ctx.lineWidth = 2 / state.wbScale;
+                for (const c of corners) {
+                    ctx.beginPath();
+                    ctx.arc(c.x, c.y, handleSize * 0.65, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.stroke();
+                }
+                ctx.restore();
+            }
+
+            // 5. Draw Marquee Multi-Select Box or Crop & Duplicate Box
+            if (activeOverlayRect) {
+                const rw = activeOverlayRect.maxX - activeOverlayRect.minX;
+                const rh = activeOverlayRect.maxY - activeOverlayRect.minY;
+                ctx.save();
+                const isCrop = activeOverlayRect.mode === 'CROP_DUP';
+                ctx.fillStyle = isCrop ? 'rgba(16, 185, 129, 0.12)' : 'rgba(37, 99, 235, 0.08)';
+                ctx.strokeStyle = isCrop ? '#059669' : '#2563eb';
+                ctx.lineWidth = 2 / state.wbScale;
+                ctx.setLineDash([5 / state.wbScale, 4 / state.wbScale]);
+                ctx.fillRect(activeOverlayRect.minX, activeOverlayRect.minY, rw, rh);
+                ctx.strokeRect(activeOverlayRect.minX, activeOverlayRect.minY, rw, rh);
+                ctx.restore();
+            }
+
+            ctx.restore();
+
+            const zoomBadge = document.getElementById('wbZoomBadge');
+            if (zoomBadge) zoomBadge.textContent = `${Math.round(state.wbScale * 100)}%`;
+            updateSelectionHudVisibility();
+        }
+
+        function initStylusCanvas() {
+            const wrap = document.getElementById('padCanvasWrap');
+            const canvas = document.getElementById('stylusCanvas');
+            if (!wrap || !canvas) return;
+
+            renderWhiteboardCanvas();
+
+            const activePointers = new Map();
+            let currentStroke = null;
+            let lastPanMid = null;
+            let lastPinchDist = null;
+            let isSpacePressed = false;
+            let dragAction = null;
+
+            window.onkeydown = (e) => {
+                if (document.getElementById('scratchpadModal').classList.contains('hidden')) return;
+                if (e.code === 'Space') isSpacePressed = true;
+                if (e.key === 'Delete' || e.key === 'Backspace') {
+                    if (state.wbSelectedIds.length > 0) {
+                        e.preventDefault();
+                        window.app.deleteSelectedWhiteboardItem();
+                    }
+                }
+                if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z') {
+                    e.preventDefault();
+                    window.app.whiteboardUndo();
+                }
+                if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'y') {
+                    e.preventDefault();
+                    window.app.whiteboardRedo();
+                }
+            };
+            window.onkeyup = (e) => {
+                if (e.code === 'Space') isSpacePressed = false;
+            };
+
+            const screenToWorld = (sx, sy) => ({
+                x: (sx - state.wbPanX) / state.wbScale,
+                y: (sy - state.wbPanY) / state.wbScale
+            });
+
+            const distToSegment = (p, v, wPt) => {
+                const l2 = (wPt.x - v.x) ** 2 + (wPt.y - v.y) ** 2;
+                if (l2 === 0) return Math.hypot(p.x - v.x, p.y - v.y);
+                const t = Math.max(0, Math.min(1, ((p.x - v.x) * (wPt.x - v.x) + (p.y - v.y) * (wPt.y - v.y)) / l2));
+                return Math.hypot(p.x - (v.x + t * (wPt.x - v.x)), p.y - (v.y + t * (wPt.y - v.y)));
+            };
+
+            const hitTestCornerHandle = (wx, wy, bounds) => {
+                if (!bounds) return null;
+                const tol = 14 / state.wbScale;
+                const handles = {
+                    NW: { x: bounds.minX, y: bounds.minY },
+                    NE: { x: bounds.maxX, y: bounds.minY },
+                    SE: { x: bounds.maxX, y: bounds.maxY },
+                    SW: { x: bounds.minX, y: bounds.maxY }
+                };
+                for (const [k, pt] of Object.entries(handles)) {
+                    if (Math.hypot(wx - pt.x, wy - pt.y) <= tol) return k;
+                }
+                return null;
+            };
+
+            const hitTestWhiteboardItem = (wx, wy) => {
+                const board = getActiveBoard();
+                const hitTol = 12 / state.wbScale;
+
+                for (let i = board.items.length - 1; i >= 0; i--) {
+                    const it = board.items[i];
+                    if (it.type === 'STROKE') {
+                        const pts = it.points || [];
+                        for (let j = 0; j < pts.length; j++) {
+                            if (j > 0 && distToSegment({ x: wx, y: wy }, pts[j - 1], pts[j]) <= hitTol + it.width / 2) {
+                                return it;
+                            } else if (Math.hypot(wx - pts[j].x, wy - pts[j].y) <= hitTol) {
+                                return it;
+                            }
+                        }
+                        const b = getItemBounds(it);
+                        if (pts.length >= 4 && wx >= b.minX && wx <= b.maxX && wy >= b.minY && wy <= b.maxY) {
+                            return it;
+                        }
+                    } else if (it.type === 'IMAGE') {
+                        if (wx >= it.x && wx <= it.x + it.w && wy >= it.y && wy <= it.y + it.h) {
+                            return it;
+                        }
+                    }
+                }
+                return null;
+            };
+
+            const eraseStrokesNearWorldPt = (wx, wy) => {
+                const board = getActiveBoard();
+                const hitRadius = 15 / state.wbScale;
+                const hitStroke = board.items.find(it => {
+                    if (it.type !== 'STROKE') return false;
+                    return it.points.some((p, idx) => {
+                        if (idx > 0) return distToSegment({ x: wx, y: wy }, it.points[idx - 1], p) <= hitRadius;
+                        return Math.hypot(p.x - wx, p.y - wy) <= hitRadius;
+                    });
+                });
+                if (hitStroke) {
+                    pushBoardUndoState();
+                    board.items = board.items.filter(it => it.id !== hitStroke.id);
+                    state.wbSelectedIds = [];
+                    renderWhiteboardCanvas();
+                }
+            };
+
+            canvas.onpointerdown = (e) => {
+                closeCustomDropdown();
+                e.preventDefault();
+                canvas.setPointerCapture(e.pointerId);
+                const r = canvas.getBoundingClientRect();
+                const sx = e.clientX - r.left, sy = e.clientY - r.top;
+                activePointers.set(e.pointerId, { x: sx, y: sy });
+
+                if (activePointers.size === 2) {
+                    currentStroke = null;
+                    dragAction = null;
+                    activeOverlayRect = null;
+                    const pts = Array.from(activePointers.values());
+                    lastPanMid = { x: (pts[0].x + pts[1].x) / 2, y: (pts[0].y + pts[1].y) / 2 };
+                    lastPinchDist = Math.hypot(pts[1].x - pts[0].x, pts[1].y - pts[0].y);
+                    return;
+                }
+
+                if (state.wbTool === 'PAN' || isSpacePressed || e.button === 1) {
+                    lastPanMid = { x: sx, y: sy };
+                    return;
+                }
+
+                const wPt = screenToWorld(sx, sy);
+
+                // CROP & DUPLICATE TOOL
+                if (state.wbTool === 'CROP_DUP') {
+                    state.wbSelectedIds = [];
+                    dragAction = { mode: 'CROP_DUP', startWorld: wPt };
+                    activeOverlayRect = { minX: wPt.x, minY: wPt.y, maxX: wPt.x, maxY: wPt.y, mode: 'CROP_DUP' };
+                    renderWhiteboardCanvas();
+                    return;
+                }
+
+                // SELECT / MULTI-SELECT / MOVE / RESIZE TOOL
+                if (state.wbTool === 'SELECT') {
+                    const board = getActiveBoard();
+                    const currBounds = getCombinedSelectedBounds();
+                    const handle = hitTestCornerHandle(wPt.x, wPt.y, currBounds);
+
+                    if (handle && state.wbSelectedIds.length > 0) {
+                        pushBoardUndoState();
+                        dragAction = {
+                            mode: 'RESIZE',
+                            handle,
+                            origBounds: { ...currBounds },
+                            origItems: cloneBoardItems(board.items.filter(it => state.wbSelectedIds.includes(it.id)))
+                        };
+                        return;
+                    }
+
+                    // Check if clicking inside existing multi-selection box
+                    const clickedInsideExistingSelection = currBounds &&
+                        wPt.x >= currBounds.minX && wPt.x <= currBounds.maxX &&
+                        wPt.y >= currBounds.minY && wPt.y <= currBounds.maxY &&
+                        state.wbSelectedIds.length > 1;
+
+                    if (!clickedInsideExistingSelection) {
+                        const hit = hitTestWhiteboardItem(wPt.x, wPt.y);
+                        if (hit) {
+                            if (e.shiftKey) {
+                                const exists = state.wbSelectedIds.includes(hit.id);
+                                const rawIds = exists
+                                    ? state.wbSelectedIds.filter(id => id !== hit.id)
+                                    : [...state.wbSelectedIds, hit.id];
+                                state.wbSelectedIds = expandSelectionWithGroups(rawIds);
+                            } else if (!state.wbSelectedIds.includes(hit.id)) {
+                                state.wbSelectedIds = expandSelectionWithGroups([hit.id]);
+                            }
+                        } else {
+                            // Drag Marquee Box on Empty Space to Multi-Select Objects
+                            state.wbSelectedIds = [];
+                            dragAction = { mode: 'MARQUEE', startWorld: wPt };
+                            activeOverlayRect = { minX: wPt.x, minY: wPt.y, maxX: wPt.x, maxY: wPt.y, mode: 'MARQUEE' };
+                            renderWhiteboardCanvas();
+                            return;
+                        }
+                    }
+
+                    renderWhiteboardCanvas();
+                    if (state.wbSelectedIds.length > 0) {
+                        pushBoardUndoState();
+                        const newBounds = getCombinedSelectedBounds();
+                        dragAction = {
+                            mode: 'MOVE',
+                            startWorld: wPt,
+                            origBounds: { ...newBounds },
+                            origItems: cloneBoardItems(board.items.filter(it => state.wbSelectedIds.includes(it.id)))
+                        };
+                    }
+                    return;
+                }
+
+                state.wbSelectedIds = [];
+
+                if (state.wbTool === 'ERASER') {
+                    eraseStrokesNearWorldPt(wPt.x, wPt.y);
+                    return;
+                }
+
+                pushBoardUndoState();
+                const board = getActiveBoard();
+                currentStroke = {
+                    id: generateUniqueId(),
+                    type: 'STROKE',
+                    groupId: null,
+                    color: state.inkColor,
+                    width: state.strokeWidth,
+                    points: [wPt]
+                };
+                board.items.push(currentStroke);
+                renderWhiteboardCanvas();
+            };
+
+            canvas.onpointermove = (e) => {
+                if (!activePointers.has(e.pointerId)) return;
+                e.preventDefault();
+                const r = canvas.getBoundingClientRect();
+                const sx = e.clientX - r.left, sy = e.clientY - r.top;
+                activePointers.set(e.pointerId, { x: sx, y: sy });
+
+                if (activePointers.size === 2) {
+                    const pts = Array.from(activePointers.values());
+                    const mid = { x: (pts[0].x + pts[1].x) / 2, y: (pts[0].y + pts[1].y) / 2 };
+                    const dist = Math.hypot(pts[1].x - pts[0].x, pts[1].y - pts[0].y);
+
+                    if (lastPanMid && lastPinchDist > 10) {
+                        const zoomFactor = dist / lastPinchDist;
+                        const newScale = Math.max(0.2, Math.min(5.0, state.wbScale * zoomFactor));
+                        const worldMid = screenToWorld(lastPanMid.x, lastPanMid.y);
+                        state.wbScale = newScale;
+                        state.wbPanX = mid.x - worldMid.x * state.wbScale;
+                        state.wbPanY = mid.y - worldMid.y * state.wbScale;
+                    }
+                    lastPanMid = mid;
+                    lastPinchDist = dist;
+                    renderWhiteboardCanvas();
+                    return;
+                }
+
+                if (state.wbTool === 'PAN' || isSpacePressed || (e.buttons & 4)) {
+                    if (lastPanMid) {
+                        state.wbPanX += sx - lastPanMid.x;
+                        state.wbPanY += sy - lastPanMid.y;
+                        renderWhiteboardCanvas();
+                    }
+                    lastPanMid = { x: sx, y: sy };
+                    return;
+                }
+
+                const wPt = screenToWorld(sx, sy);
+
+                if (dragAction && (dragAction.mode === 'MARQUEE' || dragAction.mode === 'CROP_DUP')) {
+                    activeOverlayRect = {
+                        minX: Math.min(dragAction.startWorld.x, wPt.x),
+                        minY: Math.min(dragAction.startWorld.y, wPt.y),
+                        maxX: Math.max(dragAction.startWorld.x, wPt.x),
+                        maxY: Math.max(dragAction.startWorld.y, wPt.y),
+                        mode: dragAction.mode
+                    };
+                    renderWhiteboardCanvas();
+                    return;
+                }
+
+                if (state.wbTool === 'SELECT' && dragAction && state.wbSelectedIds.length > 0) {
+                    const board = getActiveBoard();
+
+                    if (dragAction.mode === 'MOVE') {
+                        const dx = wPt.x - dragAction.startWorld.x;
+                        const dy = wPt.y - dragAction.startWorld.y;
+                        for (const orig of dragAction.origItems) {
+                            const live = board.items.find(it => it.id === orig.id);
+                            if (!live) continue;
+                            if (live.type === 'IMAGE') {
+                                live.x = orig.x + dx;
+                                live.y = orig.y + dy;
+                            } else if (live.type === 'STROKE') {
+                                live.points = orig.points.map(p => ({ x: p.x + dx, y: p.y + dy }));
+                            }
+                        }
+                        renderWhiteboardCanvas();
+                        return;
+                    }
+
+                    if (dragAction.mode === 'RESIZE') {
+                        const ob = dragAction.origBounds;
+                        let newMinX = ob.minX, newMinY = ob.minY, newMaxX = ob.maxX, newMaxY = ob.maxY;
+                        if (dragAction.handle.includes('W')) newMinX = Math.min(wPt.x, ob.maxX - 24);
+                        if (dragAction.handle.includes('E')) newMaxX = Math.max(wPt.x, ob.minX + 24);
+                        if (dragAction.handle.includes('N')) newMinY = Math.min(wPt.y, ob.maxY - 24);
+                        if (dragAction.handle.includes('S')) newMaxY = Math.max(wPt.y, ob.minY + 24);
+
+                        const oldW = Math.max(1, ob.maxX - ob.minX);
+                        const oldH = Math.max(1, ob.maxY - ob.minY);
+                        const newW = Math.max(24, newMaxX - newMinX);
+                        const newH = Math.max(24, newMaxY - newMinY);
+
+                        for (const orig of dragAction.origItems) {
+                            const live = board.items.find(it => it.id === orig.id);
+                            if (!live) continue;
+                            if (live.type === 'IMAGE') {
+                                live.x = newMinX + ((orig.x - ob.minX) / oldW) * newW;
+                                live.y = newMinY + ((orig.y - ob.minY) / oldH) * newH;
+                                live.w = (orig.w / oldW) * newW;
+                                live.h = (orig.h / oldH) * newH;
+                            } else if (live.type === 'STROKE') {
+                                live.points = orig.points.map(p => ({
+                                    x: newMinX + ((p.x - ob.minX) / oldW) * newW,
+                                    y: newMinY + ((p.y - ob.minY) / oldH) * newH
+                                }));
+                            }
+                        }
+                        renderWhiteboardCanvas();
+                        return;
+                    }
+                }
+
+                if (state.wbTool === 'ERASER') {
+                    eraseStrokesNearWorldPt(wPt.x, wPt.y);
+                    return;
+                }
+
+                if (currentStroke) {
+                    currentStroke.points.push(wPt);
+                    renderWhiteboardCanvas();
+                }
+            };
+
+            const stopPointer = (e) => {
+                activePointers.delete(e.pointerId);
+                try { canvas.releasePointerCapture(e.pointerId); } catch (_) {}
+
+                if (activePointers.size < 2) {
+                    lastPinchDist = null;
+                    lastPanMid = null;
+                }
+
+                if (dragAction && dragAction.mode === 'MARQUEE' && activeOverlayRect) {
+                    const box = activeOverlayRect;
+                    activeOverlayRect = null;
+                    dragAction = null;
+                    const board = getActiveBoard();
+                    const hitIds = [];
+                    for (const it of board.items) {
+                        // Marquee selects drawn strokes/shapes & duplicated/cropped images (click question directly to select question)
+                        if (it.isOriginalQ) continue;
+                        const b = getItemBounds(it);
+                        if (b && b.maxX >= box.minX && b.minX <= box.maxX && b.maxY >= box.minY && b.minY <= box.maxY) {
+                            hitIds.push(it.id);
+                        }
+                    }
+                    state.wbSelectedIds = expandSelectionWithGroups(hitIds);
+                    renderWhiteboardCanvas();
+                    return;
+                }
+
+                if (dragAction && dragAction.mode === 'CROP_DUP' && activeOverlayRect) {
+                    const box = activeOverlayRect;
+                    activeOverlayRect = null;
+                    dragAction = null;
+                    const cw = box.maxX - box.minX, ch = box.maxY - box.minY;
+                    if (cw > 18 && ch > 18) {
+                        const board = getActiveBoard();
+                        const offScale = 2;
+                        const offCanvas = document.createElement('canvas');
+                        offCanvas.width = Math.round(cw * offScale);
+                        offCanvas.height = Math.round(ch * offScale);
+                        const oCtx = offCanvas.getContext('2d');
+                        oCtx.fillStyle = '#ffffff';
+                        oCtx.fillRect(0, 0, offCanvas.width, offCanvas.height);
+                        oCtx.scale(offScale, offScale);
+                        oCtx.translate(-box.minX, -box.minY);
+                        drawBoardItemsToContext(oCtx, board.items);
+
+                        const dataUrl = offCanvas.toDataURL('image/png');
+                        const croppedImg = new Image();
+                        croppedImg.onload = () => {
+                            pushBoardUndoState();
+                            const newItem = {
+                                id: generateUniqueId(),
+                                type: 'IMAGE',
+                                isOriginalQ: false,
+                                groupId: null,
+                                x: box.minX + 28,
+                                y: box.minY + 28,
+                                w: cw,
+                                h: ch,
+                                src: dataUrl,
+                                imgEl: croppedImg
+                            };
+                            board.items.push(newItem);
+                            state.wbSelectedIds = [newItem.id];
+                            window.app.setWhiteboardTool('SELECT');
+                            toast('Cropped & duplicated region! Drag to move or resize.', 'success');
+                        };
+                        croppedImg.src = dataUrl;
+                    } else {
+                        renderWhiteboardCanvas();
+                    }
+                    return;
+                }
+
+                dragAction = null;
+
+                if (currentStroke) {
+                    const snappedShapePts = recognizeAndConvertStrokeToShape(currentStroke.points);
+                    if (snappedShapePts) {
+                        currentStroke.points = snappedShapePts;
+                    }
+                    currentStroke = null;
+                    renderWhiteboardCanvas();
+                }
+            };
+
+            canvas.onpointerup = stopPointer;
+            canvas.onpointercancel = stopPointer;
+
+            canvas.onwheel = (e) => {
+                e.preventDefault();
+                const r = canvas.getBoundingClientRect();
+                const sx = e.clientX - r.left, sy = e.clientY - r.top;
+                const worldBefore = screenToWorld(sx, sy);
+                const factor = e.deltaY < 0 ? 1.12 : 0.89;
+                state.wbScale = Math.max(0.2, Math.min(5.0, state.wbScale * factor));
+                state.wbPanX = sx - worldBefore.x * state.wbScale;
+                state.wbPanY = sy - worldBefore.y * state.wbScale;
+                renderWhiteboardCanvas();
+            };
+        }
+
+        // ===================================================================
+        // GLOBAL APP CONTROLLER
+        // ===================================================================
+        window.app = {
+            isExtracting: () => state.isExtracting,
+            closeCustomDropdown,
+
+            openPaperMenu(anchorEl) {
+                const papers = Array.from(new Set(state.questions.map(q => q.paperName).filter(Boolean)));
+                const opts = [
+                    { value: 'ALL', label: `All Papers (${papers.length})` },
+                    ...papers.map(p => ({ value: p, label: p }))
+                ];
+                openCustomDropdown(anchorEl, opts, state.paper, (val) => this.setPaper(val));
+            },
+            openCardSubjMenu(id, anchorEl) {
+                const q = state.questions.find(i => i.id === Number(id));
+                if (!q) return;
+                const opts = [
+                    { value: 'Physics', label: 'Physics' },
+                    { value: 'Chemistry', label: 'Chemistry' },
+                    { value: 'Mathematics', label: 'Mathematics' }
+                ];
+                openCustomDropdown(anchorEl, opts, q.subject, (val) => this.updateQField(id, 'subject', val));
+            },
+            openCardChapMenu(id, anchorEl) {
+                const q = state.questions.find(i => i.id === Number(id));
+                if (!q) return;
+                const chaps = JEE_CHAPTERS[q.subject] || JEE_CHAPTERS.Physics;
+                const opts = chaps.map(c => ({ value: c, label: c }));
+                openCustomDropdown(anchorEl, opts, q.chapter, (val) => this.updateQField(id, 'chapter', val));
+            },
+            openGeminiModelMenu(anchorEl) {
+                openCustomDropdown(anchorEl, GEMINI_MODELS, getSelectedModel(), (val, lbl) => {
+                    state.selectedModel = val;
+                    localStorage.setItem('jee_gemini_model', val);
+                    const labelEl = document.getElementById('geminiModelDropdownLabel');
+                    if (labelEl) labelEl.textContent = lbl;
+                });
+            },
+            openInsertShapeMenu(anchorEl) {
+                openCustomDropdown(anchorEl, PRESET_SHAPES, '', (shapeType) => {
+                    this.insertPresetShape(shapeType);
+                });
+            },
+            openInkStyleMenu(anchorEl) {
+                const opts = [
+                    ...WHITEBOARD_COLORS.map(c => ({ value: `COLOR:${c.value}`, label: c.label, colorDot: c.value })),
+                    ...STROKE_WIDTHS.map(w => ({ value: `WIDTH:${w.value}`, label: `Thickness: ${w.label}` }))
+                ];
+                const currKey = `COLOR:${state.inkColor}`;
+                openCustomDropdown(anchorEl, opts, currKey, (val) => {
+                    if (String(val).startsWith('COLOR:')) {
+                        const col = val.replace('COLOR:', '');
+                        this.setInk(col);
+                    } else if (String(val).startsWith('WIDTH:')) {
+                        const w = Number(val.replace('WIDTH:', ''));
+                        this.setStrokeWidth(w);
+                    }
+                });
+            },
+
+            handleFeedScroll(el) {
+                closeCustomDropdown();
+                const fab = document.getElementById('extendedAddPdfFab');
+                if (!fab || !el) return;
+                const st = el.scrollTop;
+                if (st > state.lastScrollTop + 14 && st > 60) {
+                    fab.classList.add('fab-hidden');
+                } else if (st < state.lastScrollTop - 8 || st < 40) {
+                    fab.classList.remove('fab-hidden');
+                }
+                state.lastScrollTop = Math.max(0, st);
+            },
+
+            toggleDrawer(force) {
+                closeCustomDropdown();
+                const d = document.getElementById('chaptersDrawer');
+                const b = document.getElementById('drawerBackdrop');
+                const open = typeof force === 'boolean' ? force : d.classList.contains('-translate-x-full');
+                d.classList.toggle('-translate-x-full', !open);
+                b.classList.toggle('hidden', !open);
+            },
+            selectSubjectChapter(subj, chap) {
+                state.subject = subj;
+                state.chapter = chap;
+                this.toggleDrawer(false);
+                renderAll();
+            },
+            setStatus(st) { state.status = st; renderAll(); },
+            setPaper(p) { state.paper = p; renderAll(); },
+            setSearch(v) {
+                state.search = v || '';
+                document.getElementById('clearSearchBtn')?.classList.toggle('hidden', !state.search.trim());
+                renderFeed();
+            },
+            clearSearch() {
+                state.search = '';
+                const inp = document.getElementById('searchBox');
+                if (inp) inp.value = '';
+                document.getElementById('clearSearchBtn')?.classList.add('hidden');
+                renderFeed();
+            },
+            renderDrawerChapters,
+            runBackgroundLocalOcrForExistingQuestions,
+            runBackgroundAnswerAndHintGenerator,
+
+            setMaterialTheme(hexColor) {
+                applyMaterialThemeFromSeed(hexColor, getThemeMode());
+                toast(`Applied Material 3 Expressive Theme (${hexColor})`, 'success');
+            },
+            setThemeMode(mode) {
+                applyMaterialThemeFromSeed(localStorage.getItem('jee_m3_seed_color') || '#7c3aed', mode);
+                toast(`Switched to Material 3 Expressive ${mode === 'light' ? 'Light' : 'Dark'} Mode`, 'success');
+            },
+
+            toggleFullscreen() {
+                const icon = document.getElementById('fullscreenIcon');
+                if (!document.fullscreenElement) {
+                    document.documentElement.requestFullscreen().catch(err => toast(`Fullscreen error: ${err.message}`, 'warn'));
+                    if (icon) icon.className = 'ph-bold ph-corners-in text-sm';
+                } else {
+                    document.exitFullscreen().catch(() => {});
+                    if (icon) icon.className = 'ph-bold ph-corners-out text-sm';
+                }
+            },
+
+            pushToCloudGist,
+            pullFromCloudGist,
+            handleCloudBadgeClick() {
+                if (!getGithubToken()) this.openSettingsModal(false, 'KEYS');
+                else pushToCloudGist(true);
+            },
+            toggleVisibility(inputId, iconId) {
+                const inp = document.getElementById(inputId);
+                const icon = document.getElementById(iconId);
+                if (!inp || !icon) return;
+                const isPwd = inp.type === 'password';
+                inp.type = isPwd ? 'text' : 'password';
+                icon.className = isPwd ? 'ph-bold ph-eye-slash text-base' : 'ph-bold ph-eye text-base';
+            },
+
+            getActivePopupId: () => state.activePopupId,
+            openImagePopup(id) {
+                closeCustomDropdown();
+                const q = state.questions.find(i => i.id === Number(id));
+                if (!q) return;
+                state.activePopupId = q.id;
+                document.getElementById('popupQBadge').textContent = `Q.${q.questionNumber}`;
+                document.getElementById('popupSubjChap').textContent = `${q.subject} • ${q.chapter}`;
+                document.getElementById('popupImageEl').src = q.imageDataUrl;
+                document.getElementById('imagePopupModal').classList.remove('hidden');
+            },
+            closeImagePopup() {
+                closeCustomDropdown();
+                document.getElementById('imagePopupModal').classList.add('hidden');
+                document.getElementById('popupImageEl').src = '';
+                state.activePopupId = null;
+            },
+
+            openSettingsPage(pageKey = 'HOME') {
+                closeCustomDropdown();
+                state.activeSettingsPage = pageKey;
+                ['HOME', 'KEYS', 'THEME', 'BACKUP', 'SCANNER'].forEach(p => {
+                    document.getElementById(`settingsPage_${p}`)?.classList.toggle('hidden', p !== pageKey);
+                });
+                const backBtn = document.getElementById('settingsBackBtn');
+                const headerIcon = document.getElementById('settingsHeaderIcon');
+                const titleEl = document.getElementById('settingsHeaderTitle');
+
+                if (pageKey === 'HOME') {
+                    backBtn.classList.add('hidden'); backBtn.classList.remove('flex');
+                    headerIcon.classList.remove('hidden');
+                    titleEl.textContent = 'Settings';
+                } else {
+                    backBtn.classList.remove('hidden'); backBtn.classList.add('flex');
+                    headerIcon.classList.add('hidden');
+                    const titles = {
+                        KEYS: 'API Keys & Cloud Credentials',
+                        THEME: 'Appearance & Material You Theme',
+                        BACKUP: 'Cloud Sync, Export & Vault Tools',
+                        SCANNER: 'AI Answer Key, Hints & Scanner'
+                    };
+                    titleEl.textContent = titles[pageKey] || 'Settings';
+                }
+            },
+
+            openSettingsModal(showMissingAlert = false, initialPage = 'HOME') {
+                closeCustomDropdown();
+                document.getElementById('apiKeyInput').value = getApiKey();
+                const currentMod = GEMINI_MODELS.find(m => m.value === getSelectedModel()) || GEMINI_MODELS[0];
+                const modLbl = document.getElementById('geminiModelDropdownLabel');
+                if (modLbl) modLbl.textContent = currentMod.label;
+
+                const pads = getVerticalPads();
+                document.getElementById('padTopInput').value = pads.padTop;
+                document.getElementById('padBottomInput').value = pads.padBottom;
+                document.getElementById('githubTokenInput').value = getGithubToken();
+                document.getElementById('githubGistIdInput').value = getGithubGistId();
+                document.getElementById('cloudAutoSyncCheckbox').checked = isCloudAutoSyncEnabled();
+                const autoSolveChk = document.getElementById('autoSolveHintsCheckbox');
+                if (autoSolveChk) autoSolveChk.checked = isAutoSolveHintsEnabled();
+
+                const infoEl = document.getElementById('settingsSolverStatusInfo');
+                if (infoEl && !state.isRunningBackgroundSolver) {
+                    const withHints = state.questions.filter(q => q.hint && q.answerKey).length;
+                    infoEl.textContent = `Solved: ${withHints} / ${state.questions.length} questions have Answer Keys & 1-Line Hints in Cloud Gist.`;
+                }
+
+                document.getElementById('apiKeyMissingAlert').classList.toggle('hidden', !showMissingAlert);
+                updateCloudStatusUI(state.isSyncingCloud ? 'syncing' : 'idle');
+                this.openSettingsPage(showMissingAlert ? 'KEYS' : initialPage);
+                document.getElementById('settingsModal').classList.remove('hidden');
+            },
+            closeSettingsModal() {
+                closeCustomDropdown();
+                document.getElementById('settingsModal').classList.add('hidden');
+            },
+            async saveSettings(closeModalAfter = true) {
+                closeCustomDropdown();
+                const key = document.getElementById('apiKeyInput').value.trim();
+                const model = getSelectedModel();
+                const padTop = Math.max(0, Number(document.getElementById('padTopInput').value) ?? 10);
+                const padBottom = Math.max(0, Number(document.getElementById('padBottomInput').value) ?? 10);
+                const ghToken = document.getElementById('githubTokenInput').value.trim();
+                const ghGistId = document.getElementById('githubGistIdInput').value.trim();
+                const autoSync = document.getElementById('cloudAutoSyncCheckbox').checked;
+                const autoSolve = document.getElementById('autoSolveHintsCheckbox')?.checked ?? true;
+
+                localStorage.setItem('jee_gemini_api_key', key);
+                localStorage.setItem('jee_gemini_model', model);
+                localStorage.setItem('jee_pad_top', String(padTop));
+                localStorage.setItem('jee_pad_bottom', String(padBottom));
+                localStorage.setItem('jee_github_pat', ghToken);
+                localStorage.setItem('jee_github_gist_id', ghGistId);
+                localStorage.setItem('jee_cloud_autosync', String(autoSync));
+                localStorage.setItem('jee_auto_solve_hints', String(autoSolve));
+
+                updateApiKeyIndicator();
+                updateCloudStatusUI('idle');
+                if (closeModalAfter) this.closeSettingsModal();
+                toast('Saved Settings Locally!', 'success');
+
+                if (ghToken) {
+                    if (state.questions.length === 0) await pullFromCloudGist(true);
+                    else if (autoSync) scheduleCloudAutoSync();
+                }
+            },
+
+            // Glitch-free in-place card updates (no full feed re-render unless filtered out)
+            toggleQBool(id, field) {
+                const q = state.questions.find(i => i.id === Number(id));
+                if (!q) return;
+                q[field] = !q[field];
+
+                const stillMatches = getFiltered().some(item => item.id === q.id);
+                const cardEl = document.querySelector(`article[data-card-id="${q.id}"]`);
+                if (stillMatches && cardEl) {
+                    cardEl.style.borderColor = q.starred ? 'var(--md-primary)' : (q.solved ? '#10b981' : 'var(--md-outline-variant)');
+                    const starBtn = cardEl.querySelector('.card-star-btn');
+                    const solvedBtn = cardEl.querySelector('.card-solved-btn');
+                    if (starBtn) {
+                        starBtn.classList.toggle('active-state', Boolean(q.starred));
+                        starBtn.innerHTML = `<i class="${q.starred ? 'ph-fill ph-star' : 'ph-bold ph-star'}"></i>`;
+                    }
+                    if (solvedBtn) {
+                        solvedBtn.classList.toggle('active-state', Boolean(q.solved));
+                        solvedBtn.innerHTML = `<i class="${q.solved ? 'ph-fill ph-check-circle' : 'ph-bold ph-circle'}"></i>`;
+                    }
+                    scheduleCloudAutoSync(true);
+                } else {
+                    scheduleCloudAutoSync(false);
+                }
+            },
+            updateQField(id, field, val) {
+                const q = state.questions.find(i => i.id === Number(id));
+                if (!q) return;
+                q[field] = val;
+                if (field === 'subject') q.chapter = JEE_CHAPTERS[val]?.[0] || 'General';
+
+                const stillMatches = getFiltered().some(item => item.id === q.id);
+                const cardEl = document.querySelector(`article[data-card-id="${q.id}"]`);
+                if (stillMatches && cardEl) {
+                    const subjLbl = cardEl.querySelector('.card-subj-label');
+                    const chapLbl = cardEl.querySelector('.card-chap-label');
+                    if (subjLbl) subjLbl.textContent = q.subject === 'Mathematics' ? 'Maths' : q.subject;
+                    if (chapLbl) chapLbl.textContent = q.chapter;
+                    scheduleCloudAutoSync(true);
+                } else {
+                    scheduleCloudAutoSync(false);
+                }
+            },
+            deleteQ(id) {
+                state.questions = state.questions.filter(i => i.id !== Number(id));
+                scheduleCloudAutoSync();
+                toast('Question deleted & syncing to Cloud');
+            },
+
+            confirmClearVault() {
+                closeCustomDropdown();
+                if (state.questions.length === 0) return toast('Question vault is already empty!', 'info');
+                document.getElementById('clearConfirmCount').textContent = state.questions.length;
+                const chk = document.getElementById('clearVaultDoubleCheck');
+                const btn = document.getElementById('finalClearVaultBtn');
+                if (chk) chk.checked = false;
+                if (btn) btn.disabled = true;
+                document.getElementById('clearConfirmModal').classList.remove('hidden');
+            },
+            closeClearConfirmModal() {
+                document.getElementById('clearConfirmModal').classList.add('hidden');
+            },
+            executeClearVault() {
+                const chk = document.getElementById('clearVaultDoubleCheck');
+                if (!chk || !chk.checked) return;
+                state.questions = [];
+                this.closeClearConfirmModal();
+                this.toggleDrawer(false);
+                scheduleCloudAutoSync();
+                toast('Permanently deleted all questions & synced to Cloud', 'warn');
+            },
+
+            runDeduplication(notify = false) {
+                const seen = new Set();
+                const unique = [];
+                let removed = 0;
+                for (const q of state.questions) {
+                    const key = `${(q.paperName || '').toLowerCase()}::${q.subject}::${String(q.questionNumber).trim()}`;
+                    if (seen.has(key)) removed++;
+                    else { seen.add(key); unique.push(q); }
+                }
+                if (removed > 0) { state.questions = unique; scheduleCloudAutoSync(); }
+                if (notify) toast(removed > 0 ? `Removed ${removed} duplicate questions!` : 'No duplicate questions found ✓', 'success');
+            },
+
+            exportBackupJson,
+            importBackupJson,
+
+            openUploadModal() {
+                closeCustomDropdown();
+                if (state.isExtracting && state.isUploadMinimized) {
+                    this.restoreUploadModal();
+                    return;
+                }
+                setUploadButtonsLock(false);
+                document.getElementById('uploadSetupView').classList.remove('hidden');
+                document.getElementById('uploadProgressView').classList.add('hidden');
+                document.getElementById('uploadModal').classList.remove('hidden');
+            },
+            minimizeUploadModal() {
+                if (!state.isExtracting) return;
+                closeCustomDropdown();
+                state.isUploadMinimized = true;
+                document.getElementById('uploadModal').classList.add('hidden');
+                const minBar = document.getElementById('minimizedUploadBar');
+                if (minBar) {
+                    minBar.classList.remove('hidden');
+                    minBar.classList.add('flex');
+                }
+                if (!waveAnimFrame) waveAnimFrame = requestAnimationFrame(stepAllWavyBars);
+            },
+            restoreUploadModal() {
+                closeCustomDropdown();
+                state.isUploadMinimized = false;
+                const minBar = document.getElementById('minimizedUploadBar');
+                if (minBar) {
+                    minBar.classList.add('hidden');
+                    minBar.classList.remove('flex');
+                }
+                document.getElementById('uploadModal').classList.remove('hidden');
+                if (!waveAnimFrame) waveAnimFrame = requestAnimationFrame(stepAllWavyBars);
+            },
+            closeUploadModal() {
+                closeCustomDropdown();
+                if (!state.isExtracting) document.getElementById('uploadModal').classList.add('hidden');
+            },
+            onPdfSelected,
+            startPdfExtraction,
+            cancelPdfExtraction,
+
+            openSplitModal(id) {
+                closeCustomDropdown();
+                const q = state.questions.find(i => i.id === Number(id));
+                if (!q) return;
+                state.activeSplitId = Number(id);
+                document.getElementById('splitPreviewImg').src = q.imageDataUrl;
+                document.getElementById('splitCutSlider').value = 50;
+                document.getElementById('trimTopSlider').value = 0;
+                document.getElementById('trimBotSlider').value = 100;
+                this.setSplitMode('SPLIT');
+                document.getElementById('splitModal').classList.remove('hidden');
+            },
+            closeSplitModal() {
+                closeCustomDropdown();
+                document.getElementById('splitModal').classList.add('hidden');
+                state.activeSplitId = null;
+            },
+            setSplitMode(m) {
+                state.splitMode = m;
+                const isSplit = m === 'SPLIT';
+                document.getElementById('modeSplitBtn').classList.toggle('active', isSplit);
+                document.getElementById('modeTrimBtn').classList.toggle('active', !isSplit);
+                document.getElementById('splitRangeWrap').classList.toggle('hidden', !isSplit);
+                document.getElementById('trimRangeWrap').classList.toggle('hidden', isSplit);
+                document.getElementById('trimRangeWrap').classList.toggle('flex', !isSplit);
+                document.getElementById('splitDividerLine').classList.toggle('hidden', !isSplit);
+                document.getElementById('trimTopMask').classList.toggle('hidden', isSplit);
+                document.getElementById('trimBotMask').classList.toggle('hidden', isSplit);
+                document.getElementById('splitConfirmLabel').textContent = isSplit ? 'Split into 2 Questions Now' : 'Save Trimmed Crop';
+                this.updateSplitPreview();
+            },
+            updateSplitPreview() {
+                if (state.splitMode === 'SPLIT') {
+                    const v = document.getElementById('splitCutSlider').value;
+                    document.getElementById('splitCutVal').textContent = `${v}%`;
+                    document.getElementById('splitDividerLine').style.top = `${v}%`;
+                } else {
+                    const t = document.getElementById('trimTopSlider').value;
+                    const b = document.getElementById('trimBotSlider').value;
+                    document.getElementById('trimTopMask').style.height = `${t}%`;
+                    document.getElementById('trimBotMask').style.height = `${100 - b}%`;
+                }
+            },
+            async confirmSplitOrTrim() {
+                const q = state.questions.find(i => i.id === state.activeSplitId);
+                if (!q) return;
+                const img = new Image();
+                await new Promise(r => { img.onload = r; img.src = q.imageDataUrl; });
+
+                if (state.splitMode === 'SPLIT') {
+                    const cutY = Math.floor(img.height * (Number(document.getElementById('splitCutSlider').value) / 100));
+
+                    const c1Raw = document.createElement('canvas');
+                    c1Raw.width = img.width; c1Raw.height = cutY;
+                    c1Raw.getContext('2d').drawImage(img, 0, 0, img.width, cutY, 0, 0, img.width, cutY);
+                    const c1 = autoTrimVerticalWhitespace(c1Raw);
+
+                    const c2Raw = document.createElement('canvas');
+                    c2Raw.width = img.width; c2Raw.height = Math.max(20, img.height - cutY);
+                    c2Raw.getContext('2d').drawImage(img, 0, cutY, img.width, img.height - cutY, 0, 0, img.width, img.height - cutY);
+                    const c2 = autoTrimVerticalWhitespace(c2Raw);
+
+                    const baseNum = String(q.questionNumber).replace(/[ab]$/i, '');
+                    q.questionNumber = `${baseNum}a`;
+                    q.imageDataUrl = c1.toDataURL('image/jpeg', 0.88);
+                    q.aspectRatio = c1.height / c1.width;
+                    q.ocrText = '';
+                    q.hint = '';
+                    q.answerKey = '';
+
+                    state.questions.push({
+                        ...q,
+                        id: generateUniqueId(),
+                        questionNumber: `${baseNum}b`,
+                        imageDataUrl: c2.toDataURL('image/jpeg', 0.88),
+                        aspectRatio: c2.height / c2.width,
+                        ocrText: '',
+                        hint: '',
+                        answerKey: '',
+                        solved: false,
+                        createdAt: (q.createdAt || Date.now()) + 1
+                    });
+                    scheduleCloudAutoSync();
+                    toast(`Split into Q.${baseNum}a & Q.${baseNum}b!`, 'success');
+                    runBackgroundLocalOcrForExistingQuestions(false);
+                    if (isAutoSolveHintsEnabled()) runBackgroundAnswerAndHintGenerator(false, false);
+                } else {
+                    const t = Number(document.getElementById('trimTopSlider').value) / 100;
+                    const b = Number(document.getElementById('trimBotSlider').value) / 100;
+                    const sy = Math.floor(img.height * t);
+                    const sh = Math.max(30, Math.floor(img.height * (b - t)));
+                    const c = document.createElement('canvas');
+                    c.width = img.width; c.height = sh;
+                    c.getContext('2d').drawImage(img, 0, sy, img.width, sh, 0, 0, img.width, sh);
+                    q.imageDataUrl = c.toDataURL('image/jpeg', 0.88);
+                    q.aspectRatio = c.height / c.width;
+                    scheduleCloudAutoSync();
+                    toast('Saved trimmed vertical crop!', 'success');
+                }
+                this.closeSplitModal();
+            },
+
+            // Fullscreen White Whiteboard + Group/Ungroup + Duplicate Question + Crop & Duplicate
+            getActivePadId: () => state.activePadId,
+            openScratchpad(id) {
+                closeCustomDropdown();
+                const q = state.questions.find(i => i.id === Number(id));
+                if (!q) return;
+                state.activePadId = Number(id);
+                state.padShowHint = false;
+                state.padShowAns = false;
+                state.wbSelectedIds = [];
+                state.wbScale = 1.0;
+                state.wbPanX = 0;
+                state.wbPanY = 0;
+
+                refreshScratchpadTopBarAndHints();
+                document.getElementById('scratchpadModal').classList.remove('hidden');
+                ensureQuestionImageOnBoard(q, () => {
+                    initStylusCanvas();
+                });
+            },
+            closeScratchpad() {
+                closeCustomDropdown();
+                state.wbSelectedIds = [];
+                document.getElementById('scratchpadModal').classList.add('hidden');
+            },
+            navigatePadQuestion(dir) {
+                closeCustomDropdown();
+                const q = state.questions.find(i => i.id === Number(state.activePadId));
+                if (!q) return;
+                const filtered = getFiltered();
+                const activeList = filtered.some(item => item.id === q.id) ? filtered : state.questions;
+                const idx = activeList.findIndex(item => item.id === q.id);
+                const nextQ = activeList[idx + dir];
+                if (!nextQ) return;
+                this.openScratchpad(nextQ.id);
+            },
+            togglePadQuestionBool(field) {
+                const q = state.questions.find(i => i.id === Number(state.activePadId));
+                if (!q) return;
+                q[field] = !q[field];
+                refreshScratchpadTopBarAndHints();
+                scheduleCloudAutoSync(true);
+            },
+            togglePadHint() {
+                state.padShowHint = !state.padShowHint;
+                refreshScratchpadTopBarAndHints();
+            },
+            togglePadAnswer() {
+                state.padShowAns = !state.padShowAns;
+                refreshScratchpadTopBarAndHints();
+            },
+            async solveActivePadQuestionNow() {
+                const q = state.questions.find(i => i.id === Number(state.activePadId));
+                if (!q) return;
+                if (!getApiKey()) {
+                    this.openSettingsModal(true, 'KEYS');
+                    return toast('Please save your Gemini API Key first!', 'warn');
+                }
+                const btnLbl = document.getElementById('padSolveNowBtnLabel');
+                if (btnLbl) btnLbl.textContent = 'Solving with Gemini...';
+                try {
+                    const res = await fetchSingleQuestionAnswerAndHint(q);
+                    if (res) {
+                        q.answerKey = res.answerKey || 'N/A';
+                        q.hint = res.hint || 'Use core conservation laws.';
+                        state.padShowHint = true;
+                        refreshScratchpadTopBarAndHints();
+                        scheduleCloudAutoSync(true);
+                        toast(`Generated Answer Key & 1-Line Hint for Q.${q.questionNumber}!`, 'success');
+                    }
+                } catch (err) {
+                    toast(`Failed to generate hint: ${err.message}`, 'warn');
+                } finally {
+                    if (btnLbl) btnLbl.textContent = 'Generate with Gemini';
+                }
+            },
+            setWhiteboardTool(tool) {
+                state.wbTool = tool;
+                if (tool !== 'SELECT') state.wbSelectedIds = [];
+                document.getElementById('wbToolSelectBtn')?.classList.toggle('active-state', tool === 'SELECT');
+                document.getElementById('wbToolCropDupBtn')?.classList.toggle('active-state', tool === 'CROP_DUP');
+                document.getElementById('wbToolPenBtn')?.classList.toggle('active-state', tool === 'PEN');
+                document.getElementById('wbToolPanBtn')?.classList.toggle('active-state', tool === 'PAN');
+                document.getElementById('eraserBtn')?.classList.toggle('active-state', tool === 'ERASER');
+                const canvas = document.getElementById('stylusCanvas');
+                if (canvas) {
+                    canvas.style.cursor = tool === 'PAN' ? 'grab' : (tool === 'ERASER' ? 'cell' : (tool === 'SELECT' ? 'default' : 'crosshair'));
+                }
+                renderWhiteboardCanvas();
+            },
+            insertPresetShape(shapeType) {
+                const wrap = document.getElementById('padCanvasWrap');
+                if (!wrap) return;
+                const cx = (wrap.clientWidth * 0.65 - state.wbPanX) / state.wbScale;
+                const cy = (wrap.clientHeight * 0.45 - state.wbPanY) / state.wbScale;
+                const pts = createPresetShapePoints(shapeType, cx, cy);
+                if (!pts) return;
+
+                pushBoardUndoState();
+                const board = getActiveBoard();
+                const newItem = {
+                    id: generateUniqueId(),
+                    type: 'STROKE',
+                    groupId: null,
+                    color: state.inkColor,
+                    width: state.strokeWidth,
+                    points: pts
+                };
+                board.items.push(newItem);
+                state.wbSelectedIds = [newItem.id];
+                this.setWhiteboardTool('SELECT');
+                renderWhiteboardCanvas();
+            },
+            groupSelectedWhiteboardItems() {
+                const board = getActiveBoard();
+                if (state.wbSelectedIds.length < 2) return;
+                pushBoardUndoState();
+                const newGroupId = 'grp_' + generateUniqueId();
+                for (const it of board.items) {
+                    if (state.wbSelectedIds.includes(it.id)) {
+                        it.groupId = newGroupId;
+                    }
+                }
+                renderWhiteboardCanvas();
+                toast(`Grouped ${state.wbSelectedIds.length} objects together!`, 'success');
+            },
+            ungroupSelectedWhiteboardItems() {
+                const board = getActiveBoard();
+                pushBoardUndoState();
+                for (const it of board.items) {
+                    if (state.wbSelectedIds.includes(it.id)) {
+                        it.groupId = null;
+                    }
+                }
+                renderWhiteboardCanvas();
+                toast('Ungrouped selected objects', 'info');
+            },
+            duplicateSelectedWhiteboardItem() {
+                const board = getActiveBoard();
+                if (state.wbSelectedIds.length === 0) {
+                    return toast('Select the question image, a shape, or a group first to duplicate it', 'info');
+                }
+                pushBoardUndoState();
+                const offset = 28 / state.wbScale;
+                const newGroupMap = new Map();
+                const newSelectedIds = [];
+
+                for (const id of state.wbSelectedIds) {
+                    const orig = board.items.find(it => it.id === id);
+                    if (!orig) continue;
+                    let newGroupId = null;
+                    if (orig.groupId) {
+                        if (!newGroupMap.has(orig.groupId)) newGroupMap.set(orig.groupId, 'grp_' + generateUniqueId());
+                        newGroupId = newGroupMap.get(orig.groupId);
+                    }
+                    const newId = generateUniqueId();
+                    newSelectedIds.push(newId);
+
+                    if (orig.type === 'IMAGE') {
+                        board.items.push({
+                            ...orig,
+                            id: newId,
+                            isOriginalQ: false,
+                            groupId: newGroupId,
+                            x: orig.x + offset,
+                            y: orig.y + offset
+                        });
+                    } else if (orig.type === 'STROKE') {
+                        board.items.push({
+                            ...orig,
+                            id: newId,
+                            groupId: newGroupId,
+                            points: orig.points.map(p => ({ x: p.x + offset, y: p.y + offset }))
+                        });
+                    }
+                }
+                state.wbSelectedIds = newSelectedIds;
+                renderWhiteboardCanvas();
+                toast('Duplicated selection!', 'success');
+            },
+            deleteSelectedWhiteboardItem() {
+                const board = getActiveBoard();
+                if (state.wbSelectedIds.length === 0) return;
+                const deletableIds = state.wbSelectedIds.filter(id => {
+                    const it = board.items.find(i => i.id === id);
+                    // Protect the primary original question image if it is the ONLY image on board
+                    if (it && it.isOriginalQ && board.items.filter(x => x.type === 'IMAGE').length <= 1) {
+                        toast('Original question stays on board (duplicate it first if you want copies!)', 'info');
+                        return false;
+                    }
+                    return true;
+                });
+                if (deletableIds.length === 0) return;
+                pushBoardUndoState();
+                board.items = board.items.filter(it => !deletableIds.includes(it.id));
+                state.wbSelectedIds = [];
+                renderWhiteboardCanvas();
+            },
+            toggleAutoShape() {
+                state.wbAutoShape = !state.wbAutoShape;
+                document.getElementById('wbAutoShapeBtn')?.classList.toggle('active-state', state.wbAutoShape);
+                toast(`Auto-Shape Recognition ${state.wbAutoShape ? 'ON (Circles, Squares, Triangles, Lines)' : 'OFF'}`, 'info');
+            },
+            setInk(color) {
+                state.inkColor = color;
+                const dot = document.getElementById('activeInkColorDot');
+                if (dot) dot.style.background = color;
+                if (state.wbSelectedIds.length > 0) {
+                    const board = getActiveBoard();
+                    let changed = false;
+                    for (const id of state.wbSelectedIds) {
+                        const st = board.items.find(i => i.id === id && i.type === 'STROKE');
+                        if (st) { st.color = color; changed = true; }
+                    }
+                    if (changed) { renderWhiteboardCanvas(); return; }
+                }
+                if (state.wbTool === 'ERASER' || state.wbTool === 'PAN') {
+                    this.setWhiteboardTool('PEN');
+                }
+            },
+            setStrokeWidth(w) {
+                state.strokeWidth = Number(w) || 3.5;
+                const swObj = STROKE_WIDTHS.find(item => item.value === state.strokeWidth) || STROKE_WIDTHS[1];
+                const lbl = document.getElementById('strokeWidthDropdownLabel');
+                if (lbl) lbl.textContent = swObj.short;
+                if (state.wbSelectedIds.length > 0) {
+                    const board = getActiveBoard();
+                    for (const id of state.wbSelectedIds) {
+                        const st = board.items.find(i => i.id === id && i.type === 'STROKE');
+                        if (st) st.width = state.strokeWidth;
+                    }
+                    renderWhiteboardCanvas();
+                }
+            },
+            whiteboardUndo() {
+                const board = getActiveBoard();
+                if (board.undoStack.length === 0) return;
+                board.redoStack.push(cloneBoardItems(board.items));
+                board.items = board.undoStack.pop();
+                state.wbSelectedIds = [];
+                renderWhiteboardCanvas();
+            },
+            whiteboardRedo() {
+                const board = getActiveBoard();
+                if (board.redoStack.length === 0) return;
+                board.undoStack.push(cloneBoardItems(board.items));
+                board.items = board.redoStack.pop();
+                state.wbSelectedIds = [];
+                renderWhiteboardCanvas();
+            },
+            clearInk() {
+                const board = getActiveBoard();
+                pushBoardUndoState();
+                // Keep only the original embedded question image
+                const origQ = board.items.find(it => it.isOriginalQ);
+                board.items = origQ ? [origQ] : [];
+                state.wbSelectedIds = [];
+                renderWhiteboardCanvas();
+            },
+            zoomWhiteboard(delta) {
+                const wrap = document.getElementById('padCanvasWrap');
+                if (!wrap) return;
+                const cx = wrap.clientWidth / 2, cy = wrap.clientHeight / 2;
+                const wx = (cx - state.wbPanX) / state.wbScale;
+                const wy = (cy - state.wbPanY) / state.wbScale;
+                state.wbScale = Math.max(0.2, Math.min(5.0, +(state.wbScale + delta).toFixed(2)));
+                state.wbPanX = cx - wx * state.wbScale;
+                state.wbPanY = cy - wy * state.wbScale;
+                renderWhiteboardCanvas();
+            },
+            resetWhiteboardView() {
+                state.wbScale = 1.0;
+                state.wbPanX = 0;
+                state.wbPanY = 0;
+                renderWhiteboardCanvas();
+            }
+        };
+
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                window.app.closeCustomDropdown();
+                window.app.closeClearConfirmModal();
+                window.app.closeImagePopup();
+                window.app.closeSettingsModal();
+                if (!state.isExtracting) window.app.closeUploadModal();
+                window.app.closeSplitModal();
+            }
+        });
+
+        let resizeTimer = null;
+        window.addEventListener('resize', () => {
+            window.app.closeCustomDropdown();
+            if (!document.getElementById('scratchpadModal').classList.contains('hidden')) {
+                renderWhiteboardCanvas();
+            }
+            clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(() => {
+                if (!state.isExtracting) renderFeed();
+            }, 150);
+        });
+
+        window.addEventListener('DOMContentLoaded', async () => {
+            initM3ExpressiveShapes();
+            initSwipeableStatusSegmentedBar();
+            applyMaterialThemeFromSeed(
+                localStorage.getItem('jee_m3_seed_color') || '#7c3aed',
+                localStorage.getItem('jee_m3_theme_mode') || 'dark'
+            );
+            updateApiKeyIndicator();
+            updateCloudStatusUI('idle');
+            renderAll();
+            if (getGithubToken()) await pullFromCloudGist(false);
+        });
+    </script>
+</body>
+</html>
