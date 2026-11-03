@@ -81,7 +81,7 @@
             gap: 4.5px;
             color: var(--md-on-surface-variant);
             background-color: var(--md-surface-high);
-            border-radius: 6px;
+            border-radius: 4px;
             transition: background-color 0.2s var(--m3-smooth), color 0.2s var(--m3-smooth), border-radius 0.22s var(--m3-smooth), transform 0.15s var(--m3-smooth);
             white-space: nowrap;
             cursor: pointer;
@@ -112,7 +112,7 @@
             height: 30px;
             min-width: 30px;
             padding: 0 8px;
-            border-radius: 6px;
+            border-radius: 4px;
             background-color: var(--md-surface-high);
             color: var(--md-on-surface-variant);
             display: inline-flex;
@@ -443,7 +443,7 @@
         <!-- 5. COMPACT SEARCH -->
         <div class="relative flex items-center shrink-0">
             <i class="ph-bold ph-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 m3-text-muted text-xs pointer-events-none"></i>
-            <input id="searchBox" oninput="window.app.setSearch(this.value)" type="text" placeholder="Search text, chapter, Q#..." class="h-9 w-32 sm:w-44 lg:w-52 m3-input pl-8 pr-6 text-[11px] placeholder-slate-400">
+            <input id="searchBox" oninput="window.app.setSearch(this.value)" type="text" placeholder="Search for questions..." class="h-9 w-32 sm:w-44 lg:w-52 m3-input pl-8 pr-6 text-[11px] placeholder-slate-400">
             <button id="clearSearchBtn" onclick="window.app.clearSearch()" class="hidden absolute right-2 top-1/2 -translate-y-1/2 m3-text-muted hover:opacity-100 p-0.5" title="Clear search">
                 <i class="ph-bold ph-x text-xs"></i>
             </button>
