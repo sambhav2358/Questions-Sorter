@@ -43,7 +43,6 @@
         }
         .font-mono { font-family: 'JetBrains Mono', monospace; }
 
-        /* Pure Tonal Surfaces (Zero Extra Borders Anywhere Except Cards) */
         .m3-surface { background-color: var(--md-surface); }
         .m3-surface-low { background-color: var(--md-surface-low); }
         .m3-surface-container { background-color: var(--md-surface-container); }
@@ -55,19 +54,11 @@
             color: var(--md-on-primary-container);
         }
 
-        /* Softened Organic Cookie & Clover Shapes */
         .m3-cookie-12 { clip-path: url(#m3Cookie12Clip); }
         .m3-clover-8 { clip-path: url(#m3Clover8Clip); }
         .m3-leaf-shape { border-radius: 24px 10px 24px 10px; }
-        .m3-spin-slow { animation: m3Spin 16s linear infinite; }
-        @keyframes m3Spin { to { transform: rotate(360deg); } }
 
-        /* =================================================================== */
-        /* CONNECTED SEGMENTED BUTTONS:                                        */
-        /* - Zero width/padding jitter on click                                */
-        /* - Middle boxes: 6px radius (4px less than 10px)                     */
-        /* - Edge buttons inside corners: 13px radius (3px more than 10px)     */
-        /* =================================================================== */
+        /* Connected Segmented Buttons: 6px middle radius (-4px), 13px edge inside radius (+3px), zero jitter */
         .m3-segmented-group {
             display: inline-flex;
             align-items: center;
@@ -96,32 +87,17 @@
             cursor: pointer;
             will-change: transform, background-color;
         }
-        .m3-seg-btn:first-child {
-            border-radius: 9999px 13px 13px 9999px;
-            padding-left: 13px;
-        }
-        .m3-seg-btn:last-child {
-            border-radius: 13px 9999px 9999px 13px;
-            padding-right: 13px;
-        }
-        .m3-seg-btn:hover:not(.active) {
-            background-color: var(--md-surface-highest);
-            color: var(--md-on-surface);
-        }
-        .m3-seg-btn:active {
-            transform: scale(0.96);
-        }
+        .m3-seg-btn:first-child { border-radius: 9999px 13px 13px 9999px; padding-left: 13px; }
+        .m3-seg-btn:last-child { border-radius: 13px 9999px 9999px 13px; padding-right: 13px; }
+        .m3-seg-btn:hover:not(.active) { background-color: var(--md-surface-highest); color: var(--md-on-surface); }
+        .m3-seg-btn:active { transform: scale(0.96); }
         .m3-seg-btn.active {
             background-color: var(--md-primary);
             color: var(--md-on-primary);
             border-radius: 9999px !important;
         }
 
-        /* =================================================================== */
-        /* CONNECTED ICON BUTTON GROUPS (Top Bar & Cards):                     */
-        /* - Middle buttons: 6px radius (5px in cards)                         */
-        /* - Edge buttons inside corners: 13px radius (12px in cards)          */
-        /* =================================================================== */
+        /* Connected Icon Button Groups: 6px middle radius (5px card), 13px edge inside radius (12px card) */
         .m3-icon-group {
             display: inline-flex;
             align-items: center;
@@ -131,11 +107,7 @@
             padding: 3px;
             border-radius: 9999px;
         }
-        .m3-icon-group-card {
-            height: 30px;
-            padding: 2px;
-            gap: 2px;
-        }
+        .m3-icon-group-card { height: 30px; padding: 2px; gap: 2px; }
         .m3-icon-group-btn {
             height: 30px;
             min-width: 30px;
@@ -153,17 +125,9 @@
             white-space: nowrap;
             will-change: transform, background-color;
         }
-        .m3-icon-group-btn:first-child {
-            border-radius: 9999px 13px 13px 9999px;
-            padding-left: 10px;
-        }
-        .m3-icon-group-btn:last-child {
-            border-radius: 13px 9999px 9999px 13px;
-            padding-right: 10px;
-        }
-        .m3-icon-group-btn:only-child {
-            border-radius: 9999px;
-        }
+        .m3-icon-group-btn:first-child { border-radius: 9999px 13px 13px 9999px; padding-left: 10px; }
+        .m3-icon-group-btn:last-child { border-radius: 13px 9999px 9999px 13px; padding-right: 10px; }
+        .m3-icon-group-btn:only-child { border-radius: 9999px; }
         .m3-icon-group-card .m3-icon-group-btn {
             height: 26px;
             min-width: 28px;
@@ -171,31 +135,20 @@
             font-size: 12px;
             border-radius: 5px;
         }
-        .m3-icon-group-card .m3-icon-group-btn:first-child {
-            border-radius: 9999px 12px 12px 9999px;
-            padding-left: 9px;
-        }
-        .m3-icon-group-card .m3-icon-group-btn:last-child {
-            border-radius: 12px 9999px 9999px 12px;
-            padding-right: 9px;
-        }
+        .m3-icon-group-card .m3-icon-group-btn:first-child { border-radius: 9999px 12px 12px 9999px; padding-left: 9px; }
+        .m3-icon-group-card .m3-icon-group-btn:last-child { border-radius: 12px 9999px 9999px 12px; padding-right: 9px; }
         .m3-icon-group-btn:hover:not(:disabled) {
             background-color: var(--md-primary-container);
             color: var(--md-on-primary-container);
         }
-        .m3-icon-group-btn:active:not(:disabled) {
-            transform: scale(0.93);
-        }
+        .m3-icon-group-btn:active:not(:disabled) { transform: scale(0.93); }
         .m3-icon-group-btn.active-state {
             background-color: var(--md-primary);
             color: var(--md-on-primary);
             border-radius: 9999px !important;
         }
 
-        /* =================================================================== */
-        /* CONNECTED SUBJECT + CHAPTER DROPDOWNS INSIDE CARDS:                 */
-        /* - Inside meeting corners: 12px (3px more than 9px)                  */
-        /* =================================================================== */
+        /* Connected Card Dropdowns: 12px inside meeting corners */
         .m3-card-dropdown-group {
             display: inline-flex;
             align-items: center;
@@ -231,11 +184,7 @@
         .m3-card-dropdown-btn:hover { background-color: var(--md-surface-highest); }
         .m3-card-dropdown-btn:active { transform: scale(0.96); }
 
-        /* =================================================================== */
-        /* VERTICAL GROUPED LISTS (Settings & Chapters):                       */
-        /* - Middle items: 7px radius (4px less than 11px)                     */
-        /* - Edge items inside corners: 14px radius (3px more than 11px)       */
-        /* =================================================================== */
+        /* Vertical Grouped Lists: 7px middle radius, 14px edge inside radius */
         .m3-group-list { display: flex; flex-direction: column; gap: 3px; }
         .m3-group-item {
             background-color: var(--md-surface-high);
@@ -248,41 +197,6 @@
         .m3-group-item:hover { background-color: var(--md-surface-highest); }
         .m3-group-item:active { transform: scale(0.99); }
 
-        /* =================================================================== */
-        /* AMAZING EXPRESSIVE SYNC BUTTON ANIMATION                            */
-        /* (Liquid Wave Orb + Dual Counter-Rotating Starburst + Glow Pulse)    */
-        /* =================================================================== */
-        @keyframes syncAuraPulse {
-            0%, 100% { box-shadow: 0 0 0 0px var(--md-primary-container), 0 0 14px 2px var(--md-primary); }
-            50% { box-shadow: 0 0 0 5px var(--md-primary-container), 0 0 22px 5px var(--md-primary); }
-        }
-        @keyframes syncWaveSlide {
-            from { transform: translateX(0); }
-            to { transform: translateX(-12px); }
-        }
-        @keyframes syncOrbitCCW {
-            to { transform: rotate(-360deg); }
-        }
-        .sync-btn-syncing {
-            background: linear-gradient(135deg, var(--md-primary-container), var(--md-secondary-container)) !important;
-            color: var(--md-on-primary-container) !important;
-            border-radius: 9999px !important;
-            padding: 0 11px !important;
-            animation: syncAuraPulse 1.8s ease-in-out infinite;
-        }
-        .sync-wave-svg {
-            animation: syncWaveSlide 0.9s linear infinite;
-        }
-        .sync-ring-cw {
-            transform-origin: 12px 12px;
-            animation: m3Spin 3.2s linear infinite;
-        }
-        .sync-ring-ccw {
-            transform-origin: 12px 12px;
-            animation: syncOrbitCCW 2.4s linear infinite;
-        }
-
-        /* M3 Expressive Buttons */
         .m3-btn-filled {
             background-color: var(--md-primary);
             color: var(--md-on-primary);
@@ -290,10 +204,7 @@
             font-weight: 800;
             transition: filter 0.2s ease, border-radius 0.22s var(--m3-smooth), transform 0.15s var(--m3-smooth);
         }
-        .m3-btn-filled:hover:not(:disabled) {
-            filter: brightness(1.06);
-            border-radius: 14px;
-        }
+        .m3-btn-filled:hover:not(:disabled) { filter: brightness(1.06); border-radius: 14px; }
         .m3-btn-filled:active:not(:disabled) { transform: scale(0.95); }
 
         .m3-btn-tonal {
@@ -323,13 +234,9 @@
             cursor: pointer;
             user-select: none;
         }
-        .m3-dropdown-trigger:hover {
-            background-color: var(--md-surface-highest);
-            border-radius: 14px;
-        }
+        .m3-dropdown-trigger:hover { background-color: var(--md-surface-highest); border-radius: 14px; }
         .m3-dropdown-trigger:active { transform: scale(0.96); }
 
-        /* Floating Custom M3 Dropdown Popover Menu (6px inner radius, 13px edge inside radius) */
         @keyframes m3MenuPop {
             from { opacity: 0; transform: scale(0.94) translateY(-4px); }
             to { opacity: 1; transform: scale(1) translateY(0); }
@@ -370,7 +277,6 @@
             border-radius: 9999px;
         }
 
-        /* M3 Expressive Extended FAB */
         .m3-extended-fab {
             background-color: var(--md-primary);
             color: var(--md-on-primary);
@@ -378,10 +284,7 @@
             box-shadow: 0 14px 30px -4px rgba(0, 0, 0, 0.45);
             transition: transform 0.32s var(--m3-smooth), opacity 0.25s ease, border-radius 0.25s var(--m3-smooth);
         }
-        .m3-extended-fab:hover {
-            border-radius: 9999px;
-            transform: translateY(-2px) scale(1.02);
-        }
+        .m3-extended-fab:hover { border-radius: 9999px; transform: translateY(-2px) scale(1.02); }
         .m3-extended-fab:active { transform: scale(0.95); }
         .m3-extended-fab.fab-hidden {
             transform: translateY(140%) scale(0.85);
@@ -389,7 +292,6 @@
             pointer-events: none;
         }
 
-        /* ONLY Cards Have Borders */
         .m3-card {
             background-color: var(--md-surface-container);
             border: 1.5px solid var(--md-outline-variant);
@@ -413,7 +315,6 @@
             border-radius: 12px 12px 23px 23px;
         }
 
-        /* M3 Expressive Dialogs (Always Dead-Center in Normal & Fullscreen Mode) */
         #imagePopupModal:not(.hidden),
         #settingsModal:not(.hidden),
         #uploadModal:not(.hidden),
@@ -439,7 +340,6 @@
             max-width: calc(100vw - 24px);
         }
 
-        /* Borderless Tonal Inputs */
         .m3-input {
             background-color: var(--md-surface-high);
             color: var(--md-on-surface);
@@ -505,7 +405,7 @@
             <span id="activeChapterIndicator" class="px-2 py-0.5 text-[10px] rounded-full font-extrabold max-w-[78px] truncate" style="background: var(--md-primary); color: var(--md-on-primary);">All</span>
         </button>
 
-        <!-- 3. SWIPEABLE SEGMENTED STATUS PILL (6px middle radius, 13px edge inside radius, zero click jitter) -->
+        <!-- 3. SWIPEABLE SEGMENTED STATUS PILL -->
         <div id="statusSegmentedBar" class="m3-segmented-group shrink-0" role="group" aria-label="Swipeable Question Status Filter">
             <button onclick="window.app.setStatus('ALL')" data-status="ALL" class="status-btn m3-seg-btn active">
                 <i class="ph-fill ph-squares-four text-xs"></i>
@@ -555,28 +455,16 @@
             <i class="ph-bold ph-caret-down text-[10px] m3-text-muted shrink-0"></i>
         </button>
 
-        <!-- 7. CONNECTED ACTION GROUP: FULLSCREEN, EXPRESSIVE ORBITAL SYNC, SETTINGS -->
+        <!-- 7. CONNECTED ACTION GROUP: FULLSCREEN, M3 SHAPE-MORPHING FAST-ROTATING SYNC, SETTINGS -->
         <div class="m3-icon-group shrink-0">
             <button onclick="window.app.toggleFullscreen()" class="m3-icon-group-btn" title="Toggle Fullscreen">
                 <i id="fullscreenIcon" class="ph-bold ph-corners-out text-sm"></i>
             </button>
             <button id="syncHeaderBtn" onclick="window.app.handleCloudBadgeClick()" class="m3-icon-group-btn gap-1.5" title="Click to Sync with GitHub Cloud">
                 <i id="cloudStatusIcon" class="ph-bold ph-cloud-arrow-up text-sm"></i>
-                <!-- Expressive Dual-Orbit + Rising Liquid Wave Sync SVG -->
-                <svg id="syncExpressiveSvg" class="hidden w-5 h-5 shrink-0" viewBox="0 0 24 24">
-                    <defs>
-                        <clipPath id="syncOrbClip">
-                            <circle cx="12" cy="12" r="6.8"></circle>
-                        </clipPath>
-                    </defs>
-                    <!-- Outer Counter-Rotating Dashed Scallop Halo -->
-                    <circle class="sync-ring-cw" cx="12" cy="12" r="10.2" fill="none" stroke="currentColor" stroke-width="1.6" stroke-dasharray="3.2 2.8" stroke-linecap="round"></circle>
-                    <circle class="sync-ring-ccw" cx="12" cy="12" r="8.6" fill="none" stroke="currentColor" stroke-opacity="0.55" stroke-width="1.2" stroke-dasharray="2 4" stroke-linecap="round"></circle>
-                    <!-- Inner Liquid Wave Orb -->
-                    <g clip-path="url(#syncOrbClip)">
-                        <circle cx="12" cy="12" r="6.8" fill="currentColor" fill-opacity="0.18"></circle>
-                        <path id="syncWaveFillPath" class="sync-wave-svg" fill="currentColor" d="M 0 13 Q 3 10.5, 6 13 T 12 13 T 18 13 T 24 13 T 30 13 T 36 13 L 36 24 L 0 24 Z"></path>
-                    </g>
+                <!-- Exact Material 3 Expressive Shape-Morphing + Fast-Rotation Loader from Video -->
+                <svg id="syncMorphSvg" class="hidden w-5 h-5 shrink-0" viewBox="0 0 24 24">
+                    <path class="m3-morph-loader-path" fill="currentColor" d=""></path>
                 </svg>
                 <span id="cloudStatusText" class="text-[10px] font-extrabold hidden 2xl:inline">Sync</span>
             </button>
@@ -592,9 +480,9 @@
     <!-- =================================================================== -->
     <div id="minimizedUploadBar" onclick="window.app.restoreUploadModal()" class="hidden m3-surface-high px-4 py-1.5 items-center justify-between gap-3 cursor-pointer hover:brightness-105 transition shrink-0 z-20" title="Click to reopen PDF Extraction Dialog">
         <div class="flex items-center gap-2 shrink-0">
-            <span class="w-6 h-6 m3-cookie-12 m3-spin-slow flex items-center justify-center shrink-0" style="background: var(--md-primary); color: var(--md-on-primary);">
-                <i class="ph-bold ph-file-pdf text-xs"></i>
-            </span>
+            <svg class="w-6 h-6 shrink-0" style="color: var(--md-primary);" viewBox="0 0 24 24">
+                <path class="m3-morph-loader-path" fill="currentColor" d=""></path>
+            </svg>
             <span id="minBarStatusText" class="w-56 sm:w-64 text-[11px] font-bold font-mono truncate shrink-0">Scanning Page 1...</span>
             <span id="minBarPageBadge" class="w-20 text-center py-0.5 rounded-full text-[10px] font-extrabold m3-primary-pill shrink-0">Page 1/1</span>
         </div>
@@ -1065,7 +953,9 @@
                     <div class="m3-surface-high rounded-3xl p-4 space-y-3">
                         <div class="flex items-center justify-between gap-2 text-xs">
                             <span id="extractStepTitle" class="font-extrabold flex items-center gap-2 truncate">
-                                <span class="w-4 h-4 m3-cookie-12 m3-spin-slow inline-block shrink-0" style="background: var(--md-primary)"></span>
+                                <svg class="w-5 h-5 shrink-0" style="color: var(--md-primary)" viewBox="0 0 24 24">
+                                    <path class="m3-morph-loader-path" fill="currentColor" d=""></path>
+                                </svg>
                                 <span>Extracting Questions & Clean OCR...</span>
                             </span>
                             <span id="extractPageBadge" class="w-24 text-center py-0.5 rounded-full font-extrabold shrink-0" style="background: var(--md-primary-container); color: var(--md-on-primary-container);">Page 1/1</span>
@@ -1171,7 +1061,6 @@
                     <span class="hidden sm:inline">Close</span>
                 </button>
 
-                <!-- Context-Aware Prev / Q# / Next Navigator -->
                 <div class="m3-icon-group shrink-0">
                     <button type="button" id="padPrevBtn" onclick="window.app.navigatePadQuestion(-1)" class="m3-icon-group-btn" title="Previous Question in Current Filter">
                         <i class="ph-bold ph-caret-left"></i>
@@ -1182,7 +1071,6 @@
                     </button>
                 </div>
 
-                <!-- Star & Solved Toggles for Current Question -->
                 <div class="m3-icon-group shrink-0">
                     <button type="button" id="padStarBtn" onclick="window.app.togglePadQuestionBool('starred')" class="m3-icon-group-btn" title="Toggle Starred">
                         <i id="padStarIcon" class="ph-bold ph-star"></i>
@@ -1192,7 +1080,6 @@
                     </button>
                 </div>
 
-                <!-- Hint & Answer Key Toggles -->
                 <div class="m3-icon-group shrink-0">
                     <button type="button" id="padHintToggleBtn" onclick="window.app.togglePadHint()" class="m3-icon-group-btn gap-1 text-[11px] font-bold" title="Toggle 1-Line Hint">
                         <i class="ph-bold ph-lightbulb text-amber-400"></i>
@@ -1207,7 +1094,6 @@
 
             <!-- Right Group: Select / Crop&Dup / Pen / Pan / Erase / AutoShape + Insert Shape + Ink/Size + Undo/Redo/Clear -->
             <div class="flex items-center gap-1.5 shrink-0 ml-auto">
-                <!-- Whiteboard Mode Tools -->
                 <div class="m3-icon-group">
                     <button type="button" id="wbToolSelectBtn" onclick="window.app.setWhiteboardTool('SELECT')" class="m3-icon-group-btn gap-1 text-[11px]" title="Select, Multi-Select (Drag Box or Shift+Click), Move, Resize & Group">
                         <i class="ph-bold ph-cursor"></i>
@@ -1232,21 +1118,18 @@
                     </button>
                 </div>
 
-                <!-- Insert Preset Shape Dropdown Menu -->
                 <button type="button" id="insertShapeMenuBtn" onclick="window.app.openInsertShapeMenu(this)" class="h-9 px-2.5 m3-dropdown-trigger text-[11px]" title="Insert Preset Geometric Shape">
                     <i class="ph-bold ph-shapes text-sm" style="color: var(--md-primary)"></i>
                     <span class="hidden lg:inline">+ Shape</span>
                     <i class="ph-bold ph-caret-down text-[9px] m3-text-muted"></i>
                 </button>
 
-                <!-- Consolidated Ink Color & Stroke Width Popover Trigger -->
                 <button type="button" id="inkStyleMenuBtn" onclick="window.app.openInkStyleMenu(this)" class="h-9 px-2.5 m3-dropdown-trigger text-[11px]" title="Pen Color & Thickness">
                     <span id="activeInkColorDot" class="w-3.5 h-3.5 rounded-full border border-white/40 shrink-0" style="background: #0f172a;"></span>
                     <span id="strokeWidthDropdownLabel" class="hidden sm:inline">Med</span>
                     <i class="ph-bold ph-caret-down text-[9px] m3-text-muted"></i>
                 </button>
 
-                <!-- Undo / Redo / Clear Group -->
                 <div class="m3-icon-group">
                     <button type="button" onclick="window.app.whiteboardUndo()" class="m3-icon-group-btn" title="Undo (Ctrl+Z)">
                         <i class="ph-bold ph-arrow-u-up-left"></i>
@@ -1261,7 +1144,7 @@
             </div>
         </div>
 
-        <!-- Collapsible Hint & Answer Key Reveal Strip (Below Status Bar) -->
+        <!-- Collapsible Hint & Answer Key Reveal Strip -->
         <div id="padHintAnswerDrawer" class="hidden m3-surface-high px-4 py-2 items-center justify-between gap-3 shrink-0">
             <div class="flex flex-wrap items-center gap-3 min-w-0 flex-1 text-xs">
                 <div id="padHintBox" class="hidden items-center gap-2 px-3.5 py-1 rounded-2xl m3-surface-low">
@@ -1283,14 +1166,13 @@
 
         <!-- 100% FULLSCREEN WHITE WHITEBOARD WITH EMBEDDED QUESTION IMAGE -->
         <div id="padCanvasWrap" class="flex-1 w-full bg-white relative overflow-hidden select-none min-h-0">
-            <!-- Subtle Floating Helper Pill -->
             <div class="absolute top-3 left-3.5 pointer-events-none z-10 flex items-center gap-2">
                 <span id="wbHelperBanner" class="px-3 py-1 rounded-full bg-slate-900/80 text-white text-[10px] font-mono shadow">
                     Whiteboard • Select to Move/Resize/Group/Duplicate (Question or Shapes) • Crop & Dup to slice diagrams
                 </span>
             </div>
 
-            <!-- Floating Selected Object / Group Action Bar (Shows when 1 or more objects or question image are selected) -->
+            <!-- Floating Selected Object / Group Action Bar -->
             <div id="wbSelectionHud" class="hidden absolute top-3 right-4 z-10 m3-icon-group shadow-xl">
                 <button type="button" id="wbGroupBtn" onclick="window.app.groupSelectedWhiteboardItems()" class="hidden m3-icon-group-btn gap-1 text-[11px] font-bold" title="Group Selected Objects Together">
                     <i class="ph-bold ph-link"></i>
@@ -1327,14 +1209,13 @@
         </div>
     </div>
 
-    <!-- =================================================================== -->
-    <!-- GLOBAL CUSTOM DROPDOWN AT VERY END OF BODY WITH Z-[100]             -->
-    <!-- =================================================================== -->
+    <!-- GLOBAL CUSTOM DROPDOWN AT VERY END OF BODY WITH Z-[100] -->
     <div id="customDropdownBackdrop" onclick="window.app.closeCustomDropdown()" class="fixed inset-0 z-[95] hidden"></div>
     <div id="customDropdownMenu" class="fixed z-[100] hidden m3-custom-menu max-h-80 overflow-y-auto min-w-[175px] max-w-[300px]"></div>
 
     <!-- M3 THEME-MATCHED TOAST NOTIFICATIONS -->
     <div id="toastBox" class="fixed bottom-24 right-6 z-[110] flex flex-col gap-2 pointer-events-none"></div>
+
     <!-- =================================================================== -->
     <!-- CORE APPLICATION LOGIC (M3 EXPRESSIVE + WHITEBOARD + AI HINTS)      -->
     <!-- =================================================================== -->
@@ -1363,7 +1244,102 @@
             if (p8) p8.setAttribute('d', makeSoftStarburst(8, 0.445, 0.495));
         }
 
-        // 2. Smoothly Propagating 60fps HTML5 Canvas Sine Wave Progress Bar
+        // ===================================================================
+        // 2. EXACT MATERIAL 3 EXPRESSIVE SHAPE-MORPHING + FAST-ROTATION LOADER
+        // (Matches video 00:03-00:08: Pentagon -> 9-Cookie -> 4-Lobe Pinched Clover -> 12-Gear -> 8-Cookie -> Circle)
+        // ===================================================================
+        const M3_MORPH_SHAPES = [
+            // 0. Rounded Pentagon (00:03)
+            (a) => 0.84 + 0.11 * Math.cos(5 * a) - 0.02 * Math.cos(10 * a),
+            // 1. 9-Lobe Scalloped Cookie (00:04)
+            (a) => 0.87 + 0.068 * Math.cos(9 * a),
+            // 2. Pinched 4-Lobe Clover / Flower (00:05)
+            (a) => 0.72 + 0.22 * Math.cos(4 * a) - 0.04 * Math.cos(8 * a),
+            // 3. 12-Tooth Sunburst Gear Cookie (00:06)
+            (a) => 0.83 + 0.13 * Math.cos(12 * a),
+            // 4. 8-Lobe Soft Octagon Cookie (00:07)
+            (a) => 0.86 + 0.078 * Math.cos(8 * a),
+            // 5. Smooth Circle (00:08)
+            () => 0.89
+        ];
+
+        let m3MorphAnimId = null;
+        let m3MorphActive = false;
+
+        function computeMorphPathD(shapeIdxA, shapeIdxB, morphT, rotRad) {
+            const fnA = M3_MORPH_SHAPES[shapeIdxA];
+            const fnB = M3_MORPH_SHAPES[shapeIdxB];
+            const steps = 96;
+            const maxR = 10.6;
+            let d = '';
+            for (let i = 0; i <= steps; i++) {
+                const theta = (i / steps) * Math.PI * 2;
+                const localA = theta - rotRad;
+                const rNorm = fnA(localA) * (1 - morphT) + fnB(localA) * morphT;
+                const r = maxR * rNorm;
+                const x = (12 + r * Math.cos(theta)).toFixed(2);
+                const y = (12 + r * Math.sin(theta)).toFixed(2);
+                d += (i === 0 ? `M ${x} ${y}` : ` L ${x} ${y}`);
+            }
+            return d + ' Z';
+        }
+
+        function stepM3MorphLoader(now) {
+            if (!m3MorphActive && document.getElementById('minimizedUploadBar')?.classList.contains('hidden') && document.getElementById('uploadProgressView')?.classList.contains('hidden')) {
+                m3MorphAnimId = null;
+                return;
+            }
+
+            const beatDuration = 720;
+            const totalBeats = now / beatDuration;
+            const beatIndex = Math.floor(totalBeats);
+            const rawFrac = totalBeats - beatIndex;
+
+            const u = Math.min(1, rawFrac / 0.65);
+            const easeMorph = 1 - Math.pow(1 - u, 3);
+
+            // Exact fast angular velocity + whip on morph transition from video
+            const rotDeg = (now * 0.22) + (beatIndex + easeMorph) * 105;
+            const rotRad = (rotDeg * Math.PI) / 180;
+
+            const idxA = beatIndex % M3_MORPH_SHAPES.length;
+            const idxB = (beatIndex + 1) % M3_MORPH_SHAPES.length;
+            const pathD = computeMorphPathD(idxA, idxB, easeMorph, rotRad);
+
+            document.querySelectorAll('.m3-morph-loader-path').forEach(p => {
+                p.setAttribute('d', pathD);
+            });
+
+            m3MorphAnimId = requestAnimationFrame(stepM3MorphLoader);
+        }
+
+        function ensureM3MorphLoopRunning() {
+            if (!m3MorphAnimId) {
+                m3MorphAnimId = requestAnimationFrame(stepM3MorphLoader);
+            }
+        }
+
+        function setSyncButtonExpressiveProgress(active) {
+            const syncBtn = document.getElementById('syncHeaderBtn');
+            const icon = document.getElementById('cloudStatusIcon');
+            const svg = document.getElementById('syncMorphSvg');
+            if (!syncBtn || !icon || !svg) return;
+
+            m3MorphActive = active;
+            if (!active) {
+                syncBtn.classList.remove('active-state');
+                svg.classList.add('hidden');
+                icon.classList.remove('hidden');
+                return;
+            }
+
+            syncBtn.classList.add('active-state');
+            icon.classList.add('hidden');
+            svg.classList.remove('hidden');
+            ensureM3MorphLoopRunning();
+        }
+
+        // 3. Smoothly Propagating 60fps HTML5 Canvas Sine Wave Progress Bar
         const waveInstances = new Map();
         let waveAnimFrame = null;
 
@@ -1485,51 +1461,6 @@
             }
         }
 
-        // 3. Expressive Dual-Orbit + Rising Liquid Wave Sync Button Animation
-        let syncWaveTimer = null;
-        let syncWaveLevel = 16;
-
-        function setSyncButtonExpressiveProgress(active, completed = false) {
-            const syncBtn = document.getElementById('syncHeaderBtn');
-            const icon = document.getElementById('cloudStatusIcon');
-            const svg = document.getElementById('syncExpressiveSvg');
-            const wavePath = document.getElementById('syncWaveFillPath');
-            if (!syncBtn || !icon || !svg || !wavePath) return;
-
-            if (!active) {
-                clearInterval(syncWaveTimer);
-                syncWaveTimer = null;
-                syncBtn.classList.remove('sync-btn-syncing');
-                svg.classList.add('hidden');
-                icon.classList.remove('hidden');
-                return;
-            }
-
-            syncBtn.classList.add('sync-btn-syncing');
-            icon.classList.add('hidden');
-            svg.classList.remove('hidden');
-
-            const setWaveY = (yVal) => {
-                const y = Number(yVal).toFixed(2);
-                const yPeak = (yVal - 2.2).toFixed(2);
-                wavePath.setAttribute('d', `M 0 ${y} Q 3 ${yPeak}, 6 ${y} T 12 ${y} T 18 ${y} T 24 ${y} T 30 ${y} T 36 ${y} L 36 24 L 0 24 Z`);
-            };
-
-            if (completed) {
-                setWaveY(5.5);
-                return;
-            }
-
-            if (!syncWaveTimer) {
-                syncWaveLevel = 17.5;
-                setWaveY(syncWaveLevel);
-                syncWaveTimer = setInterval(() => {
-                    syncWaveLevel = syncWaveLevel > 7.2 ? syncWaveLevel - (syncWaveLevel - 6.8) * 0.08 : 16.5;
-                    setWaveY(syncWaveLevel);
-                }, 70);
-            }
-        }
-
         const JEE_CHAPTERS = {
             Physics: [
                 "Basic Mathematics", "Units and Measurements, Errors and Experiments", "Vectors", "Rectilinear Motion", "Projectile Motion", "Relative Motion", "Circular Kinematics", "Newton's Laws of Motion", "Work, Power and Energy", "COM, Momentum and Collision", "Rigid Body Mechanics", "Mechanical properties of Solids (Elasticity)", "Thermometry", "Thermal Expansion", "Calorimetry", "Heat Transfer", "Kinetic Theory of Gases", "Thermodynamics", "Fluid Mechanics", "Simple Harmonic Motion", "Transverse waves (String Waves)", "Longitudinal Waves (Sound Waves)", "Gravitation",
@@ -1594,20 +1525,18 @@
             currentUploadBatchIds: [],
             activeSplitId: null,
             splitMode: 'SPLIT',
-            // Fullscreen White Whiteboard State
             activePadId: null,
-            wbTool: 'PEN', // 'SELECT' | 'CROP_DUP' | 'PEN' | 'PAN' | 'ERASER'
+            wbTool: 'PEN',
             wbAutoShape: true,
             inkColor: '#0f172a',
             strokeWidth: 3.5,
             wbScale: 1.0,
             wbPanX: 0,
             wbPanY: 0,
-            wbBoards: {}, // { [qId]: { items: [], undoStack: [], redoStack: [], initialized: boolean } }
-            wbSelectedIds: [], // Array of selected item IDs (supports single, multi, and grouped selection!)
+            wbBoards: {},
+            wbSelectedIds: [],
             padShowHint: false,
             padShowAns: false,
-            // Cloud & Background Task States
             isSyncingCloud: false,
             hasPendingCloudPush: false,
             ocrWorker: null,
@@ -1629,9 +1558,6 @@
         const isAutoSolveHintsEnabled = () => localStorage.getItem('jee_auto_solve_hints') !== 'false';
         const getThemeMode = () => localStorage.getItem('jee_m3_theme_mode') || 'dark';
 
-        // ===================================================================
-        // CUSTOM FLOATING MATERIAL 3 DROPDOWN ENGINE (Z-[100] ABOVE MODALS)
-        // ===================================================================
         function openCustomDropdown(anchorEl, options, currentVal, onSelectCallback) {
             const menu = document.getElementById('customDropdownMenu');
             const backdrop = document.getElementById('customDropdownBackdrop');
@@ -1683,9 +1609,6 @@
             document.getElementById('customDropdownBackdrop')?.classList.add('hidden');
         }
 
-        // ===================================================================
-        // MATERIAL 3 EXPRESSIVE DYNAMIC COLOR ENGINE
-        // ===================================================================
         function hexToHsl(hex) {
             hex = String(hex || '#7c3aed').replace('#', '');
             if (hex.length === 3) hex = hex.split('').map(c => c + c).join('');
@@ -1768,7 +1691,6 @@
             }
         }
 
-        // Fixed Swipeable Segmented Bar (Only switches on drag move so normal click never double-fires)
         function initSwipeableStatusSegmentedBar() {
             const bar = document.getElementById('statusSegmentedBar');
             if (!bar) return;
@@ -1817,9 +1739,6 @@
             }, 3000);
         }
 
-        // ===================================================================
-        // PER-QUESTION GEMINI AI ANSWER KEY & 1-LINE HINT ENGINE (1 REQ / Q)
-        // ===================================================================
         async function fetchSingleQuestionAnswerAndHint(q) {
             const apiKey = getApiKey();
             if (!apiKey || !q || !q.imageDataUrl) return null;
@@ -1941,7 +1860,7 @@ Analyze this JEE question image (${q.subject} - ${q.chapter}).
                 }
 
                 if (updatedAny) {
-                    scheduleCloudAutoSync();
+                    scheduleCloudAutoSync(true);
                     if (manualNotify) toast(`Generated Answer Keys & 1-Line Hints for ${completed} questions & synced to Gist!`, 'success');
                 }
             } finally {
@@ -1956,9 +1875,6 @@ Analyze this JEE question image (${q.subject} - ${q.chapter}).
             }
         }
 
-        // ===================================================================
-        // DIAGRAM-NOISE FILTERED LOCAL OCR ENGINE (PDF.JS + TESSERACT.JS V5)
-        // ===================================================================
         function cleanQuestionTextOnly(rawText) {
             if (!rawText) return '';
             const lines = String(rawText).split(/\r?\n/);
@@ -2074,7 +1990,7 @@ Analyze this JEE question image (${q.subject} - ${q.chapter}).
                     if (state.search) renderFeed();
                 }
                 if (updatedAny) {
-                    scheduleCloudAutoSync();
+                    scheduleCloudAutoSync(true);
                     if (manualNotify) toast(`Indexed clean question text for ${completed} questions!`, 'success');
                 }
             } finally {
@@ -2097,7 +2013,7 @@ Analyze this JEE question image (${q.subject} - ${q.chapter}).
             }
         }
 
-        function updateCloudStatusUI(status = 'idle', detail = '', completed = false) {
+        function updateCloudStatusUI(status = 'idle', detail = '') {
             const syncBtn = document.getElementById('syncHeaderBtn');
             const icon = document.getElementById('cloudStatusIcon');
             const txt = document.getElementById('cloudStatusText');
@@ -2119,7 +2035,7 @@ Analyze this JEE question image (${q.subject} - ${q.chapter}).
             }
 
             if (status === 'syncing') {
-                setSyncButtonExpressiveProgress(true, completed);
+                setSyncButtonExpressiveProgress(true);
                 if (settingsCloudWave) {
                     settingsCloudWave.classList.remove('hidden');
                     renderM3WavyProgress(settingsCloudWave, 75);
@@ -2182,9 +2098,6 @@ Analyze this JEE question image (${q.subject} - ${q.chapter}).
             }
         }
 
-        // ===================================================================
-        // GITHUB SECRET GIST CLOUD SYNC ENGINE
-        // ===================================================================
         let cloudSyncTimer = null;
         function scheduleCloudAutoSync(skipFullRender = false) {
             if (!skipFullRender) {
@@ -2298,9 +2211,8 @@ Analyze this JEE question image (${q.subject} - ${q.chapter}).
                     if (gistInp) gistInp.value = data.id;
                 }
 
-                setSyncButtonExpressiveProgress(true, true);
                 localStorage.setItem('jee_cloud_last_sync', new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }));
-                setTimeout(() => updateCloudStatusUI('idle'), 260);
+                updateCloudStatusUI('idle');
                 if (manualNotify) toast(`Synced ${state.questions.length} questions to GitHub Secret Gist!`, 'success');
             } catch (err) {
                 updateCloudStatusUI('error', err.message);
@@ -2370,7 +2282,6 @@ Analyze this JEE question image (${q.subject} - ${q.chapter}).
                     hint: r.hint || '',
                     answerKey: r.answerKey || ''
                 }));
-                setSyncButtonExpressiveProgress(true, true);
                 localStorage.setItem('jee_cloud_last_sync', new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }));
                 state.isSyncingCloud = false;
                 sortAndRefreshQuestions();
@@ -2383,9 +2294,6 @@ Analyze this JEE question image (${q.subject} - ${q.chapter}).
             }
         }
 
-        // ===================================================================
-        // BACKUP EXPORT & IMPORT (.JSON)
-        // ===================================================================
         function exportBackupJson() {
             if (state.questions.length === 0) return toast('No questions in Cloud Vault to export yet!', 'warn');
             const blob = new Blob([JSON.stringify({
@@ -2427,7 +2335,6 @@ Analyze this JEE question image (${q.subject} - ${q.chapter}).
                 event.target.value = '';
             }
         }
-
         // ===================================================================
         // 3-STAGE BULLETPROOF ANTI-TEXT-CLIP BOUNDARY GUARD & AUTO-TRIMMER
         // ===================================================================
@@ -2578,9 +2485,6 @@ Analyze this JEE question image (${q.subject} - ${q.chapter}).
             return { dataUrl: c.toDataURL('image/jpeg', 0.88), aspectRatio: c.height / c.width };
         }
 
-        // ===================================================================
-        // GEMINI VISION API CALL FOR PAGE LAYOUT
-        // ===================================================================
         async function analyzePageLayoutWithGemini(base64Jpeg, pageNum, abortSignal) {
             const apiKey = getApiKey();
             const selectedModel = getSelectedModel();
@@ -2682,9 +2586,6 @@ CRITICAL RULES FOR ZERO TEXT CLIPPING & ZERO CLUBBING:
             box.scrollTop = box.scrollHeight;
         }
 
-        // ===================================================================
-        // PDF UPLOAD, BACKGROUND MINIMIZE BAR & INSTANT CANCEL/CLOSE
-        // ===================================================================
         function setUploadButtonsLock(isUploading) {
             const topClose = document.getElementById('uploadTopCloseBtn');
             const minBtn = document.getElementById('minimizeUploadBtn');
@@ -2700,6 +2601,7 @@ CRITICAL RULES FOR ZERO TEXT CLIPPING & ZERO CLUBBING:
                 cancelBtn.classList.toggle('hidden', !isUploading);
                 cancelBtn.classList.toggle('inline-flex', isUploading);
             }
+            if (isUploading) ensureM3MorphLoopRunning();
         }
 
         function updateUploadProgressEverywhere(pct, pageBadgeText, subStatusText) {
@@ -2712,6 +2614,7 @@ CRITICAL RULES FOR ZERO TEXT CLIPPING & ZERO CLUBBING:
             if (minBadge) minBadge.textContent = pageBadgeText;
             if (minTxt) minTxt.textContent = subStatusText;
             renderM3WavyProgress('minBarWaveWrap', pct);
+            ensureM3MorphLoopRunning();
         }
 
         async function onPdfSelected(e) {
@@ -2951,9 +2854,6 @@ CRITICAL RULES FOR ZERO TEXT CLIPPING & ZERO CLUBBING:
             }
         }
 
-        // ===================================================================
-        // CASE-INSENSITIVE MULTI-WORD FULL-QUESTION SEARCH & FILTERING
-        // ===================================================================
         const normalizeForSearch = (str) => String(str || '').toLowerCase().replace(/[^\w\s.]/g, ' ').replace(/\s+/g, ' ').trim();
 
         function getFiltered() {
@@ -3136,8 +3036,11 @@ CRITICAL RULES FOR ZERO TEXT CLIPPING & ZERO CLUBBING:
             if (list.length === 0) {
                 container.innerHTML = `
                     <div class="max-w-lg mx-auto my-12 m3-dialog p-8 text-center space-y-4">
-                        <div class="w-16 h-16 m3-cookie-12 flex items-center justify-center mx-auto ${state.isSyncingCloud ? 'm3-spin-slow' : ''}" style="background: var(--md-primary-container); color: var(--md-primary);">
-                            <i class="ph-bold ${state.isSyncingCloud ? 'ph-cloud-arrow-down' : 'ph-scissors'} text-3xl"></i>
+                        <div class="w-16 h-16 m3-cookie-12 flex items-center justify-center mx-auto" style="background: var(--md-primary-container); color: var(--md-primary);">
+                            ${state.isSyncingCloud
+                                ? `<svg class="w-9 h-9" viewBox="0 0 24 24"><path class="m3-morph-loader-path" fill="currentColor" d=""></path></svg>`
+                                : `<i class="ph-bold ph-scissors text-3xl"></i>`
+                            }
                         </div>
                         <h2 class="text-lg font-extrabold">
                             ${state.isSyncingCloud
@@ -3169,7 +3072,10 @@ CRITICAL RULES FOR ZERO TEXT CLIPPING & ZERO CLUBBING:
                         </div>
                     </div>
                 `;
-                if (state.isSyncingCloud) renderM3WavyProgress('emptyStateWaveWrap', 72);
+                if (state.isSyncingCloud) {
+                    renderM3WavyProgress('emptyStateWaveWrap', 72);
+                    ensureM3MorphLoopRunning();
+                }
                 return;
             }
 
@@ -3194,11 +3100,7 @@ CRITICAL RULES FOR ZERO TEXT CLIPPING & ZERO CLUBBING:
         }
 
         // ===================================================================
-        // FULLSCREEN WHITE WHITEBOARD ENGINE:
-        // - Unified Object Model (Images, Cropped Regions, Strokes, Preset Shapes)
-        // - Duplicate Original Question Image or Any Object
-        // - Group / Ungroup Multiple Objects (`🔗 Group` / `Ungroup`)
-        // - Crop & Duplicate Tool (`✂️ Crop & Dup`)
+        // FULLSCREEN WHITE WHITEBOARD ENGINE
         // ===================================================================
         function getActiveBoard() {
             const id = state.activePadId || 'default';
@@ -3210,9 +3112,7 @@ CRITICAL RULES FOR ZERO TEXT CLIPPING & ZERO CLUBBING:
 
         function cloneBoardItems(items) {
             return items.map(it => {
-                if (it.type === 'IMAGE') {
-                    return { ...it };
-                }
+                if (it.type === 'IMAGE') return { ...it };
                 return {
                     ...it,
                     points: (it.points || []).map(p => ({ x: p.x, y: p.y }))
@@ -3526,7 +3426,7 @@ CRITICAL RULES FOR ZERO TEXT CLIPPING & ZERO CLUBBING:
                 const pts = [];
                 for (let i = 0; i <= 64; i++) {
                     const a = (i / 64) * Math.PI * 2;
-                    pts.push({ x: cx + r * Math.cos(a), y: cy + ry ? cy + r * Math.sin(a) : cy + r * Math.sin(a) });
+                    pts.push({ x: cx + r * Math.cos(a), y: cy + r * Math.sin(a) });
                 }
                 return pts;
             }
@@ -3564,7 +3464,6 @@ CRITICAL RULES FOR ZERO TEXT CLIPPING & ZERO CLUBBING:
             return null;
         }
 
-        // Helper to draw all board items onto any 2D context (used for both screen render & Crop-and-Duplicate!)
         function drawBoardItemsToContext(ctx, items) {
             ctx.lineCap = 'round';
             ctx.lineJoin = 'round';
@@ -3593,7 +3492,7 @@ CRITICAL RULES FOR ZERO TEXT CLIPPING & ZERO CLUBBING:
             }
         }
 
-        let activeOverlayRect = null; // { minX, minY, maxX, maxY, mode: 'MARQUEE' | 'CROP_DUP' }
+        let activeOverlayRect = null;
 
         function renderWhiteboardCanvas() {
             const wrap = document.getElementById('padCanvasWrap');
@@ -3612,11 +3511,9 @@ CRITICAL RULES FOR ZERO TEXT CLIPPING & ZERO CLUBBING:
             ctx.save();
             ctx.scale(dpr, dpr);
 
-            // 1. Pure White Whiteboard Background
             ctx.fillStyle = '#ffffff';
             ctx.fillRect(0, 0, cw, ch);
 
-            // 2. Subtle Infinite Dot Grid
             const baseStep = 34;
             const screenStep = baseStep * state.wbScale;
             if (screenStep >= 11) {
@@ -3633,14 +3530,12 @@ CRITICAL RULES FOR ZERO TEXT CLIPPING & ZERO CLUBBING:
                 }
             }
 
-            // 3. Apply Infinite Camera Transform
             ctx.translate(state.wbPanX, state.wbPanY);
             ctx.scale(state.wbScale, state.wbScale);
 
             const board = getActiveBoard();
             drawBoardItemsToContext(ctx, board.items);
 
-            // 4. Draw Selection Box & 4 Corner Resize Handles
             const selBounds = getCombinedSelectedBounds();
             if (selBounds) {
                 const bw = selBounds.maxX - selBounds.minX;
@@ -3672,7 +3567,6 @@ CRITICAL RULES FOR ZERO TEXT CLIPPING & ZERO CLUBBING:
                 ctx.restore();
             }
 
-            // 5. Draw Marquee Multi-Select Box or Crop & Duplicate Box
             if (activeOverlayRect) {
                 const rw = activeOverlayRect.maxX - activeOverlayRect.minX;
                 const rh = activeOverlayRect.maxY - activeOverlayRect.minY;
@@ -3828,7 +3722,6 @@ CRITICAL RULES FOR ZERO TEXT CLIPPING & ZERO CLUBBING:
 
                 const wPt = screenToWorld(sx, sy);
 
-                // CROP & DUPLICATE TOOL
                 if (state.wbTool === 'CROP_DUP') {
                     state.wbSelectedIds = [];
                     dragAction = { mode: 'CROP_DUP', startWorld: wPt };
@@ -3837,7 +3730,6 @@ CRITICAL RULES FOR ZERO TEXT CLIPPING & ZERO CLUBBING:
                     return;
                 }
 
-                // SELECT / MULTI-SELECT / MOVE / RESIZE TOOL
                 if (state.wbTool === 'SELECT') {
                     const board = getActiveBoard();
                     const currBounds = getCombinedSelectedBounds();
@@ -3854,7 +3746,6 @@ CRITICAL RULES FOR ZERO TEXT CLIPPING & ZERO CLUBBING:
                         return;
                     }
 
-                    // Check if clicking inside existing multi-selection box
                     const clickedInsideExistingSelection = currBounds &&
                         wPt.x >= currBounds.minX && wPt.x <= currBounds.maxX &&
                         wPt.y >= currBounds.minY && wPt.y <= currBounds.maxY &&
@@ -3873,7 +3764,6 @@ CRITICAL RULES FOR ZERO TEXT CLIPPING & ZERO CLUBBING:
                                 state.wbSelectedIds = expandSelectionWithGroups([hit.id]);
                             }
                         } else {
-                            // Drag Marquee Box on Empty Space to Multi-Select Objects
                             state.wbSelectedIds = [];
                             dragAction = { mode: 'MARQUEE', startWorld: wPt };
                             activeOverlayRect = { minX: wPt.x, minY: wPt.y, maxX: wPt.x, maxY: wPt.y, mode: 'MARQUEE' };
@@ -4047,7 +3937,6 @@ CRITICAL RULES FOR ZERO TEXT CLIPPING & ZERO CLUBBING:
                     const board = getActiveBoard();
                     const hitIds = [];
                     for (const it of board.items) {
-                        // Marquee selects drawn strokes/shapes & duplicated/cropped images (click question directly to select question)
                         if (it.isOriginalQ) continue;
                         const b = getItemBounds(it);
                         if (b && b.maxX >= box.minX && b.minX <= box.maxX && b.maxY >= box.minY && b.minY <= box.maxY) {
@@ -4382,7 +4271,6 @@ CRITICAL RULES FOR ZERO TEXT CLIPPING & ZERO CLUBBING:
                 }
             },
 
-            // Glitch-free in-place card updates (no full feed re-render unless filtered out)
             toggleQBool(id, field) {
                 const q = state.questions.find(i => i.id === Number(id));
                 if (!q) return;
@@ -4492,6 +4380,7 @@ CRITICAL RULES FOR ZERO TEXT CLIPPING & ZERO CLUBBING:
                     minBar.classList.add('flex');
                 }
                 if (!waveAnimFrame) waveAnimFrame = requestAnimationFrame(stepAllWavyBars);
+                ensureM3MorphLoopRunning();
             },
             restoreUploadModal() {
                 closeCustomDropdown();
@@ -4503,6 +4392,7 @@ CRITICAL RULES FOR ZERO TEXT CLIPPING & ZERO CLUBBING:
                 }
                 document.getElementById('uploadModal').classList.remove('hidden');
                 if (!waveAnimFrame) waveAnimFrame = requestAnimationFrame(stepAllWavyBars);
+                ensureM3MorphLoopRunning();
             },
             closeUploadModal() {
                 closeCustomDropdown();
@@ -4653,9 +4543,8 @@ CRITICAL RULES FOR ZERO TEXT CLIPPING & ZERO CLUBBING:
             togglePadQuestionBool(field) {
                 const q = state.questions.find(i => i.id === Number(state.activePadId));
                 if (!q) return;
-                q[field] = !q[field];
+                this.toggleQBool(q.id, field);
                 refreshScratchpadTopBarAndHints();
-                scheduleCloudAutoSync(true);
             },
             togglePadHint() {
                 state.padShowHint = !state.padShowHint;
@@ -4799,7 +4688,6 @@ CRITICAL RULES FOR ZERO TEXT CLIPPING & ZERO CLUBBING:
                 if (state.wbSelectedIds.length === 0) return;
                 const deletableIds = state.wbSelectedIds.filter(id => {
                     const it = board.items.find(i => i.id === id);
-                    // Protect the primary original question image if it is the ONLY image on board
                     if (it && it.isOriginalQ && board.items.filter(x => x.type === 'IMAGE').length <= 1) {
                         toast('Original question stays on board (duplicate it first if you want copies!)', 'info');
                         return false;
@@ -4867,7 +4755,6 @@ CRITICAL RULES FOR ZERO TEXT CLIPPING & ZERO CLUBBING:
             clearInk() {
                 const board = getActiveBoard();
                 pushBoardUndoState();
-                // Keep only the original embedded question image
                 const origQ = board.items.find(it => it.isOriginalQ);
                 board.items = origQ ? [origQ] : [];
                 state.wbSelectedIds = [];
