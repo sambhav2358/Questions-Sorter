@@ -841,7 +841,6 @@
                             <div class="flex items-center justify-between gap-2">
                                 <div>
                                     <span class="text-xs font-extrabold uppercase tracking-wider" style="color: var(--md-primary)">AI Answer Key & 1-Line Hint Generator</span>
-                                    <p class="text-[11px] m3-text-muted">Sends 1 dedicated Gemini API request per question for maximum accuracy & updates your Gist JSON.</p>
                                 </div>
                                 <label class="flex items-center gap-1.5 text-[11px] font-bold cursor-pointer shrink-0">
                                     <input id="autoSolveHintsCheckbox" type="checkbox" checked onchange="window.app.saveSettings(false)" class="rounded focus:ring-0">
@@ -4258,7 +4257,7 @@ CRITICAL RULES FOR ZERO TEXT CLIPPING & ZERO CLUBBING:
                 updateApiKeyIndicator();
                 updateCloudStatusUI('idle');
                 if (closeModalAfter) this.closeSettingsModal();
-                toast('Saved Settings Locally!', 'success');
+                toast('Settings Saved!', 'success');
 
                 if (ghToken) {
                     if (state.questions.length === 0) await pullFromCloudGist(true);
