@@ -58,7 +58,7 @@
         .m3-clover-8 { clip-path: url(#m3Clover8Clip); }
         .m3-leaf-shape { border-radius: 24px 10px 24px 10px; }
 
-        /* Connected Segmented Buttons: 6px middle radius (-4px), 13px edge inside radius (+3px), zero jitter */
+        /* Connected Segmented Buttons: 4px middle radius, 13px edge inside radius, zero jitter */
         .m3-segmented-group {
             display: inline-flex;
             align-items: center;
@@ -97,7 +97,7 @@
             border-radius: 9999px !important;
         }
 
-        /* Connected Icon Button Groups: 6px middle radius (5px card), 13px edge inside radius (12px card) */
+        /* Connected Icon Button Groups: 4px middle radius (5px card), 13px edge inside radius (12px card) */
         .m3-icon-group {
             display: inline-flex;
             align-items: center;
@@ -571,29 +571,44 @@
     </button>
 
     <!-- =================================================================== -->
-    <!-- IMAGE POPUP LIGHTBOX DIALOG                                         -->
+    <!-- IMAGE POPUP LIGHTBOX DIALOG (NOW WITH STARRED & SOLVED BUTTONS!)    -->
     <!-- =================================================================== -->
     <div id="imagePopupModal" onclick="if(event.target === this) window.app.closeImagePopup()" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-3 sm:p-5">
         <div class="relative max-w-5xl w-full max-h-[92vh] m3-dialog flex flex-col overflow-hidden">
-            <div class="px-4 py-3 m3-surface-low flex items-center justify-between gap-2 shrink-0">
+            <div class="px-4 py-3 m3-surface-low flex items-center justify-between gap-2 shrink-0 flex-wrap">
                 <div class="flex items-center gap-2.5 min-w-0">
                     <span id="popupQBadge" class="w-9 h-9 m3-cookie-12 font-extrabold text-xs flex items-center justify-center shrink-0" style="background: var(--md-primary); color: var(--md-on-primary);">Q.1</span>
                     <span id="popupSubjChap" class="text-xs sm:text-sm font-bold truncate">Physics</span>
                 </div>
 
-                <div class="m3-icon-group shrink-0">
-                    <button type="button" onclick="const id = window.app.getActivePopupId(); window.app.closeImagePopup(); window.app.openSplitModal(id);" class="m3-icon-group-btn gap-1.5 text-xs font-bold">
-                        <i class="ph-bold ph-scissors"></i>
-                        <span>Split / Trim</span>
-                    </button>
-                    <button type="button" onclick="const id = window.app.getActivePopupId(); window.app.closeImagePopup(); window.app.openScratchpad(id);" class="m3-icon-group-btn gap-1.5 text-xs font-bold">
-                        <i class="ph-bold ph-pencil-line"></i>
-                        <span>Whiteboard</span>
-                    </button>
-                    <button type="button" onclick="window.app.closeImagePopup()" class="m3-icon-group-btn gap-1.5 text-xs font-extrabold active-state">
-                        <i class="ph-bold ph-x"></i>
-                        <span>Close</span>
-                    </button>
+                <div class="flex items-center gap-2 shrink-0 ml-auto">
+                    <!-- Starred & Solved Buttons inside Image Preview Box -->
+                    <div class="m3-icon-group shrink-0">
+                        <button type="button" id="popupStarBtn" onclick="window.app.togglePopupQuestionBool('starred')" class="m3-icon-group-btn gap-1.5 text-xs font-bold" title="Toggle Starred">
+                            <i id="popupStarIcon" class="ph-bold ph-star"></i>
+                            <span class="hidden sm:inline">Star</span>
+                        </button>
+                        <button type="button" id="popupSolvedBtn" onclick="window.app.togglePopupQuestionBool('solved')" class="m3-icon-group-btn gap-1.5 text-xs font-bold" title="Toggle Solved">
+                            <i id="popupSolvedIcon" class="ph-bold ph-circle"></i>
+                            <span class="hidden sm:inline">Solved</span>
+                        </button>
+                    </div>
+
+                    <!-- Split / Whiteboard / Close Actions -->
+                    <div class="m3-icon-group shrink-0">
+                        <button type="button" onclick="const id = window.app.getActivePopupId(); window.app.closeImagePopup(); window.app.openSplitModal(id);" class="m3-icon-group-btn gap-1.5 text-xs font-bold">
+                            <i class="ph-bold ph-scissors"></i>
+                            <span>Split / Trim</span>
+                        </button>
+                        <button type="button" onclick="const id = window.app.getActivePopupId(); window.app.closeImagePopup(); window.app.openScratchpad(id, true);" class="m3-icon-group-btn gap-1.5 text-xs font-bold">
+                            <i class="ph-bold ph-pencil-line"></i>
+                            <span>Whiteboard</span>
+                        </button>
+                        <button type="button" onclick="window.app.closeImagePopup()" class="m3-icon-group-btn gap-1.5 text-xs font-extrabold active-state">
+                            <i class="ph-bold ph-x"></i>
+                            <span>Close</span>
+                        </button>
+                    </div>
                 </div>
             </div>
 
@@ -1240,7 +1255,6 @@
 
         // ===================================================================
         // 2. EXACT MATERIAL 3 EXPRESSIVE SHAPE-MORPHING + FAST-ROTATION LOADER
-        // (Matches video 00:03-00:08: Pentagon -> 9-Cookie -> 4-Lobe Pinched Clover -> 12-Gear -> 8-Cookie -> Circle)
         // ===================================================================
         const M3_MORPH_SHAPES = [
             // 0. Rounded Pentagon (00:03)
@@ -1520,6 +1534,7 @@
             activeSplitId: null,
             splitMode: 'SPLIT',
             activePadId: null,
+            padContextIds: [], // Locks Prev/Next question filter context inside Whiteboard & Popup!
             wbTool: 'PEN',
             wbAutoShape: true,
             inkColor: '#0f172a',
@@ -2093,7 +2108,7 @@ Analyze this JEE question image (${q.subject} - ${q.chapter}).
         }
 
         let cloudSyncTimer = null;
-        function scheduleCloudAutoSync(skipFullRender = false) {
+        function scheduleCloudAutoSync(skipFullRender = false, allowEmptyPush = false) {
             if (!skipFullRender) {
                 sortAndRefreshQuestions();
             } else {
@@ -2101,7 +2116,7 @@ Analyze this JEE question image (${q.subject} - ${q.chapter}).
             }
             if (!getGithubToken() || !isCloudAutoSyncEnabled() || state.isExtracting) return;
             clearTimeout(cloudSyncTimer);
-            cloudSyncTimer = setTimeout(() => pushToCloudGist(false), 1200);
+            cloudSyncTimer = setTimeout(() => pushToCloudGist(false, allowEmptyPush), 1200);
         }
 
         const sanitizePaperFilename = (p) => `jee_vault_paper_${String(p || 'Default_Paper').replace(/[^a-zA-Z0-9_-]/g, '_').slice(0, 45) || 'Default'}.json`;
@@ -2124,7 +2139,7 @@ Analyze this JEE question image (${q.subject} - ${q.chapter}).
             return gistId;
         }
 
-        async function pushToCloudGist(manualNotify = false) {
+        async function pushToCloudGist(manualNotify = false, allowEmptyPush = false) {
             const tokenInp = document.getElementById('githubTokenInput');
             const gistInp = document.getElementById('githubGistIdInput');
             if (tokenInp?.value.trim()) localStorage.setItem('jee_github_pat', tokenInp.value.trim());
@@ -2136,6 +2151,13 @@ Analyze this JEE question image (${q.subject} - ${q.chapter}).
                     window.app.openSettingsModal(false, 'KEYS');
                     toast('Paste your GitHub Personal Access Token (gist scope) first!', 'warn');
                 }
+                return;
+            }
+
+            // Safety Guard: Never overwrite Cloud Gist with 0 questions unless explicitly triggered by Clear Vault
+            if (state.questions.length === 0 && !allowEmptyPush) {
+                if (manualNotify) toast('Vault is empty — pulling from Cloud instead to protect your backup!', 'info');
+                await pullFromCloudGist(manualNotify);
                 return;
             }
 
@@ -3094,8 +3116,45 @@ CRITICAL RULES FOR ZERO TEXT CLIPPING & ZERO CLUBBING:
         }
 
         // ===================================================================
-        // FULLSCREEN WHITE WHITEBOARD ENGINE
+        // FULLSCREEN WHITE WHITEBOARD ENGINE + LOCKED CONTEXT NAVIGATION
         // ===================================================================
+        function capturePadNavigationContext(currentQId) {
+            const filtered = getFiltered();
+            const list = filtered.some(item => item.id === Number(currentQId)) ? filtered : state.questions;
+            state.padContextIds = list.map(item => item.id);
+        }
+
+        function getLockedPadContextList(currentQId) {
+            if (Array.isArray(state.padContextIds) && state.padContextIds.includes(Number(currentQId))) {
+                const resolved = state.padContextIds
+                    .map(id => state.questions.find(q => q.id === id))
+                    .filter(Boolean);
+                if (resolved.length > 0) return resolved;
+            }
+            capturePadNavigationContext(currentQId);
+            return state.padContextIds
+                .map(id => state.questions.find(q => q.id === id))
+                .filter(Boolean);
+        }
+
+        function refreshImagePopupTopBar() {
+            const q = state.questions.find(i => i.id === Number(state.activePopupId));
+            if (!q) return;
+            const starBtn = document.getElementById('popupStarBtn');
+            const starIcon = document.getElementById('popupStarIcon');
+            const solvedBtn = document.getElementById('popupSolvedBtn');
+            const solvedIcon = document.getElementById('popupSolvedIcon');
+
+            if (starBtn && starIcon) {
+                starBtn.classList.toggle('active-state', Boolean(q.starred));
+                starIcon.className = q.starred ? 'ph-fill ph-star' : 'ph-bold ph-star';
+            }
+            if (solvedBtn && solvedIcon) {
+                solvedBtn.classList.toggle('active-state', Boolean(q.solved));
+                solvedIcon.className = q.solved ? 'ph-fill ph-check-circle' : 'ph-bold ph-circle';
+            }
+        }
+
         function getActiveBoard() {
             const id = state.activePadId || 'default';
             if (!state.wbBoards[id]) {
@@ -3230,8 +3289,7 @@ CRITICAL RULES FOR ZERO TEXT CLIPPING & ZERO CLUBBING:
             const q = state.questions.find(i => i.id === Number(state.activePadId));
             if (!q) return;
 
-            const filtered = getFiltered();
-            const activeList = filtered.some(item => item.id === q.id) ? filtered : state.questions;
+            const activeList = getLockedPadContextList(q.id);
             const idx = activeList.findIndex(item => item.id === q.id);
 
             const titleEl = document.getElementById('padQTitle');
@@ -4163,11 +4221,19 @@ CRITICAL RULES FOR ZERO TEXT CLIPPING & ZERO CLUBBING:
                 closeCustomDropdown();
                 const q = state.questions.find(i => i.id === Number(id));
                 if (!q) return;
+                capturePadNavigationContext(q.id);
                 state.activePopupId = q.id;
                 document.getElementById('popupQBadge').textContent = `Q.${q.questionNumber}`;
                 document.getElementById('popupSubjChap').textContent = `${q.subject} • ${q.chapter}`;
                 document.getElementById('popupImageEl').src = q.imageDataUrl;
+                refreshImagePopupTopBar();
                 document.getElementById('imagePopupModal').classList.remove('hidden');
+            },
+            togglePopupQuestionBool(field) {
+                const q = state.questions.find(i => i.id === Number(state.activePopupId));
+                if (!q) return;
+                this.toggleQBool(q.id, field);
+                refreshImagePopupTopBar();
             },
             closeImagePopup() {
                 closeCustomDropdown();
@@ -4270,9 +4336,13 @@ CRITICAL RULES FOR ZERO TEXT CLIPPING & ZERO CLUBBING:
                 if (!q) return;
                 q[field] = !q[field];
 
+                const isOverlayOpen = !document.getElementById('scratchpadModal')?.classList.contains('hidden') ||
+                                      !document.getElementById('imagePopupModal')?.classList.contains('hidden');
                 const stillMatches = getFiltered().some(item => item.id === q.id);
                 const cardEl = document.querySelector(`article[data-card-id="${q.id}"]`);
-                if (stillMatches && cardEl) {
+
+                // If Whiteboard or Image Popup is open, update card in place without re-sorting/losing context
+                if ((stillMatches || isOverlayOpen) && cardEl) {
                     cardEl.style.borderColor = q.starred ? 'var(--md-primary)' : (q.solved ? '#10b981' : 'var(--md-outline-variant)');
                     const starBtn = cardEl.querySelector('.card-star-btn');
                     const solvedBtn = cardEl.querySelector('.card-solved-btn');
@@ -4332,7 +4402,7 @@ CRITICAL RULES FOR ZERO TEXT CLIPPING & ZERO CLUBBING:
                 state.questions = [];
                 this.closeClearConfirmModal();
                 this.toggleDrawer(false);
-                scheduleCloudAutoSync();
+                scheduleCloudAutoSync(false, true);
                 toast('Permanently deleted all questions & synced to Cloud', 'warn');
             },
 
@@ -4498,12 +4568,15 @@ CRITICAL RULES FOR ZERO TEXT CLIPPING & ZERO CLUBBING:
                 this.closeSplitModal();
             },
 
-            // Fullscreen White Whiteboard + Group/Ungroup + Duplicate Question + Crop & Duplicate
+            // Fullscreen White Whiteboard + Locked Context Navigation
             getActivePadId: () => state.activePadId,
-            openScratchpad(id) {
+            openScratchpad(id, keepContext = false) {
                 closeCustomDropdown();
                 const q = state.questions.find(i => i.id === Number(id));
                 if (!q) return;
+                if (!keepContext || !Array.isArray(state.padContextIds) || !state.padContextIds.includes(q.id)) {
+                    capturePadNavigationContext(q.id);
+                }
                 state.activePadId = Number(id);
                 state.padShowHint = false;
                 state.padShowAns = false;
@@ -4522,17 +4595,17 @@ CRITICAL RULES FOR ZERO TEXT CLIPPING & ZERO CLUBBING:
                 closeCustomDropdown();
                 state.wbSelectedIds = [];
                 document.getElementById('scratchpadModal').classList.add('hidden');
+                renderAll();
             },
             navigatePadQuestion(dir) {
                 closeCustomDropdown();
                 const q = state.questions.find(i => i.id === Number(state.activePadId));
                 if (!q) return;
-                const filtered = getFiltered();
-                const activeList = filtered.some(item => item.id === q.id) ? filtered : state.questions;
+                const activeList = getLockedPadContextList(q.id);
                 const idx = activeList.findIndex(item => item.id === q.id);
                 const nextQ = activeList[idx + dir];
                 if (!nextQ) return;
-                this.openScratchpad(nextQ.id);
+                this.openScratchpad(nextQ.id, true);
             },
             togglePadQuestionBool(field) {
                 const q = state.questions.find(i => i.id === Number(state.activePadId));
