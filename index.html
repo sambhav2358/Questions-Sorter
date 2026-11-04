@@ -120,10 +120,14 @@
             justify-content: center;
             font-size: 13px;
             font-weight: 700;
-            transition: background-color 0.2s var(--m3-smooth), color 0.2s var(--m3-smooth), border-radius 0.22s var(--m3-smooth), transform 0.15s var(--m3-smooth);
+            transition: background-color 0.2s var(--m3-smooth), color 0.2s var(--m3-smooth), border-radius 0.22s var(--m3-smooth), transform 0.15s var(--m3-smooth), opacity 0.2s ease;
             position: relative;
             white-space: nowrap;
             will-change: transform, background-color;
+        }
+        .m3-icon-group-btn:disabled {
+            opacity: 0.38;
+            pointer-events: none;
         }
         .m3-icon-group-btn:first-child { border-radius: 9999px 13px 13px 9999px; padding-left: 10px; }
         .m3-icon-group-btn:last-child { border-radius: 13px 9999px 9999px 13px; padding-right: 10px; }
@@ -230,12 +234,13 @@
             align-items: center;
             justify-content: space-between;
             gap: 5px;
-            transition: background-color 0.2s ease, border-radius 0.22s var(--m3-smooth), transform 0.15s var(--m3-smooth);
+            transition: background-color 0.2s ease, border-radius 0.22s var(--m3-smooth), transform 0.15s var(--m3-smooth), opacity 0.2s ease;
             cursor: pointer;
             user-select: none;
         }
-        .m3-dropdown-trigger:hover { background-color: var(--md-surface-highest); border-radius: 14px; }
-        .m3-dropdown-trigger:active { transform: scale(0.96); }
+        .m3-dropdown-trigger:disabled { opacity: 0.38; pointer-events: none; }
+        .m3-dropdown-trigger:hover:not(:disabled) { background-color: var(--md-surface-highest); border-radius: 14px; }
+        .m3-dropdown-trigger:active:not(:disabled) { transform: scale(0.96); }
 
         @keyframes m3MenuPop {
             from { opacity: 0; transform: scale(0.94) translateY(-4px); }
@@ -340,6 +345,22 @@
             max-width: calc(100vw - 24px);
         }
 
+        /* Swipe / Arrow Slide Animations for Image Preview Dialog */
+        @keyframes popupSlideNextIn {
+            from { opacity: 0; transform: translateX(72px) scale(0.98); }
+            to { opacity: 1; transform: translateX(0) scale(1); }
+        }
+        @keyframes popupSlidePrevIn {
+            from { opacity: 0; transform: translateX(-72px) scale(0.98); }
+            to { opacity: 1; transform: translateX(0) scale(1); }
+        }
+        .popup-anim-next {
+            animation: popupSlideNextIn 0.24s var(--m3-smooth) forwards;
+        }
+        .popup-anim-prev {
+            animation: popupSlidePrevIn 0.24s var(--m3-smooth) forwards;
+        }
+
         .m3-input {
             background-color: var(--md-surface-high);
             color: var(--md-on-surface);
@@ -373,6 +394,7 @@
             border-radius: 50%;
         }
         #stylusCanvas { touch-action: none; }
+        #popupSwipeViewport { touch-action: pan-y; }
     </style>
 </head>
 <body class="h-[100dvh] w-screen overflow-hidden flex flex-col select-none m3-surface">
@@ -571,13 +593,22 @@
     </button>
 
     <!-- =================================================================== -->
-    <!-- IMAGE POPUP LIGHTBOX DIALOG (NOW WITH STARRED & SOLVED BUTTONS!)    -->
+    <!-- IMAGE POPUP LIGHTBOX DIALOG (SWIPEABLE + ARROW KEYS + STAR/SOLVED)  -->
     <!-- =================================================================== -->
     <div id="imagePopupModal" onclick="if(event.target === this) window.app.closeImagePopup()" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-3 sm:p-5">
         <div class="relative max-w-5xl w-full max-h-[92vh] m3-dialog flex flex-col overflow-hidden">
             <div class="px-4 py-3 m3-surface-low flex items-center justify-between gap-2 shrink-0 flex-wrap">
-                <div class="flex items-center gap-2.5 min-w-0">
-                    <span id="popupQBadge" class="w-9 h-9 m3-cookie-12 font-extrabold text-xs flex items-center justify-center shrink-0" style="background: var(--md-primary); color: var(--md-on-primary);">Q.1</span>
+                <div class="flex items-center gap-2 min-w-0">
+                    <!-- Prev / Next Context Navigation in Image Preview -->
+                    <div class="m3-icon-group shrink-0">
+                        <button type="button" id="popupPrevBtn" onclick="window.app.navigatePopupQuestion(-1)" class="m3-icon-group-btn" title="Previous Question (Left Arrow / Swipe Right)">
+                            <i class="ph-bold ph-caret-left"></i>
+                        </button>
+                        <span id="popupQBadge" class="px-2.5 text-xs font-extrabold flex items-center justify-center shrink-0" style="color: var(--md-primary);">Q.1 (1/1)</span>
+                        <button type="button" id="popupNextBtn" onclick="window.app.navigatePopupQuestion(1)" class="m3-icon-group-btn" title="Next Question (Right Arrow / Swipe Left)">
+                            <i class="ph-bold ph-caret-right"></i>
+                        </button>
+                    </div>
                     <span id="popupSubjChap" class="text-xs sm:text-sm font-bold truncate">Physics</span>
                 </div>
 
@@ -612,8 +643,8 @@
                 </div>
             </div>
 
-            <div class="w-full flex-1 overflow-y-auto bg-white flex items-center justify-center p-3 sm:p-6">
-                <img id="popupImageEl" src="" alt="Full Question View" class="max-w-full h-auto object-contain rounded-xl">
+            <div id="popupSwipeViewport" class="w-full flex-1 overflow-y-auto overflow-x-hidden bg-white flex items-center justify-center p-3 sm:p-6 relative select-none">
+                <img id="popupImageEl" src="" draggable="false" alt="Full Question View" class="max-w-full h-auto object-contain rounded-xl transition-transform duration-150 will-change-transform">
             </div>
         </div>
     </div>
@@ -817,7 +848,7 @@
                                 </button>
                             </div>
                             <div id="settingsCloudWavyBar" class="hidden pt-1"></div>
-                            <p id="cloudLastSyncInfo" class="text-[11px] m3-text-muted font-mono">Questions are stored 100% in your Cloud Gist.</p>
+                            <p id="cloudLastSyncInfo" class="text-[11px] m3-text-muted font-mono">Questions & whiteboard rough work are stored 100% in your Cloud Gist.</p>
                         </div>
 
                         <div class="p-4 m3-group-item space-y-3">
@@ -1076,11 +1107,11 @@
                 </button>
 
                 <div class="m3-icon-group shrink-0">
-                    <button type="button" id="padPrevBtn" onclick="window.app.navigatePadQuestion(-1)" class="m3-icon-group-btn" title="Previous Question in Current Filter">
+                    <button type="button" id="padPrevBtn" onclick="window.app.navigatePadQuestion(-1)" class="m3-icon-group-btn" title="Previous Question (Left Arrow)">
                         <i class="ph-bold ph-caret-left"></i>
                     </button>
                     <span id="padQTitle" class="px-2.5 text-[11px] font-extrabold truncate max-w-[125px] sm:max-w-[165px]" title="Current Question">Q.1 (1/1)</span>
-                    <button type="button" id="padNextBtn" onclick="window.app.navigatePadQuestion(1)" class="m3-icon-group-btn" title="Next Question in Current Filter">
+                    <button type="button" id="padNextBtn" onclick="window.app.navigatePadQuestion(1)" class="m3-icon-group-btn" title="Next Question (Right Arrow)">
                         <i class="ph-bold ph-caret-right"></i>
                     </button>
                 </div>
@@ -1109,49 +1140,49 @@
             <!-- Right Group: Select / Crop&Dup / Pen / Pan / Erase / AutoShape + Insert Shape + Ink/Size + Undo/Redo/Clear -->
             <div class="flex items-center gap-1.5 shrink-0 ml-auto">
                 <div class="m3-icon-group">
-                    <button type="button" id="wbToolSelectBtn" onclick="window.app.setWhiteboardTool('SELECT')" class="m3-icon-group-btn gap-1 text-[11px]" title="Select, Multi-Select (Drag Box or Shift+Click), Move, Resize & Group">
+                    <button type="button" id="wbToolSelectBtn" onclick="window.app.setWhiteboardTool('SELECT')" class="wb-mod-btn m3-icon-group-btn gap-1 text-[11px]" title="Select, Multi-Select (Drag Box or Shift+Click), Move, Resize & Group">
                         <i class="ph-bold ph-cursor"></i>
                         <span class="hidden xl:inline">Select</span>
                     </button>
-                    <button type="button" id="wbToolCropDupBtn" onclick="window.app.setWhiteboardTool('CROP_DUP')" class="m3-icon-group-btn gap-1 text-[11px]" title="Crop & Duplicate any region (e.g., diagram or question part) as a new movable object">
+                    <button type="button" id="wbToolCropDupBtn" onclick="window.app.setWhiteboardTool('CROP_DUP')" class="wb-mod-btn m3-icon-group-btn gap-1 text-[11px]" title="Crop & Duplicate any region (e.g., diagram or question part) as a new movable object">
                         <i class="ph-bold ph-crop"></i>
                         <span class="hidden xl:inline">Crop & Dup</span>
                     </button>
-                    <button type="button" id="wbToolPenBtn" onclick="window.app.setWhiteboardTool('PEN')" class="m3-icon-group-btn active-state gap-1 text-[11px]" title="Pen Tool">
+                    <button type="button" id="wbToolPenBtn" onclick="window.app.setWhiteboardTool('PEN')" class="wb-mod-btn m3-icon-group-btn active-state gap-1 text-[11px]" title="Pen Tool">
                         <i class="ph-bold ph-pencil-simple"></i>
                         <span class="hidden xl:inline">Pen</span>
                     </button>
-                    <button type="button" id="wbToolPanBtn" onclick="window.app.setWhiteboardTool('PAN')" class="m3-icon-group-btn gap-1 text-[11px]" title="Pan / Move Infinite Whiteboard">
+                    <button type="button" id="wbToolPanBtn" onclick="window.app.setWhiteboardTool('PAN')" class="m3-icon-group-btn gap-1 text-[11px]" title="Pan / Move Infinite Whiteboard (Always allowed)">
                         <i class="ph-bold ph-hand-grabbing"></i>
                     </button>
-                    <button type="button" id="eraserBtn" onclick="window.app.setWhiteboardTool('ERASER')" class="m3-icon-group-btn gap-1 text-[11px]" title="Eraser Tool">
+                    <button type="button" id="eraserBtn" onclick="window.app.setWhiteboardTool('ERASER')" class="wb-mod-btn m3-icon-group-btn gap-1 text-[11px]" title="Eraser Tool">
                         <i class="ph-bold ph-eraser"></i>
                     </button>
-                    <button type="button" id="wbAutoShapeBtn" onclick="window.app.toggleAutoShape()" class="m3-icon-group-btn active-state gap-1 text-[11px]" title="Auto-convert hand-drawn shapes">
+                    <button type="button" id="wbAutoShapeBtn" onclick="window.app.toggleAutoShape()" class="wb-mod-btn m3-icon-group-btn active-state gap-1 text-[11px]" title="Auto-convert hand-drawn shapes">
                         <i class="ph-bold ph-magic-wand"></i>
                     </button>
                 </div>
 
-                <button type="button" id="insertShapeMenuBtn" onclick="window.app.openInsertShapeMenu(this)" class="h-9 px-2.5 m3-dropdown-trigger text-[11px]" title="Insert Preset Geometric Shape">
+                <button type="button" id="insertShapeMenuBtn" onclick="window.app.openInsertShapeMenu(this)" class="wb-mod-btn h-9 px-2.5 m3-dropdown-trigger text-[11px]" title="Insert Preset Geometric Shape">
                     <i class="ph-bold ph-shapes text-sm" style="color: var(--md-primary)"></i>
                     <span class="hidden lg:inline">+ Shape</span>
                     <i class="ph-bold ph-caret-down text-[9px] m3-text-muted"></i>
                 </button>
 
-                <button type="button" id="inkStyleMenuBtn" onclick="window.app.openInkStyleMenu(this)" class="h-9 px-2.5 m3-dropdown-trigger text-[11px]" title="Pen Color & Thickness">
+                <button type="button" id="inkStyleMenuBtn" onclick="window.app.openInkStyleMenu(this)" class="wb-mod-btn h-9 px-2.5 m3-dropdown-trigger text-[11px]" title="Pen Color & Thickness">
                     <span id="activeInkColorDot" class="w-3.5 h-3.5 rounded-full border border-white/40 shrink-0" style="background: #0f172a;"></span>
                     <span id="strokeWidthDropdownLabel" class="hidden sm:inline">Med</span>
                     <i class="ph-bold ph-caret-down text-[9px] m3-text-muted"></i>
                 </button>
 
                 <div class="m3-icon-group">
-                    <button type="button" onclick="window.app.whiteboardUndo()" class="m3-icon-group-btn" title="Undo (Ctrl+Z)">
+                    <button type="button" onclick="window.app.whiteboardUndo()" class="wb-mod-btn m3-icon-group-btn" title="Undo (Ctrl+Z)">
                         <i class="ph-bold ph-arrow-u-up-left"></i>
                     </button>
-                    <button type="button" onclick="window.app.whiteboardRedo()" class="m3-icon-group-btn" title="Redo (Ctrl+Y)">
+                    <button type="button" onclick="window.app.whiteboardRedo()" class="wb-mod-btn m3-icon-group-btn" title="Redo (Ctrl+Y)">
                         <i class="ph-bold ph-arrow-u-up-right"></i>
                     </button>
-                    <button type="button" onclick="window.app.clearInk()" class="m3-icon-group-btn hover:!bg-rose-600 hover:!text-white" title="Clear All Drawings (Keeps Original Question Image)">
+                    <button type="button" onclick="window.app.clearInk()" class="wb-mod-btn m3-icon-group-btn hover:!bg-rose-600 hover:!text-white" title="Clear All Drawings (Resets Whiteboard to Default)">
                         <i class="ph-bold ph-trash"></i>
                     </button>
                 </div>
@@ -1180,22 +1211,29 @@
 
         <!-- 100% FULLSCREEN WHITE WHITEBOARD WITH EMBEDDED QUESTION IMAGE -->
         <div id="padCanvasWrap" class="flex-1 w-full bg-white relative overflow-hidden select-none min-h-0">
-            
+            <!-- Background Rough-Work Loading Pill (Disables editing while allowing zoom/pan) -->
+            <div id="wbLoadingBadge" class="hidden absolute top-3 left-3.5 z-20 px-3.5 py-1.5 rounded-full m3-primary-pill shadow-xl items-center gap-2 text-xs font-extrabold pointer-events-none">
+                <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24">
+                    <path class="m3-morph-loader-path" fill="currentColor" d=""></path>
+                </svg>
+                <span>Loading saved rough work (Zoom/Pan active, editing locked)...</span>
+            </div>
+
             <!-- Floating Selected Object / Group Action Bar -->
             <div id="wbSelectionHud" class="hidden absolute top-3 right-4 z-10 m3-icon-group shadow-xl">
-                <button type="button" id="wbGroupBtn" onclick="window.app.groupSelectedWhiteboardItems()" class="hidden m3-icon-group-btn gap-1 text-[11px] font-bold" title="Group Selected Objects Together">
+                <button type="button" id="wbGroupBtn" onclick="window.app.groupSelectedWhiteboardItems()" class="wb-mod-btn hidden m3-icon-group-btn gap-1 text-[11px] font-bold" title="Group Selected Objects Together">
                     <i class="ph-bold ph-link"></i>
                     <span>Group</span>
                 </button>
-                <button type="button" id="wbUngroupBtn" onclick="window.app.ungroupSelectedWhiteboardItems()" class="hidden m3-icon-group-btn gap-1 text-[11px] font-bold" title="Ungroup Selected Objects">
+                <button type="button" id="wbUngroupBtn" onclick="window.app.ungroupSelectedWhiteboardItems()" class="wb-mod-btn hidden m3-icon-group-btn gap-1 text-[11px] font-bold" title="Ungroup Selected Objects">
                     <i class="ph-bold ph-link-break"></i>
                     <span>Ungroup</span>
                 </button>
-                <button type="button" onclick="window.app.duplicateSelectedWhiteboardItem()" class="m3-icon-group-btn gap-1 text-[11px] font-bold" title="Duplicate Selected Question Image, Shape or Group">
+                <button type="button" onclick="window.app.duplicateSelectedWhiteboardItem()" class="wb-mod-btn m3-icon-group-btn gap-1 text-[11px] font-bold" title="Duplicate Selected Question Image, Shape or Group">
                     <i class="ph-bold ph-copy"></i>
                     <span>Duplicate</span>
                 </button>
-                <button type="button" onclick="window.app.deleteSelectedWhiteboardItem()" class="m3-icon-group-btn hover:!bg-rose-600 hover:!text-white gap-1 text-[11px] font-bold" title="Delete Selected Item (Del)">
+                <button type="button" onclick="window.app.deleteSelectedWhiteboardItem()" class="wb-mod-btn m3-icon-group-btn hover:!bg-rose-600 hover:!text-white gap-1 text-[11px] font-bold" title="Delete Selected Item (Del)">
                     <i class="ph-bold ph-trash"></i>
                     <span>Delete</span>
                 </button>
@@ -1257,17 +1295,11 @@
         // 2. EXACT MATERIAL 3 EXPRESSIVE SHAPE-MORPHING + FAST-ROTATION LOADER
         // ===================================================================
         const M3_MORPH_SHAPES = [
-            // 0. Rounded Pentagon (00:03)
             (a) => 0.84 + 0.11 * Math.cos(5 * a) - 0.02 * Math.cos(10 * a),
-            // 1. 9-Lobe Scalloped Cookie (00:04)
             (a) => 0.87 + 0.068 * Math.cos(9 * a),
-            // 2. Pinched 4-Lobe Clover / Flower (00:05)
             (a) => 0.72 + 0.22 * Math.cos(4 * a) - 0.04 * Math.cos(8 * a),
-            // 3. 12-Tooth Sunburst Gear Cookie (00:06)
             (a) => 0.83 + 0.13 * Math.cos(12 * a),
-            // 4. 8-Lobe Soft Octagon Cookie (00:07)
             (a) => 0.86 + 0.078 * Math.cos(8 * a),
-            // 5. Smooth Circle (00:08)
             () => 0.89
         ];
 
@@ -1293,7 +1325,8 @@
         }
 
         function stepM3MorphLoader(now) {
-            if (!m3MorphActive && document.getElementById('minimizedUploadBar')?.classList.contains('hidden') && document.getElementById('uploadProgressView')?.classList.contains('hidden')) {
+            const isWbLoading = !document.getElementById('wbLoadingBadge')?.classList.contains('hidden');
+            if (!m3MorphActive && !isWbLoading && document.getElementById('minimizedUploadBar')?.classList.contains('hidden') && document.getElementById('uploadProgressView')?.classList.contains('hidden')) {
                 m3MorphAnimId = null;
                 return;
             }
@@ -1306,7 +1339,6 @@
             const u = Math.min(1, rawFrac / 0.65);
             const easeMorph = 1 - Math.pow(1 - u, 3);
 
-            // Exact fast angular velocity + whip on morph transition from video
             const rotDeg = (now * 0.22) + (beatIndex + easeMorph) * 105;
             const rotRad = (rotDeg * Math.PI) / 180;
 
@@ -1346,7 +1378,6 @@
             svg.classList.remove('hidden');
             ensureM3MorphLoopRunning();
         }
-
         // 3. Smoothly Propagating 60fps HTML5 Canvas Sine Wave Progress Bar
         const waveInstances = new Map();
         let waveAnimFrame = null;
@@ -1534,7 +1565,9 @@
             activeSplitId: null,
             splitMode: 'SPLIT',
             activePadId: null,
-            padContextIds: [], // Locks Prev/Next question filter context inside Whiteboard & Popup!
+            padContextIds: [], // Locks Prev/Next question filter context inside Whiteboard & Image Preview
+            wbIsLoading: false, // Locks board modifications while loading rough work in background (zoom/pan allowed)
+            wbLoadToken: 0,
             wbTool: 'PEN',
             wbAutoShape: true,
             inkColor: '#0f172a',
@@ -2094,6 +2127,7 @@ Analyze this JEE question image (${q.subject} - ${q.chapter}).
                 if (q.id === undefined || q.id === null) q.id = generateUniqueId();
                 if (q.hint === undefined) q.hint = '';
                 if (q.answerKey === undefined) q.answerKey = '';
+                if (q.whiteboardData === undefined) q.whiteboardData = null;
                 ensureQuestionAspectRatio(q);
             });
             state.questions.sort((a, b) => {
@@ -2154,7 +2188,6 @@ Analyze this JEE question image (${q.subject} - ${q.chapter}).
                 return;
             }
 
-            // Safety Guard: Never overwrite Cloud Gist with 0 questions unless explicitly triggered by Clear Vault
             if (state.questions.length === 0 && !allowEmptyPush) {
                 if (manualNotify) toast('Vault is empty — pulling from Cloud instead to protect your backup!', 'info');
                 await pullFromCloudGist(manualNotify);
@@ -2229,7 +2262,7 @@ Analyze this JEE question image (${q.subject} - ${q.chapter}).
 
                 localStorage.setItem('jee_cloud_last_sync', new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }));
                 updateCloudStatusUI('idle');
-                if (manualNotify) toast(`Synced ${state.questions.length} questions to GitHub Secret Gist!`, 'success');
+                if (manualNotify) toast(`Synced ${state.questions.length} questions & rough work to GitHub Secret Gist!`, 'success');
             } catch (err) {
                 updateCloudStatusUI('error', err.message);
                 if (manualNotify) toast(`Cloud Push failed: ${err.message}`, 'warn');
@@ -2292,11 +2325,13 @@ Analyze this JEE question image (${q.subject} - ${q.chapter}).
                     }
                 }
 
+                state.wbBoards = {};
                 state.questions = restoredQuestions.map(r => ({
                     ...r,
                     id: r.id || generateUniqueId(),
                     hint: r.hint || '',
-                    answerKey: r.answerKey || ''
+                    answerKey: r.answerKey || '',
+                    whiteboardData: r.whiteboardData || null
                 }));
                 localStorage.setItem('jee_cloud_last_sync', new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }));
                 state.isSyncingCloud = false;
@@ -2340,7 +2375,8 @@ Analyze this JEE question image (${q.subject} - ${q.chapter}).
                     ...r,
                     id: generateUniqueId(),
                     hint: r.hint || '',
-                    answerKey: r.answerKey || ''
+                    answerKey: r.answerKey || '',
+                    whiteboardData: r.whiteboardData || null
                 })));
                 scheduleCloudAutoSync();
                 toast(`Imported ${records.length} questions & syncing to Cloud!`, 'success');
@@ -2351,6 +2387,7 @@ Analyze this JEE question image (${q.subject} - ${q.chapter}).
                 event.target.value = '';
             }
         }
+
         // ===================================================================
         // 3-STAGE BULLETPROOF ANTI-TEXT-CLIP BOUNDARY GUARD & AUTO-TRIMMER
         // ===================================================================
@@ -2823,6 +2860,7 @@ CRITICAL RULES FOR ZERO TEXT CLIPPING & ZERO CLUBBING:
                             lastLineSnippet: b.lastLineSnippet || '',
                             hint: '',
                             answerKey: '',
+                            whiteboardData: null,
                             solved: false,
                             starred: false,
                             isStitched: false,
@@ -3114,9 +3152,8 @@ CRITICAL RULES FOR ZERO TEXT CLIPPING & ZERO CLUBBING:
                 `;
             }
         }
-
         // ===================================================================
-        // FULLSCREEN WHITE WHITEBOARD ENGINE + LOCKED CONTEXT NAVIGATION
+        // LOCKED CONTEXT NAVIGATION (IMAGE PREVIEW + WHITEBOARD)
         // ===================================================================
         function capturePadNavigationContext(currentQId) {
             const filtered = getFiltered();
@@ -3140,6 +3177,21 @@ CRITICAL RULES FOR ZERO TEXT CLIPPING & ZERO CLUBBING:
         function refreshImagePopupTopBar() {
             const q = state.questions.find(i => i.id === Number(state.activePopupId));
             if (!q) return;
+
+            const activeList = getLockedPadContextList(q.id);
+            const idx = activeList.findIndex(item => item.id === q.id);
+
+            const badgeEl = document.getElementById('popupQBadge');
+            if (badgeEl) badgeEl.textContent = `Q.${q.questionNumber} (${idx + 1}/${activeList.length})`;
+
+            const subjEl = document.getElementById('popupSubjChap');
+            if (subjEl) subjEl.textContent = `${q.subject} • ${q.chapter}`;
+
+            const prevBtn = document.getElementById('popupPrevBtn');
+            const nextBtn = document.getElementById('popupNextBtn');
+            if (prevBtn) prevBtn.disabled = idx <= 0;
+            if (nextBtn) nextBtn.disabled = idx < 0 || idx >= activeList.length - 1;
+
             const starBtn = document.getElementById('popupStarBtn');
             const starIcon = document.getElementById('popupStarIcon');
             const solvedBtn = document.getElementById('popupSolvedBtn');
@@ -3155,12 +3207,259 @@ CRITICAL RULES FOR ZERO TEXT CLIPPING & ZERO CLUBBING:
             }
         }
 
+        function initPopupSwipeNavigation() {
+            const viewport = document.getElementById('popupSwipeViewport');
+            const imgEl = document.getElementById('popupImageEl');
+            if (!viewport || !imgEl) return;
+
+            let startX = 0, startY = 0, currentDX = 0, isTouching = false, isHorizSwipe = false;
+
+            viewport.addEventListener('pointerdown', (e) => {
+                if (e.button && e.button !== 0) return;
+                isTouching = true;
+                isHorizSwipe = false;
+                startX = e.clientX;
+                startY = e.clientY;
+                currentDX = 0;
+                imgEl.style.transition = 'none';
+            });
+
+            viewport.addEventListener('pointermove', (e) => {
+                if (!isTouching) return;
+                const dx = e.clientX - startX;
+                const dy = e.clientY - startY;
+
+                if (!isHorizSwipe) {
+                    if (Math.abs(dx) > 14 && Math.abs(dx) > Math.abs(dy) * 1.25) {
+                        isHorizSwipe = true;
+                    } else if (Math.abs(dy) > 18) {
+                        isTouching = false;
+                        imgEl.style.transform = '';
+                        return;
+                    }
+                }
+
+                if (isHorizSwipe) {
+                    currentDX = dx;
+                    imgEl.style.transform = `translateX(${(dx * 0.38).toFixed(1)}px)`;
+                }
+            });
+
+            const finishSwipe = () => {
+                if (!isTouching) return;
+                isTouching = false;
+                imgEl.style.transition = 'transform 0.18s ease';
+                imgEl.style.transform = '';
+
+                if (isHorizSwipe) {
+                    if (currentDX < -55) {
+                        window.app.navigatePopupQuestion(1);
+                    } else if (currentDX > 55) {
+                        window.app.navigatePopupQuestion(-1);
+                    }
+                }
+                isHorizSwipe = false;
+                currentDX = 0;
+            };
+
+            viewport.addEventListener('pointerup', finishSwipe);
+            viewport.addEventListener('pointercancel', finishSwipe);
+        }
+
+        // ===================================================================
+        // FULLSCREEN WHITE WHITEBOARD + GIST ROUGH-WORK PERSISTENCE ENGINE
+        // ===================================================================
         function getActiveBoard() {
             const id = state.activePadId || 'default';
             if (!state.wbBoards[id]) {
                 state.wbBoards[id] = { items: [], undoStack: [], redoStack: [], initialized: false };
             }
             return state.wbBoards[id];
+        }
+
+        function setWhiteboardLoadingLock(isLoading) {
+            state.wbIsLoading = Boolean(isLoading);
+            const badge = document.getElementById('wbLoadingBadge');
+            if (badge) {
+                badge.classList.toggle('hidden', !state.wbIsLoading);
+                badge.classList.toggle('inline-flex', state.wbIsLoading);
+            }
+            document.querySelectorAll('.wb-mod-btn').forEach(btn => {
+                btn.disabled = state.wbIsLoading;
+            });
+            if (state.wbIsLoading) ensureM3MorphLoopRunning();
+        }
+
+        function boardHasRoughWork(items) {
+            if (!Array.isArray(items)) return false;
+            return items.some(it => it.type === 'STROKE' || (it.type === 'IMAGE' && !it.isOriginalQ));
+        }
+
+        let wbSaveTimer = null;
+        function syncActiveBoardToQuestionGist(immediate = false) {
+            const q = state.questions.find(i => i.id === Number(state.activePadId));
+            if (!q || state.wbIsLoading) return;
+            const board = getActiveBoard();
+
+            if (!boardHasRoughWork(board.items)) {
+                // No pen marks, shapes, or duplicated crops -> reset saved rough work to null (default)
+                if (q.whiteboardData !== null) {
+                    q.whiteboardData = null;
+                    scheduleCloudAutoSync(true);
+                }
+                return;
+            }
+
+            const serializedItems = board.items.map(it => {
+                if (it.type === 'IMAGE') {
+                    return {
+                        id: it.id,
+                        type: 'IMAGE',
+                        isOriginalQ: Boolean(it.isOriginalQ),
+                        groupId: it.groupId || null,
+                        x: Math.round(it.x * 10) / 10,
+                        y: Math.round(it.y * 10) / 10,
+                        w: Math.round(it.w * 10) / 10,
+                        h: Math.round(it.h * 10) / 10,
+                        src: it.isOriginalQ ? null : it.src
+                    };
+                }
+                return {
+                    id: it.id,
+                    type: 'STROKE',
+                    groupId: it.groupId || null,
+                    color: it.color,
+                    width: it.width,
+                    points: (it.points || []).map(p => ({
+                        x: Math.round(p.x * 10) / 10,
+                        y: Math.round(p.y * 10) / 10
+                    }))
+                };
+            });
+
+            q.whiteboardData = {
+                v: 1,
+                scale: state.wbScale,
+                panX: Math.round(state.wbPanX),
+                panY: Math.round(state.wbPanY),
+                items: serializedItems
+            };
+
+            clearTimeout(wbSaveTimer);
+            if (immediate) {
+                scheduleCloudAutoSync(true);
+            } else {
+                wbSaveTimer = setTimeout(() => scheduleCloudAutoSync(true), 800);
+            }
+        }
+
+        function createDefaultQuestionImageItem(q, imgEl) {
+            const targetW = Math.min(680, Math.max(400, Math.round(window.innerWidth * 0.45)));
+            const ratio = imgEl.height / (imgEl.width || 1);
+            const targetH = Math.round(targetW * ratio);
+            return {
+                id: generateUniqueId(),
+                type: 'IMAGE',
+                isOriginalQ: true,
+                groupId: null,
+                x: 36,
+                y: 44,
+                w: targetW,
+                h: targetH,
+                src: q.imageDataUrl,
+                imgEl
+            };
+        }
+
+        const loadImageElementAsync = (src) => new Promise((resolve) => {
+            const img = new Image();
+            img.onload = () => resolve(img);
+            img.onerror = () => resolve(null);
+            img.src = src;
+        });
+
+        async function loadQuestionBoardInBackground(q) {
+            const token = ++state.wbLoadToken;
+            const board = getActiveBoard();
+
+            setWhiteboardLoadingLock(true);
+
+            // Step 1: Load the base question image so the user can see & zoom/pan immediately
+            const baseQImg = await loadImageElementAsync(q.imageDataUrl);
+            if (token !== state.wbLoadToken) return;
+
+            const defaultQItem = baseQImg ? createDefaultQuestionImageItem(q, baseQImg) : null;
+            const saved = q.whiteboardData;
+            const hasSavedRoughWork = saved && Array.isArray(saved.items) && boardHasRoughWork(saved.items);
+
+            if (!hasSavedRoughWork) {
+                // No pen marks or shapes saved -> Reset whiteboard to clean default with question at (36, 44)
+                q.whiteboardData = null;
+                state.wbScale = 1.0;
+                state.wbPanX = 0;
+                state.wbPanY = 0;
+                board.items = defaultQItem ? [defaultQItem] : [];
+                board.undoStack = [];
+                board.redoStack = [];
+                board.initialized = true;
+                setWhiteboardLoadingLock(false);
+                initStylusCanvas();
+                return;
+            }
+
+            // Temporarily show the question while hydrating rough work in the background (Zoom/Pan enabled!)
+            state.wbScale = Number(saved.scale) || 1.0;
+            state.wbPanX = Number(saved.panX) || 0;
+            state.wbPanY = Number(saved.panY) || 0;
+            if (!board.initialized && defaultQItem) {
+                board.items = [defaultQItem];
+            }
+            initStylusCanvas();
+
+            // Step 2: Hydrate all saved strokes, shapes & cropped/duplicated images in the background
+            await new Promise(r => setTimeout(r, 40));
+            if (token !== state.wbLoadToken) return;
+
+            const hydratedItems = [];
+            for (const rawIt of saved.items) {
+                if (rawIt.type === 'IMAGE') {
+                    const srcToLoad = rawIt.isOriginalQ ? q.imageDataUrl : (rawIt.src || q.imageDataUrl);
+                    const loadedImg = rawIt.isOriginalQ ? baseQImg : await loadImageElementAsync(srcToLoad);
+                    if (token !== state.wbLoadToken) return;
+                    if (loadedImg) {
+                        hydratedItems.push({
+                            id: rawIt.id || generateUniqueId(),
+                            type: 'IMAGE',
+                            isOriginalQ: Boolean(rawIt.isOriginalQ),
+                            groupId: rawIt.groupId || null,
+                            x: Number(rawIt.x) ?? 36,
+                            y: Number(rawIt.y) ?? 44,
+                            w: Number(rawIt.w) || (defaultQItem ? defaultQItem.w : 500),
+                            h: Number(rawIt.h) || (defaultQItem ? defaultQItem.h : 250),
+                            src: srcToLoad,
+                            imgEl: loadedImg
+                        });
+                    }
+                } else if (rawIt.type === 'STROKE' && Array.isArray(rawIt.points) && rawIt.points.length > 0) {
+                    hydratedItems.push({
+                        id: rawIt.id || generateUniqueId(),
+                        type: 'STROKE',
+                        groupId: rawIt.groupId || null,
+                        color: rawIt.color || '#0f172a',
+                        width: Number(rawIt.width) || 3.5,
+                        points: rawIt.points.map(p => ({ x: Number(p.x) || 0, y: Number(p.y) || 0 }))
+                    });
+                }
+            }
+
+            if (!hydratedItems.some(it => it.isOriginalQ) && defaultQItem) {
+                hydratedItems.unshift(defaultQItem);
+            }
+
+            board.items = hydratedItems;
+            board.initialized = true;
+            setWhiteboardLoadingLock(false);
+            renderWhiteboardCanvas();
         }
 
         function cloneBoardItems(items) {
@@ -3178,35 +3477,6 @@ CRITICAL RULES FOR ZERO TEXT CLIPPING & ZERO CLUBBING:
             board.undoStack.push(cloneBoardItems(board.items));
             if (board.undoStack.length > 40) board.undoStack.shift();
             board.redoStack = [];
-        }
-
-        function ensureQuestionImageOnBoard(q, callback) {
-            const board = getActiveBoard();
-            if (board.initialized && board.items.some(it => it.isOriginalQ)) {
-                if (callback) callback();
-                return;
-            }
-            const img = new Image();
-            img.onload = () => {
-                const targetW = Math.min(680, Math.max(400, Math.round(window.innerWidth * 0.45)));
-                const ratio = img.height / (img.width || 1);
-                const targetH = Math.round(targetW * ratio);
-                board.items.unshift({
-                    id: generateUniqueId(),
-                    type: 'IMAGE',
-                    isOriginalQ: true,
-                    groupId: null,
-                    x: 36,
-                    y: 44,
-                    w: targetW,
-                    h: targetH,
-                    src: q.imageDataUrl,
-                    imgEl: img
-                });
-                board.initialized = true;
-                if (callback) callback();
-            };
-            img.src = q.imageDataUrl;
         }
 
         function getItemBounds(item) {
@@ -3268,7 +3538,7 @@ CRITICAL RULES FOR ZERO TEXT CLIPPING & ZERO CLUBBING:
 
             const board = getActiveBoard();
             const selectedItems = board.items.filter(it => state.wbSelectedIds.includes(it.id));
-            const hasSel = selectedItems.length > 0;
+            const hasSel = selectedItems.length > 0 && !state.wbIsLoading;
 
             hud.classList.toggle('hidden', !hasSel);
             hud.classList.toggle('inline-flex', hasSel);
@@ -3589,7 +3859,7 @@ CRITICAL RULES FOR ZERO TEXT CLIPPING & ZERO CLUBBING:
             drawBoardItemsToContext(ctx, board.items);
 
             const selBounds = getCombinedSelectedBounds();
-            if (selBounds) {
+            if (selBounds && !state.wbIsLoading) {
                 const bw = selBounds.maxX - selBounds.minX;
                 const bh = selBounds.maxY - selBounds.minY;
                 const handleSize = 9 / state.wbScale;
@@ -3640,6 +3910,8 @@ CRITICAL RULES FOR ZERO TEXT CLIPPING & ZERO CLUBBING:
             updateSelectionHudVisibility();
         }
 
+        let isSpacePressedGlobal = false;
+
         function initStylusCanvas() {
             const wrap = document.getElementById('padCanvasWrap');
             const canvas = document.getElementById('stylusCanvas');
@@ -3651,30 +3923,7 @@ CRITICAL RULES FOR ZERO TEXT CLIPPING & ZERO CLUBBING:
             let currentStroke = null;
             let lastPanMid = null;
             let lastPinchDist = null;
-            let isSpacePressed = false;
             let dragAction = null;
-
-            window.onkeydown = (e) => {
-                if (document.getElementById('scratchpadModal').classList.contains('hidden')) return;
-                if (e.code === 'Space') isSpacePressed = true;
-                if (e.key === 'Delete' || e.key === 'Backspace') {
-                    if (state.wbSelectedIds.length > 0) {
-                        e.preventDefault();
-                        window.app.deleteSelectedWhiteboardItem();
-                    }
-                }
-                if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z') {
-                    e.preventDefault();
-                    window.app.whiteboardUndo();
-                }
-                if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'y') {
-                    e.preventDefault();
-                    window.app.whiteboardRedo();
-                }
-            };
-            window.onkeyup = (e) => {
-                if (e.code === 'Space') isSpacePressed = false;
-            };
 
             const screenToWorld = (sx, sy) => ({
                 x: (sx - state.wbPanX) / state.wbScale,
@@ -3746,6 +3995,7 @@ CRITICAL RULES FOR ZERO TEXT CLIPPING & ZERO CLUBBING:
                     board.items = board.items.filter(it => it.id !== hitStroke.id);
                     state.wbSelectedIds = [];
                     renderWhiteboardCanvas();
+                    syncActiveBoardToQuestionGist();
                 }
             };
 
@@ -3757,6 +4007,7 @@ CRITICAL RULES FOR ZERO TEXT CLIPPING & ZERO CLUBBING:
                 const sx = e.clientX - r.left, sy = e.clientY - r.top;
                 activePointers.set(e.pointerId, { x: sx, y: sy });
 
+                // 2-Finger Pinch-to-Zoom & Pan is ALWAYS allowed (even while loading rough work)
                 if (activePointers.size === 2) {
                     currentStroke = null;
                     dragAction = null;
@@ -3767,7 +4018,8 @@ CRITICAL RULES FOR ZERO TEXT CLIPPING & ZERO CLUBBING:
                     return;
                 }
 
-                if (state.wbTool === 'PAN' || isSpacePressed || e.button === 1) {
+                // While loading rough work in background, disable board modification & allow Pan/Zoom!
+                if (state.wbIsLoading || state.wbTool === 'PAN' || isSpacePressedGlobal || e.button === 1) {
                     lastPanMid = { x: sx, y: sy };
                     return;
                 }
@@ -3885,7 +4137,7 @@ CRITICAL RULES FOR ZERO TEXT CLIPPING & ZERO CLUBBING:
                     return;
                 }
 
-                if (state.wbTool === 'PAN' || isSpacePressed || (e.buttons & 4)) {
+                if (state.wbIsLoading || state.wbTool === 'PAN' || isSpacePressedGlobal || (e.buttons & 4)) {
                     if (lastPanMid) {
                         state.wbPanX += sx - lastPanMid.x;
                         state.wbPanY += sy - lastPanMid.y;
@@ -4037,12 +4289,19 @@ CRITICAL RULES FOR ZERO TEXT CLIPPING & ZERO CLUBBING:
                             board.items.push(newItem);
                             state.wbSelectedIds = [newItem.id];
                             window.app.setWhiteboardTool('SELECT');
+                            syncActiveBoardToQuestionGist();
                             toast('Cropped & duplicated region! Drag to move or resize.', 'success');
                         };
                         croppedImg.src = dataUrl;
                     } else {
                         renderWhiteboardCanvas();
                     }
+                    return;
+                }
+
+                if (dragAction && (dragAction.mode === 'MOVE' || dragAction.mode === 'RESIZE')) {
+                    dragAction = null;
+                    syncActiveBoardToQuestionGist();
                     return;
                 }
 
@@ -4055,6 +4314,7 @@ CRITICAL RULES FOR ZERO TEXT CLIPPING & ZERO CLUBBING:
                     }
                     currentStroke = null;
                     renderWhiteboardCanvas();
+                    syncActiveBoardToQuestionGist();
                 }
             };
 
@@ -4115,11 +4375,13 @@ CRITICAL RULES FOR ZERO TEXT CLIPPING & ZERO CLUBBING:
                 });
             },
             openInsertShapeMenu(anchorEl) {
+                if (state.wbIsLoading) return;
                 openCustomDropdown(anchorEl, PRESET_SHAPES, '', (shapeType) => {
                     this.insertPresetShape(shapeType);
                 });
             },
             openInkStyleMenu(anchorEl) {
+                if (state.wbIsLoading) return;
                 const opts = [
                     ...WHITEBOARD_COLORS.map(c => ({ value: `COLOR:${c.value}`, label: c.label, colorDot: c.value })),
                     ...STROKE_WIDTHS.map(w => ({ value: `WIDTH:${w.value}`, label: `Thickness: ${w.label}` }))
@@ -4217,17 +4479,35 @@ CRITICAL RULES FOR ZERO TEXT CLIPPING & ZERO CLUBBING:
             },
 
             getActivePopupId: () => state.activePopupId,
-            openImagePopup(id) {
+            openImagePopup(id, keepContext = false, slideDir = 0) {
                 closeCustomDropdown();
                 const q = state.questions.find(i => i.id === Number(id));
                 if (!q) return;
-                capturePadNavigationContext(q.id);
+                if (!keepContext || !Array.isArray(state.padContextIds) || !state.padContextIds.includes(q.id)) {
+                    capturePadNavigationContext(q.id);
+                }
                 state.activePopupId = q.id;
-                document.getElementById('popupQBadge').textContent = `Q.${q.questionNumber}`;
-                document.getElementById('popupSubjChap').textContent = `${q.subject} • ${q.chapter}`;
-                document.getElementById('popupImageEl').src = q.imageDataUrl;
+                const imgEl = document.getElementById('popupImageEl');
+                if (imgEl) {
+                    imgEl.classList.remove('popup-anim-next', 'popup-anim-prev');
+                    imgEl.src = q.imageDataUrl;
+                    if (slideDir !== 0) {
+                        void imgEl.offsetWidth;
+                        imgEl.classList.add(slideDir > 0 ? 'popup-anim-next' : 'popup-anim-prev');
+                    }
+                }
                 refreshImagePopupTopBar();
                 document.getElementById('imagePopupModal').classList.remove('hidden');
+            },
+            navigatePopupQuestion(dir) {
+                closeCustomDropdown();
+                const q = state.questions.find(i => i.id === Number(state.activePopupId));
+                if (!q) return;
+                const activeList = getLockedPadContextList(q.id);
+                const idx = activeList.findIndex(item => item.id === q.id);
+                const nextQ = activeList[idx + dir];
+                if (!nextQ) return;
+                this.openImagePopup(nextQ.id, true, dir);
             },
             togglePopupQuestionBool(field) {
                 const q = state.questions.find(i => i.id === Number(state.activePopupId));
@@ -4238,8 +4518,13 @@ CRITICAL RULES FOR ZERO TEXT CLIPPING & ZERO CLUBBING:
             closeImagePopup() {
                 closeCustomDropdown();
                 document.getElementById('imagePopupModal').classList.add('hidden');
-                document.getElementById('popupImageEl').src = '';
+                const imgEl = document.getElementById('popupImageEl');
+                if (imgEl) {
+                    imgEl.src = '';
+                    imgEl.classList.remove('popup-anim-next', 'popup-anim-prev');
+                }
                 state.activePopupId = null;
+                renderAll();
             },
 
             openSettingsPage(pageKey = 'HOME') {
@@ -4341,7 +4626,6 @@ CRITICAL RULES FOR ZERO TEXT CLIPPING & ZERO CLUBBING:
                 const stillMatches = getFiltered().some(item => item.id === q.id);
                 const cardEl = document.querySelector(`article[data-card-id="${q.id}"]`);
 
-                // If Whiteboard or Image Popup is open, update card in place without re-sorting/losing context
                 if ((stillMatches || isOverlayOpen) && cardEl) {
                     cardEl.style.borderColor = q.starred ? 'var(--md-primary)' : (q.solved ? '#10b981' : 'var(--md-outline-variant)');
                     const starBtn = cardEl.querySelector('.card-star-btn');
@@ -4535,6 +4819,7 @@ CRITICAL RULES FOR ZERO TEXT CLIPPING & ZERO CLUBBING:
                     q.ocrText = '';
                     q.hint = '';
                     q.answerKey = '';
+                    q.whiteboardData = null;
 
                     state.questions.push({
                         ...q,
@@ -4545,6 +4830,7 @@ CRITICAL RULES FOR ZERO TEXT CLIPPING & ZERO CLUBBING:
                         ocrText: '',
                         hint: '',
                         answerKey: '',
+                        whiteboardData: null,
                         solved: false,
                         createdAt: (q.createdAt || Date.now()) + 1
                     });
@@ -4568,10 +4854,13 @@ CRITICAL RULES FOR ZERO TEXT CLIPPING & ZERO CLUBBING:
                 this.closeSplitModal();
             },
 
-            // Fullscreen White Whiteboard + Locked Context Navigation
+            // Fullscreen White Whiteboard + Background Gist Rough-Work Loader
             getActivePadId: () => state.activePadId,
             openScratchpad(id, keepContext = false) {
                 closeCustomDropdown();
+                if (state.activePadId && !state.wbIsLoading) {
+                    syncActiveBoardToQuestionGist(true);
+                }
                 const q = state.questions.find(i => i.id === Number(id));
                 if (!q) return;
                 if (!keepContext || !Array.isArray(state.padContextIds) || !state.padContextIds.includes(q.id)) {
@@ -4587,12 +4876,15 @@ CRITICAL RULES FOR ZERO TEXT CLIPPING & ZERO CLUBBING:
 
                 refreshScratchpadTopBarAndHints();
                 document.getElementById('scratchpadModal').classList.remove('hidden');
-                ensureQuestionImageOnBoard(q, () => {
-                    initStylusCanvas();
-                });
+                loadQuestionBoardInBackground(q);
             },
             closeScratchpad() {
                 closeCustomDropdown();
+                if (state.activePadId && !state.wbIsLoading) {
+                    syncActiveBoardToQuestionGist(true);
+                }
+                state.wbLoadToken++;
+                setWhiteboardLoadingLock(false);
                 state.wbSelectedIds = [];
                 document.getElementById('scratchpadModal').classList.add('hidden');
                 renderAll();
@@ -4647,6 +4939,7 @@ CRITICAL RULES FOR ZERO TEXT CLIPPING & ZERO CLUBBING:
                 }
             },
             setWhiteboardTool(tool) {
+                if (state.wbIsLoading && tool !== 'PAN') return;
                 state.wbTool = tool;
                 if (tool !== 'SELECT') state.wbSelectedIds = [];
                 document.getElementById('wbToolSelectBtn')?.classList.toggle('active-state', tool === 'SELECT');
@@ -4661,6 +4954,7 @@ CRITICAL RULES FOR ZERO TEXT CLIPPING & ZERO CLUBBING:
                 renderWhiteboardCanvas();
             },
             insertPresetShape(shapeType) {
+                if (state.wbIsLoading) return;
                 const wrap = document.getElementById('padCanvasWrap');
                 if (!wrap) return;
                 const cx = (wrap.clientWidth * 0.65 - state.wbPanX) / state.wbScale;
@@ -4682,8 +4976,10 @@ CRITICAL RULES FOR ZERO TEXT CLIPPING & ZERO CLUBBING:
                 state.wbSelectedIds = [newItem.id];
                 this.setWhiteboardTool('SELECT');
                 renderWhiteboardCanvas();
+                syncActiveBoardToQuestionGist();
             },
             groupSelectedWhiteboardItems() {
+                if (state.wbIsLoading) return;
                 const board = getActiveBoard();
                 if (state.wbSelectedIds.length < 2) return;
                 pushBoardUndoState();
@@ -4694,9 +4990,11 @@ CRITICAL RULES FOR ZERO TEXT CLIPPING & ZERO CLUBBING:
                     }
                 }
                 renderWhiteboardCanvas();
+                syncActiveBoardToQuestionGist();
                 toast(`Grouped ${state.wbSelectedIds.length} objects together!`, 'success');
             },
             ungroupSelectedWhiteboardItems() {
+                if (state.wbIsLoading) return;
                 const board = getActiveBoard();
                 pushBoardUndoState();
                 for (const it of board.items) {
@@ -4705,9 +5003,11 @@ CRITICAL RULES FOR ZERO TEXT CLIPPING & ZERO CLUBBING:
                     }
                 }
                 renderWhiteboardCanvas();
+                syncActiveBoardToQuestionGist();
                 toast('Ungrouped selected objects', 'info');
             },
             duplicateSelectedWhiteboardItem() {
+                if (state.wbIsLoading) return;
                 const board = getActiveBoard();
                 if (state.wbSelectedIds.length === 0) {
                     return toast('Select the question image, a shape, or a group first to duplicate it', 'info');
@@ -4748,9 +5048,11 @@ CRITICAL RULES FOR ZERO TEXT CLIPPING & ZERO CLUBBING:
                 }
                 state.wbSelectedIds = newSelectedIds;
                 renderWhiteboardCanvas();
+                syncActiveBoardToQuestionGist();
                 toast('Duplicated selection!', 'success');
             },
             deleteSelectedWhiteboardItem() {
+                if (state.wbIsLoading) return;
                 const board = getActiveBoard();
                 if (state.wbSelectedIds.length === 0) return;
                 const deletableIds = state.wbSelectedIds.filter(id => {
@@ -4766,13 +5068,16 @@ CRITICAL RULES FOR ZERO TEXT CLIPPING & ZERO CLUBBING:
                 board.items = board.items.filter(it => !deletableIds.includes(it.id));
                 state.wbSelectedIds = [];
                 renderWhiteboardCanvas();
+                syncActiveBoardToQuestionGist();
             },
             toggleAutoShape() {
+                if (state.wbIsLoading) return;
                 state.wbAutoShape = !state.wbAutoShape;
                 document.getElementById('wbAutoShapeBtn')?.classList.toggle('active-state', state.wbAutoShape);
                 toast(`Auto-Shape Recognition ${state.wbAutoShape ? 'ON (Circles, Squares, Triangles, Lines)' : 'OFF'}`, 'info');
             },
             setInk(color) {
+                if (state.wbIsLoading) return;
                 state.inkColor = color;
                 const dot = document.getElementById('activeInkColorDot');
                 if (dot) dot.style.background = color;
@@ -4783,13 +5088,18 @@ CRITICAL RULES FOR ZERO TEXT CLIPPING & ZERO CLUBBING:
                         const st = board.items.find(i => i.id === id && i.type === 'STROKE');
                         if (st) { st.color = color; changed = true; }
                     }
-                    if (changed) { renderWhiteboardCanvas(); return; }
+                    if (changed) {
+                        renderWhiteboardCanvas();
+                        syncActiveBoardToQuestionGist();
+                        return;
+                    }
                 }
                 if (state.wbTool === 'ERASER' || state.wbTool === 'PAN') {
                     this.setWhiteboardTool('PEN');
                 }
             },
             setStrokeWidth(w) {
+                if (state.wbIsLoading) return;
                 state.strokeWidth = Number(w) || 3.5;
                 const swObj = STROKE_WIDTHS.find(item => item.value === state.strokeWidth) || STROKE_WIDTHS[1];
                 const lbl = document.getElementById('strokeWidthDropdownLabel');
@@ -4801,31 +5111,49 @@ CRITICAL RULES FOR ZERO TEXT CLIPPING & ZERO CLUBBING:
                         if (st) st.width = state.strokeWidth;
                     }
                     renderWhiteboardCanvas();
+                    syncActiveBoardToQuestionGist();
                 }
             },
             whiteboardUndo() {
+                if (state.wbIsLoading) return;
                 const board = getActiveBoard();
                 if (board.undoStack.length === 0) return;
                 board.redoStack.push(cloneBoardItems(board.items));
                 board.items = board.undoStack.pop();
                 state.wbSelectedIds = [];
                 renderWhiteboardCanvas();
+                syncActiveBoardToQuestionGist();
             },
             whiteboardRedo() {
+                if (state.wbIsLoading) return;
                 const board = getActiveBoard();
                 if (board.redoStack.length === 0) return;
                 board.undoStack.push(cloneBoardItems(board.items));
                 board.items = board.redoStack.pop();
                 state.wbSelectedIds = [];
                 renderWhiteboardCanvas();
+                syncActiveBoardToQuestionGist();
             },
             clearInk() {
+                if (state.wbIsLoading) return;
+                const q = state.questions.find(i => i.id === Number(state.activePadId));
                 const board = getActiveBoard();
                 pushBoardUndoState();
                 const origQ = board.items.find(it => it.isOriginalQ);
+                if (origQ && origQ.imgEl && q) {
+                    const defItem = createDefaultQuestionImageItem(q, origQ.imgEl);
+                    origQ.x = defItem.x;
+                    origQ.y = defItem.y;
+                    origQ.w = defItem.w;
+                    origQ.h = defItem.h;
+                }
                 board.items = origQ ? [origQ] : [];
                 state.wbSelectedIds = [];
+                state.wbScale = 1.0;
+                state.wbPanX = 0;
+                state.wbPanY = 0;
                 renderWhiteboardCanvas();
+                syncActiveBoardToQuestionGist(true);
             },
             zoomWhiteboard(delta) {
                 const wrap = document.getElementById('padCanvasWrap');
@@ -4846,7 +5174,11 @@ CRITICAL RULES FOR ZERO TEXT CLIPPING & ZERO CLUBBING:
             }
         };
 
+        // Global Keyboard Shortcuts: Escape, Spacebar Pan, Undo/Redo, Delete, and ArrowLeft / ArrowRight Navigation!
         window.addEventListener('keydown', (e) => {
+            const tag = (e.target?.tagName || '').toUpperCase();
+            const isTyping = tag === 'INPUT' || tag === 'TEXTAREA' || e.target?.isContentEditable;
+
             if (e.key === 'Escape') {
                 window.app.closeCustomDropdown();
                 window.app.closeClearConfirmModal();
@@ -4854,7 +5186,59 @@ CRITICAL RULES FOR ZERO TEXT CLIPPING & ZERO CLUBBING:
                 window.app.closeSettingsModal();
                 if (!state.isExtracting) window.app.closeUploadModal();
                 window.app.closeSplitModal();
+                return;
             }
+
+            if (isTyping) return;
+
+            const isScratchpadOpen = !document.getElementById('scratchpadModal')?.classList.contains('hidden');
+            const isImagePopupOpen = !document.getElementById('imagePopupModal')?.classList.contains('hidden');
+
+            // Left / Right Arrow Key Question Switching in Whiteboard & Image Preview Dialog
+            if (e.key === 'ArrowLeft') {
+                if (isScratchpadOpen) {
+                    e.preventDefault();
+                    window.app.navigatePadQuestion(-1);
+                    return;
+                }
+                if (isImagePopupOpen) {
+                    e.preventDefault();
+                    window.app.navigatePopupQuestion(-1);
+                    return;
+                }
+            }
+            if (e.key === 'ArrowRight') {
+                if (isScratchpadOpen) {
+                    e.preventDefault();
+                    window.app.navigatePadQuestion(1);
+                    return;
+                }
+                if (isImagePopupOpen) {
+                    e.preventDefault();
+                    window.app.navigatePopupQuestion(1);
+                    return;
+                }
+            }
+
+            if (isScratchpadOpen) {
+                if (e.code === 'Space') isSpacePressedGlobal = true;
+                if ((e.key === 'Delete' || e.key === 'Backspace') && state.wbSelectedIds.length > 0 && !state.wbIsLoading) {
+                    e.preventDefault();
+                    window.app.deleteSelectedWhiteboardItem();
+                }
+                if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z' && !state.wbIsLoading) {
+                    e.preventDefault();
+                    window.app.whiteboardUndo();
+                }
+                if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'y' && !state.wbIsLoading) {
+                    e.preventDefault();
+                    window.app.whiteboardRedo();
+                }
+            }
+        });
+
+        window.addEventListener('keyup', (e) => {
+            if (e.code === 'Space') isSpacePressedGlobal = false;
         });
 
         let resizeTimer = null;
@@ -4872,6 +5256,7 @@ CRITICAL RULES FOR ZERO TEXT CLIPPING & ZERO CLUBBING:
         window.addEventListener('DOMContentLoaded', async () => {
             initM3ExpressiveShapes();
             initSwipeableStatusSegmentedBar();
+            initPopupSwipeNavigation();
             applyMaterialThemeFromSeed(
                 localStorage.getItem('jee_m3_seed_color') || '#7c3aed',
                 localStorage.getItem('jee_m3_theme_mode') || 'dark'
