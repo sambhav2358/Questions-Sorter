@@ -345,20 +345,18 @@
             max-width: calc(100vw - 24px);
         }
 
-        /* Swipe / Arrow Slide Animations for Image Preview Dialog */
-        @keyframes popupSlideNextIn {
-            from { opacity: 0; transform: translateX(72px) scale(0.98); }
-            to { opacity: 1; transform: translateX(0) scale(1); }
-        }
-        @keyframes popupSlidePrevIn {
-            from { opacity: 0; transform: translateX(-72px) scale(0.98); }
-            to { opacity: 1; transform: translateX(0) scale(1); }
-        }
-        .popup-anim-next {
-            animation: popupSlideNextIn 0.24s var(--m3-smooth) forwards;
-        }
-        .popup-anim-prev {
-            animation: popupSlidePrevIn 0.24s var(--m3-smooth) forwards;
+        /* 3-Card Carousel Track for Full-Card Swiping in Image Popup */
+        .popup-carousel-card {
+            background-color: var(--md-surface-container);
+            border-radius: 32px;
+            box-shadow: 0 28px 64px rgba(0, 0, 0, 0.65);
+            width: 100%;
+            max-width: 64rem;
+            max-height: 90dvh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            user-select: none;
         }
 
         .m3-input {
@@ -394,7 +392,7 @@
             border-radius: 50%;
         }
         #stylusCanvas { touch-action: none; }
-        #popupSwipeViewport { touch-action: pan-y; }
+        #popupCarouselViewport { touch-action: pan-y; }
     </style>
 </head>
 <body class="h-[100dvh] w-screen overflow-hidden flex flex-col select-none m3-surface">
@@ -484,7 +482,6 @@
             </button>
             <button id="syncHeaderBtn" onclick="window.app.handleCloudBadgeClick()" class="m3-icon-group-btn gap-1.5" title="Click to Sync with GitHub Cloud">
                 <i id="cloudStatusIcon" class="ph-bold ph-cloud-arrow-up text-sm"></i>
-                <!-- Exact Material 3 Expressive Shape-Morphing + Fast-Rotation Loader from Video -->
                 <svg id="syncMorphSvg" class="hidden w-5 h-5 shrink-0" viewBox="0 0 24 24">
                     <path class="m3-morph-loader-path" fill="currentColor" d=""></path>
                 </svg>
@@ -593,58 +590,18 @@
     </button>
 
     <!-- =================================================================== -->
-    <!-- IMAGE POPUP LIGHTBOX DIALOG (SWIPEABLE + ARROW KEYS + STAR/SOLVED)  -->
+    <!-- FULL-CARD 3-PANEL CAROUSEL IMAGE POPUP LIGHTBOX                     -->
+    <!-- Swiping moves the entire card & brings the adjacent card into frame -->
     <!-- =================================================================== -->
-    <div id="imagePopupModal" onclick="if(event.target === this) window.app.closeImagePopup()" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-3 sm:p-5">
-        <div class="relative max-w-5xl w-full max-h-[92vh] m3-dialog flex flex-col overflow-hidden">
-            <div class="px-4 py-3 m3-surface-low flex items-center justify-between gap-2 shrink-0 flex-wrap">
-                <div class="flex items-center gap-2 min-w-0">
-                    <!-- Prev / Next Context Navigation in Image Preview -->
-                    <div class="m3-icon-group shrink-0">
-                        <button type="button" id="popupPrevBtn" onclick="window.app.navigatePopupQuestion(-1)" class="m3-icon-group-btn" title="Previous Question (Left Arrow / Swipe Right)">
-                            <i class="ph-bold ph-caret-left"></i>
-                        </button>
-                        <span id="popupQBadge" class="px-2.5 text-xs font-extrabold flex items-center justify-center shrink-0" style="color: var(--md-primary);">Q.1 (1/1)</span>
-                        <button type="button" id="popupNextBtn" onclick="window.app.navigatePopupQuestion(1)" class="m3-icon-group-btn" title="Next Question (Right Arrow / Swipe Left)">
-                            <i class="ph-bold ph-caret-right"></i>
-                        </button>
-                    </div>
-                    <span id="popupSubjChap" class="text-xs sm:text-sm font-bold truncate">Physics</span>
-                </div>
-
-                <div class="flex items-center gap-2 shrink-0 ml-auto">
-                    <!-- Starred & Solved Buttons inside Image Preview Box -->
-                    <div class="m3-icon-group shrink-0">
-                        <button type="button" id="popupStarBtn" onclick="window.app.togglePopupQuestionBool('starred')" class="m3-icon-group-btn gap-1.5 text-xs font-bold" title="Toggle Starred">
-                            <i id="popupStarIcon" class="ph-bold ph-star"></i>
-                            <span class="hidden sm:inline">Star</span>
-                        </button>
-                        <button type="button" id="popupSolvedBtn" onclick="window.app.togglePopupQuestionBool('solved')" class="m3-icon-group-btn gap-1.5 text-xs font-bold" title="Toggle Solved">
-                            <i id="popupSolvedIcon" class="ph-bold ph-circle"></i>
-                            <span class="hidden sm:inline">Solved</span>
-                        </button>
-                    </div>
-
-                    <!-- Split / Whiteboard / Close Actions -->
-                    <div class="m3-icon-group shrink-0">
-                        <button type="button" onclick="const id = window.app.getActivePopupId(); window.app.closeImagePopup(); window.app.openSplitModal(id);" class="m3-icon-group-btn gap-1.5 text-xs font-bold">
-                            <i class="ph-bold ph-scissors"></i>
-                            <span>Split / Trim</span>
-                        </button>
-                        <button type="button" onclick="const id = window.app.getActivePopupId(); window.app.closeImagePopup(); window.app.openScratchpad(id, true);" class="m3-icon-group-btn gap-1.5 text-xs font-bold">
-                            <i class="ph-bold ph-pencil-line"></i>
-                            <span>Whiteboard</span>
-                        </button>
-                        <button type="button" onclick="window.app.closeImagePopup()" class="m3-icon-group-btn gap-1.5 text-xs font-extrabold active-state">
-                            <i class="ph-bold ph-x"></i>
-                            <span>Close</span>
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <div id="popupSwipeViewport" class="w-full flex-1 overflow-y-auto overflow-x-hidden bg-white flex items-center justify-center p-3 sm:p-6 relative select-none">
-                <img id="popupImageEl" src="" draggable="false" alt="Full Question View" class="max-w-full h-auto object-contain rounded-xl transition-transform duration-150 will-change-transform">
+    <div id="imagePopupModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden overflow-hidden">
+        <div id="popupCarouselViewport" class="w-screen h-[100dvh] overflow-hidden relative flex items-center">
+            <div id="popupCarouselTrack" class="flex items-center h-full will-change-transform" style="width: 300vw; transform: translate3d(-100vw, 0, 0);">
+                <!-- SLIDE 0: PREVIOUS CARD -->
+                <div id="popupSlidePrev" onclick="if(event.target === this) window.app.closeImagePopup()" class="w-screen h-full flex items-center justify-center p-3 sm:p-5 shrink-0"></div>
+                <!-- SLIDE 1: CURRENT ACTIVE CARD -->
+                <div id="popupSlideCurr" onclick="if(event.target === this) window.app.closeImagePopup()" class="w-screen h-full flex items-center justify-center p-3 sm:p-5 shrink-0"></div>
+                <!-- SLIDE 2: NEXT CARD -->
+                <div id="popupSlideNext" onclick="if(event.target === this) window.app.closeImagePopup()" class="w-screen h-full flex items-center justify-center p-3 sm:p-5 shrink-0"></div>
             </div>
         </div>
     </div>
@@ -1293,13 +1250,23 @@
 
         // ===================================================================
         // 2. EXACT MATERIAL 3 EXPRESSIVE SHAPE-MORPHING + FAST-ROTATION LOADER
+        // Fixed 4-Lobe Clover: Plump rounded diagonal petals with sharp inner dimples (never looks like a '+')
         // ===================================================================
         const M3_MORPH_SHAPES = [
+            // 0. Rounded Pentagon
             (a) => 0.84 + 0.11 * Math.cos(5 * a) - 0.02 * Math.cos(10 * a),
+            // 1. 9-Lobe Scalloped Cookie
             (a) => 0.87 + 0.068 * Math.cos(9 * a),
-            (a) => 0.72 + 0.22 * Math.cos(4 * a) - 0.04 * Math.cos(8 * a),
+            // 2. Plump 4-Leaf Clover (Wide round petals at 45 deg, narrow pinched waist dimples)
+            (a) => {
+                const s = Math.abs(Math.cos(2 * a));
+                return 0.92 - 0.24 * Math.pow(s, 2.8);
+            },
+            // 3. 12-Tooth Sunburst Gear Cookie
             (a) => 0.83 + 0.13 * Math.cos(12 * a),
+            // 4. 8-Lobe Soft Octagon Cookie
             (a) => 0.86 + 0.078 * Math.cos(8 * a),
+            // 5. Smooth Circle
             () => 0.89
         ];
 
@@ -1554,6 +1521,7 @@
             paper: 'ALL',
             search: '',
             activePopupId: null,
+            isPopupAnimating: false,
             activeSettingsPage: 'HOME',
             selectedModel: localStorage.getItem('jee_gemini_model') || 'gemini-3.5-flash-lite',
             pdfDoc: null,
@@ -3153,7 +3121,7 @@ CRITICAL RULES FOR ZERO TEXT CLIPPING & ZERO CLUBBING:
             }
         }
         // ===================================================================
-        // LOCKED CONTEXT NAVIGATION (IMAGE PREVIEW + WHITEBOARD)
+        // LOCKED CONTEXT NAVIGATION & 3-CARD FULL-DIALOG SWIPE CAROUSEL
         // ===================================================================
         function capturePadNavigationContext(currentQId) {
             const filtered = getFiltered();
@@ -3174,91 +3142,184 @@ CRITICAL RULES FOR ZERO TEXT CLIPPING & ZERO CLUBBING:
                 .filter(Boolean);
         }
 
-        function refreshImagePopupTopBar() {
+        function buildPopupCardHtml(q, idx, total) {
+            if (!q) return '';
+            const hasPrev = idx > 0;
+            const hasNext = idx < total - 1;
+
+            return `
+            <div class="popup-carousel-card" onclick="event.stopPropagation()">
+                <div class="px-4 py-3 m3-surface-low flex items-center justify-between gap-2 shrink-0 flex-wrap">
+                    <div class="flex items-center gap-2 min-w-0">
+                        <div class="m3-icon-group shrink-0">
+                            <button type="button" ${!hasPrev ? 'disabled' : ''} onclick="window.app.navigatePopupQuestion(-1)" class="m3-icon-group-btn" title="Previous Question (Left Arrow / Swipe Right)">
+                                <i class="ph-bold ph-caret-left"></i>
+                            </button>
+                            <span class="px-2.5 text-xs font-extrabold flex items-center justify-center shrink-0" style="color: var(--md-primary);">Q.${q.questionNumber} (${idx + 1}/${total})</span>
+                            <button type="button" ${!hasNext ? 'disabled' : ''} onclick="window.app.navigatePopupQuestion(1)" class="m3-icon-group-btn" title="Next Question (Right Arrow / Swipe Left)">
+                                <i class="ph-bold ph-caret-right"></i>
+                            </button>
+                        </div>
+                        <span class="text-xs sm:text-sm font-bold truncate">${q.subject} • ${q.chapter}</span>
+                    </div>
+
+                    <div class="flex items-center gap-2 shrink-0 ml-auto">
+                        <div class="m3-icon-group shrink-0">
+                            <button type="button" onclick="window.app.togglePopupQuestionBool('starred', ${q.id})" class="m3-icon-group-btn gap-1.5 text-xs font-bold ${q.starred ? 'active-state' : ''}" title="Toggle Starred">
+                                <i class="${q.starred ? 'ph-fill ph-star' : 'ph-bold ph-star'}"></i>
+                                <span class="hidden sm:inline">Star</span>
+                            </button>
+                            <button type="button" onclick="window.app.togglePopupQuestionBool('solved', ${q.id})" class="m3-icon-group-btn gap-1.5 text-xs font-bold ${q.solved ? 'active-state' : ''}" title="Toggle Solved">
+                                <i class="${q.solved ? 'ph-fill ph-check-circle' : 'ph-bold ph-circle'}"></i>
+                                <span class="hidden sm:inline">Solved</span>
+                            </button>
+                        </div>
+
+                        <div class="m3-icon-group shrink-0">
+                            <button type="button" onclick="window.app.closeImagePopup(); window.app.openSplitModal(${q.id});" class="m3-icon-group-btn gap-1.5 text-xs font-bold">
+                                <i class="ph-bold ph-scissors"></i>
+                                <span>Split / Trim</span>
+                            </button>
+                            <button type="button" onclick="window.app.closeImagePopup(); window.app.openScratchpad(${q.id}, true);" class="m3-icon-group-btn gap-1.5 text-xs font-bold">
+                                <i class="ph-bold ph-pencil-line"></i>
+                                <span>Whiteboard</span>
+                            </button>
+                            <button type="button" onclick="window.app.closeImagePopup()" class="m3-icon-group-btn gap-1.5 text-xs font-extrabold active-state">
+                                <i class="ph-bold ph-x"></i>
+                                <span>Close</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="w-full flex-1 min-h-0 overflow-y-auto bg-white flex p-3 sm:p-5 select-none">
+                    <img src="${q.imageDataUrl}" draggable="false" alt="Q.${q.questionNumber}" class="m-auto max-w-full max-h-[calc(82dvh-74px)] w-auto h-auto object-contain rounded-xl select-none">
+                </div>
+            </div>
+            `;
+        }
+
+        function renderPopupCarouselSlots() {
             const q = state.questions.find(i => i.id === Number(state.activePopupId));
             if (!q) return;
 
             const activeList = getLockedPadContextList(q.id);
             const idx = activeList.findIndex(item => item.id === q.id);
+            const total = activeList.length;
 
-            const badgeEl = document.getElementById('popupQBadge');
-            if (badgeEl) badgeEl.textContent = `Q.${q.questionNumber} (${idx + 1}/${activeList.length})`;
+            const prevQ = idx > 0 ? activeList[idx - 1] : null;
+            const nextQ = idx >= 0 && idx < total - 1 ? activeList[idx + 1] : null;
 
-            const subjEl = document.getElementById('popupSubjChap');
-            if (subjEl) subjEl.textContent = `${q.subject} • ${q.chapter}`;
+            const slidePrev = document.getElementById('popupSlidePrev');
+            const slideCurr = document.getElementById('popupSlideCurr');
+            const slideNext = document.getElementById('popupSlideNext');
+            const track = document.getElementById('popupCarouselTrack');
 
-            const prevBtn = document.getElementById('popupPrevBtn');
-            const nextBtn = document.getElementById('popupNextBtn');
-            if (prevBtn) prevBtn.disabled = idx <= 0;
-            if (nextBtn) nextBtn.disabled = idx < 0 || idx >= activeList.length - 1;
+            if (slidePrev) slidePrev.innerHTML = prevQ ? buildPopupCardHtml(prevQ, idx - 1, total) : '';
+            if (slideCurr) slideCurr.innerHTML = buildPopupCardHtml(q, idx, total);
+            if (slideNext) slideNext.innerHTML = nextQ ? buildPopupCardHtml(nextQ, idx + 1, total) : '';
 
-            const starBtn = document.getElementById('popupStarBtn');
-            const starIcon = document.getElementById('popupStarIcon');
-            const solvedBtn = document.getElementById('popupSolvedBtn');
-            const solvedIcon = document.getElementById('popupSolvedIcon');
-
-            if (starBtn && starIcon) {
-                starBtn.classList.toggle('active-state', Boolean(q.starred));
-                starIcon.className = q.starred ? 'ph-fill ph-star' : 'ph-bold ph-star';
-            }
-            if (solvedBtn && solvedIcon) {
-                solvedBtn.classList.toggle('active-state', Boolean(q.solved));
-                solvedIcon.className = q.solved ? 'ph-fill ph-check-circle' : 'ph-bold ph-circle';
+            if (track) {
+                track.style.transition = 'none';
+                track.style.transform = 'translate3d(-100vw, 0, 0)';
             }
         }
 
+        function animatePopupCarouselToNeighbor(dir) {
+            if (state.isPopupAnimating) return;
+            const q = state.questions.find(i => i.id === Number(state.activePopupId));
+            if (!q) return;
+
+            const activeList = getLockedPadContextList(q.id);
+            const idx = activeList.findIndex(item => item.id === q.id);
+            const targetQ = activeList[idx + dir];
+            const track = document.getElementById('popupCarouselTrack');
+
+            if (!targetQ || !track) return;
+
+            state.isPopupAnimating = true;
+            track.style.transition = 'transform 0.26s cubic-bezier(0.2, 0, 0, 1)';
+            track.style.transform = dir > 0 ? 'translate3d(-200vw, 0, 0)' : 'translate3d(0vw, 0, 0)';
+
+            setTimeout(() => {
+                state.activePopupId = targetQ.id;
+                renderPopupCarouselSlots();
+                state.isPopupAnimating = false;
+            }, 265);
+        }
+
         function initPopupSwipeNavigation() {
-            const viewport = document.getElementById('popupSwipeViewport');
-            const imgEl = document.getElementById('popupImageEl');
-            if (!viewport || !imgEl) return;
+            const viewport = document.getElementById('popupCarouselViewport');
+            const track = document.getElementById('popupCarouselTrack');
+            if (!viewport || !track) return;
 
             let startX = 0, startY = 0, currentDX = 0, isTouching = false, isHorizSwipe = false;
 
             viewport.addEventListener('pointerdown', (e) => {
+                if (state.isPopupAnimating) return;
                 if (e.button && e.button !== 0) return;
+                if (e.target.closest('button')) return;
+
                 isTouching = true;
                 isHorizSwipe = false;
                 startX = e.clientX;
                 startY = e.clientY;
                 currentDX = 0;
-                imgEl.style.transition = 'none';
+                track.style.transition = 'none';
             });
 
             viewport.addEventListener('pointermove', (e) => {
-                if (!isTouching) return;
+                if (!isTouching || state.isPopupAnimating) return;
                 const dx = e.clientX - startX;
                 const dy = e.clientY - startY;
 
                 if (!isHorizSwipe) {
-                    if (Math.abs(dx) > 14 && Math.abs(dx) > Math.abs(dy) * 1.25) {
+                    if (Math.abs(dx) > 10 && Math.abs(dx) > Math.abs(dy) * 1.15) {
                         isHorizSwipe = true;
-                    } else if (Math.abs(dy) > 18) {
+                    } else if (Math.abs(dy) > 16) {
                         isTouching = false;
-                        imgEl.style.transform = '';
                         return;
                     }
                 }
 
                 if (isHorizSwipe) {
+                    const q = state.questions.find(i => i.id === Number(state.activePopupId));
+                    const activeList = q ? getLockedPadContextList(q.id) : [];
+                    const idx = q ? activeList.findIndex(item => item.id === q.id) : -1;
+                    const canPrev = idx > 0;
+                    const canNext = idx >= 0 && idx < activeList.length - 1;
+
+                    let effectiveDX = dx;
+                    if ((dx > 0 && !canPrev) || (dx < 0 && !canNext)) {
+                        effectiveDX = dx * 0.22; // Smooth edge resistance when no further card exists
+                    }
                     currentDX = dx;
-                    imgEl.style.transform = `translateX(${(dx * 0.38).toFixed(1)}px)`;
+                    track.style.transform = `translate3d(calc(-100vw + ${effectiveDX.toFixed(1)}px), 0, 0)`;
                 }
             });
 
             const finishSwipe = () => {
                 if (!isTouching) return;
                 isTouching = false;
-                imgEl.style.transition = 'transform 0.18s ease';
-                imgEl.style.transform = '';
 
-                if (isHorizSwipe) {
-                    if (currentDX < -55) {
-                        window.app.navigatePopupQuestion(1);
-                    } else if (currentDX > 55) {
-                        window.app.navigatePopupQuestion(-1);
-                    }
-                }
+                if (!isHorizSwipe) return;
                 isHorizSwipe = false;
+
+                const q = state.questions.find(i => i.id === Number(state.activePopupId));
+                const activeList = q ? getLockedPadContextList(q.id) : [];
+                const idx = q ? activeList.findIndex(item => item.id === q.id) : -1;
+                const canPrev = idx > 0;
+                const canNext = idx >= 0 && idx < activeList.length - 1;
+                const threshold = Math.min(90, window.innerWidth * 0.14);
+
+                if (currentDX < -threshold && canNext) {
+                    animatePopupCarouselToNeighbor(1);
+                } else if (currentDX > threshold && canPrev) {
+                    animatePopupCarouselToNeighbor(-1);
+                } else {
+                    track.style.transition = 'transform 0.22s cubic-bezier(0.2, 0, 0, 1)';
+                    track.style.transform = 'translate3d(-100vw, 0, 0)';
+                }
                 currentDX = 0;
             };
 
@@ -3302,7 +3363,6 @@ CRITICAL RULES FOR ZERO TEXT CLIPPING & ZERO CLUBBING:
             const board = getActiveBoard();
 
             if (!boardHasRoughWork(board.items)) {
-                // No pen marks, shapes, or duplicated crops -> reset saved rough work to null (default)
                 if (q.whiteboardData !== null) {
                     q.whiteboardData = null;
                     scheduleCloudAutoSync(true);
@@ -3384,7 +3444,6 @@ CRITICAL RULES FOR ZERO TEXT CLIPPING & ZERO CLUBBING:
 
             setWhiteboardLoadingLock(true);
 
-            // Step 1: Load the base question image so the user can see & zoom/pan immediately
             const baseQImg = await loadImageElementAsync(q.imageDataUrl);
             if (token !== state.wbLoadToken) return;
 
@@ -3393,7 +3452,6 @@ CRITICAL RULES FOR ZERO TEXT CLIPPING & ZERO CLUBBING:
             const hasSavedRoughWork = saved && Array.isArray(saved.items) && boardHasRoughWork(saved.items);
 
             if (!hasSavedRoughWork) {
-                // No pen marks or shapes saved -> Reset whiteboard to clean default with question at (36, 44)
                 q.whiteboardData = null;
                 state.wbScale = 1.0;
                 state.wbPanX = 0;
@@ -3407,7 +3465,6 @@ CRITICAL RULES FOR ZERO TEXT CLIPPING & ZERO CLUBBING:
                 return;
             }
 
-            // Temporarily show the question while hydrating rough work in the background (Zoom/Pan enabled!)
             state.wbScale = Number(saved.scale) || 1.0;
             state.wbPanX = Number(saved.panX) || 0;
             state.wbPanY = Number(saved.panY) || 0;
@@ -3416,7 +3473,6 @@ CRITICAL RULES FOR ZERO TEXT CLIPPING & ZERO CLUBBING:
             }
             initStylusCanvas();
 
-            // Step 2: Hydrate all saved strokes, shapes & cropped/duplicated images in the background
             await new Promise(r => setTimeout(r, 40));
             if (token !== state.wbLoadToken) return;
 
@@ -3617,6 +3673,10 @@ CRITICAL RULES FOR ZERO TEXT CLIPPING & ZERO CLUBBING:
             if (solveBtn) solveBtn.classList.toggle('hidden', Boolean(q.hint && q.answerKey));
         }
 
+        // ===================================================================
+        // UPGRADED GEOMETRIC INK-TO-SHAPE RECOGNITION ENGINE
+        // (Lines, Circles, Ellipses, Squares, Rectangles, Triangles)
+        // ===================================================================
         function rdpSimplify(points, epsilon) {
             if (points.length < 3) return points;
             let dmax = 0, index = 0;
@@ -3645,7 +3705,7 @@ CRITICAL RULES FOR ZERO TEXT CLIPPING & ZERO CLUBBING:
         }
 
         function recognizeAndConvertStrokeToShape(rawPts) {
-            if (!state.wbAutoShape || !rawPts || rawPts.length < 10) return null;
+            if (!state.wbAutoShape || !rawPts || rawPts.length < 8) return null;
 
             let pathLen = 0;
             let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
@@ -3660,52 +3720,100 @@ CRITICAL RULES FOR ZERO TEXT CLIPPING & ZERO CLUBBING:
 
             const w = maxX - minX, h = maxY - minY;
             const diag = Math.hypot(w, h);
-            const minSize = 24 / state.wbScale;
+            const minSize = 22 / state.wbScale;
             if (diag < minSize) return null;
 
             const startPt = rawPts[0];
             const endPt = rawPts[rawPts.length - 1];
             const endDist = Math.hypot(endPt.x - startPt.x, endPt.y - startPt.y);
 
-            if (endDist > minSize && (pathLen / endDist) < 1.085) {
-                return [startPt, endPt];
+            // 1. Straight Line Detection (with axis-snapping within 4.5 degrees)
+            if (endDist > minSize && (pathLen / endDist) < 1.09) {
+                let x2 = endPt.x, y2 = endPt.y;
+                const deg = Math.abs(Math.atan2(y2 - startPt.y, x2 - startPt.x) * (180 / Math.PI));
+                if (deg < 4.5 || deg > 175.5) y2 = startPt.y;
+                else if (Math.abs(deg - 90) < 4.5) x2 = startPt.x;
+                return [{ x: startPt.x, y: startPt.y }, { x: x2, y: y2 }];
             }
 
-            const isClosed = endDist < Math.max(38 / state.wbScale, pathLen * 0.23) && w > minSize * 0.45 && h > minSize * 0.45;
+            // 2. Closed Shape Verification (tolerates slight gap or slight tail overlap)
+            const isClosed = endDist < Math.max(46 / state.wbScale, pathLen * 0.28) && w > minSize * 0.38 && h > minSize * 0.38;
             if (!isClosed) return null;
 
-            const closedPts = [...rawPts, startPt];
-            const simplified = rdpSimplify(closedPts, diag * 0.085);
+            // Trim small start/end tail overlap if user drew past the starting corner
+            let trimmedPts = rawPts;
+            if (rawPts.length > 20) {
+                let bestCloseIdx = rawPts.length - 1;
+                let minD = endDist;
+                const startSearch = Math.floor(rawPts.length * 0.72);
+                for (let i = startSearch; i < rawPts.length; i++) {
+                    const d = Math.hypot(rawPts[i].x - startPt.x, rawPts[i].y - startPt.y);
+                    if (d < minD) { minD = d; bestCloseIdx = i; }
+                }
+                trimmedPts = rawPts.slice(0, bestCloseIdx + 1);
+            }
 
+            const closedPts = [...trimmedPts, trimmedPts[0]];
+            const simplified = rdpSimplify(closedPts, diag * 0.068);
+
+            // Extract salient corners using segment length + turning angle
             const corners = [simplified[0]];
             for (let i = 1; i < simplified.length - 1; i++) {
                 const prev = corners[corners.length - 1];
                 const curr = simplified[i];
                 const next = simplified[i + 1];
-                if (Math.hypot(curr.x - prev.x, curr.y - prev.y) < diag * 0.12) continue;
+                if (Math.hypot(curr.x - prev.x, curr.y - prev.y) < diag * 0.11) continue;
                 const a1 = Math.atan2(curr.y - prev.y, curr.x - prev.x);
                 const a2 = Math.atan2(next.y - curr.y, next.x - curr.x);
                 let diff = Math.abs(a2 - a1) * (180 / Math.PI);
                 if (diff > 180) diff = 360 - diff;
-                if (diff > 26) corners.push(curr);
+                if (diff > 28) corners.push(curr);
+            }
+            if (corners.length > 2 && Math.hypot(corners[corners.length - 1].x - corners[0].x, corners[corners.length - 1].y - corners[0].y) < diag * 0.12) {
+                corners.pop();
             }
 
-            if (corners.length === 3) {
-                return [corners[0], corners[1], corners[2], corners[0]];
-            }
-
+            // Compute Polygon Area & Ellipse Radial Error
             const cx = (minX + maxX) / 2, cy = (minY + maxY) / 2;
             let rx = w / 2, ry = h / 2;
             let radialErrSum = 0;
-            for (const p of rawPts) {
+            for (const p of trimmedPts) {
                 const normDist = Math.hypot((p.x - cx) / rx, (p.y - cy) / ry);
                 radialErrSum += Math.abs(normDist - 1);
             }
-            const meanRadialErr = radialErrSum / rawPts.length;
+            const meanRadialErr = radialErrSum / trimmedPts.length;
 
-            if (meanRadialErr < 0.135 && corners.length !== 4) {
-                if (Math.abs(rx - ry) / Math.max(rx, ry) < 0.2) {
-                    rx = ry = (rx + ry) / 2;
+            // Compute Signed Shoelace Area for Rectangularity / Triangularity Ratio
+            let area2 = 0;
+            for (let i = 0; i < closedPts.length - 1; i++) {
+                area2 += (closedPts[i].x * closedPts[i + 1].y - closedPts[i + 1].x * closedPts[i].y);
+            }
+            const polyArea = Math.abs(area2) / 2;
+            const bboxArea = Math.max(1, w * h);
+            const areaFillRatio = polyArea / bboxArea; // ~0.50 for triangle, ~0.785 for circle/ellipse, ~0.92+ for rectangle
+
+            // 3. Triangle Detection (3 corners or triangular area fill ratio)
+            if (corners.length === 3 || (corners.length === 4 && areaFillRatio < 0.62 && meanRadialErr > 0.13)) {
+                const tri = corners.slice(0, 3);
+                // Snap nearly horizontal base
+                for (let i = 0; i < 3; i++) {
+                    const pA = tri[i], pB = tri[(i + 1) % 3];
+                    const deg = Math.abs(Math.atan2(pB.y - pA.y, pB.x - pA.x) * (180 / Math.PI));
+                    if (deg < 5 || deg > 175) {
+                        const avgY = (pA.y + pB.y) / 2;
+                        pA.y = avgY; pB.y = avgY;
+                    } else if (Math.abs(deg - 90) < 5) {
+                        const avgX = (pA.x + pB.x) / 2;
+                        pA.x = avgX; pB.x = avgX;
+                    }
+                }
+                return [{ ...tri[0] }, { ...tri[1] }, { ...tri[2] }, { ...tri[0] }];
+            }
+
+            // 4. Circle / Ellipse Detection (Low radial error & smooth perimeter)
+            if (meanRadialErr < 0.125 && (corners.length >= 5 || (areaFillRatio > 0.69 && areaFillRatio < 0.85))) {
+                if (Math.abs(rx - ry) / Math.max(rx, ry) < 0.22) {
+                    rx = ry = (rx + ry) / 2; // Snap to exact circle
                 }
                 const circlePts = [];
                 const steps = 64;
@@ -3716,10 +3824,11 @@ CRITICAL RULES FOR ZERO TEXT CLIPPING & ZERO CLUBBING:
                 return circlePts;
             }
 
-            if (corners.length === 4 || (meanRadialErr >= 0.135 && corners.length >= 4 && corners.length <= 5)) {
+            // 5. Rectangle / Square Detection
+            if (corners.length === 4 || (areaFillRatio >= 0.78 && meanRadialErr >= 0.115)) {
                 let halfW = w / 2, halfH = h / 2;
-                if (Math.abs(w - h) / Math.max(w, h) < 0.16) {
-                    halfW = halfH = (halfW + halfH) / 2;
+                if (Math.abs(w - h) / Math.max(w, h) < 0.18) {
+                    halfW = halfH = (halfW + halfH) / 2; // Snap to exact square
                 }
                 return [
                     { x: cx - halfW, y: cy - halfH },
@@ -4007,7 +4116,6 @@ CRITICAL RULES FOR ZERO TEXT CLIPPING & ZERO CLUBBING:
                 const sx = e.clientX - r.left, sy = e.clientY - r.top;
                 activePointers.set(e.pointerId, { x: sx, y: sy });
 
-                // 2-Finger Pinch-to-Zoom & Pan is ALWAYS allowed (even while loading rough work)
                 if (activePointers.size === 2) {
                     currentStroke = null;
                     dragAction = null;
@@ -4018,7 +4126,6 @@ CRITICAL RULES FOR ZERO TEXT CLIPPING & ZERO CLUBBING:
                     return;
                 }
 
-                // While loading rough work in background, disable board modification & allow Pan/Zoom!
                 if (state.wbIsLoading || state.wbTool === 'PAN' || isSpacePressedGlobal || e.button === 1) {
                     lastPanMid = { x: sx, y: sy };
                     return;
@@ -4183,16 +4290,33 @@ CRITICAL RULES FOR ZERO TEXT CLIPPING & ZERO CLUBBING:
 
                     if (dragAction.mode === 'RESIZE') {
                         const ob = dragAction.origBounds;
+                        const oldW = Math.max(1, ob.maxX - ob.minX);
+                        const oldH = Math.max(1, ob.maxY - ob.minY);
+
                         let newMinX = ob.minX, newMinY = ob.minY, newMaxX = ob.maxX, newMaxY = ob.maxY;
                         if (dragAction.handle.includes('W')) newMinX = Math.min(wPt.x, ob.maxX - 24);
                         if (dragAction.handle.includes('E')) newMaxX = Math.max(wPt.x, ob.minX + 24);
                         if (dragAction.handle.includes('N')) newMinY = Math.min(wPt.y, ob.maxY - 24);
                         if (dragAction.handle.includes('S')) newMaxY = Math.max(wPt.y, ob.minY + 24);
 
-                        const oldW = Math.max(1, ob.maxX - ob.minX);
-                        const oldH = Math.max(1, ob.maxY - ob.minY);
-                        const newW = Math.max(24, newMaxX - newMinX);
-                        const newH = Math.max(24, newMaxY - newMinY);
+                        let newW = Math.max(24, newMaxX - newMinX);
+                        let newH = Math.max(24, newMaxY - newMinY);
+
+                        // Strictly lock aspect ratio when resizing any IMAGE!
+                        const hasAnyImage = dragAction.origItems.some(it => it.type === 'IMAGE');
+                        if (hasAnyImage) {
+                            const scaleX = newW / oldW;
+                            const scaleY = newH / oldH;
+                            const lockedScale = Math.max(24 / Math.min(oldW, oldH), (scaleX + scaleY) / 2);
+                            newW = oldW * lockedScale;
+                            newH = oldH * lockedScale;
+
+                            if (dragAction.handle.includes('W')) newMinX = ob.maxX - newW;
+                            else newMaxX = ob.minX + newW;
+
+                            if (dragAction.handle.includes('N')) newMinY = ob.maxY - newH;
+                            else newMaxY = ob.minY + newH;
+                        }
 
                         for (const orig of dragAction.origItems) {
                             const live = board.items.find(it => it.id === orig.id);
@@ -4479,7 +4603,7 @@ CRITICAL RULES FOR ZERO TEXT CLIPPING & ZERO CLUBBING:
             },
 
             getActivePopupId: () => state.activePopupId,
-            openImagePopup(id, keepContext = false, slideDir = 0) {
+            openImagePopup(id, keepContext = false) {
                 closeCustomDropdown();
                 const q = state.questions.find(i => i.id === Number(id));
                 if (!q) return;
@@ -4487,42 +4611,25 @@ CRITICAL RULES FOR ZERO TEXT CLIPPING & ZERO CLUBBING:
                     capturePadNavigationContext(q.id);
                 }
                 state.activePopupId = q.id;
-                const imgEl = document.getElementById('popupImageEl');
-                if (imgEl) {
-                    imgEl.classList.remove('popup-anim-next', 'popup-anim-prev');
-                    imgEl.src = q.imageDataUrl;
-                    if (slideDir !== 0) {
-                        void imgEl.offsetWidth;
-                        imgEl.classList.add(slideDir > 0 ? 'popup-anim-next' : 'popup-anim-prev');
-                    }
-                }
-                refreshImagePopupTopBar();
+                state.isPopupAnimating = false;
+                renderPopupCarouselSlots();
                 document.getElementById('imagePopupModal').classList.remove('hidden');
             },
             navigatePopupQuestion(dir) {
                 closeCustomDropdown();
-                const q = state.questions.find(i => i.id === Number(state.activePopupId));
-                if (!q) return;
-                const activeList = getLockedPadContextList(q.id);
-                const idx = activeList.findIndex(item => item.id === q.id);
-                const nextQ = activeList[idx + dir];
-                if (!nextQ) return;
-                this.openImagePopup(nextQ.id, true, dir);
+                animatePopupCarouselToNeighbor(dir);
             },
-            togglePopupQuestionBool(field) {
-                const q = state.questions.find(i => i.id === Number(state.activePopupId));
+            togglePopupQuestionBool(field, qId = null) {
+                const targetId = qId || state.activePopupId;
+                const q = state.questions.find(i => i.id === Number(targetId));
                 if (!q) return;
                 this.toggleQBool(q.id, field);
-                refreshImagePopupTopBar();
+                renderPopupCarouselSlots();
             },
             closeImagePopup() {
                 closeCustomDropdown();
+                state.isPopupAnimating = false;
                 document.getElementById('imagePopupModal').classList.add('hidden');
-                const imgEl = document.getElementById('popupImageEl');
-                if (imgEl) {
-                    imgEl.src = '';
-                    imgEl.classList.remove('popup-anim-next', 'popup-anim-prev');
-                }
                 state.activePopupId = null;
                 renderAll();
             },
@@ -4662,7 +4769,10 @@ CRITICAL RULES FOR ZERO TEXT CLIPPING & ZERO CLUBBING:
                 }
             },
             deleteQ(id) {
-                state.questions = state.questions.filter(i => i.id !== Number(id));
+                const numId = Number(id);
+                state.questions = state.questions.filter(i => i.id !== numId);
+                state.padContextIds = (state.padContextIds || []).filter(cid => cid !== numId);
+                delete state.wbBoards[numId];
                 scheduleCloudAutoSync();
                 toast('Question deleted & syncing to Cloud');
             },
@@ -4684,6 +4794,8 @@ CRITICAL RULES FOR ZERO TEXT CLIPPING & ZERO CLUBBING:
                 const chk = document.getElementById('clearVaultDoubleCheck');
                 if (!chk || !chk.checked) return;
                 state.questions = [];
+                state.wbBoards = {};
+                state.padContextIds = [];
                 this.closeClearConfirmModal();
                 this.toggleDrawer(false);
                 scheduleCloudAutoSync(false, true);
@@ -4820,6 +4932,7 @@ CRITICAL RULES FOR ZERO TEXT CLIPPING & ZERO CLUBBING:
                     q.hint = '';
                     q.answerKey = '';
                     q.whiteboardData = null;
+                    delete state.wbBoards[q.id];
 
                     state.questions.push({
                         ...q,
@@ -4848,6 +4961,7 @@ CRITICAL RULES FOR ZERO TEXT CLIPPING & ZERO CLUBBING:
                     c.getContext('2d').drawImage(img, 0, sy, img.width, sh, 0, 0, img.width, sh);
                     q.imageDataUrl = c.toDataURL('image/jpeg', 0.88);
                     q.aspectRatio = c.height / c.width;
+                    delete state.wbBoards[q.id];
                     scheduleCloudAutoSync();
                     toast('Saved trimmed vertical crop!', 'success');
                 }
@@ -5194,7 +5308,6 @@ CRITICAL RULES FOR ZERO TEXT CLIPPING & ZERO CLUBBING:
             const isScratchpadOpen = !document.getElementById('scratchpadModal')?.classList.contains('hidden');
             const isImagePopupOpen = !document.getElementById('imagePopupModal')?.classList.contains('hidden');
 
-            // Left / Right Arrow Key Question Switching in Whiteboard & Image Preview Dialog
             if (e.key === 'ArrowLeft') {
                 if (isScratchpadOpen) {
                     e.preventDefault();
