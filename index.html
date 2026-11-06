@@ -58,7 +58,7 @@
         .m3-clover-8 { clip-path: url(#m3Clover8Clip); }
         .m3-leaf-shape { border-radius: 24px 10px 24px 10px; }
 
-        /* Connected Segmented Buttons: 4px middle radius, 13px edge inside radius */
+        /* Connected Segmented Buttons */
         .m3-segmented-group {
             display: inline-flex;
             align-items: center;
@@ -97,7 +97,7 @@
             border-radius: 9999px !important;
         }
 
-        /* Connected Icon Button Groups: 4px middle radius (5px card), 13px edge inside radius (12px card) */
+        /* Connected Icon Button Groups */
         .m3-icon-group {
             display: inline-flex;
             align-items: center;
@@ -152,7 +152,7 @@
             border-radius: 9999px !important;
         }
 
-        /* Connected Card Dropdowns: 5px middle radius, 12px inside edge corners */
+        /* Connected Card Dropdowns */
         .m3-card-dropdown-group {
             display: inline-flex;
             align-items: center;
@@ -188,7 +188,7 @@
         .m3-card-dropdown-btn:hover { background-color: var(--md-surface-highest); }
         .m3-card-dropdown-btn:active { transform: scale(0.96); }
 
-        /* Vertical Grouped Lists: 7px middle radius, 14px edge inside radius */
+        /* Vertical Grouped Lists */
         .m3-group-list { display: flex; flex-direction: column; gap: 3px; }
         .m3-group-item {
             background-color: var(--md-surface-high);
@@ -282,6 +282,7 @@
             border-radius: 9999px;
         }
 
+        /* Scroll-Reactive Extended FAB */
         .m3-extended-fab {
             background-color: var(--md-primary);
             color: var(--md-on-primary);
@@ -291,10 +292,10 @@
         }
         .m3-extended-fab:hover { border-radius: 9999px; transform: translateY(-2px) scale(1.02); }
         .m3-extended-fab:active { transform: scale(0.95); }
-        .m3-extended-fab.fab-hidden {
-            transform: translateY(140%) scale(0.85);
-            opacity: 0;
-            pointer-events: none;
+        .fab-hidden {
+            transform: translateY(150%) scale(0.85) !important;
+            opacity: 0 !important;
+            pointer-events: none !important;
         }
 
         .m3-card {
@@ -323,7 +324,6 @@
         #imagePopupModal:not(.hidden),
         #settingsModal:not(.hidden),
         #uploadModal:not(.hidden),
-        #imageImportModal:not(.hidden),
         #splitModal:not(.hidden),
         #clearConfirmModal:not(.hidden) {
             display: flex !important;
@@ -394,11 +394,12 @@
             border-radius: 50%;
         }
         #stylusCanvas { touch-action: none; }
+        #popupCarouselViewport { touch-action: pan-y; }
     </style>
 </head>
 <body class="h-[100dvh] w-screen overflow-hidden flex flex-col select-none m3-surface">
 
-    <!-- HIDDEN SVG DEFINITIONS FOR ORGANIC SHAPES -->
+    <!-- HIDDEN SVG DEFINITIONS -->
     <svg width="0" height="0" class="absolute pointer-events-none">
         <defs>
             <clipPath id="m3Cookie12Clip" clipPathUnits="objectBoundingBox">
@@ -411,7 +412,7 @@
     </svg>
 
     <!-- =================================================================== -->
-    <!-- MAIN TOP BAR (No Logo/Branding, Neutral Copy, Constant 36px Height) -->
+    <!-- MAIN TOP BAR (No Branding, Constant 36px Controls)                  -->
     <!-- =================================================================== -->
     <header class="h-13 m3-surface-low px-2.5 sm:px-3.5 py-1.5 flex items-center gap-1.5 shrink-0 z-30">
         <!-- 1. CHAPTERS BUTTON -->
@@ -473,7 +474,7 @@
 
         <!-- 6. CONNECTED ACTION GROUP: RANDOM PRACTICE, FULLSCREEN, SYNC, SETTINGS -->
         <div class="m3-icon-group shrink-0">
-            <button onclick="window.app.pickRandomQuestion()" class="m3-icon-group-btn" title="Pick a random question from current filter">
+            <button onclick="window.app.pickRandomQuestion()" class="m3-icon-group-btn" title="Random question from current filter">
                 <i class="ph-bold ph-shuffle text-sm"></i>
             </button>
             <button onclick="window.app.toggleFullscreen()" class="m3-icon-group-btn" title="Toggle Fullscreen">
@@ -576,18 +577,12 @@
     <main id="mainFeedContainer" onscroll="window.app.handleFeedScroll(this)" class="flex-1 min-h-0 overflow-y-auto px-3 sm:px-5 pt-4 pb-36"></main>
 
     <!-- =================================================================== -->
-    <!-- FLOATING IMPORT MENU BUTTON (+ Add PDF or Image)                    -->
+    <!-- SCROLL-REACTIVE UNIFIED FLOATING ACTION BUTTON (+ Add Questions)    -->
     <!-- =================================================================== -->
-    <div id="extendedAddPdfFab" class="fixed bottom-6 right-6 z-30 flex items-center gap-2">
-        <button onclick="window.app.openImageImportModal()" class="h-12 px-4 m3-btn-tonal shadow-xl flex items-center gap-2 font-extrabold text-xs" title="Import Photo / Screenshot (or Ctrl+V)">
-            <i class="ph-bold ph-camera text-base" style="color: var(--md-primary)"></i>
-            <span>Add Image</span>
-        </button>
-        <button onclick="window.app.openUploadModal()" class="h-12 px-5 m3-extended-fab flex items-center gap-2.5 font-extrabold text-xs">
-            <i class="ph-bold ph-file-pdf text-base"></i>
-            <span>Add PDF</span>
-        </button>
-    </div>
+    <button id="extendedAddPdfFab" onclick="window.app.openUploadModal()" class="fixed bottom-6 right-6 z-30 h-14 px-6 m3-extended-fab flex items-center gap-2.5 font-extrabold text-sm">
+        <i class="ph-bold ph-plus text-lg"></i>
+        <span>Add Questions</span>
+    </button>
 
     <!-- =================================================================== -->
     <!-- FULL-CARD 3-PANEL CAROUSEL IMAGE POPUP LIGHTBOX                     -->
@@ -598,73 +593,6 @@
                 <div id="popupSlidePrev" onclick="if(event.target === this) window.app.closeImagePopup()" class="w-screen h-full flex items-center justify-center p-3 sm:p-5 shrink-0"></div>
                 <div id="popupSlideCurr" onclick="if(event.target === this) window.app.closeImagePopup()" class="w-screen h-full flex items-center justify-center p-3 sm:p-5 shrink-0"></div>
                 <div id="popupSlideNext" onclick="if(event.target === this) window.app.closeImagePopup()" class="w-screen h-full flex items-center justify-center p-3 sm:p-5 shrink-0"></div>
-            </div>
-        </div>
-    </div>
-
-    <!-- =================================================================== -->
-    <!-- MODAL: IMAGE / PHOTO IMPORT WITH AUTO-DESKEW & OCR                  -->
-    <!-- =================================================================== -->
-    <div id="imageImportModal" onclick="if(event.target === this) window.app.closeImageImportModal()" class="fixed inset-0 bg-black/75 backdrop-blur-sm z-50 hidden flex items-center justify-center p-3 sm:p-5">
-        <div class="m3-dialog max-w-2xl w-full max-h-[92vh] flex flex-col overflow-hidden">
-            <div class="px-5 py-3.5 m3-surface-low flex items-center justify-between gap-2 shrink-0">
-                <div>
-                    <h3 class="font-extrabold text-sm sm:text-base">Import Question Image</h3>
-                    <p class="text-[11px] m3-text-muted">Upload a photo or paste (`Ctrl+V`). Tilt angle is automatically straightened.</p>
-                </div>
-                <button type="button" onclick="window.app.closeImageImportModal()" class="h-9 w-9 m3-btn-tonal flex items-center justify-center shrink-0">
-                    <i class="ph-bold ph-x text-sm"></i>
-                </button>
-            </div>
-
-            <div class="p-4 overflow-y-auto space-y-3 flex-1">
-                <label for="singleImageFileInput" class="block m3-surface-high rounded-3xl p-4 text-center cursor-pointer hover:brightness-105 transition">
-                    <input type="file" id="singleImageFileInput" accept="image/*" class="hidden" onchange="window.app.onImageFileSelected(event)">
-                    <p id="selectedImageFileLabel" class="text-xs sm:text-sm font-extrabold">Select Photo / Screenshot (or press Ctrl+V anywhere)</p>
-                </label>
-
-                <div id="imageImportPreviewWrap" class="hidden space-y-3">
-                    <div class="flex flex-wrap items-center justify-between gap-2 m3-surface-high p-3 rounded-3xl text-xs">
-                        <div class="flex items-center gap-2">
-                            <span class="font-bold">Angle:</span>
-                            <input id="imageDeskewSlider" type="range" min="-15" max="15" step="0.2" value="0" oninput="window.app.updateImageDeskewPreview(this.value)" class="split-slider w-36">
-                            <span id="imageDeskewVal" class="font-mono font-bold w-12">0.0°</span>
-                            <button type="button" onclick="window.app.autoDetectImageAngle()" class="h-7 px-2.5 m3-btn-tonal text-[11px]">Auto-Angle</button>
-                        </div>
-                        <label class="flex items-center gap-1.5 font-bold cursor-pointer">
-                            <input type="checkbox" id="imageCleanContrastChk" checked onchange="window.app.updateImageDeskewPreview()" class="rounded">
-                            <span>Clean Shadows</span>
-                        </label>
-                    </div>
-
-                    <div class="bg-white rounded-3xl p-3 flex items-center justify-center max-h-60 overflow-hidden">
-                        <canvas id="imageImportCanvas" class="max-h-52 max-w-full object-contain"></canvas>
-                    </div>
-
-                    <div class="grid grid-cols-2 sm:grid-cols-3 gap-2.5 m3-surface-high p-3.5 rounded-3xl">
-                        <div>
-                            <label class="block text-[10px] font-bold m3-text-muted mb-1">Paper / Source Name</label>
-                            <input id="imgImportPaperInput" type="text" placeholder="Custom Practice" class="w-full h-9 m3-input m3-surface-low px-3 text-xs">
-                        </div>
-                        <div>
-                            <label class="block text-[10px] font-bold m3-text-muted mb-1">Question #</label>
-                            <input id="imgImportQNumInput" type="text" placeholder="Auto" class="w-full h-9 m3-input m3-surface-low px-3 text-xs">
-                        </div>
-                        <div class="col-span-2 sm:col-span-1 flex items-end">
-                            <label class="flex items-center gap-2 text-xs font-bold cursor-pointer h-9 px-2">
-                                <input type="checkbox" id="imgImportAiClassifyChk" checked class="rounded">
-                                <span>Auto-Classify & Solve</span>
-                            </label>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="px-5 py-3 m3-surface-low flex items-center justify-end gap-2 shrink-0">
-                <button type="button" id="saveImageImportBtn" disabled onclick="window.app.saveImportedImageQuestion()" class="h-10 px-6 m3-btn-filled disabled:opacity-40 text-xs sm:text-sm flex items-center gap-1.5 shadow-lg">
-                    <i class="ph-bold ph-check"></i>
-                    <span id="saveImageImportBtnLbl">Add Question</span>
-                </button>
             </div>
         </div>
     </div>
@@ -951,12 +879,15 @@
     </div>
 
     <!-- =================================================================== -->
-    <!-- MODAL 2: IMPORT PDF                                                 -->
+    <!-- MODAL 2: UNIFIED IMPORT DIALOG (AUTO-DETECTS PDF OR IMAGE / PASTE)  -->
     <!-- =================================================================== -->
-    <div id="uploadModal" onclick="if(event.target === this && !window.app.isExtracting()) window.app.closeUploadModal()" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-3 sm:p-6">
-        <div class="m3-dialog max-w-2xl w-full max-h-[90vh] flex flex-col overflow-hidden">
-            <div class="px-5 py-3.5 m3-surface-low flex items-center justify-between gap-2">
-                <h3 class="font-extrabold text-sm sm:text-base truncate">Import PDF</h3>
+    <div id="uploadModal" onclick="if(event.target === this && !window.app.isExtracting()) window.app.closeUploadModal()" class="fixed inset-0 bg-black/75 backdrop-blur-sm z-50 hidden flex items-center justify-center p-3 sm:p-6">
+        <div class="m3-dialog max-w-2xl w-full max-h-[92vh] flex flex-col overflow-hidden">
+            <div class="px-5 py-3.5 m3-surface-low flex items-center justify-between gap-2 shrink-0">
+                <div>
+                    <h3 id="unifiedModalTitle" class="font-extrabold text-sm sm:text-base truncate">Add Questions (PDF or Image)</h3>
+                    <p class="text-[11px] m3-text-muted">Select a PDF test paper or question image, or press Ctrl+V to paste.</p>
+                </div>
                 <div class="flex items-center gap-1.5 shrink-0">
                     <button type="button" id="minimizeUploadBtn" onclick="window.app.minimizeUploadModal()" class="hidden h-9 w-9 m3-btn-tonal items-center justify-center" title="Minimize">
                         <i class="ph-bold ph-minus text-base"></i>
@@ -967,17 +898,20 @@
                 </div>
             </div>
 
-            <div class="p-5 overflow-y-auto space-y-4 flex-1">
-                <div id="uploadSetupView" class="m3-group-list">
-                    <label for="pdfFileInput" class="block m3-group-item p-6 text-center cursor-pointer">
-                        <input type="file" id="pdfFileInput" accept="application/pdf" class="hidden" onchange="window.app.onPdfSelected(event)">
+            <div class="p-4 sm:p-5 overflow-y-auto space-y-4 flex-1">
+                <!-- Unified File Picker -->
+                <div id="uploadSetupView" class="space-y-3">
+                    <label for="unifiedFileInput" class="block m3-surface-high rounded-3xl p-5 text-center cursor-pointer hover:brightness-105 transition">
+                        <input type="file" id="unifiedFileInput" accept="application/pdf,image/*,.pdf" class="hidden" onchange="window.app.onUnifiedFileSelected(event)">
                         <div class="w-12 h-12 m3-cookie-12 flex items-center justify-center mx-auto mb-2" style="background: var(--md-primary-container); color: var(--md-primary);">
-                            <i class="ph-duotone ph-file-pdf text-2xl"></i>
+                            <i id="unifiedFileIcon" class="ph-duotone ph-file-plus text-2xl"></i>
                         </div>
-                        <p id="selectedFileLabel" class="text-sm font-extrabold">Select PDF File</p>
+                        <p id="selectedFileLabel" class="text-xs sm:text-sm font-extrabold">Select PDF or Image File (or press Ctrl+V)</p>
+                        <p id="selectedFileTypeBadge" class="text-[11px] m3-text-muted mt-0.5">Automatically detects PDF documents and photos/screenshots</p>
                     </label>
 
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 m3-group-item p-4">
+                    <!-- Auto-Shown When PDF Is Selected -->
+                    <div id="pdfSetupSubView" class="hidden grid-cols-1 sm:grid-cols-2 gap-3 m3-surface-high p-4 rounded-3xl">
                         <div>
                             <label class="block text-[11px] font-bold m3-text-muted mb-1">Paper Name</label>
                             <input id="paperTitleInput" type="text" placeholder="e.g. Test 3" class="w-full h-9 m3-input m3-surface-low px-3.5 text-xs">
@@ -991,8 +925,46 @@
                             </div>
                         </div>
                     </div>
+
+                    <!-- Auto-Shown When Image Is Selected or Pasted -->
+                    <div id="imageSetupSubView" class="hidden space-y-3">
+                        <div class="flex flex-wrap items-center justify-between gap-2 m3-surface-high p-3 rounded-3xl text-xs">
+                            <div class="flex items-center gap-2">
+                                <span class="font-bold">Angle:</span>
+                                <input id="imageDeskewSlider" type="range" min="-15" max="15" step="0.2" value="0" oninput="window.app.updateImageDeskewPreview(this.value)" class="split-slider w-36">
+                                <span id="imageDeskewVal" class="font-mono font-bold w-12">0.0°</span>
+                                <button type="button" onclick="window.app.autoDetectImageAngle()" class="h-7 px-2.5 m3-btn-tonal text-[11px]">Auto-Angle</button>
+                            </div>
+                            <label class="flex items-center gap-1.5 font-bold cursor-pointer">
+                                <input type="checkbox" id="imageCleanContrastChk" checked onchange="window.app.updateImageDeskewPreview()" class="rounded">
+                                <span>Clean Shadows</span>
+                            </label>
+                        </div>
+
+                        <div class="bg-white rounded-3xl p-3 flex items-center justify-center max-h-56 overflow-hidden">
+                            <canvas id="imageImportCanvas" class="max-h-48 max-w-full object-contain"></canvas>
+                        </div>
+
+                        <div class="grid grid-cols-2 sm:grid-cols-3 gap-2.5 m3-surface-high p-3.5 rounded-3xl">
+                            <div>
+                                <label class="block text-[10px] font-bold m3-text-muted mb-1">Paper / Source Name</label>
+                                <input id="imgImportPaperInput" type="text" placeholder="Custom Practice" class="w-full h-9 m3-input m3-surface-low px-3 text-xs">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold m3-text-muted mb-1">Question #</label>
+                                <input id="imgImportQNumInput" type="text" placeholder="Auto" class="w-full h-9 m3-input m3-surface-low px-3 text-xs">
+                            </div>
+                            <div class="col-span-2 sm:col-span-1 flex items-end">
+                                <label class="flex items-center gap-2 text-xs font-bold cursor-pointer h-9 px-2">
+                                    <input type="checkbox" id="imgImportAiClassifyChk" checked class="rounded">
+                                    <span>Auto-Classify & Solve</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
+                <!-- PDF Extraction Live Progress View -->
                 <div id="uploadProgressView" class="hidden space-y-3">
                     <div class="m3-surface-high rounded-3xl p-4 space-y-3">
                         <div class="flex items-center justify-between gap-2 text-xs">
@@ -1019,7 +991,7 @@
                 </div>
             </div>
 
-            <div class="px-5 py-3 m3-surface-low flex items-center justify-between">
+            <div class="px-5 py-3 m3-surface-low flex items-center justify-between shrink-0">
                 <div>
                     <button type="button" id="cancelExtractBtn" onclick="window.app.cancelPdfExtraction()" class="hidden h-9 px-4 rounded-full bg-rose-500/20 hover:bg-rose-600 text-rose-400 hover:text-white text-xs font-extrabold items-center gap-1.5 transition">
                         <i class="ph-bold ph-stop-circle"></i>
@@ -1027,8 +999,9 @@
                     </button>
                 </div>
 
-                <button type="button" id="startExtractBtn" onclick="window.app.startPdfExtraction()" disabled class="h-10 px-6 m3-btn-filled disabled:opacity-40 text-xs sm:text-sm flex items-center gap-1.5 shadow-lg ml-auto">
-                    <span>Start Import</span>
+                <button type="button" id="startExtractBtn" onclick="window.app.startUnifiedImportAction()" disabled class="h-10 px-6 m3-btn-filled disabled:opacity-40 text-xs sm:text-sm flex items-center gap-1.5 shadow-lg ml-auto">
+                    <i class="ph-bold ph-check"></i>
+                    <span id="startExtractBtnLbl">Import</span>
                 </button>
             </div>
         </div>
@@ -1086,11 +1059,11 @@
     </div>
 
     <!-- =================================================================== -->
-    <!-- MODAL 4: FULLSCREEN WHITEBOARD (WITH FULLSCREEN BUTTON & TIMER)     -->
+    <!-- MODAL 4: FULLSCREEN WHITEBOARD (ROTATION + MANUAL TIMER + SUBLINK)  -->
     <!-- =================================================================== -->
     <div id="scratchpadModal" class="fixed inset-0 m3-surface z-50 hidden flex flex-col">
         <div class="h-13 m3-surface-low px-2.5 sm:px-3.5 py-1.5 flex items-center justify-between gap-1.5 shrink-0">
-            <!-- Left Group: Close + Prev/Next + Star/Solved/Tag + Timer + Hint/Ans -->
+            <!-- Left Group: Close + Prev/Next + Star/Solved/Tag + Manual Timer + Hint/Ans -->
             <div class="flex items-center gap-1.5 min-w-0 shrink-0">
                 <button type="button" onclick="window.app.closeScratchpad()" class="h-9 px-3 m3-btn-tonal text-xs font-extrabold flex items-center gap-1 shrink-0" title="Close (Esc)">
                     <i class="ph-bold ph-x text-sm"></i>
@@ -1120,9 +1093,9 @@
                     </button>
                 </div>
 
-                <!-- Live Per-Question Timer Pill (Click to Pause/Resume, Double-Click to Reset) -->
-                <button type="button" id="padTimerBtn" onclick="window.app.toggleQuestionTimer()" ondblclick="window.app.resetQuestionTimer()" class="h-9 px-2.5 rounded-full m3-surface-high text-[11px] font-mono font-extrabold flex items-center gap-1 shrink-0" title="Click: Pause/Resume • Double-Click: Reset">
-                    <i id="padTimerIcon" class="ph-bold ph-timer text-xs" style="color: var(--md-primary)"></i>
+                <!-- Manual Question Timer Pill (Starts ONLY when clicked, Double-Click resets) -->
+                <button type="button" id="padTimerBtn" onclick="window.app.toggleQuestionTimer()" ondblclick="window.app.resetQuestionTimer()" class="h-9 px-2.5 rounded-full m3-surface-high text-[11px] font-mono font-extrabold flex items-center gap-1 shrink-0" title="Click: Start / Pause Timer • Double-Click: Reset">
+                    <i id="padTimerIcon" class="ph-fill ph-play text-emerald-400 text-xs"></i>
                     <span id="padTimerText">00:00</span>
                 </button>
 
@@ -1141,7 +1114,7 @@
             <!-- Right Group: Tools + Shape + Style + Grid + Undo/Redo/Clear + Fullscreen -->
             <div class="flex items-center gap-1.5 shrink-0 ml-auto">
                 <div class="m3-icon-group">
-                    <button type="button" id="wbToolSelectBtn" onclick="window.app.setWhiteboardTool('SELECT')" class="wb-mod-btn m3-icon-group-btn gap-1 text-[11px]" title="Select / Move / Resize">
+                    <button type="button" id="wbToolSelectBtn" onclick="window.app.setWhiteboardTool('SELECT')" class="wb-mod-btn m3-icon-group-btn gap-1 text-[11px]" title="Select / Move / Resize / Rotate">
                         <i class="ph-bold ph-cursor"></i>
                     </button>
                     <button type="button" id="wbToolCropDupBtn" onclick="window.app.setWhiteboardTool('CROP_DUP')" class="wb-mod-btn m3-icon-group-btn gap-1 text-[11px]" title="Crop & Duplicate Region">
@@ -1150,7 +1123,7 @@
                     <button type="button" id="wbToolPenBtn" onclick="window.app.setWhiteboardTool('PEN')" class="wb-mod-btn m3-icon-group-btn active-state gap-1 text-[11px]" title="Pen">
                         <i class="ph-bold ph-pencil-simple"></i>
                     </button>
-                    <button type="button" id="wbToolLaserBtn" onclick="window.app.setWhiteboardTool('LASER')" class="wb-mod-btn m3-icon-group-btn gap-1 text-[11px]" title="Laser Pointer (Temporary Trail)">
+                    <button type="button" id="wbToolLaserBtn" onclick="window.app.setWhiteboardTool('LASER')" class="wb-mod-btn m3-icon-group-btn gap-1 text-[11px]" title="Laser Pointer">
                         <i class="ph-bold ph-sparkle text-rose-400"></i>
                     </button>
                     <button type="button" id="wbToolPanBtn" onclick="window.app.setWhiteboardTool('PAN')" class="m3-icon-group-btn gap-1 text-[11px]" title="Pan">
@@ -1188,7 +1161,6 @@
                     <button type="button" onclick="window.app.clearInk()" class="wb-mod-btn m3-icon-group-btn hover:!bg-rose-600 hover:!text-white" title="Reset Board">
                         <i class="ph-bold ph-trash"></i>
                     </button>
-                    <!-- Fullscreen Toggle Button Inside Whiteboard -->
                     <button type="button" onclick="window.app.toggleFullscreen()" class="m3-icon-group-btn" title="Toggle Fullscreen">
                         <i id="wbFullscreenIcon" class="ph-bold ph-corners-out"></i>
                     </button>
@@ -1225,7 +1197,20 @@
                 <span>Loading saved board...</span>
             </div>
 
+            <!-- Floating Selected Object / Group Action Bar (Includes Rotate & Reset Rotation!) -->
             <div id="wbSelectionHud" class="hidden absolute top-3 right-4 z-10 m3-icon-group shadow-xl">
+                <button type="button" onclick="window.app.rotateSelectedWhiteboardItems(-15)" class="wb-mod-btn m3-icon-group-btn gap-1 text-[11px] font-bold" title="Rotate Counter-Clockwise (-15°)">
+                    <i class="ph-bold ph-arrow-counter-clockwise"></i>
+                    <span class="hidden sm:inline">-15°</span>
+                </button>
+                <button type="button" onclick="window.app.rotateSelectedWhiteboardItems(15)" class="wb-mod-btn m3-icon-group-btn gap-1 text-[11px] font-bold" title="Rotate Clockwise (+15°)">
+                    <i class="ph-bold ph-arrow-clockwise"></i>
+                    <span class="hidden sm:inline">+15°</span>
+                </button>
+                <button type="button" onclick="window.app.resetSelectedWhiteboardRotation()" class="wb-mod-btn m3-icon-group-btn gap-1 text-[11px] font-bold" title="Reset Rotation to 0°">
+                    <i class="ph-bold ph-arrows-clockwise"></i>
+                    <span>0°</span>
+                </button>
                 <button type="button" id="wbGroupBtn" onclick="window.app.groupSelectedWhiteboardItems()" class="wb-mod-btn hidden m3-icon-group-btn gap-1 text-[11px] font-bold">
                     <i class="ph-bold ph-link"></i>
                     <span>Group</span>
@@ -1236,11 +1221,11 @@
                 </button>
                 <button type="button" onclick="window.app.duplicateSelectedWhiteboardItem()" class="wb-mod-btn m3-icon-group-btn gap-1 text-[11px] font-bold">
                     <i class="ph-bold ph-copy"></i>
-                    <span>Duplicate</span>
+                    <span class="hidden md:inline">Duplicate</span>
                 </button>
                 <button type="button" onclick="window.app.deleteSelectedWhiteboardItem()" class="wb-mod-btn m3-icon-group-btn hover:!bg-rose-600 hover:!text-white gap-1 text-[11px] font-bold">
                     <i class="ph-bold ph-trash"></i>
-                    <span>Delete</span>
+                    <span class="hidden md:inline">Delete</span>
                 </button>
             </div>
 
@@ -1294,7 +1279,7 @@
             if (p8) p8.setAttribute('d', makeSoftStarburst(8, 0.445, 0.495));
         }
 
-        // Fast-Rotating Shape-Morphing Loader (With Plump 4-Leaf Clover)
+        // Fast-Rotating Shape-Morphing Loader (Plump 4-Leaf Clover)
         const M3_MORPH_SHAPES = [
             (a) => 0.84 + 0.11 * Math.cos(5 * a) - 0.02 * Math.cos(10 * a),
             (a) => 0.87 + 0.068 * Math.cos(9 * a),
@@ -1567,6 +1552,7 @@
             isPopupAnimating: false,
             activeSettingsPage: 'HOME',
             selectedModel: localStorage.getItem('jee_gemini_model') || 'gemini-3.5-flash-lite',
+            importMode: null, // 'PDF' | 'IMAGE'
             pdfDoc: null,
             isExtracting: false,
             isUploadMinimized: false,
@@ -1584,7 +1570,7 @@
             wbLoadToken: 0,
             wbTool: 'PEN',
             wbAutoShape: true,
-            wbGridMode: 'DOTS', // 'DOTS' | 'GRID' | 'BLANK'
+            wbGridMode: 'DOTS',
             laserPoints: [],
             inkColor: '#0f172a',
             strokeWidth: 3.5,
@@ -1596,7 +1582,8 @@
             padShowHint: false,
             padShowAns: false,
             timerInterval: null,
-            timerPaused: false,
+            timerPaused: true, // Manual timer: always starts paused until user clicks it
+            isHandlingHash: false,
             isSyncingCloud: false,
             hasPendingCloudPush: false,
             ocrWorker: null,
@@ -1606,6 +1593,73 @@
         };
 
         const generateUniqueId = () => Date.now() * 1000 + (state.nextId++ % 1000);
+        const generateQuestionUid = () => {
+            const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
+            let out = '';
+            for (let i = 0; i < 10; i++) {
+                out += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            return out;
+        };
+
+        // ===================================================================
+        // SUB-LINK HASH ROUTER: #/paper-name/subject/chapter-name/uid
+        // ===================================================================
+        function slugifyRoutePart(str, fallback = 'general') {
+            const s = String(str || fallback)
+                .trim()
+                .toLowerCase()
+                .replace(/[^a-z0-9]+/g, '-')
+                .replace(/^-+|-+$/g, '');
+            return s || fallback;
+        }
+
+        function buildQuestionSubLinkHash(q) {
+            if (!q) return '';
+            if (!q.uid) q.uid = generateQuestionUid();
+            const paperSlug = slugifyRoutePart(q.paperName, 'paper');
+            const subjSlug = slugifyRoutePart(q.subject, 'subject');
+            const chapSlug = slugifyRoutePart(q.chapter, 'chapter');
+            return `#/${paperSlug}/${subjSlug}/${chapSlug}/${q.uid}`;
+        }
+
+        function syncUrlHashWithActiveQuestion(q) {
+            if (state.isHandlingHash || !q) return;
+            const targetHash = buildQuestionSubLinkHash(q);
+            if (window.location.hash !== targetHash) {
+                history.replaceState(null, '', targetHash);
+            }
+        }
+
+        function clearQuestionUrlHash() {
+            if (state.isHandlingHash) return;
+            if (window.location.hash) {
+                history.replaceState(null, '', window.location.pathname + window.location.search);
+            }
+        }
+
+        function checkAndOpenQuestionFromUrlHash() {
+            const rawHash = window.location.hash || '';
+            if (!rawHash.startsWith('#/')) return;
+            const parts = rawHash.slice(2).split('/').filter(Boolean);
+            if (parts.length < 4) return;
+            const uid = parts[parts.length - 1];
+            const targetQ = state.questions.find(q => q.uid === uid);
+            if (!targetQ) return;
+
+            state.isHandlingHash = true;
+            try {
+                const isWbOpen = !document.getElementById('scratchpadModal')?.classList.contains('hidden');
+                if (isWbOpen) {
+                    window.app.openScratchpad(targetQ.id, true);
+                } else {
+                    window.app.openScratchpad(targetQ.id, false);
+                }
+            } finally {
+                state.isHandlingHash = false;
+            }
+        }
+
         const getApiKey = () => (localStorage.getItem('jee_gemini_api_key') || '').trim();
         const getSelectedModel = () => state.selectedModel || localStorage.getItem('jee_gemini_model') || 'gemini-3.5-flash-lite';
         const getVerticalPads = () => ({
@@ -1618,6 +1672,9 @@
         const isAutoSolveHintsEnabled = () => localStorage.getItem('jee_auto_solve_hints') !== 'false';
         const getThemeMode = () => localStorage.getItem('jee_m3_theme_mode') || 'dark';
 
+        // ===================================================================
+        // MANUAL PER-QUESTION SOLVE TIMER (STARTS ONLY WHEN CLICKED)
+        // ===================================================================
         function formatTimeSeconds(sec) {
             const total = Math.max(0, Math.floor(Number(sec) || 0));
             const m = Math.floor(total / 60);
@@ -1625,10 +1682,15 @@
             return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
         }
 
-        function startQuestionTimer() {
+        function initQuestionTimerIdle() {
             clearInterval(state.timerInterval);
-            state.timerPaused = false;
+            state.timerInterval = null;
+            state.timerPaused = true;
             updateTimerUI();
+        }
+
+        function ensureTimerTicking() {
+            clearInterval(state.timerInterval);
             state.timerInterval = setInterval(() => {
                 if (state.timerPaused) return;
                 const activeId = state.activePadId || state.activePopupId;
@@ -1643,6 +1705,7 @@
         function stopQuestionTimer() {
             clearInterval(state.timerInterval);
             state.timerInterval = null;
+            state.timerPaused = true;
         }
 
         function updateTimerUI() {
@@ -1654,11 +1717,18 @@
             const padIcon = document.getElementById('padTimerIcon');
             if (padTxt) padTxt.textContent = formatted;
             if (padIcon) {
-                padIcon.className = state.timerPaused ? 'ph-bold ph-pause text-amber-400 text-xs' : 'ph-bold ph-timer text-xs';
+                padIcon.className = state.timerPaused
+                    ? 'ph-fill ph-play text-emerald-400 text-xs'
+                    : 'ph-fill ph-pause text-amber-400 text-xs';
             }
 
             document.querySelectorAll('.popup-timer-text').forEach(el => {
                 el.textContent = formatted;
+            });
+            document.querySelectorAll('.popup-timer-icon').forEach(el => {
+                el.className = state.timerPaused
+                    ? 'popup-timer-icon ph-fill ph-play text-emerald-400 text-xs'
+                    : 'popup-timer-icon ph-fill ph-pause text-amber-400 text-xs';
             });
         }
 
@@ -1844,7 +1914,7 @@
         }
 
         // ===================================================================
-        // AUTO-DESKEW & SHADOW CLEANUP FOR PHOTO / SCREENSHOT IMPORT
+        // UNIFIED PDF + IMAGE IMPORT & AUTO-DESKEW ENGINE
         // ===================================================================
         function estimateImageSkewAngle(img) {
             const w = 360;
@@ -1855,7 +1925,6 @@
             ctx.drawImage(img, 0, 0, w, h);
             const data = ctx.getImageData(0, 0, w, h).data;
 
-            // Convert to binary ink map (1 = dark text pixel, 0 = background)
             const ink = new Uint8Array(w * h);
             let sumLuma = 0;
             for (let i = 0; i < w * h; i++) {
@@ -1867,7 +1936,6 @@
                 ink[i] = luma < thresh ? 1 : 0;
             }
 
-            // Maximize horizontal projection profile variance across [-12 deg, +12 deg]
             let bestAngle = 0, maxVariance = -1;
             const cx = w / 2, cy = h / 2;
 
@@ -1941,10 +2009,21 @@
             const img = new Image();
             img.onload = () => {
                 URL.revokeObjectURL(url);
+                state.importMode = 'IMAGE';
                 state.importRawImg = img;
-                document.getElementById('selectedImageFileLabel').textContent = labelName;
-                document.getElementById('imageImportPreviewWrap').classList.remove('hidden');
-                document.getElementById('saveImageImportBtn').disabled = false;
+                state.pdfDoc = null;
+
+                document.getElementById('selectedFileLabel').textContent = labelName;
+                document.getElementById('selectedFileTypeBadge').textContent = 'Detected: Image • Auto-straightening & OCR enabled';
+                document.getElementById('unifiedFileIcon').className = 'ph-duotone ph-image text-2xl';
+                document.getElementById('pdfSetupSubView').classList.add('hidden');
+                document.getElementById('pdfSetupSubView').classList.remove('grid');
+                document.getElementById('imageSetupSubView').classList.remove('hidden');
+
+                const startBtn = document.getElementById('startExtractBtn');
+                const startLbl = document.getElementById('startExtractBtnLbl');
+                if (startBtn) startBtn.disabled = false;
+                if (startLbl) startLbl.textContent = 'Add Image Question';
 
                 const detectedAngle = estimateImageSkewAngle(img);
                 state.importDeskewAngle = detectedAngle;
@@ -1953,6 +2032,43 @@
                 renderDeskewedAndCleanedImage(img, detectedAngle, document.getElementById('imageCleanContrastChk').checked);
             };
             img.src = url;
+        }
+
+        async function onUnifiedFileSelected(e) {
+            const file = e.target.files?.[0];
+            if (!file) return;
+            const isPdf = file.type === 'application/pdf' || /\.pdf$/i.test(file.name || '');
+
+            if (isPdf) {
+                state.importMode = 'PDF';
+                state.importRawImg = null;
+                document.getElementById('selectedFileLabel').textContent = file.name;
+                document.getElementById('selectedFileTypeBadge').textContent = 'Detected: PDF Document • Multi-page question extraction';
+                document.getElementById('unifiedFileIcon').className = 'ph-duotone ph-file-pdf text-2xl';
+                document.getElementById('imageSetupSubView').classList.add('hidden');
+                document.getElementById('pdfSetupSubView').classList.remove('hidden');
+                document.getElementById('pdfSetupSubView').classList.add('grid');
+
+                const titleEl = document.getElementById('paperTitleInput');
+                if (!titleEl.value.trim()) titleEl.value = file.name.replace(/\.pdf$/i, '');
+
+                try {
+                    const buf = await file.arrayBuffer();
+                    state.pdfDoc = await pdfjsLib.getDocument({ data: buf }).promise;
+                    document.getElementById('startPageInput').value = 1;
+                    document.getElementById('endPageInput').value = state.pdfDoc.numPages;
+                    document.getElementById('startExtractBtn').disabled = false;
+                    document.getElementById('startExtractBtnLbl').textContent = 'Extract PDF Questions';
+                    toast(`Loaded PDF (${state.pdfDoc.numPages} pages)`, 'success');
+                } catch (_) {
+                    toast('Could not read PDF file.', 'warn');
+                }
+            } else if (file.type.startsWith('image/') || /\.(png|jpe?g|webp|bmp|gif)$/i.test(file.name || '')) {
+                await loadSingleImageForImport(file, file.name);
+            } else {
+                toast('Unsupported file format. Select a PDF or Image.', 'warn');
+            }
+            e.target.value = '';
         }
 
         async function classifyAndSolveImportedImageWithGemini(base64Jpeg) {
@@ -2344,6 +2460,7 @@
         function sortAndRefreshQuestions(skipRender = false) {
             state.questions.forEach(q => {
                 if (q.id === undefined || q.id === null) q.id = generateUniqueId();
+                if (!q.uid) q.uid = generateQuestionUid();
                 if (q.hint === undefined) q.hint = '';
                 if (q.answerKey === undefined) q.answerKey = '';
                 if (q.whiteboardData === undefined) q.whiteboardData = null;
@@ -2423,6 +2540,7 @@
             try {
                 const paperGroups = {};
                 state.questions.forEach(q => {
+                    if (!q.uid) q.uid = generateQuestionUid();
                     const pName = q.paperName || 'Default Paper';
                     (paperGroups[pName] = paperGroups[pName] || []).push(q);
                 });
@@ -2533,6 +2651,7 @@
 
                 const gistData = await res.json();
                 const restoredQuestions = [];
+                let anyMissingUid = false;
 
                 for (const [fName, fileObj] of Object.entries(gistData.files || {})) {
                     if (!fName.startsWith('jee_vault_paper_')) continue;
@@ -2547,19 +2666,25 @@
                 }
 
                 state.wbBoards = {};
-                state.questions = restoredQuestions.map(r => ({
-                    ...r,
-                    id: r.id || generateUniqueId(),
-                    hint: r.hint || '',
-                    answerKey: r.answerKey || '',
-                    whiteboardData: r.whiteboardData || null,
-                    timeSpent: Number(r.timeSpent) || 0,
-                    noteTag: r.noteTag || ''
-                }));
+                state.questions = restoredQuestions.map(r => {
+                    if (!r.uid) anyMissingUid = true;
+                    return {
+                        ...r,
+                        id: r.id || generateUniqueId(),
+                        uid: r.uid || generateQuestionUid(),
+                        hint: r.hint || '',
+                        answerKey: r.answerKey || '',
+                        whiteboardData: r.whiteboardData || null,
+                        timeSpent: Number(r.timeSpent) || 0,
+                        noteTag: r.noteTag || ''
+                    };
+                });
                 localStorage.setItem('jee_cloud_last_sync', new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }));
                 state.isSyncingCloud = false;
                 sortAndRefreshQuestions();
                 if (manualNotify) toast(`Loaded ${state.questions.length} questions from Gist.`, 'success');
+                if (anyMissingUid) scheduleCloudAutoSync(true);
+                checkAndOpenQuestionFromUrlHash();
                 runBackgroundLocalOcrForExistingQuestions(false);
             } catch (err) {
                 state.isSyncingCloud = false;
@@ -2597,6 +2722,7 @@
                 state.questions.push(...records.map(r => ({
                     ...r,
                     id: generateUniqueId(),
+                    uid: r.uid || generateQuestionUid(),
                     hint: r.hint || '',
                     answerKey: r.answerKey || '',
                     whiteboardData: r.whiteboardData || null,
@@ -2887,25 +3013,6 @@ RULES:
             ensureM3MorphLoopRunning();
         }
 
-        async function onPdfSelected(e) {
-            const file = e.target.files?.[0];
-            if (!file) return;
-            document.getElementById('selectedFileLabel').textContent = file.name;
-            const titleEl = document.getElementById('paperTitleInput');
-            if (!titleEl.value.trim()) titleEl.value = file.name.replace(/\.pdf$/i, '');
-
-            try {
-                const buf = await file.arrayBuffer();
-                state.pdfDoc = await pdfjsLib.getDocument({ data: buf }).promise;
-                document.getElementById('startPageInput').value = 1;
-                document.getElementById('endPageInput').value = state.pdfDoc.numPages;
-                document.getElementById('startExtractBtn').disabled = false;
-                toast(`Loaded PDF (${state.pdfDoc.numPages} pages)`, 'success');
-            } catch (_) {
-                toast('Could not read PDF file.', 'warn');
-            }
-        }
-
         function cancelPdfExtraction() {
             if (!state.isExtracting) return;
             state.cancelExtractionRequested = true;
@@ -3065,6 +3172,7 @@ RULES:
                         const cleanNum = rawQNum.replace(/\D/g, '') || `${extractedCount + 1}`;
                         const qObj = {
                             id: generateUniqueId(),
+                            uid: generateQuestionUid(),
                             questionNumber: rawQNum.toUpperCase() === 'CONT' ? cleanNum : rawQNum,
                             subject: ['Physics', 'Chemistry', 'Mathematics'].includes(b.subject) ? b.subject : 'Physics',
                             chapter: b.chapter || 'General Practice',
@@ -3335,7 +3443,7 @@ RULES:
                             ${state.isSyncingCloud
                                 ? 'Loading your question bank from cloud storage.'
                                 : state.questions.length === 0
-                                ? 'Import a PDF, add a photo/screenshot, or pull your existing questions from GitHub Gist.'
+                                ? 'Import a PDF or question image, or pull your existing questions from GitHub Gist.'
                                 : 'Clear your search query or change the active status and chapter filters.'}
                         </p>
                         <div class="flex flex-wrap items-center justify-center gap-2.5 pt-1">
@@ -3345,10 +3453,7 @@ RULES:
                                 </button>
                             ` : ''}
                             <button onclick="window.app.openUploadModal()" class="h-9 px-4 m3-btn-filled text-xs flex items-center gap-1.5 shadow">
-                                <i class="ph-bold ph-file-pdf"></i> Add PDF
-                            </button>
-                            <button onclick="window.app.openImageImportModal()" class="h-9 px-4 m3-btn-tonal text-xs flex items-center gap-1.5">
-                                <i class="ph-bold ph-camera"></i> Add Image
+                                <i class="ph-bold ph-plus"></i> Add Questions
                             </button>
                             <button onclick="window.app.pullFromCloudGist(true)" class="h-9 px-4 m3-btn-tonal text-xs flex items-center gap-1.5">
                                 <i class="ph-bold ph-cloud-arrow-down"></i> Pull Gist
@@ -3426,8 +3531,8 @@ RULES:
                     </div>
 
                     <div class="flex items-center gap-1.5 shrink-0 ml-auto flex-wrap">
-                        <button type="button" onclick="window.app.toggleQuestionTimer()" ondblclick="window.app.resetQuestionTimer()" class="h-9 px-2.5 rounded-full m3-surface-high text-[11px] font-mono font-extrabold flex items-center gap-1 shrink-0" title="Click: Pause/Resume • Double-Click: Reset">
-                            <i class="ph-bold ph-timer text-xs" style="color: var(--md-primary)"></i>
+                        <button type="button" onclick="window.app.toggleQuestionTimer()" ondblclick="window.app.resetQuestionTimer()" class="h-9 px-2.5 rounded-full m3-surface-high text-[11px] font-mono font-extrabold flex items-center gap-1 shrink-0" title="Click: Start/Pause Timer • Double-Click: Reset">
+                            <i class="popup-timer-icon ${state.timerPaused ? 'ph-fill ph-play text-emerald-400' : 'ph-fill ph-pause text-amber-400'} text-xs"></i>
                             <span class="popup-timer-text">${formatTimeSeconds(q.timeSpent || 0)}</span>
                         </button>
 
@@ -3474,6 +3579,8 @@ RULES:
             const q = state.questions.find(i => i.id === Number(state.activePopupId));
             if (!q) return;
 
+            syncUrlHashWithActiveQuestion(q);
+
             const activeList = getLockedPadContextList(q.id);
             const idx = activeList.findIndex(item => item.id === q.id);
             const total = activeList.length;
@@ -3519,7 +3626,6 @@ RULES:
             }, 255);
         }
 
-        // Fixed Touch + Mouse Drag Full-Card Carousel Swiping
         function initPopupSwipeNavigation() {
             const viewport = document.getElementById('popupCarouselViewport');
             const track = document.getElementById('popupCarouselTrack');
@@ -3599,7 +3705,6 @@ RULES:
                 currentDX = 0;
             };
 
-            // Native Touch Listeners (with passive: false so browser never hijacks horizontal swipe)
             viewport.addEventListener('touchstart', (e) => {
                 if (e.touches.length !== 1) return;
                 onDragStart(e.touches[0].clientX, e.touches[0].clientY, e.target);
@@ -3613,7 +3718,6 @@ RULES:
             viewport.addEventListener('touchend', onDragEnd);
             viewport.addEventListener('touchcancel', onDragEnd);
 
-            // Mouse Drag Listeners for Desktop/Trackpad
             viewport.addEventListener('mousedown', (e) => {
                 if (e.button !== 0) return;
                 onDragStart(e.clientX, e.clientY, e.target);
@@ -3626,7 +3730,7 @@ RULES:
         }
 
         // ===================================================================
-        // FULLSCREEN WHITEBOARD + GIST ROUGH-WORK PERSISTENCE ENGINE
+        // FULLSCREEN WHITEBOARD + ROTATION + GIST ROUGH-WORK PERSISTENCE
         // ===================================================================
         function getActiveBoard() {
             const id = state.activePadId || 'default';
@@ -3651,7 +3755,7 @@ RULES:
 
         function boardHasRoughWork(items) {
             if (!Array.isArray(items)) return false;
-            return items.some(it => it.type === 'STROKE' || (it.type === 'IMAGE' && !it.isOriginalQ));
+            return items.some(it => it.type === 'STROKE' || (it.type === 'IMAGE' && !it.isOriginalQ) || (it.type === 'IMAGE' && it.isOriginalQ && (it.rotation || 0) !== 0));
         }
 
         let wbSaveTimer = null;
@@ -3679,6 +3783,7 @@ RULES:
                         y: Math.round(it.y * 10) / 10,
                         w: Math.round(it.w * 10) / 10,
                         h: Math.round(it.h * 10) / 10,
+                        rotation: Number(it.rotation) || 0,
                         src: it.isOriginalQ ? null : it.src
                     };
                 }
@@ -3688,6 +3793,7 @@ RULES:
                     groupId: it.groupId || null,
                     color: it.color,
                     width: it.width,
+                    rotation: Number(it.rotation) || 0,
                     points: (it.points || []).map(p => ({
                         x: Math.round(p.x * 10) / 10,
                         y: Math.round(p.y * 10) / 10
@@ -3696,7 +3802,7 @@ RULES:
             });
 
             q.whiteboardData = {
-                v: 1,
+                v: 2,
                 scale: state.wbScale,
                 panX: Math.round(state.wbPanX),
                 panY: Math.round(state.wbPanY),
@@ -3724,6 +3830,7 @@ RULES:
                 y: 44,
                 w: targetW,
                 h: targetH,
+                rotation: 0,
                 src: q.imageDataUrl,
                 imgEl
             };
@@ -3790,6 +3897,7 @@ RULES:
                             y: Number(rawIt.y) ?? 44,
                             w: Number(rawIt.w) || (defaultQItem ? defaultQItem.w : 500),
                             h: Number(rawIt.h) || (defaultQItem ? defaultQItem.h : 250),
+                            rotation: Number(rawIt.rotation) || 0,
                             src: srcToLoad,
                             imgEl: loadedImg
                         });
@@ -3801,6 +3909,7 @@ RULES:
                         groupId: rawIt.groupId || null,
                         color: rawIt.color || '#0f172a',
                         width: Number(rawIt.width) || 3.5,
+                        rotation: Number(rawIt.rotation) || 0,
                         points: rawIt.points.map(p => ({ x: Number(p.x) || 0, y: Number(p.y) || 0 }))
                     });
                 }
@@ -3913,6 +4022,8 @@ RULES:
             const q = state.questions.find(i => i.id === Number(state.activePadId));
             if (!q) return;
 
+            syncUrlHashWithActiveQuestion(q);
+
             const activeList = getLockedPadContextList(q.id);
             const idx = activeList.findIndex(item => item.id === q.id);
 
@@ -3979,6 +4090,9 @@ RULES:
             if (solveBtn) solveBtn.classList.toggle('hidden', Boolean(q.hint && q.answerKey));
         }
 
+        // ===================================================================
+        // GEOMETRIC INK-TO-SHAPE RECOGNITION ENGINE
+        // ===================================================================
         function rdpSimplify(points, epsilon) {
             if (points.length < 3) return points;
             let dmax = 0, index = 0;
@@ -4187,12 +4301,20 @@ RULES:
             return null;
         }
 
+        // Draw whiteboard item with rotation support
         function drawBoardItemsToContext(ctx, items) {
             ctx.lineCap = 'round';
             ctx.lineJoin = 'round';
             for (const item of items) {
+                ctx.save();
+                const rot = Number(item.rotation) || 0;
                 if (item.type === 'IMAGE' && item.imgEl) {
-                    ctx.save();
+                    const cx = item.x + item.w / 2;
+                    const cy = item.y + item.h / 2;
+                    ctx.translate(cx, cy);
+                    if (rot !== 0) ctx.rotate((rot * Math.PI) / 180);
+                    ctx.translate(-cx, -cy);
+
                     ctx.shadowColor = 'rgba(15, 23, 42, 0.1)';
                     ctx.shadowBlur = 14 / state.wbScale;
                     ctx.strokeStyle = 'rgba(148, 163, 184, 0.45)';
@@ -4201,8 +4323,15 @@ RULES:
                     ctx.fillRect(item.x, item.y, item.w, item.h);
                     ctx.strokeRect(item.x, item.y, item.w, item.h);
                     ctx.drawImage(item.imgEl, item.x, item.y, item.w, item.h);
-                    ctx.restore();
                 } else if (item.type === 'STROKE' && item.points && item.points.length > 0) {
+                    let sumX = 0, sumY = 0;
+                    for (const p of item.points) { sumX += p.x; sumY += p.y; }
+                    const cx = sumX / item.points.length;
+                    const cy = sumY / item.points.length;
+                    ctx.translate(cx, cy);
+                    if (rot !== 0) ctx.rotate((rot * Math.PI) / 180);
+                    ctx.translate(-cx, -cy);
+
                     ctx.beginPath();
                     ctx.strokeStyle = item.color === '#f8fafc' ? '#0f172a' : item.color;
                     ctx.lineWidth = item.width;
@@ -4212,6 +4341,7 @@ RULES:
                     }
                     ctx.stroke();
                 }
+                ctx.restore();
             }
         }
 
@@ -4286,7 +4416,6 @@ RULES:
             const board = getActiveBoard();
             drawBoardItemsToContext(ctx, board.items);
 
-            // Temporary Laser Pointer Trail
             if (state.laserPoints.length > 1) {
                 const now = performance.now();
                 ctx.save();
@@ -4318,6 +4447,25 @@ RULES:
                 ctx.setLineDash([6 / state.wbScale, 4 / state.wbScale]);
                 ctx.strokeRect(selBounds.minX, selBounds.minY, bw, bh);
                 ctx.setLineDash([]);
+
+                // Draw top rotation stalk handle
+                const topMidX = (selBounds.minX + selBounds.maxX) / 2;
+                const topMidY = selBounds.minY;
+                const stalkH = 24 / state.wbScale;
+                ctx.beginPath();
+                ctx.strokeStyle = '#2563eb';
+                ctx.lineWidth = 1.5 / state.wbScale;
+                ctx.moveTo(topMidX, topMidY);
+                ctx.lineTo(topMidX, topMidY - stalkH);
+                ctx.stroke();
+
+                ctx.beginPath();
+                ctx.fillStyle = '#ffffff';
+                ctx.strokeStyle = '#2563eb';
+                ctx.lineWidth = 2 / state.wbScale;
+                ctx.arc(topMidX, topMidY - stalkH, handleSize * 0.7, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.stroke();
 
                 const corners = [
                     { x: selBounds.minX, y: selBounds.minY },
@@ -4383,6 +4531,15 @@ RULES:
                 if (l2 === 0) return Math.hypot(p.x - v.x, p.y - v.y);
                 const t = Math.max(0, Math.min(1, ((p.x - v.x) * (wPt.x - v.x) + (p.y - v.y) * (wPt.y - v.y)) / l2));
                 return Math.hypot(p.x - (v.x + t * (wPt.x - v.x)), p.y - (v.y + t * (wPt.y - v.y)));
+            };
+
+            const hitTestRotationHandle = (wx, wy, bounds) => {
+                if (!bounds) return false;
+                const topMidX = (bounds.minX + bounds.maxX) / 2;
+                const stalkH = 24 / state.wbScale;
+                const rotHandleY = bounds.minY - stalkH;
+                const tol = 16 / state.wbScale;
+                return Math.hypot(wx - topMidX, wy - rotHandleY) <= tol;
             };
 
             const hitTestCornerHandle = (wx, wy, bounds) => {
@@ -4489,8 +4646,20 @@ RULES:
                 if (state.wbTool === 'SELECT') {
                     const board = getActiveBoard();
                     const currBounds = getCombinedSelectedBounds();
-                    const handle = hitTestCornerHandle(wPt.x, wPt.y, currBounds);
 
+                    if (hitTestRotationHandle(wPt.x, wPt.y, currBounds)) {
+                        pushBoardUndoState();
+                        const cx = (currBounds.minX + currBounds.maxX) / 2;
+                        const cy = (currBounds.minY + currBounds.maxY) / 2;
+                        dragAction = {
+                            mode: 'ROTATE',
+                            center: { x: cx, y: cy },
+                            origRotations: board.items.filter(it => state.wbSelectedIds.includes(it.id)).map(it => ({ id: it.id, rot: Number(it.rotation) || 0 }))
+                        };
+                        return;
+                    }
+
+                    const handle = hitTestCornerHandle(wPt.x, wPt.y, currBounds);
                     if (handle && state.wbSelectedIds.length > 0) {
                         pushBoardUndoState();
                         dragAction = {
@@ -4557,6 +4726,7 @@ RULES:
                     groupId: null,
                     color: state.inkColor,
                     width: state.strokeWidth,
+                    rotation: 0,
                     points: [wPt]
                 };
                 board.items.push(currentStroke);
@@ -4622,6 +4792,23 @@ RULES:
                 if (state.wbTool === 'SELECT' && dragAction && state.wbSelectedIds.length > 0) {
                     const board = getActiveBoard();
 
+                    if (dragAction.mode === 'ROTATE') {
+                        const c = dragAction.center;
+                        const angleRad = Math.atan2(wPt.y - c.y, wPt.x - c.x);
+                        let angleDeg = (angleRad * 180) / Math.PI + 90; // Align top handle to 0°
+                        if (angleDeg < 0) angleDeg += 360;
+                        if (Math.abs(angleDeg - Math.round(angleDeg / 15) * 15) < 3.5) {
+                            angleDeg = Math.round(angleDeg / 15) * 15;
+                        }
+
+                        for (const itemRot of dragAction.origRotations) {
+                            const live = board.items.find(it => it.id === itemRot.id);
+                            if (live) live.rotation = Math.round(angleDeg);
+                        }
+                        renderWhiteboardCanvas();
+                        return;
+                    }
+
                     if (dragAction.mode === 'MOVE') {
                         const dx = wPt.x - dragAction.startWorld.x;
                         const dy = wPt.y - dragAction.startWorld.y;
@@ -4653,7 +4840,6 @@ RULES:
                         let newW = Math.max(24, newMaxX - newMinX);
                         let newH = Math.max(24, newMaxY - newMinY);
 
-                        // Strictly lock aspect ratio when resizing any IMAGE
                         const hasAnyImage = dragAction.origItems.some(it => it.type === 'IMAGE');
                         if (hasAnyImage) {
                             const scaleX = newW / oldW;
@@ -4758,6 +4944,7 @@ RULES:
                                 y: box.minY + 28,
                                 w: cw,
                                 h: ch,
+                                rotation: 0,
                                 src: dataUrl,
                                 imgEl: croppedImg
                             };
@@ -4774,7 +4961,7 @@ RULES:
                     return;
                 }
 
-                if (dragAction && (dragAction.mode === 'MOVE' || dragAction.mode === 'RESIZE')) {
+                if (dragAction && (dragAction.mode === 'MOVE' || dragAction.mode === 'RESIZE' || dragAction.mode === 'ROTATE')) {
                     dragAction = null;
                     syncActiveBoardToQuestionGist();
                     return;
@@ -4897,6 +5084,11 @@ RULES:
 
             toggleQuestionTimer() {
                 state.timerPaused = !state.timerPaused;
+                if (!state.timerPaused) {
+                    ensureTimerTicking();
+                } else {
+                    stopQuestionTimer();
+                }
                 updateTimerUI();
             },
             resetQuestionTimer() {
@@ -4904,7 +5096,8 @@ RULES:
                 const q = state.questions.find(i => i.id === Number(activeId));
                 if (!q) return;
                 q.timeSpent = 0;
-                state.timerPaused = false;
+                stopQuestionTimer();
+                state.timerPaused = true;
                 updateTimerUI();
                 scheduleCloudAutoSync(true);
             },
@@ -4991,23 +5184,64 @@ RULES:
                 icon.className = isPwd ? 'ph-bold ph-eye-slash text-base' : 'ph-bold ph-eye text-base';
             },
 
-            // Photo / Screenshot Import with Auto-Deskew
-            openImageImportModal(initialFileOrBlob = null) {
+            // Unified Import Modal Actions
+            openUploadModal(initialFileOrBlob = null) {
                 closeCustomDropdown();
-                document.getElementById('imageImportModal').classList.remove('hidden');
+                if (state.isExtracting && state.isUploadMinimized) {
+                    this.restoreUploadModal();
+                    return;
+                }
+                setUploadButtonsLock(false);
+                document.getElementById('uploadSetupView').classList.remove('hidden');
+                document.getElementById('uploadProgressView').classList.add('hidden');
+                document.getElementById('pdfSetupSubView').classList.add('hidden');
+                document.getElementById('pdfSetupSubView').classList.remove('grid');
+                document.getElementById('imageSetupSubView').classList.add('hidden');
+                document.getElementById('selectedFileLabel').textContent = 'Select PDF or Image File (or press Ctrl+V)';
+                document.getElementById('selectedFileTypeBadge').textContent = 'Automatically detects PDF documents and photos/screenshots';
+                document.getElementById('unifiedFileIcon').className = 'ph-duotone ph-file-plus text-2xl';
+                document.getElementById('startExtractBtn').disabled = true;
+                document.getElementById('startExtractBtnLbl').textContent = 'Import';
+                document.getElementById('uploadModal').classList.remove('hidden');
+
                 if (initialFileOrBlob) {
-                    loadSingleImageForImport(initialFileOrBlob, initialFileOrBlob.name || 'Pasted Image');
+                    if (initialFileOrBlob.type === 'application/pdf') {
+                        // Handle initial PDF drop
+                    } else {
+                        loadSingleImageForImport(initialFileOrBlob, initialFileOrBlob.name || 'Pasted Image');
+                    }
                 }
             },
-            closeImageImportModal() {
+            minimizeUploadModal() {
+                if (!state.isExtracting) return;
                 closeCustomDropdown();
-                document.getElementById('imageImportModal').classList.add('hidden');
-                state.importRawImg = null;
+                state.isUploadMinimized = true;
+                document.getElementById('uploadModal').classList.add('hidden');
+                const minBar = document.getElementById('minimizedUploadBar');
+                if (minBar) {
+                    minBar.classList.remove('hidden');
+                    minBar.classList.add('flex');
+                }
+                if (!waveAnimFrame) waveAnimFrame = requestAnimationFrame(stepAllWavyBars);
+                ensureM3MorphLoopRunning();
             },
-            onImageFileSelected(e) {
-                const f = e.target.files?.[0];
-                if (f) loadSingleImageForImport(f, f.name);
+            restoreUploadModal() {
+                closeCustomDropdown();
+                state.isUploadMinimized = false;
+                const minBar = document.getElementById('minimizedUploadBar');
+                if (minBar) {
+                    minBar.classList.add('hidden');
+                    minBar.classList.remove('flex');
+                }
+                document.getElementById('uploadModal').classList.remove('hidden');
+                if (!waveAnimFrame) waveAnimFrame = requestAnimationFrame(stepAllWavyBars);
+                ensureM3MorphLoopRunning();
             },
+            closeUploadModal() {
+                closeCustomDropdown();
+                if (!state.isExtracting) document.getElementById('uploadModal').classList.add('hidden');
+            },
+            onUnifiedFileSelected,
             autoDetectImageAngle() {
                 if (!state.importRawImg) return;
                 const angle = estimateImageSkewAngle(state.importRawImg);
@@ -5023,11 +5257,18 @@ RULES:
                 document.getElementById('imageDeskewVal').textContent = `${angle.toFixed(1)}°`;
                 renderDeskewedAndCleanedImage(state.importRawImg, angle, document.getElementById('imageCleanContrastChk').checked);
             },
+            async startUnifiedImportAction() {
+                if (state.importMode === 'PDF') {
+                    await startPdfExtraction();
+                } else if (state.importMode === 'IMAGE') {
+                    await this.saveImportedImageQuestion();
+                }
+            },
             async saveImportedImageQuestion() {
                 if (!state.importRawImg || state.isImportingImage) return;
                 state.isImportingImage = true;
-                const btn = document.getElementById('saveImageImportBtn');
-                const lbl = document.getElementById('saveImageImportBtnLbl');
+                const btn = document.getElementById('startExtractBtn');
+                const lbl = document.getElementById('startExtractBtnLbl');
                 if (btn) btn.disabled = true;
                 if (lbl) lbl.textContent = 'Processing...';
 
@@ -5041,7 +5282,7 @@ RULES:
                     const dataUrl = trimmed.toDataURL('image/jpeg', 0.88);
                     const base64Jpeg = dataUrl.split(',')[1];
 
-                    const paperName = document.getElementById('imgImportPaperInput').value.trim() || 'Imported Images';
+                    const paperName = document.getElementById('imgImportPaperInput').value.trim() || 'Imported Photos';
                     let qNum = document.getElementById('imgImportQNumInput').value.trim();
                     let subj = state.subject !== 'ALL' ? state.subject : 'Physics';
                     let chap = state.chapter !== 'ALL' ? state.chapter : (JEE_CHAPTERS[subj]?.[0] || 'General');
@@ -5061,8 +5302,9 @@ RULES:
                     const ocrTxt = await recognizeImageTextWithTesseract(trimmed);
                     const finalQNum = qNum || `${state.questions.length + 1}`;
 
-                    state.questions.push({
+                    const newQ = {
                         id: generateUniqueId(),
+                        uid: generateQuestionUid(),
                         questionNumber: finalQNum,
                         subject: subj,
                         chapter: chap,
@@ -5083,19 +5325,22 @@ RULES:
                         isStitched: false,
                         continuesToNextPage: false,
                         createdAt: Date.now()
-                    });
+                    };
 
-                    this.closeImageImportModal();
+                    state.questions.push(newQ);
+                    this.closeUploadModal();
                     scheduleCloudAutoSync(false);
                     toast(`Added Q.${finalQNum} (${subj} • ${chap})`, 'success');
                 } catch (err) {
                     toast('Failed to import image: ' + err.message, 'warn');
                 } finally {
                     state.isImportingImage = false;
+                    state.importRawImg = null;
                     if (btn) btn.disabled = false;
-                    if (lbl) lbl.textContent = 'Add Question';
+                    if (lbl) lbl.textContent = 'Import';
                 }
             },
+            cancelPdfExtraction,
 
             getActivePopupId: () => state.activePopupId,
             openImagePopup(id, keepContext = false) {
@@ -5109,7 +5354,7 @@ RULES:
                 state.isPopupAnimating = false;
                 renderPopupCarouselSlots();
                 document.getElementById('imagePopupModal').classList.remove('hidden');
-                startQuestionTimer();
+                stopQuestionTimer(); // Timer starts only when clicked by user
             },
             navigatePopupQuestion(dir) {
                 closeCustomDropdown();
@@ -5128,6 +5373,7 @@ RULES:
                 state.isPopupAnimating = false;
                 document.getElementById('imagePopupModal').classList.add('hidden');
                 state.activePopupId = null;
+                clearQuestionUrlHash();
                 renderAll();
                 scheduleCloudAutoSync(true);
             },
@@ -5296,6 +5542,7 @@ RULES:
                 state.padContextIds = [];
                 this.closeClearConfirmModal();
                 this.toggleDrawer(false);
+                clearQuestionUrlHash();
                 scheduleCloudAutoSync(false, true);
                 toast('Deleted all questions.', 'warn');
             },
@@ -5315,50 +5562,6 @@ RULES:
 
             exportBackupJson,
             importBackupJson,
-
-            openUploadModal() {
-                closeCustomDropdown();
-                if (state.isExtracting && state.isUploadMinimized) {
-                    this.restoreUploadModal();
-                    return;
-                }
-                setUploadButtonsLock(false);
-                document.getElementById('uploadSetupView').classList.remove('hidden');
-                document.getElementById('uploadProgressView').classList.add('hidden');
-                document.getElementById('uploadModal').classList.remove('hidden');
-            },
-            minimizeUploadModal() {
-                if (!state.isExtracting) return;
-                closeCustomDropdown();
-                state.isUploadMinimized = true;
-                document.getElementById('uploadModal').classList.add('hidden');
-                const minBar = document.getElementById('minimizedUploadBar');
-                if (minBar) {
-                    minBar.classList.remove('hidden');
-                    minBar.classList.add('flex');
-                }
-                if (!waveAnimFrame) waveAnimFrame = requestAnimationFrame(stepAllWavyBars);
-                ensureM3MorphLoopRunning();
-            },
-            restoreUploadModal() {
-                closeCustomDropdown();
-                state.isUploadMinimized = false;
-                const minBar = document.getElementById('minimizedUploadBar');
-                if (minBar) {
-                    minBar.classList.add('hidden');
-                    minBar.classList.remove('flex');
-                }
-                document.getElementById('uploadModal').classList.remove('hidden');
-                if (!waveAnimFrame) waveAnimFrame = requestAnimationFrame(stepAllWavyBars);
-                ensureM3MorphLoopRunning();
-            },
-            closeUploadModal() {
-                closeCustomDropdown();
-                if (!state.isExtracting) document.getElementById('uploadModal').classList.add('hidden');
-            },
-            onPdfSelected,
-            startPdfExtraction,
-            cancelPdfExtraction,
 
             openSplitModal(id) {
                 closeCustomDropdown();
@@ -5435,6 +5638,7 @@ RULES:
                     state.questions.push({
                         ...q,
                         id: generateUniqueId(),
+                        uid: generateQuestionUid(),
                         questionNumber: `${baseNum}b`,
                         imageDataUrl: c2.toDataURL('image/jpeg', 0.88),
                         aspectRatio: c2.height / c2.width,
@@ -5468,7 +5672,7 @@ RULES:
                 this.closeSplitModal();
             },
 
-            // Fullscreen Whiteboard
+            // Fullscreen Whiteboard with Rotation + Reset Rotation
             getActivePadId: () => state.activePadId,
             openScratchpad(id, keepContext = false) {
                 closeCustomDropdown();
@@ -5490,7 +5694,7 @@ RULES:
 
                 refreshScratchpadTopBarAndHints();
                 document.getElementById('scratchpadModal').classList.remove('hidden');
-                startQuestionTimer();
+                initQuestionTimerIdle(); // Timer starts paused
                 loadQuestionBoardInBackground(q);
             },
             closeScratchpad() {
@@ -5503,6 +5707,7 @@ RULES:
                 setWhiteboardLoadingLock(false);
                 state.wbSelectedIds = [];
                 document.getElementById('scratchpadModal').classList.add('hidden');
+                clearQuestionUrlHash();
                 renderAll();
             },
             navigatePadQuestion(dir) {
@@ -5592,6 +5797,7 @@ RULES:
                     groupId: null,
                     color: state.inkColor,
                     width: state.strokeWidth,
+                    rotation: 0,
                     points: pts
                 };
                 board.items.push(newItem);
@@ -5599,6 +5805,34 @@ RULES:
                 this.setWhiteboardTool('SELECT');
                 renderWhiteboardCanvas();
                 syncActiveBoardToQuestionGist();
+            },
+            rotateSelectedWhiteboardItems(deltaDeg) {
+                if (state.wbIsLoading || state.wbSelectedIds.length === 0) return;
+                const board = getActiveBoard();
+                pushBoardUndoState();
+                for (const id of state.wbSelectedIds) {
+                    const it = board.items.find(i => i.id === id);
+                    if (it) {
+                        let cur = Number(it.rotation) || 0;
+                        cur = (cur + deltaDeg) % 360;
+                        if (cur < 0) cur += 360;
+                        it.rotation = cur;
+                    }
+                }
+                renderWhiteboardCanvas();
+                syncActiveBoardToQuestionGist();
+            },
+            resetSelectedWhiteboardRotation() {
+                if (state.wbIsLoading || state.wbSelectedIds.length === 0) return;
+                const board = getActiveBoard();
+                pushBoardUndoState();
+                for (const id of state.wbSelectedIds) {
+                    const it = board.items.find(i => i.id === id);
+                    if (it) it.rotation = 0;
+                }
+                renderWhiteboardCanvas();
+                syncActiveBoardToQuestionGist();
+                toast('Rotation reset to 0°', 'success');
             },
             groupSelectedWhiteboardItems() {
                 if (state.wbIsLoading) return;
@@ -5653,13 +5887,15 @@ RULES:
                             isOriginalQ: false,
                             groupId: newGroupId,
                             x: orig.x + offset,
-                            y: orig.y + offset
+                            y: orig.y + offset,
+                            rotation: Number(orig.rotation) || 0
                         });
                     } else if (orig.type === 'STROKE') {
                         board.items.push({
                             ...orig,
                             id: newId,
                             groupId: newGroupId,
+                            rotation: Number(orig.rotation) || 0,
                             points: orig.points.map(p => ({ x: p.x + offset, y: p.y + offset }))
                         });
                     }
@@ -5762,6 +5998,7 @@ RULES:
                     origQ.y = defItem.y;
                     origQ.w = defItem.w;
                     origQ.h = defItem.h;
+                    origQ.rotation = 0;
                 }
                 board.items = origQ ? [origQ] : [];
                 state.wbSelectedIds = [];
@@ -5790,7 +6027,7 @@ RULES:
             }
         };
 
-        // Global Clipboard Paste Listener (Ctrl+V anywhere imports a screenshot/image)
+        // Clipboard Paste Listener (Ctrl+V anywhere)
         window.addEventListener('paste', (e) => {
             const items = e.clipboardData?.items || [];
             for (const item of items) {
@@ -5798,7 +6035,8 @@ RULES:
                     const blob = item.getAsFile();
                     if (blob) {
                         e.preventDefault();
-                        window.app.openImageImportModal(blob);
+                        window.app.openUploadModal();
+                        loadSingleImageForImport(blob, 'Pasted Image');
                         break;
                     }
                 }
@@ -5812,7 +6050,6 @@ RULES:
             if (e.key === 'Escape') {
                 window.app.closeCustomDropdown();
                 window.app.closeClearConfirmModal();
-                window.app.closeImageImportModal();
                 window.app.closeImagePopup();
                 window.app.closeSettingsModal();
                 if (!state.isExtracting) window.app.closeUploadModal();
@@ -5874,7 +6111,7 @@ RULES:
         let resizeTimer = null;
         window.addEventListener('resize', () => {
             window.app.closeCustomDropdown();
-            if (!document.getElementById('scratchpadModal').classList.contains('hidden')) {
+            if (!document.getElementById('scratchpadModal')?.classList.contains('hidden')) {
                 renderWhiteboardCanvas();
             }
             clearTimeout(resizeTimer);
@@ -5895,6 +6132,7 @@ RULES:
             updateCloudStatusUI('idle');
             renderAll();
             if (getGithubToken()) await pullFromCloudGist(false);
+            else checkAndOpenQuestionFromUrlHash();
         });
     </script>
 </body>
