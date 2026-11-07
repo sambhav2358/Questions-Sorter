@@ -3487,7 +3487,7 @@ RULES:
                 `;
             }
         }
-        // ===================================================================
+                // ===================================================================
         // LOCKED CONTEXT NAVIGATION & 3-CARD FULL-DIALOG SWIPE CAROUSEL
         // ===================================================================
         function capturePadNavigationContext(currentQId) {
@@ -3513,6 +3513,9 @@ RULES:
             if (!q) return '';
             const hasPrev = idx > 0;
             const hasNext = idx < total - 1;
+            const timerIconClass = state.timerPaused
+                ? 'popup-timer-icon ph-fill ph-play text-emerald-400 text-xs'
+                : 'popup-timer-icon ph-fill ph-pause text-amber-400 text-xs';
 
             return `
             <div class="popup-carousel-card" onclick="event.stopPropagation()">
@@ -3531,8 +3534,8 @@ RULES:
                     </div>
 
                     <div class="flex items-center gap-1.5 shrink-0 ml-auto flex-wrap">
-                        <button type="button" onclick="window.app.toggleQuestionTimer()" ondblclick="window.app.resetQuestionTimer()" class="h-9 px-2.5 rounded-full m3-surface-high text-[11px] font-mono font-extrabold flex items-center gap-1 shrink-0" title="Click: Start/Pause Timer • Double-Click: Reset">
-                            <i class="popup-timer-icon ${state.timerPaused ? 'ph-fill ph-play text-emerald-400' : 'ph-fill ph-pause text-amber-400'} text-xs"></i>
+                        <button type="button" onclick="window.app.toggleQuestionTimer()" ondblclick="window.app.resetQuestionTimer()" class="h-9 px-2.5 rounded-full m3-surface-high text-[11px] font-mono font-extrabold flex items-center gap-1 shrink-0" title="Click: Start / Pause Timer • Double-Click: Reset">
+                            <i class="${timerIconClass}"></i>
                             <span class="popup-timer-text">${formatTimeSeconds(q.timeSpent || 0)}</span>
                         </button>
 
@@ -3556,7 +3559,7 @@ RULES:
                                 <i class="ph-bold ph-scissors"></i>
                                 <span class="hidden sm:inline">Split</span>
                             </button>
-                            <button type="button" onclick="window.app.closeImagePopup(); window.app.openScratchpad(${q.id}, true);" class="m3-icon-group-btn gap-1 text-xs font-bold">
+                            <button type="button" onclick="window.app.closeImagePopup(true); window.app.openScratchpad(${q.id}, true);" class="m3-icon-group-btn gap-1 text-xs font-bold">
                                 <i class="ph-bold ph-pencil-line"></i>
                                 <span class="hidden sm:inline">Whiteboard</span>
                             </button>
@@ -3578,8 +3581,6 @@ RULES:
         function renderPopupCarouselSlots() {
             const q = state.questions.find(i => i.id === Number(state.activePopupId));
             if (!q) return;
-
-            syncUrlHashWithActiveQuestion(q);
 
             const activeList = getLockedPadContextList(q.id);
             const idx = activeList.findIndex(item => item.id === q.id);
@@ -3616,11 +3617,13 @@ RULES:
             if (!targetQ || !track) return;
 
             state.isPopupAnimating = true;
+            initQuestionTimerIdle();
             track.style.transition = 'transform 0.25s cubic-bezier(0.2, 0, 0, 1)';
             track.style.transform = dir > 0 ? 'translate3d(-200vw, 0, 0)' : 'translate3d(0vw, 0, 0)';
 
             setTimeout(() => {
                 state.activePopupId = targetQ.id;
+                syncUrlHashWithActiveQuestion(targetQ);
                 renderPopupCarouselSlots();
                 state.isPopupAnimating = false;
             }, 255);
@@ -3755,7 +3758,11 @@ RULES:
 
         function boardHasRoughWork(items) {
             if (!Array.isArray(items)) return false;
-            return items.some(it => it.type === 'STROKE' || (it.type === 'IMAGE' && !it.isOriginalQ) || (it.type === 'IMAGE' && it.isOriginalQ && (it.rotation || 0) !== 0));
+            return items.some(it =>
+                it.type === 'STROKE' ||
+                (it.type === 'IMAGE' && !it.isOriginalQ) ||
+                (it.type === 'IMAGE' && it.isOriginalQ && Math.abs(Number(it.rotation) || 0) > 0.1)
+            );
         }
 
         let wbSaveTimer = null;
@@ -3783,7 +3790,7 @@ RULES:
                         y: Math.round(it.y * 10) / 10,
                         w: Math.round(it.w * 10) / 10,
                         h: Math.round(it.h * 10) / 10,
-                        rotation: Number(it.rotation) || 0,
+                        rotation: Math.round((Number(it.rotation) || 0) * 10) / 10,
                         src: it.isOriginalQ ? null : it.src
                     };
                 }
@@ -3793,7 +3800,7 @@ RULES:
                     groupId: it.groupId || null,
                     color: it.color,
                     width: it.width,
-                    rotation: Number(it.rotation) || 0,
+                    rotation: Math.round((Number(it.rotation) || 0) * 10) / 10,
                     points: (it.points || []).map(p => ({
                         x: Math.round(p.x * 10) / 10,
                         y: Math.round(p.y * 10) / 10
@@ -3802,7 +3809,7 @@ RULES:
             });
 
             q.whiteboardData = {
-                v: 2,
+                v: 1,
                 scale: state.wbScale,
                 panX: Math.round(state.wbPanX),
                 panY: Math.round(state.wbPanY),
@@ -3927,9 +3934,10 @@ RULES:
 
         function cloneBoardItems(items) {
             return items.map(it => {
-                if (it.type === 'IMAGE') return { ...it };
+                if (it.type === 'IMAGE') return { ...it, rotation: Number(it.rotation) || 0 };
                 return {
                     ...it,
+                    rotation: Number(it.rotation) || 0,
                     points: (it.points || []).map(p => ({ x: p.x, y: p.y }))
                 };
             });
@@ -3942,10 +3950,53 @@ RULES:
             board.redoStack = [];
         }
 
+        function rotatePointAround(px, py, cx, cy, angleDeg) {
+            const rad = (Number(angleDeg) * Math.PI) / 180;
+            const cosA = Math.cos(rad), sinA = Math.sin(rad);
+            const dx = px - cx, dy = py - cy;
+            return {
+                x: cx + dx * cosA - dy * sinA,
+                y: cy + dx * sinA + dy * cosA
+            };
+        }
+
+        function applyRotationDeltaToItems(itemsToRotate, pivotX, pivotY, deltaDeg) {
+            if (!itemsToRotate || itemsToRotate.length === 0 || Math.abs(deltaDeg) < 0.001) return;
+            for (const it of itemsToRotate) {
+                if (it.type === 'IMAGE') {
+                    const icx = it.x + it.w / 2;
+                    const icy = it.y + it.h / 2;
+                    const newCenter = rotatePointAround(icx, icy, pivotX, pivotY, deltaDeg);
+                    it.x = newCenter.x - it.w / 2;
+                    it.y = newCenter.y - it.h / 2;
+                    it.rotation = ((Number(it.rotation) || 0) + deltaDeg) % 360;
+                } else if (it.type === 'STROKE' && Array.isArray(it.points)) {
+                    it.points = it.points.map(p => rotatePointAround(p.x, p.y, pivotX, pivotY, deltaDeg));
+                    it.rotation = ((Number(it.rotation) || 0) + deltaDeg) % 360;
+                }
+            }
+        }
+
         function getItemBounds(item) {
             if (!item) return null;
             if (item.type === 'IMAGE') {
-                return { minX: item.x, minY: item.y, maxX: item.x + item.w, maxY: item.y + item.h };
+                const rot = Number(item.rotation) || 0;
+                if (Math.abs(rot) < 0.1) {
+                    return { minX: item.x, minY: item.y, maxX: item.x + item.w, maxY: item.y + item.h };
+                }
+                const cx = item.x + item.w / 2, cy = item.y + item.h / 2;
+                const corners = [
+                    rotatePointAround(item.x, item.y, cx, cy, rot),
+                    rotatePointAround(item.x + item.w, item.y, cx, cy, rot),
+                    rotatePointAround(item.x + item.w, item.y + item.h, cx, cy, rot),
+                    rotatePointAround(item.x, item.y + item.h, cx, cy, rot)
+                ];
+                return {
+                    minX: Math.min(...corners.map(c => c.x)),
+                    minY: Math.min(...corners.map(c => c.y)),
+                    maxX: Math.max(...corners.map(c => c.x)),
+                    maxY: Math.max(...corners.map(c => c.y))
+                };
             }
             let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
             for (const p of (item.points || [])) {
@@ -4022,8 +4073,6 @@ RULES:
             const q = state.questions.find(i => i.id === Number(state.activePadId));
             if (!q) return;
 
-            syncUrlHashWithActiveQuestion(q);
-
             const activeList = getLockedPadContextList(q.id);
             const idx = activeList.findIndex(item => item.id === q.id);
 
@@ -4090,9 +4139,6 @@ RULES:
             if (solveBtn) solveBtn.classList.toggle('hidden', Boolean(q.hint && q.answerKey));
         }
 
-        // ===================================================================
-        // GEOMETRIC INK-TO-SHAPE RECOGNITION ENGINE
-        // ===================================================================
         function rdpSimplify(points, epsilon) {
             if (points.length < 3) return points;
             let dmax = 0, index = 0;
@@ -4301,37 +4347,27 @@ RULES:
             return null;
         }
 
-        // Draw whiteboard item with rotation support
         function drawBoardItemsToContext(ctx, items) {
             ctx.lineCap = 'round';
             ctx.lineJoin = 'round';
             for (const item of items) {
-                ctx.save();
-                const rot = Number(item.rotation) || 0;
                 if (item.type === 'IMAGE' && item.imgEl) {
+                    ctx.save();
                     const cx = item.x + item.w / 2;
                     const cy = item.y + item.h / 2;
+                    const rotRad = ((Number(item.rotation) || 0) * Math.PI) / 180;
                     ctx.translate(cx, cy);
-                    if (rot !== 0) ctx.rotate((rot * Math.PI) / 180);
-                    ctx.translate(-cx, -cy);
-
+                    if (rotRad !== 0) ctx.rotate(rotRad);
                     ctx.shadowColor = 'rgba(15, 23, 42, 0.1)';
                     ctx.shadowBlur = 14 / state.wbScale;
                     ctx.strokeStyle = 'rgba(148, 163, 184, 0.45)';
                     ctx.lineWidth = 1.2 / state.wbScale;
                     ctx.fillStyle = '#ffffff';
-                    ctx.fillRect(item.x, item.y, item.w, item.h);
-                    ctx.strokeRect(item.x, item.y, item.w, item.h);
-                    ctx.drawImage(item.imgEl, item.x, item.y, item.w, item.h);
+                    ctx.fillRect(-item.w / 2, -item.h / 2, item.w, item.h);
+                    ctx.strokeRect(-item.w / 2, -item.h / 2, item.w, item.h);
+                    ctx.drawImage(item.imgEl, -item.w / 2, -item.h / 2, item.w, item.h);
+                    ctx.restore();
                 } else if (item.type === 'STROKE' && item.points && item.points.length > 0) {
-                    let sumX = 0, sumY = 0;
-                    for (const p of item.points) { sumX += p.x; sumY += p.y; }
-                    const cx = sumX / item.points.length;
-                    const cy = sumY / item.points.length;
-                    ctx.translate(cx, cy);
-                    if (rot !== 0) ctx.rotate((rot * Math.PI) / 180);
-                    ctx.translate(-cx, -cy);
-
                     ctx.beginPath();
                     ctx.strokeStyle = item.color === '#f8fafc' ? '#0f172a' : item.color;
                     ctx.lineWidth = item.width;
@@ -4341,7 +4377,6 @@ RULES:
                     }
                     ctx.stroke();
                 }
-                ctx.restore();
             }
         }
 
@@ -4440,6 +4475,9 @@ RULES:
                 const bw = selBounds.maxX - selBounds.minX;
                 const bh = selBounds.maxY - selBounds.minY;
                 const handleSize = 9 / state.wbScale;
+                const rotStalkLen = 26 / state.wbScale;
+                const topMidX = (selBounds.minX + selBounds.maxX) / 2;
+                const rotHandleY = selBounds.minY - rotStalkLen;
 
                 ctx.save();
                 ctx.strokeStyle = '#2563eb';
@@ -4448,25 +4486,21 @@ RULES:
                 ctx.strokeRect(selBounds.minX, selBounds.minY, bw, bh);
                 ctx.setLineDash([]);
 
-                // Draw top rotation stalk handle
-                const topMidX = (selBounds.minX + selBounds.maxX) / 2;
-                const topMidY = selBounds.minY;
-                const stalkH = 24 / state.wbScale;
+                // Top Rotation Stalk & Handle
                 ctx.beginPath();
-                ctx.strokeStyle = '#2563eb';
-                ctx.lineWidth = 1.5 / state.wbScale;
-                ctx.moveTo(topMidX, topMidY);
-                ctx.lineTo(topMidX, topMidY - stalkH);
+                ctx.moveTo(topMidX, selBounds.minY);
+                ctx.lineTo(topMidX, rotHandleY);
                 ctx.stroke();
 
-                ctx.beginPath();
-                ctx.fillStyle = '#ffffff';
+                ctx.fillStyle = '#dbeafe';
                 ctx.strokeStyle = '#2563eb';
                 ctx.lineWidth = 2 / state.wbScale;
-                ctx.arc(topMidX, topMidY - stalkH, handleSize * 0.7, 0, Math.PI * 2);
+                ctx.beginPath();
+                ctx.arc(topMidX, rotHandleY, handleSize * 0.78, 0, Math.PI * 2);
                 ctx.fill();
                 ctx.stroke();
 
+                // 4 Corner Resize Handles
                 const corners = [
                     { x: selBounds.minX, y: selBounds.minY },
                     { x: selBounds.maxX, y: selBounds.minY },
@@ -4474,8 +4508,6 @@ RULES:
                     { x: selBounds.minX, y: selBounds.maxY }
                 ];
                 ctx.fillStyle = '#ffffff';
-                ctx.strokeStyle = '#2563eb';
-                ctx.lineWidth = 2 / state.wbScale;
                 for (const c of corners) {
                     ctx.beginPath();
                     ctx.arc(c.x, c.y, handleSize * 0.65, 0, Math.PI * 2);
@@ -4533,18 +4565,13 @@ RULES:
                 return Math.hypot(p.x - (v.x + t * (wPt.x - v.x)), p.y - (v.y + t * (wPt.y - v.y)));
             };
 
-            const hitTestRotationHandle = (wx, wy, bounds) => {
-                if (!bounds) return false;
-                const topMidX = (bounds.minX + bounds.maxX) / 2;
-                const stalkH = 24 / state.wbScale;
-                const rotHandleY = bounds.minY - stalkH;
-                const tol = 16 / state.wbScale;
-                return Math.hypot(wx - topMidX, wy - rotHandleY) <= tol;
-            };
-
-            const hitTestCornerHandle = (wx, wy, bounds) => {
+            const hitTestCornerOrRotateHandle = (wx, wy, bounds) => {
                 if (!bounds) return null;
-                const tol = 14 / state.wbScale;
+                const tol = 15 / state.wbScale;
+                const topMidX = (bounds.minX + bounds.maxX) / 2;
+                const rotHandleY = bounds.minY - (26 / state.wbScale);
+                if (Math.hypot(wx - topMidX, wy - rotHandleY) <= tol * 1.15) return 'ROTATE';
+
                 const handles = {
                     NW: { x: bounds.minX, y: bounds.minY },
                     NE: { x: bounds.maxX, y: bounds.minY },
@@ -4577,7 +4604,9 @@ RULES:
                             return it;
                         }
                     } else if (it.type === 'IMAGE') {
-                        if (wx >= it.x && wx <= it.x + it.w && wy >= it.y && wy <= it.y + it.h) {
+                        const icx = it.x + it.w / 2, icy = it.y + it.h / 2;
+                        const localPt = rotatePointAround(wx, wy, icx, icy, -(Number(it.rotation) || 0));
+                        if (localPt.x >= it.x && localPt.x <= it.x + it.w && localPt.y >= it.y && localPt.y <= it.y + it.h) {
                             return it;
                         }
                     }
@@ -4646,20 +4675,23 @@ RULES:
                 if (state.wbTool === 'SELECT') {
                     const board = getActiveBoard();
                     const currBounds = getCombinedSelectedBounds();
+                    const handle = hitTestCornerOrRotateHandle(wPt.x, wPt.y, currBounds);
 
-                    if (hitTestRotationHandle(wPt.x, wPt.y, currBounds)) {
+                    if (handle === 'ROTATE' && state.wbSelectedIds.length > 0) {
                         pushBoardUndoState();
-                        const cx = (currBounds.minX + currBounds.maxX) / 2;
-                        const cy = (currBounds.minY + currBounds.maxY) / 2;
+                        const pivotX = (currBounds.minX + currBounds.maxX) / 2;
+                        const pivotY = (currBounds.minY + currBounds.maxY) / 2;
+                        const startAngleDeg = Math.atan2(wPt.y - pivotY, wPt.x - pivotX) * (180 / Math.PI);
                         dragAction = {
                             mode: 'ROTATE',
-                            center: { x: cx, y: cy },
-                            origRotations: board.items.filter(it => state.wbSelectedIds.includes(it.id)).map(it => ({ id: it.id, rot: Number(it.rotation) || 0 }))
+                            pivotX,
+                            pivotY,
+                            startAngleDeg,
+                            origItems: cloneBoardItems(board.items.filter(it => state.wbSelectedIds.includes(it.id)))
                         };
                         return;
                     }
 
-                    const handle = hitTestCornerHandle(wPt.x, wPt.y, currBounds);
                     if (handle && state.wbSelectedIds.length > 0) {
                         pushBoardUndoState();
                         dragAction = {
@@ -4793,17 +4825,24 @@ RULES:
                     const board = getActiveBoard();
 
                     if (dragAction.mode === 'ROTATE') {
-                        const c = dragAction.center;
-                        const angleRad = Math.atan2(wPt.y - c.y, wPt.x - c.x);
-                        let angleDeg = (angleRad * 180) / Math.PI + 90; // Align top handle to 0°
-                        if (angleDeg < 0) angleDeg += 360;
-                        if (Math.abs(angleDeg - Math.round(angleDeg / 15) * 15) < 3.5) {
-                            angleDeg = Math.round(angleDeg / 15) * 15;
-                        }
+                        const currAngleDeg = Math.atan2(wPt.y - dragAction.pivotY, wPt.x - dragAction.pivotX) * (180 / Math.PI);
+                        let deltaDeg = currAngleDeg - dragAction.startAngleDeg;
+                        if (e.shiftKey) deltaDeg = Math.round(deltaDeg / 15) * 15;
 
-                        for (const itemRot of dragAction.origRotations) {
-                            const live = board.items.find(it => it.id === itemRot.id);
-                            if (live) live.rotation = Math.round(angleDeg);
+                        for (const orig of dragAction.origItems) {
+                            const live = board.items.find(it => it.id === orig.id);
+                            if (!live) continue;
+                            if (live.type === 'IMAGE') {
+                                const icx = orig.x + orig.w / 2;
+                                const icy = orig.y + orig.h / 2;
+                                const rotC = rotatePointAround(icx, icy, dragAction.pivotX, dragAction.pivotY, deltaDeg);
+                                live.x = rotC.x - orig.w / 2;
+                                live.y = rotC.y - orig.h / 2;
+                                live.rotation = ((Number(orig.rotation) || 0) + deltaDeg) % 360;
+                            } else if (live.type === 'STROKE') {
+                                live.points = orig.points.map(p => rotatePointAround(p.x, p.y, dragAction.pivotX, dragAction.pivotY, deltaDeg));
+                                live.rotation = ((Number(orig.rotation) || 0) + deltaDeg) % 360;
+                            }
                         }
                         renderWhiteboardCanvas();
                         return;
@@ -5082,12 +5121,11 @@ RULES:
                 this.openImagePopup(pick.id);
             },
 
+            // Manual Timer Controls: Starts ONLY when user clicks
             toggleQuestionTimer() {
                 state.timerPaused = !state.timerPaused;
-                if (!state.timerPaused) {
+                if (!state.timerPaused && !state.timerInterval) {
                     ensureTimerTicking();
-                } else {
-                    stopQuestionTimer();
                 }
                 updateTimerUI();
             },
@@ -5096,8 +5134,9 @@ RULES:
                 const q = state.questions.find(i => i.id === Number(activeId));
                 if (!q) return;
                 q.timeSpent = 0;
-                stopQuestionTimer();
                 state.timerPaused = true;
+                clearInterval(state.timerInterval);
+                state.timerInterval = null;
                 updateTimerUI();
                 scheduleCloudAutoSync(true);
             },
@@ -5107,9 +5146,9 @@ RULES:
                 const fab = document.getElementById('extendedAddPdfFab');
                 if (!fab || !el) return;
                 const st = el.scrollTop;
-                if (st > state.lastScrollTop + 14 && st > 60) {
+                if (st > state.lastScrollTop + 10 && st > 45) {
                     fab.classList.add('fab-hidden');
-                } else if (st < state.lastScrollTop - 8 || st < 40) {
+                } else if (st < state.lastScrollTop - 6 || st < 35) {
                     fab.classList.remove('fab-hidden');
                 }
                 state.lastScrollTop = Math.max(0, st);
@@ -5184,8 +5223,8 @@ RULES:
                 icon.className = isPwd ? 'ph-bold ph-eye-slash text-base' : 'ph-bold ph-eye text-base';
             },
 
-            // Unified Import Modal Actions
-            openUploadModal(initialFileOrBlob = null) {
+            // Unified PDF & Image Import Modal
+            openUploadModal(initialImageBlob = null) {
                 closeCustomDropdown();
                 if (state.isExtracting && state.isUploadMinimized) {
                     this.restoreUploadModal();
@@ -5194,23 +5233,31 @@ RULES:
                 setUploadButtonsLock(false);
                 document.getElementById('uploadSetupView').classList.remove('hidden');
                 document.getElementById('uploadProgressView').classList.add('hidden');
-                document.getElementById('pdfSetupSubView').classList.add('hidden');
-                document.getElementById('pdfSetupSubView').classList.remove('grid');
-                document.getElementById('imageSetupSubView').classList.add('hidden');
+
+                if (initialImageBlob) {
+                    document.getElementById('uploadModal').classList.remove('hidden');
+                    loadSingleImageForImport(initialImageBlob, initialImageBlob.name || 'Pasted Image');
+                    return;
+                }
+
+                state.importMode = null;
+                state.pdfDoc = null;
+                state.importRawImg = null;
                 document.getElementById('selectedFileLabel').textContent = 'Select PDF or Image File (or press Ctrl+V)';
                 document.getElementById('selectedFileTypeBadge').textContent = 'Automatically detects PDF documents and photos/screenshots';
                 document.getElementById('unifiedFileIcon').className = 'ph-duotone ph-file-plus text-2xl';
+                document.getElementById('pdfSetupSubView').classList.add('hidden');
+                document.getElementById('pdfSetupSubView').classList.remove('grid');
+                document.getElementById('imageSetupSubView').classList.add('hidden');
                 document.getElementById('startExtractBtn').disabled = true;
                 document.getElementById('startExtractBtnLbl').textContent = 'Import';
                 document.getElementById('uploadModal').classList.remove('hidden');
-
-                if (initialFileOrBlob) {
-                    if (initialFileOrBlob.type === 'application/pdf') {
-                        // Handle initial PDF drop
-                    } else {
-                        loadSingleImageForImport(initialFileOrBlob, initialFileOrBlob.name || 'Pasted Image');
-                    }
-                }
+            },
+            openImageImportModal(blob = null) {
+                this.openUploadModal(blob);
+            },
+            closeImageImportModal() {
+                this.closeUploadModal();
             },
             minimizeUploadModal() {
                 if (!state.isExtracting) return;
@@ -5239,9 +5286,20 @@ RULES:
             },
             closeUploadModal() {
                 closeCustomDropdown();
-                if (!state.isExtracting) document.getElementById('uploadModal').classList.add('hidden');
+                if (!state.isExtracting && !state.isImportingImage) {
+                    document.getElementById('uploadModal').classList.add('hidden');
+                    state.importRawImg = null;
+                }
             },
             onUnifiedFileSelected,
+            startUnifiedImportAction() {
+                if (state.importMode === 'PDF') {
+                    startPdfExtraction();
+                } else if (state.importMode === 'IMAGE') {
+                    this.saveImportedImageQuestion();
+                }
+            },
+            cancelPdfExtraction,
             autoDetectImageAngle() {
                 if (!state.importRawImg) return;
                 const angle = estimateImageSkewAngle(state.importRawImg);
@@ -5256,13 +5314,6 @@ RULES:
                 state.importDeskewAngle = angle;
                 document.getElementById('imageDeskewVal').textContent = `${angle.toFixed(1)}°`;
                 renderDeskewedAndCleanedImage(state.importRawImg, angle, document.getElementById('imageCleanContrastChk').checked);
-            },
-            async startUnifiedImportAction() {
-                if (state.importMode === 'PDF') {
-                    await startPdfExtraction();
-                } else if (state.importMode === 'IMAGE') {
-                    await this.saveImportedImageQuestion();
-                }
             },
             async saveImportedImageQuestion() {
                 if (!state.importRawImg || state.isImportingImage) return;
@@ -5282,7 +5333,7 @@ RULES:
                     const dataUrl = trimmed.toDataURL('image/jpeg', 0.88);
                     const base64Jpeg = dataUrl.split(',')[1];
 
-                    const paperName = document.getElementById('imgImportPaperInput').value.trim() || 'Imported Photos';
+                    const paperName = document.getElementById('imgImportPaperInput').value.trim() || 'Imported Images';
                     let qNum = document.getElementById('imgImportQNumInput').value.trim();
                     let subj = state.subject !== 'ALL' ? state.subject : 'Physics';
                     let chap = state.chapter !== 'ALL' ? state.chapter : (JEE_CHAPTERS[subj]?.[0] || 'General');
@@ -5302,7 +5353,7 @@ RULES:
                     const ocrTxt = await recognizeImageTextWithTesseract(trimmed);
                     const finalQNum = qNum || `${state.questions.length + 1}`;
 
-                    const newQ = {
+                    state.questions.push({
                         id: generateUniqueId(),
                         uid: generateQuestionUid(),
                         questionNumber: finalQNum,
@@ -5325,9 +5376,9 @@ RULES:
                         isStitched: false,
                         continuesToNextPage: false,
                         createdAt: Date.now()
-                    };
+                    });
 
-                    state.questions.push(newQ);
+                    state.isImportingImage = false;
                     this.closeUploadModal();
                     scheduleCloudAutoSync(false);
                     toast(`Added Q.${finalQNum} (${subj} • ${chap})`, 'success');
@@ -5335,12 +5386,10 @@ RULES:
                     toast('Failed to import image: ' + err.message, 'warn');
                 } finally {
                     state.isImportingImage = false;
-                    state.importRawImg = null;
                     if (btn) btn.disabled = false;
-                    if (lbl) lbl.textContent = 'Import';
+                    if (lbl) lbl.textContent = 'Add Image Question';
                 }
             },
-            cancelPdfExtraction,
 
             getActivePopupId: () => state.activePopupId,
             openImagePopup(id, keepContext = false) {
@@ -5352,9 +5401,10 @@ RULES:
                 }
                 state.activePopupId = q.id;
                 state.isPopupAnimating = false;
+                initQuestionTimerIdle();
+                syncUrlHashWithActiveQuestion(q);
                 renderPopupCarouselSlots();
                 document.getElementById('imagePopupModal').classList.remove('hidden');
-                stopQuestionTimer(); // Timer starts only when clicked by user
             },
             navigatePopupQuestion(dir) {
                 closeCustomDropdown();
@@ -5367,13 +5417,13 @@ RULES:
                 this.toggleQBool(q.id, field);
                 renderPopupCarouselSlots();
             },
-            closeImagePopup() {
+            closeImagePopup(keepHash = false) {
                 closeCustomDropdown();
                 stopQuestionTimer();
                 state.isPopupAnimating = false;
                 document.getElementById('imagePopupModal').classList.add('hidden');
                 state.activePopupId = null;
-                clearQuestionUrlHash();
+                if (!keepHash) clearQuestionUrlHash();
                 renderAll();
                 scheduleCloudAutoSync(true);
             },
@@ -5542,7 +5592,6 @@ RULES:
                 state.padContextIds = [];
                 this.closeClearConfirmModal();
                 this.toggleDrawer(false);
-                clearQuestionUrlHash();
                 scheduleCloudAutoSync(false, true);
                 toast('Deleted all questions.', 'warn');
             },
@@ -5672,7 +5721,7 @@ RULES:
                 this.closeSplitModal();
             },
 
-            // Fullscreen Whiteboard with Rotation + Reset Rotation
+            // Fullscreen Whiteboard
             getActivePadId: () => state.activePadId,
             openScratchpad(id, keepContext = false) {
                 closeCustomDropdown();
@@ -5692,9 +5741,10 @@ RULES:
                 state.wbPanX = 0;
                 state.wbPanY = 0;
 
+                initQuestionTimerIdle();
+                syncUrlHashWithActiveQuestion(q);
                 refreshScratchpadTopBarAndHints();
                 document.getElementById('scratchpadModal').classList.remove('hidden');
-                initQuestionTimerIdle(); // Timer starts paused
                 loadQuestionBoardInBackground(q);
             },
             closeScratchpad() {
@@ -5706,8 +5756,9 @@ RULES:
                 state.wbLoadToken++;
                 setWhiteboardLoadingLock(false);
                 state.wbSelectedIds = [];
-                document.getElementById('scratchpadModal').classList.add('hidden');
+                state.activePadId = null;
                 clearQuestionUrlHash();
+                document.getElementById('scratchpadModal').classList.add('hidden');
                 renderAll();
             },
             navigatePadQuestion(dir) {
@@ -5808,31 +5859,49 @@ RULES:
             },
             rotateSelectedWhiteboardItems(deltaDeg) {
                 if (state.wbIsLoading || state.wbSelectedIds.length === 0) return;
-                const board = getActiveBoard();
+                const bounds = getCombinedSelectedBounds();
+                if (!bounds) return;
                 pushBoardUndoState();
-                for (const id of state.wbSelectedIds) {
-                    const it = board.items.find(i => i.id === id);
-                    if (it) {
-                        let cur = Number(it.rotation) || 0;
-                        cur = (cur + deltaDeg) % 360;
-                        if (cur < 0) cur += 360;
-                        it.rotation = cur;
-                    }
-                }
+                const board = getActiveBoard();
+                const selectedItems = board.items.filter(it => state.wbSelectedIds.includes(it.id));
+                const pivotX = (bounds.minX + bounds.maxX) / 2;
+                const pivotY = (bounds.minY + bounds.maxY) / 2;
+                applyRotationDeltaToItems(selectedItems, pivotX, pivotY, Number(deltaDeg) || 0);
                 renderWhiteboardCanvas();
                 syncActiveBoardToQuestionGist();
             },
             resetSelectedWhiteboardRotation() {
                 if (state.wbIsLoading || state.wbSelectedIds.length === 0) return;
                 const board = getActiveBoard();
+                const selectedItems = board.items.filter(it => state.wbSelectedIds.includes(it.id));
+                if (!selectedItems.some(it => Math.abs(Number(it.rotation) || 0) > 0.05)) return;
+
                 pushBoardUndoState();
-                for (const id of state.wbSelectedIds) {
-                    const it = board.items.find(i => i.id === id);
-                    if (it) it.rotation = 0;
+                const bounds = getCombinedSelectedBounds();
+                const pivotX = bounds ? (bounds.minX + bounds.maxX) / 2 : 0;
+                const pivotY = bounds ? (bounds.minY + bounds.maxY) / 2 : 0;
+
+                for (const it of selectedItems) {
+                    const currRot = Number(it.rotation) || 0;
+                    if (Math.abs(currRot) <= 0.05) continue;
+                    if (it.type === 'IMAGE') {
+                        if (selectedItems.length > 1 && bounds) {
+                            const icx = it.x + it.w / 2, icy = it.y + it.h / 2;
+                            const unrotC = rotatePointAround(icx, icy, pivotX, pivotY, -currRot);
+                            it.x = unrotC.x - it.w / 2;
+                            it.y = unrotC.y - it.h / 2;
+                        }
+                        it.rotation = 0;
+                    } else if (it.type === 'STROKE' && Array.isArray(it.points)) {
+                        const b = getItemBounds(it);
+                        const scx = selectedItems.length > 1 && bounds ? pivotX : ((b.minX + b.maxX) / 2);
+                        const scy = selectedItems.length > 1 && bounds ? pivotY : ((b.minY + b.maxY) / 2);
+                        it.points = it.points.map(p => rotatePointAround(p.x, p.y, scx, scy, -currRot));
+                        it.rotation = 0;
+                    }
                 }
                 renderWhiteboardCanvas();
                 syncActiveBoardToQuestionGist();
-                toast('Rotation reset to 0°', 'success');
             },
             groupSelectedWhiteboardItems() {
                 if (state.wbIsLoading) return;
@@ -5886,9 +5955,9 @@ RULES:
                             id: newId,
                             isOriginalQ: false,
                             groupId: newGroupId,
+                            rotation: Number(orig.rotation) || 0,
                             x: orig.x + offset,
-                            y: orig.y + offset,
-                            rotation: Number(orig.rotation) || 0
+                            y: orig.y + offset
                         });
                     } else if (orig.type === 'STROKE') {
                         board.items.push({
@@ -6027,7 +6096,7 @@ RULES:
             }
         };
 
-        // Clipboard Paste Listener (Ctrl+V anywhere)
+        // Global Clipboard Paste Listener (Ctrl+V opens unified import dialog in Image mode)
         window.addEventListener('paste', (e) => {
             const items = e.clipboardData?.items || [];
             for (const item of items) {
@@ -6035,12 +6104,15 @@ RULES:
                     const blob = item.getAsFile();
                     if (blob) {
                         e.preventDefault();
-                        window.app.openUploadModal();
-                        loadSingleImageForImport(blob, 'Pasted Image');
+                        window.app.openUploadModal(blob);
                         break;
                     }
                 }
             }
+        });
+
+        window.addEventListener('hashchange', () => {
+            checkAndOpenQuestionFromUrlHash();
         });
 
         window.addEventListener('keydown', (e) => {
@@ -6111,7 +6183,7 @@ RULES:
         let resizeTimer = null;
         window.addEventListener('resize', () => {
             window.app.closeCustomDropdown();
-            if (!document.getElementById('scratchpadModal')?.classList.contains('hidden')) {
+            if (!document.getElementById('scratchpadModal').classList.contains('hidden')) {
                 renderWhiteboardCanvas();
             }
             clearTimeout(resizeTimer);
@@ -6132,7 +6204,7 @@ RULES:
             updateCloudStatusUI('idle');
             renderAll();
             if (getGithubToken()) await pullFromCloudGist(false);
-            else checkAndOpenQuestionFromUrlHash();
+            checkAndOpenQuestionFromUrlHash();
         });
     </script>
 </body>
