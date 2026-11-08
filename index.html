@@ -477,7 +477,7 @@
         <!-- 4. FLEXIBLE SEARCH BOX -->
         <div class="relative flex items-center flex-1 min-w-[110px] max-w-[240px] ml-auto">
             <i class="ph-bold ph-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 m3-text-muted text-xs pointer-events-none"></i>
-            <input id="searchBox" oninput="window.app.setSearch(this.value)" type="text" placeholder="Search..." class="h-9 w-full m3-input pl-8 pr-6 text-[11px] placeholder-slate-400">
+            <input id="searchBox" oninput="window.app.setSearch(this.value)" type="text" placeholder="Search for questions..." class="h-9 w-full m3-input pl-8 pr-6 text-[11px] placeholder-slate-400">
             <button id="clearSearchBtn" onclick="window.app.clearSearch()" class="hidden absolute right-2 top-1/2 -translate-y-1/2 m3-text-muted hover:opacity-100 p-0.5" title="Clear search">
                 <i class="ph-bold ph-x text-xs"></i>
             </button>
@@ -611,7 +611,7 @@
     <!-- =================================================================== -->
     <!-- SCROLL-REACTIVE UNIFIED FLOATING ACTION BUTTON (+ Add Questions)    -->
     <!-- =================================================================== -->
-    <button id="extendedAddPdfFab" onclick="window.app.openUploadModal()" class="fixed bottom-6 right-6 z-30 h-13 px-5 m3-extended-fab flex items-center gap-2 font-extrabold text-xs sm:text-sm">
+    <button id="extendedAddPdfFab" onclick="window.app.openUploadModal()" class="fixed bottom-6 right-6 z-30 h-16 px-5 m3-extended-fab flex items-center gap-2 font-extrabold text-xs sm:text-sm">
         <i class="ph-bold ph-plus text-base"></i>
         <span>Add Questions</span>
     </button>
@@ -1198,7 +1198,7 @@
                         <i class="ph-bold ph-download-simple text-xs"></i>
                     </button>
                     <button type="button" onclick="window.app.clearInk()" class="wb-mod-btn m3-icon-group-btn hover:!bg-rose-600 hover:!text-white" title="Reset Board">
-                        <i class="ph-bold ph-trash text-xs"></i>
+                        <i class="ph-bold ph-arrow-counter-clockwise text-xs"></i>
                     </button>
                     <button type="button" onclick="window.app.toggleFullscreen()" class="m3-icon-group-btn" title="Fullscreen">
                         <i id="wbFullscreenIcon" class="ph-bold ph-corners-out text-xs"></i>
@@ -3460,7 +3460,7 @@ RULES:
                         <div id="emptyStateWaveWrap" class="${state.isSyncingCloud ? 'py-1' : 'hidden'}"></div>
                         <p class="text-xs m3-text-muted leading-relaxed">
                             ${state.isSyncingCloud
-                                ? 'Fetching question bank from GitHub Gist.'
+                                ? 'Fetching questions from Database'
                                 : state.questions.length === 0
                                 ? 'Add a PDF or question image, or pull from Gist.'
                                 : 'Clear your search query or change the active filters.'}
