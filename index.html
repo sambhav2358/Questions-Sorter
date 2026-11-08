@@ -20,15 +20,15 @@
             --md-on-secondary-container: hsl(272, 90%, 92%);
             --md-tertiary-container: hsl(330, 55%, 26%);
             --md-on-tertiary-container: hsl(330, 95%, 93%);
-            --md-surface: hsl(252, 28%, 7%);
-            --md-surface-low: hsl(252, 28%, 10%);
-            --md-surface-container: hsl(252, 28%, 13%);
-            --md-surface-high: hsl(252, 28%, 17%);
-            --md-surface-highest: hsl(252, 28%, 22%);
-            --md-on-surface: hsl(252, 25%, 96%);
-            --md-on-surface-variant: hsl(252, 18%, 74%);
-            --md-outline: hsl(252, 20%, 36%);
-            --md-outline-variant: hsl(252, 20%, 22%);
+            --md-surface: hsl(252, 24%, 7%);
+            --md-surface-low: hsl(252, 24%, 10%);
+            --md-surface-container: hsl(252, 24%, 13%);
+            --md-surface-high: hsl(252, 24%, 17%);
+            --md-surface-highest: hsl(252, 24%, 22%);
+            --md-on-surface: hsl(252, 20%, 96%);
+            --md-on-surface-variant: hsl(252, 15%, 72%);
+            --md-outline: hsl(252, 18%, 36%);
+            --md-outline-variant: hsl(252, 18%, 20%);
             --m3-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
             --m3-smooth: cubic-bezier(0.2, 0, 0, 1);
         }
@@ -39,7 +39,7 @@
             background-color: var(--md-surface);
             color: var(--md-on-surface);
             overscroll-behavior: none;
-            transition: background-color 0.3s var(--m3-smooth), color 0.3s var(--m3-smooth);
+            transition: background-color 0.25s var(--m3-smooth), color 0.25s var(--m3-smooth);
         }
         .font-mono { font-family: 'JetBrains Mono', monospace; }
 
@@ -64,21 +64,22 @@
             align-items: center;
             height: 36px;
             background-color: var(--md-surface-low);
+            border: 1px solid var(--md-outline-variant);
             border-radius: 9999px;
             padding: 3px;
-            gap: 2.5px;
+            gap: 2px;
             touch-action: pan-y;
             user-select: none;
         }
         .m3-seg-btn {
-            height: 30px;
-            padding: 0 11px;
+            height: 28px;
+            padding: 0 9px;
             font-size: 11px;
             font-weight: 700;
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            gap: 4.5px;
+            gap: 4px;
             color: var(--md-on-surface-variant);
             background-color: var(--md-surface-high);
             border-radius: 4px;
@@ -87,8 +88,8 @@
             cursor: pointer;
             will-change: transform, background-color;
         }
-        .m3-seg-btn:first-child { border-radius: 9999px 13px 13px 9999px; padding-left: 13px; }
-        .m3-seg-btn:last-child { border-radius: 13px 9999px 9999px 13px; padding-right: 13px; }
+        .m3-seg-btn:first-child { border-radius: 9999px 12px 12px 9999px; padding-left: 11px; }
+        .m3-seg-btn:last-child { border-radius: 12px 9999px 9999px 12px; padding-right: 11px; }
         .m3-seg-btn:hover:not(.active) { background-color: var(--md-surface-highest); color: var(--md-on-surface); }
         .m3-seg-btn:active { transform: scale(0.96); }
         .m3-seg-btn.active {
@@ -102,16 +103,18 @@
             display: inline-flex;
             align-items: center;
             height: 36px;
-            gap: 2.5px;
+            gap: 2px;
             background-color: var(--md-surface-low);
+            border: 1px solid var(--md-outline-variant);
             padding: 3px;
             border-radius: 9999px;
         }
+        .m3-icon-group-wb { height: 34px; padding: 2px; gap: 2px; }
         .m3-icon-group-card { height: 30px; padding: 2px; gap: 2px; }
         .m3-icon-group-btn {
-            height: 30px;
-            min-width: 30px;
-            padding: 0 8px;
+            height: 28px;
+            min-width: 28px;
+            padding: 0 7px;
             border-radius: 4px;
             background-color: var(--md-surface-high);
             color: var(--md-on-surface-variant);
@@ -129,18 +132,18 @@
             opacity: 0.38;
             pointer-events: none;
         }
-        .m3-icon-group-btn:first-child { border-radius: 9999px 13px 13px 9999px; padding-left: 10px; }
-        .m3-icon-group-btn:last-child { border-radius: 13px 9999px 9999px 13px; padding-right: 10px; }
+        .m3-icon-group-btn:first-child { border-radius: 9999px 12px 12px 9999px; padding-left: 9px; }
+        .m3-icon-group-btn:last-child { border-radius: 12px 9999px 9999px 13px; padding-right: 9px; }
         .m3-icon-group-btn:only-child { border-radius: 9999px; }
         .m3-icon-group-card .m3-icon-group-btn {
-            height: 26px;
-            min-width: 28px;
-            padding: 0 7px;
+            height: 24px;
+            min-width: 26px;
+            padding: 0 6px;
             font-size: 12px;
             border-radius: 5px;
         }
-        .m3-icon-group-card .m3-icon-group-btn:first-child { border-radius: 9999px 12px 12px 9999px; padding-left: 9px; }
-        .m3-icon-group-card .m3-icon-group-btn:last-child { border-radius: 12px 9999px 9999px 12px; padding-right: 9px; }
+        .m3-icon-group-card .m3-icon-group-btn:first-child { border-radius: 9999px 11px 11px 9999px; padding-left: 8px; }
+        .m3-icon-group-card .m3-icon-group-btn:last-child { border-radius: 11px 9999px 9999px 11px; padding-right: 8px; }
         .m3-icon-group-btn:hover:not(:disabled) {
             background-color: var(--md-primary-container);
             color: var(--md-on-primary-container);
@@ -158,12 +161,14 @@
             align-items: center;
             gap: 2px;
             background-color: var(--md-surface-low);
+            border: 1px solid var(--md-outline-variant);
             padding: 2px;
             border-radius: 9999px;
+            min-width: 0;
         }
         .m3-card-dropdown-btn {
-            height: 26px;
-            padding: 0 9px;
+            height: 24px;
+            padding: 0 8px;
             font-size: 11px;
             font-weight: 700;
             background-color: var(--md-surface-high);
@@ -171,19 +176,20 @@
             border-radius: 5px;
             display: inline-flex;
             align-items: center;
-            gap: 4px;
+            gap: 3.5px;
             transition: background-color 0.2s var(--m3-smooth), transform 0.15s var(--m3-smooth);
             cursor: pointer;
+            min-width: 0;
         }
         .m3-card-dropdown-btn:first-child {
-            border-radius: 9999px 12px 12px 9999px;
-            padding-left: 11px;
+            border-radius: 9999px 11px 11px 9999px;
+            padding-left: 10px;
             color: var(--md-primary);
             font-weight: 800;
         }
         .m3-card-dropdown-btn:last-child {
-            border-radius: 12px 9999px 9999px 12px;
-            padding-right: 11px;
+            border-radius: 11px 9999px 9999px 11px;
+            padding-right: 10px;
         }
         .m3-card-dropdown-btn:hover { background-color: var(--md-surface-highest); }
         .m3-card-dropdown-btn:active { transform: scale(0.96); }
@@ -228,6 +234,7 @@
         .m3-dropdown-trigger {
             background-color: var(--md-surface-high);
             color: var(--md-on-surface);
+            border: 1px solid var(--md-outline-variant);
             border-radius: 9999px;
             font-weight: 700;
             display: inline-flex;
@@ -248,9 +255,10 @@
         }
         .m3-custom-menu {
             background-color: var(--md-surface-high);
+            border: 1px solid var(--md-outline-variant);
             border-radius: 24px;
             padding: 5px;
-            box-shadow: 0 22px 52px rgba(0, 0, 0, 0.72);
+            box-shadow: 0 22px 52px rgba(0, 0, 0, 0.45);
             animation: m3MenuPop 0.18s var(--m3-smooth);
             display: flex;
             flex-direction: column;
@@ -287,7 +295,7 @@
             background-color: var(--md-primary);
             color: var(--md-on-primary);
             border-radius: 22px;
-            box-shadow: 0 14px 30px -4px rgba(0, 0, 0, 0.45);
+            box-shadow: 0 12px 28px -4px rgba(0, 0, 0, 0.38);
             transition: transform 0.32s var(--m3-smooth), opacity 0.25s ease, border-radius 0.25s var(--m3-smooth);
         }
         .m3-extended-fab:hover { border-radius: 9999px; transform: translateY(-2px) scale(1.02); }
@@ -310,7 +318,7 @@
         }
         .m3-card:hover {
             border-color: var(--md-primary);
-            box-shadow: 0 12px 28px -8px rgba(0, 0, 0, 0.35);
+            box-shadow: 0 12px 28px -8px rgba(0, 0, 0, 0.22);
         }
         .m3-card-top-segment {
             background-color: var(--md-surface-high);
@@ -319,6 +327,7 @@
         .m3-card-img-segment {
             background-color: #ffffff;
             border-radius: 12px 12px 23px 23px;
+            border: 1px solid rgba(148, 163, 184, 0.14);
         }
 
         #imagePopupModal:not(.hidden),
@@ -339,8 +348,9 @@
         }
         .m3-dialog {
             background-color: var(--md-surface-container);
+            border: 1px solid var(--md-outline-variant);
             border-radius: 32px;
-            box-shadow: 0 28px 64px rgba(0, 0, 0, 0.6);
+            box-shadow: 0 28px 64px rgba(0, 0, 0, 0.48);
             animation: m3DialogIn 0.24s var(--m3-smooth);
             margin: auto;
             max-width: calc(100vw - 24px);
@@ -349,8 +359,9 @@
         /* 3-Card Carousel Track for Full-Card Swiping in Image Popup */
         .popup-carousel-card {
             background-color: var(--md-surface-container);
+            border: 1px solid var(--md-outline-variant);
             border-radius: 32px;
-            box-shadow: 0 28px 64px rgba(0, 0, 0, 0.65);
+            box-shadow: 0 28px 64px rgba(0, 0, 0, 0.55);
             width: 100%;
             max-width: 64rem;
             max-height: 90dvh;
@@ -364,14 +375,20 @@
         .m3-input {
             background-color: var(--md-surface-high);
             color: var(--md-on-surface);
+            border: 1px solid var(--md-outline-variant);
             border-radius: 9999px;
-            border: none;
             transition: background-color 0.2s ease, box-shadow 0.2s ease;
         }
         .m3-input:focus {
             outline: none;
             background-color: var(--md-surface-highest);
             box-shadow: 0 0 0 2px var(--md-primary);
+        }
+
+        /* Responsive Portrait/Vertical Screen Adjustments (Prevents Header Clipping) */
+        @media (max-width: 960px) {
+            .status-label-text { display: none; }
+            .m3-seg-btn { padding: 0 7.5px; }
         }
 
         ::-webkit-scrollbar { width: 6px; height: 6px; }
@@ -386,7 +403,7 @@
             height: 26px; width: 26px; border-radius: 9px;
             background: var(--md-primary); cursor: pointer;
             border: 3px solid var(--md-on-primary);
-            box-shadow: 0 2px 8px rgba(0,0,0,0.45);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.35);
             transition: transform 0.18s var(--m3-smooth), border-radius 0.18s var(--m3-smooth);
         }
         input[type=range].split-slider::-webkit-slider-thumb:active {
@@ -412,77 +429,82 @@
     </svg>
 
     <!-- =================================================================== -->
-    <!-- MAIN TOP BAR (No Branding, Constant 36px Controls)                  -->
+    <!-- MAIN TOP BAR (Responsive on Both Vertical & Horizontal Screens)     -->
     <!-- =================================================================== -->
-    <header class="h-13 m3-surface-low px-2.5 sm:px-3.5 py-1.5 flex items-center gap-1.5 shrink-0 z-30">
+    <header class="h-13 m3-surface-low border-b border-[var(--md-outline-variant)] px-2 sm:px-3 py-1.5 flex items-center gap-1.5 shrink-0 z-30 w-full overflow-x-auto no-scrollbar">
         <!-- 1. CHAPTERS BUTTON -->
-        <button onclick="window.app.toggleDrawer()" class="h-9 px-3 m3-btn-tonal text-[11px] flex items-center gap-1.5 shrink-0">
+        <button onclick="window.app.toggleDrawer()" class="h-9 px-2.5 m3-btn-tonal text-[11px] flex items-center gap-1.5 shrink-0">
             <i class="ph-bold ph-folders text-sm" style="color: var(--md-primary)"></i>
-            <span class="hidden md:inline">Chapters</span>
-            <span id="activeChapterIndicator" class="px-2 py-0.5 text-[10px] rounded-full font-extrabold max-w-[84px] truncate" style="background: var(--md-primary); color: var(--md-on-primary);">All</span>
+            <span class="hidden sm:inline">Chapters</span>
+            <span id="activeChapterIndicator" class="px-2 py-0.5 text-[10px] rounded-full font-extrabold max-w-[76px] truncate" style="background: var(--md-primary); color: var(--md-on-primary);">All</span>
         </button>
 
         <!-- 2. SWIPEABLE SEGMENTED STATUS PILL -->
         <div id="statusSegmentedBar" class="m3-segmented-group shrink-0" role="group" aria-label="Status Filter">
-            <button onclick="window.app.setStatus('ALL')" data-status="ALL" class="status-btn m3-seg-btn active">
+            <button onclick="window.app.setStatus('ALL')" data-status="ALL" class="status-btn m3-seg-btn active" title="All Questions">
                 <i class="ph-fill ph-squares-four text-xs"></i>
                 <span>All</span>
             </button>
-            <button onclick="window.app.setStatus('UNSOLVED')" data-status="UNSOLVED" class="status-btn m3-seg-btn">
+            <button onclick="window.app.setStatus('UNSOLVED')" data-status="UNSOLVED" class="status-btn m3-seg-btn" title="Unsolved Questions">
                 <i class="ph-bold ph-circle text-xs"></i>
-                <span>Unsolved</span>
+                <span class="status-label-text">Unsolved</span>
                 <span id="status-count-UNSOLVED" class="text-[10px] font-extrabold opacity-85">0</span>
             </button>
-            <button onclick="window.app.setStatus('SOLVED')" data-status="SOLVED" class="status-btn m3-seg-btn">
+            <button onclick="window.app.setStatus('SOLVED')" data-status="SOLVED" class="status-btn m3-seg-btn" title="Solved Questions">
                 <i class="ph-fill ph-check-circle text-xs"></i>
-                <span>Solved</span>
+                <span class="status-label-text">Solved</span>
                 <span id="status-count-SOLVED" class="text-[10px] font-extrabold opacity-85">0</span>
             </button>
-            <button onclick="window.app.setStatus('STARRED')" data-status="STARRED" class="status-btn m3-seg-btn">
+            <button onclick="window.app.setStatus('STARRED')" data-status="STARRED" class="status-btn m3-seg-btn" title="Starred Questions">
                 <i class="ph-fill ph-star text-xs"></i>
-                <span>Starred</span>
+                <span class="status-label-text">Starred</span>
                 <span id="status-count-STARRED" class="text-[10px] font-extrabold opacity-85">0</span>
             </button>
         </div>
 
-        <!-- 3. FLEX GAP & BACKGROUND STATUS PILLS -->
-        <div class="flex-1 min-w-[2px] flex items-center justify-center gap-1.5">
-            <div id="ocrStatusBadge" class="hidden h-7 items-center gap-1 px-2.5 rounded-full text-[10px] font-extrabold m3-primary-pill shrink-0">
+        <!-- 3. BACKGROUND STATUS PILLS -->
+        <div class="flex items-center gap-1 shrink-0">
+            <div id="ocrStatusBadge" class="hidden h-7 items-center gap-1 px-2 rounded-full text-[10px] font-extrabold m3-primary-pill shrink-0">
                 <i class="ph-bold ph-text-T animate-bounce text-xs"></i>
-                <span id="ocrStatusText">OCR: 0/0</span>
+                <span id="ocrStatusText">OCR</span>
             </div>
-            <div id="solverStatusBadge" onclick="window.app.openSettingsModal(false, 'SCANNER')" class="hidden h-7 items-center gap-1 px-2.5 rounded-full text-[10px] font-extrabold m3-primary-pill cursor-pointer shrink-0" title="Generating solutions in background">
+            <div id="solverStatusBadge" onclick="window.app.openSettingsModal(false, 'SCANNER')" class="hidden h-7 items-center gap-1 px-2 rounded-full text-[10px] font-extrabold m3-primary-pill cursor-pointer shrink-0" title="Generating hints in background">
                 <i class="ph-bold ph-lightbulb animate-pulse text-xs"></i>
-                <span id="solverStatusText">Hints: 0/0</span>
+                <span id="solverStatusText">Hints</span>
             </div>
         </div>
 
-        <!-- 4. COMPACT SEARCH -->
-        <div class="relative flex items-center shrink-0">
+        <!-- 4. FLEXIBLE SEARCH BOX -->
+        <div class="relative flex items-center flex-1 min-w-[110px] max-w-[240px] ml-auto">
             <i class="ph-bold ph-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 m3-text-muted text-xs pointer-events-none"></i>
-            <input id="searchBox" oninput="window.app.setSearch(this.value)" type="text" placeholder="Search questions or tags..." class="h-9 w-32 sm:w-44 lg:w-52 m3-input pl-8 pr-6 text-[11px] placeholder-slate-400">
+            <input id="searchBox" oninput="window.app.setSearch(this.value)" type="text" placeholder="Search..." class="h-9 w-full m3-input pl-8 pr-6 text-[11px] placeholder-slate-400">
             <button id="clearSearchBtn" onclick="window.app.clearSearch()" class="hidden absolute right-2 top-1/2 -translate-y-1/2 m3-text-muted hover:opacity-100 p-0.5" title="Clear search">
                 <i class="ph-bold ph-x text-xs"></i>
             </button>
         </div>
 
-        <!-- 5. PAPER FILTER DROPDOWN -->
-        <button type="button" id="paperDropdownBtn" onclick="window.app.openPaperMenu(this)" class="h-9 px-2.5 m3-dropdown-trigger text-[11px] max-w-[122px] shrink-0">
-            <span id="paperDropdownLabel" class="truncate">All Papers (0)</span>
+        <!-- 5. PAPER FILTER & SORT DROPDOWNS -->
+        <button type="button" id="paperDropdownBtn" onclick="window.app.openPaperMenu(this)" class="h-9 px-2.5 m3-dropdown-trigger text-[11px] max-w-[115px] shrink-0" title="Filter by Paper">
+            <span id="paperDropdownLabel" class="truncate">All Papers</span>
             <i class="ph-bold ph-caret-down text-[10px] m3-text-muted shrink-0"></i>
         </button>
 
-        <!-- 6. CONNECTED ACTION GROUP: RANDOM PRACTICE, FULLSCREEN, SYNC, SETTINGS -->
+        <button type="button" id="sortDropdownBtn" onclick="window.app.openSortMenu(this)" class="h-9 px-2.5 m3-dropdown-trigger text-[11px] shrink-0" title="Sort Questions">
+            <i class="ph-bold ph-sort-ascending text-xs" style="color: var(--md-primary)"></i>
+            <span id="sortDropdownLabel" class="hidden xl:inline">Q.#</span>
+        </button>
+
+        <!-- 6. CONNECTED ACTION GROUP: RANDOM, FULLSCREEN, SYNC, SETTINGS -->
         <div class="m3-icon-group shrink-0">
-            <button onclick="window.app.pickRandomQuestion()" class="m3-icon-group-btn" title="Random question from current filter">
+            <button onclick="window.app.pickRandomQuestion()" class="m3-icon-group-btn" title="Random Question">
                 <i class="ph-bold ph-shuffle text-sm"></i>
             </button>
-            <button onclick="window.app.toggleFullscreen()" class="m3-icon-group-btn" title="Toggle Fullscreen">
+            <button onclick="window.app.toggleFullscreen()" class="m3-icon-group-btn" title="Fullscreen">
                 <i id="fullscreenIcon" class="ph-bold ph-corners-out text-sm"></i>
             </button>
-            <button id="syncHeaderBtn" onclick="window.app.handleCloudBadgeClick()" class="m3-icon-group-btn gap-1.5" title="Sync with GitHub Gist">
+            <button id="syncHeaderBtn" onclick="window.app.handleCloudBadgeClick()" class="m3-icon-group-btn gap-1" title="Sync with GitHub Gist">
                 <i id="cloudStatusIcon" class="ph-bold ph-cloud-arrow-up text-sm"></i>
-                <svg id="syncMorphSvg" class="hidden w-5 h-5 shrink-0" viewBox="0 0 24 24">
+                <svg id="syncMorphSvg" class="hidden w-4 h-4 shrink-0" viewBox="0 0 24 24">
                     <path class="m3-morph-loader-path" fill="currentColor" d=""></path>
                 </svg>
                 <span id="cloudStatusText" class="text-[10px] font-extrabold hidden 2xl:inline">Sync</span>
@@ -546,15 +568,25 @@
     </div>
 
     <!-- =================================================================== -->
-    <!-- CHAPTERS NAVIGATION DRAWER                                          -->
+    <!-- CHAPTERS & TAGS NAVIGATION DRAWER                                   -->
     <!-- =================================================================== -->
     <div id="drawerBackdrop" onclick="window.app.toggleDrawer(false)" class="fixed inset-0 bg-black/55 backdrop-blur-xs z-40 hidden"></div>
-    <aside id="chaptersDrawer" class="fixed inset-y-0 left-0 w-80 m3-surface-container rounded-r-[32px] z-50 -translate-x-full transition-transform duration-300 ease-out flex flex-col shadow-2xl overflow-hidden">
+    <aside id="chaptersDrawer" class="fixed inset-y-0 left-0 w-80 m3-surface-container border-r border-[var(--md-outline-variant)] rounded-r-[32px] z-50 -translate-x-full transition-transform duration-300 ease-out flex flex-col shadow-2xl overflow-hidden">
         <div class="p-4 flex items-center justify-between">
-            <h2 class="font-extrabold text-xs uppercase tracking-wider pl-1">Subjects & Chapters</h2>
+            <h2 class="font-extrabold text-xs uppercase tracking-wider pl-1">Chapters & Tags</h2>
             <button onclick="window.app.toggleDrawer(false)" class="h-8 w-8 m3-btn-tonal flex items-center justify-center" title="Close">
                 <i class="ph-bold ph-x text-xs"></i>
             </button>
+        </div>
+
+        <!-- Quick Tag Filter Pills -->
+        <div class="px-3 pb-2 flex items-center gap-1.5 overflow-x-auto no-scrollbar">
+            <button type="button" onclick="window.app.setTagFilter('ALL')" data-tag-chip="ALL" class="drawer-tag-chip h-7 px-2.5 rounded-full text-[10px] font-extrabold shrink-0 m3-btn-filled">All Tags</button>
+            <button type="button" onclick="window.app.setTagFilter('Concept')" data-tag-chip="Concept" class="drawer-tag-chip h-7 px-2.5 rounded-full text-[10px] font-bold shrink-0 m3-surface-high">Concept</button>
+            <button type="button" onclick="window.app.setTagFilter('Formula')" data-tag-chip="Formula" class="drawer-tag-chip h-7 px-2.5 rounded-full text-[10px] font-bold shrink-0 m3-surface-high">Formula</button>
+            <button type="button" onclick="window.app.setTagFilter('Calc')" data-tag-chip="Calc" class="drawer-tag-chip h-7 px-2.5 rounded-full text-[10px] font-bold shrink-0 m3-surface-high">Calc</button>
+            <button type="button" onclick="window.app.setTagFilter('Trap')" data-tag-chip="Trap" class="drawer-tag-chip h-7 px-2.5 rounded-full text-[10px] font-bold shrink-0 m3-surface-high">Trap</button>
+            <button type="button" onclick="window.app.setTagFilter('Redo')" data-tag-chip="Redo" class="drawer-tag-chip h-7 px-2.5 rounded-full text-[10px] font-bold shrink-0 m3-surface-high">Redo</button>
         </div>
 
         <div class="px-3 pb-2">
@@ -563,9 +595,9 @@
 
         <div id="drawerChapterList" class="flex-1 overflow-y-auto p-3 space-y-3"></div>
 
-        <div class="p-3.5 m3-surface-low flex items-center justify-between text-xs">
+        <div class="p-3.5 m3-surface-low border-t border-[var(--md-outline-variant)] flex items-center justify-between text-xs">
             <span id="drawerProgressText" class="px-3 py-1 rounded-full m3-primary-pill font-extrabold text-[11px]">Solved: 0 / 0</span>
-            <button onclick="window.app.confirmClearVault()" class="px-3 py-1 rounded-full bg-rose-500/15 text-rose-400 hover:bg-rose-500/25 font-bold flex items-center gap-1 transition">
+            <button onclick="window.app.confirmClearVault()" class="px-3 py-1 rounded-full bg-rose-500/15 text-rose-500 hover:bg-rose-500/25 font-bold flex items-center gap-1 transition">
                 <i class="ph-bold ph-trash"></i> Clear All
             </button>
         </div>
@@ -574,13 +606,13 @@
     <!-- =================================================================== -->
     <!-- MAIN QUESTION FEED WORKSPACE                                        -->
     <!-- =================================================================== -->
-    <main id="mainFeedContainer" onscroll="window.app.handleFeedScroll(this)" class="flex-1 min-h-0 overflow-y-auto px-3 sm:px-5 pt-4 pb-36"></main>
+    <main id="mainFeedContainer" onscroll="window.app.handleFeedScroll(this)" class="flex-1 min-h-0 overflow-y-auto px-3 sm:px-5 pt-4 pb-36 flex flex-col"></main>
 
     <!-- =================================================================== -->
     <!-- SCROLL-REACTIVE UNIFIED FLOATING ACTION BUTTON (+ Add Questions)    -->
     <!-- =================================================================== -->
-    <button id="extendedAddPdfFab" onclick="window.app.openUploadModal()" class="fixed bottom-6 right-6 z-30 h-14 px-6 m3-extended-fab flex items-center gap-2.5 font-extrabold text-sm">
-        <i class="ph-bold ph-plus text-lg"></i>
+    <button id="extendedAddPdfFab" onclick="window.app.openUploadModal()" class="fixed bottom-6 right-6 z-30 h-13 px-5 m3-extended-fab flex items-center gap-2 font-extrabold text-xs sm:text-sm">
+        <i class="ph-bold ph-plus text-base"></i>
         <span>Add Questions</span>
     </button>
 
@@ -598,13 +630,13 @@
     </div>
 
     <!-- =================================================================== -->
-    <!-- MODAL 1: SETTINGS                                                   -->
+    <!-- MODAL 1: SETTINGS (Hardcoded Gist ID, Neutral Copy)                 -->
     <!-- =================================================================== -->
     <div id="settingsModal" onclick="if(event.target === this) window.app.closeSettingsModal()" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-3 sm:p-5">
         <div class="m3-dialog max-w-lg w-full max-h-[90vh] flex flex-col overflow-hidden">
-            <div class="px-5 py-3.5 m3-surface-low flex items-center justify-between gap-2 shrink-0">
+            <div class="px-5 py-3.5 m3-surface-low border-b border-[var(--md-outline-variant)] flex items-center justify-between gap-2 shrink-0">
                 <div class="flex items-center gap-2.5 min-w-0">
-                    <button type="button" id="settingsBackBtn" onclick="window.app.openSettingsPage('HOME')" class="hidden h-9 w-9 rounded-2xl m3-surface-high hover:brightness-110 items-center justify-center transition shrink-0" title="Back">
+                    <button type="button" id="settingsBackBtn" onclick="window.app.openSettingsPage('HOME')" class="hidden h-9 w-9 rounded-2xl m3-surface-high hover:brightness-105 items-center justify-center transition shrink-0" title="Back">
                         <i class="ph-bold ph-arrow-left text-base"></i>
                     </button>
                     <div id="settingsHeaderIcon" class="w-9 h-9 m3-cookie-12 flex items-center justify-center shrink-0" style="background: var(--md-primary-container); color: var(--md-primary);">
@@ -621,7 +653,7 @@
             <div class="p-4 overflow-y-auto flex-1 space-y-3">
                 <div id="apiKeyMissingAlert" class="hidden p-3.5 rounded-3xl m3-primary-pill text-xs leading-relaxed">
                     <strong class="font-extrabold block mb-0.5">API Key Required:</strong>
-                    Enter your Google AI Studio API Key below to enable layout detection and solution hints.
+                    Enter your Gemini API Key below to enable PDF extraction and hints.
                 </div>
 
                 <!-- PAGE 0: HUB -->
@@ -632,8 +664,8 @@
                                 <i class="ph-bold ph-key text-lg"></i>
                             </div>
                             <div class="min-w-0">
-                                <div class="font-extrabold text-sm">API Keys & Cloud</div>
-                                <div class="text-xs m3-text-muted truncate">Gemini API Key, GitHub PAT & Gist ID</div>
+                                <div class="font-extrabold text-sm">API Keys</div>
+                                <div class="text-xs m3-text-muted truncate">Gemini API Key & GitHub Token</div>
                             </div>
                         </div>
                         <i class="ph-bold ph-caret-right m3-text-muted text-base shrink-0"></i>
@@ -646,7 +678,7 @@
                             </div>
                             <div class="min-w-0">
                                 <div class="font-extrabold text-sm">Appearance</div>
-                                <div class="text-xs m3-text-muted truncate">Dark/Light mode & accent color</div>
+                                <div class="text-xs m3-text-muted truncate">Theme mode & accent color</div>
                             </div>
                         </div>
                         <i class="ph-bold ph-caret-right m3-text-muted text-base shrink-0"></i>
@@ -659,7 +691,7 @@
                             </div>
                             <div class="min-w-0">
                                 <div class="font-extrabold text-sm">Sync & Data</div>
-                                <div class="text-xs m3-text-muted truncate">Cloud sync, JSON backup, deduplication & OCR</div>
+                                <div class="text-xs m3-text-muted truncate">Gist sync, JSON export/import & OCR</div>
                             </div>
                         </div>
                         <i class="ph-bold ph-caret-right m3-text-muted text-base shrink-0"></i>
@@ -671,15 +703,15 @@
                                 <i class="ph-bold ph-lightbulb text-lg"></i>
                             </div>
                             <div class="min-w-0">
-                                <div class="font-extrabold text-sm">Answer Keys, Hints & Scanner</div>
-                                <div class="text-xs m3-text-muted truncate">Model selection, batch solver & crop margins</div>
+                                <div class="font-extrabold text-sm">Solver & Crop Margins</div>
+                                <div class="text-xs m3-text-muted truncate">Model selection, hints & padding</div>
                             </div>
                         </div>
                         <i class="ph-bold ph-caret-right m3-text-muted text-base shrink-0"></i>
                     </button>
                 </div>
 
-                <!-- PAGE 1: API KEYS -->
+                <!-- PAGE 1: API KEYS (Gist ID Hardcoded to 9259f71c65f635b809f348a7216b6e53) -->
                 <div id="settingsPage_KEYS" class="hidden space-y-3">
                     <div class="m3-group-list">
                         <div class="p-4 m3-group-item space-y-1.5">
@@ -700,11 +732,7 @@
                                     <i id="githubTokenEyeIcon" class="ph-bold ph-eye text-base"></i>
                                 </button>
                             </div>
-                        </div>
-
-                        <div class="p-4 m3-group-item space-y-1.5">
-                            <label class="block text-xs font-bold">Gist ID <span class="m3-text-muted font-normal">(Auto-filled)</span></label>
-                            <input id="githubGistIdInput" type="text" placeholder="Leave blank to auto-discover..." class="w-full h-10 m3-input m3-surface-low px-3.5 text-xs font-mono">
+                            <p class="text-[11px] m3-text-muted font-mono">Linked Gist: 9259f71c65f635b809f348a7216b6e53</p>
                         </div>
                     </div>
                 </div>
@@ -715,7 +743,7 @@
                         <div class="p-4 m3-group-item flex items-center justify-between gap-3">
                             <div>
                                 <div class="text-xs font-extrabold uppercase tracking-wider">Theme Mode</div>
-                                <div class="text-[11px] m3-text-muted">Switch between dark and light surfaces</div>
+                                <div class="text-[11px] m3-text-muted">Dark or Light appearance</div>
                             </div>
                             <div class="m3-segmented-group">
                                 <button type="button" id="themeModeDarkBtn" onclick="window.app.setThemeMode('dark')" class="m3-seg-btn active">
@@ -780,15 +808,15 @@
                             <div class="grid grid-cols-2 gap-2.5">
                                 <button type="button" onclick="window.app.pushToCloudGist(true)" class="h-10 px-4 m3-btn-filled text-xs flex items-center justify-center gap-1.5 shadow">
                                     <i class="ph-bold ph-cloud-arrow-up text-sm"></i>
-                                    <span>Push to Cloud</span>
+                                    <span>Push to Gist</span>
                                 </button>
                                 <button type="button" onclick="window.app.pullFromCloudGist(true)" class="h-10 px-4 m3-btn-tonal text-xs flex items-center justify-center gap-1.5">
                                     <i class="ph-bold ph-cloud-arrow-down text-sm"></i>
-                                    <span>Pull from Cloud</span>
+                                    <span>Pull from Gist</span>
                                 </button>
                             </div>
                             <div id="settingsCloudWavyBar" class="hidden pt-1"></div>
-                            <p id="cloudLastSyncInfo" class="text-[11px] m3-text-muted font-mono">Not synced yet.</p>
+                            <p id="cloudLastSyncInfo" class="text-[11px] m3-text-muted font-mono">Gist: 9259f71c65f635b809f348a7216b6e53</p>
                         </div>
 
                         <div class="p-4 m3-group-item space-y-3">
@@ -869,7 +897,7 @@
                 </div>
             </div>
 
-            <div class="px-5 py-3 m3-surface-low flex items-center justify-end shrink-0">
+            <div class="px-5 py-3 m3-surface-low border-t border-[var(--md-outline-variant)] flex items-center justify-end shrink-0">
                 <button type="button" onclick="window.app.saveSettings()" class="h-10 px-6 m3-btn-filled text-xs flex items-center gap-1.5 shadow">
                     <i class="ph-bold ph-check text-sm"></i>
                     <span>Save</span>
@@ -877,16 +905,15 @@
             </div>
         </div>
     </div>
-
     <!-- =================================================================== -->
     <!-- MODAL 2: UNIFIED IMPORT DIALOG (AUTO-DETECTS PDF OR IMAGE / PASTE)  -->
     <!-- =================================================================== -->
     <div id="uploadModal" onclick="if(event.target === this && !window.app.isExtracting()) window.app.closeUploadModal()" class="fixed inset-0 bg-black/75 backdrop-blur-sm z-50 hidden flex items-center justify-center p-3 sm:p-6">
         <div class="m3-dialog max-w-2xl w-full max-h-[92vh] flex flex-col overflow-hidden">
-            <div class="px-5 py-3.5 m3-surface-low flex items-center justify-between gap-2 shrink-0">
+            <div class="px-5 py-3.5 m3-surface-low border-b border-[var(--md-outline-variant)] flex items-center justify-between gap-2 shrink-0">
                 <div>
-                    <h3 id="unifiedModalTitle" class="font-extrabold text-sm sm:text-base truncate">Add Questions (PDF or Image)</h3>
-                    <p class="text-[11px] m3-text-muted">Select a PDF test paper or question image, or press Ctrl+V to paste.</p>
+                    <h3 id="unifiedModalTitle" class="font-extrabold text-sm sm:text-base truncate">Add Questions</h3>
+                    <p class="text-[11px] m3-text-muted">Select a PDF or image file, or press Ctrl+V to paste.</p>
                 </div>
                 <div class="flex items-center gap-1.5 shrink-0">
                     <button type="button" id="minimizeUploadBtn" onclick="window.app.minimizeUploadModal()" class="hidden h-9 w-9 m3-btn-tonal items-center justify-center" title="Minimize">
@@ -899,18 +926,17 @@
             </div>
 
             <div class="p-4 sm:p-5 overflow-y-auto space-y-4 flex-1">
-                <!-- Unified File Picker -->
                 <div id="uploadSetupView" class="space-y-3">
                     <label for="unifiedFileInput" class="block m3-surface-high rounded-3xl p-5 text-center cursor-pointer hover:brightness-105 transition">
                         <input type="file" id="unifiedFileInput" accept="application/pdf,image/*,.pdf" class="hidden" onchange="window.app.onUnifiedFileSelected(event)">
                         <div class="w-12 h-12 m3-cookie-12 flex items-center justify-center mx-auto mb-2" style="background: var(--md-primary-container); color: var(--md-primary);">
                             <i id="unifiedFileIcon" class="ph-duotone ph-file-plus text-2xl"></i>
                         </div>
-                        <p id="selectedFileLabel" class="text-xs sm:text-sm font-extrabold">Select PDF or Image File (or press Ctrl+V)</p>
-                        <p id="selectedFileTypeBadge" class="text-[11px] m3-text-muted mt-0.5">Automatically detects PDF documents and photos/screenshots</p>
+                        <p id="selectedFileLabel" class="text-xs sm:text-sm font-extrabold">Select PDF or Image File</p>
+                        <p id="selectedFileTypeBadge" class="text-[11px] m3-text-muted mt-0.5">Supports PDF papers and question images</p>
                     </label>
 
-                    <!-- Auto-Shown When PDF Is Selected -->
+                    <!-- PDF Options -->
                     <div id="pdfSetupSubView" class="hidden grid-cols-1 sm:grid-cols-2 gap-3 m3-surface-high p-4 rounded-3xl">
                         <div>
                             <label class="block text-[11px] font-bold m3-text-muted mb-1">Paper Name</label>
@@ -926,7 +952,7 @@
                         </div>
                     </div>
 
-                    <!-- Auto-Shown When Image Is Selected or Pasted -->
+                    <!-- Image Options -->
                     <div id="imageSetupSubView" class="hidden space-y-3">
                         <div class="flex flex-wrap items-center justify-between gap-2 m3-surface-high p-3 rounded-3xl text-xs">
                             <div class="flex items-center gap-2">
@@ -937,18 +963,18 @@
                             </div>
                             <label class="flex items-center gap-1.5 font-bold cursor-pointer">
                                 <input type="checkbox" id="imageCleanContrastChk" checked onchange="window.app.updateImageDeskewPreview()" class="rounded">
-                                <span>Clean Shadows</span>
+                                <span>Normalize Contrast</span>
                             </label>
                         </div>
 
-                        <div class="bg-white rounded-3xl p-3 flex items-center justify-center max-h-56 overflow-hidden">
+                        <div class="bg-white rounded-3xl p-3 flex items-center justify-center max-h-56 overflow-hidden border border-[var(--md-outline-variant)]">
                             <canvas id="imageImportCanvas" class="max-h-48 max-w-full object-contain"></canvas>
                         </div>
 
                         <div class="grid grid-cols-2 sm:grid-cols-3 gap-2.5 m3-surface-high p-3.5 rounded-3xl">
                             <div>
-                                <label class="block text-[10px] font-bold m3-text-muted mb-1">Paper / Source Name</label>
-                                <input id="imgImportPaperInput" type="text" placeholder="Custom Practice" class="w-full h-9 m3-input m3-surface-low px-3 text-xs">
+                                <label class="block text-[10px] font-bold m3-text-muted mb-1">Source Name</label>
+                                <input id="imgImportPaperInput" type="text" placeholder="Custom" class="w-full h-9 m3-input m3-surface-low px-3 text-xs">
                             </div>
                             <div>
                                 <label class="block text-[10px] font-bold m3-text-muted mb-1">Question #</label>
@@ -957,14 +983,14 @@
                             <div class="col-span-2 sm:col-span-1 flex items-end">
                                 <label class="flex items-center gap-2 text-xs font-bold cursor-pointer h-9 px-2">
                                     <input type="checkbox" id="imgImportAiClassifyChk" checked class="rounded">
-                                    <span>Auto-Classify & Solve</span>
+                                    <span>Auto-Classify</span>
                                 </label>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- PDF Extraction Live Progress View -->
+                <!-- PDF Extraction Progress -->
                 <div id="uploadProgressView" class="hidden space-y-3">
                     <div class="m3-surface-high rounded-3xl p-4 space-y-3">
                         <div class="flex items-center justify-between gap-2 text-xs">
@@ -972,7 +998,7 @@
                                 <svg class="w-5 h-5 shrink-0" style="color: var(--md-primary)" viewBox="0 0 24 24">
                                     <path class="m3-morph-loader-path" fill="currentColor" d=""></path>
                                 </svg>
-                                <span>Extracting Questions...</span>
+                                <span>Processing PDF...</span>
                             </span>
                             <span id="extractPageBadge" class="w-24 text-center py-0.5 rounded-full font-extrabold shrink-0" style="background: var(--md-primary-container); color: var(--md-on-primary-container);">Page 1/1</span>
                         </div>
@@ -991,9 +1017,9 @@
                 </div>
             </div>
 
-            <div class="px-5 py-3 m3-surface-low flex items-center justify-between shrink-0">
+            <div class="px-5 py-3 m3-surface-low border-t border-[var(--md-outline-variant)] flex items-center justify-between shrink-0">
                 <div>
-                    <button type="button" id="cancelExtractBtn" onclick="window.app.cancelPdfExtraction()" class="hidden h-9 px-4 rounded-full bg-rose-500/20 hover:bg-rose-600 text-rose-400 hover:text-white text-xs font-extrabold items-center gap-1.5 transition">
+                    <button type="button" id="cancelExtractBtn" onclick="window.app.cancelPdfExtraction()" class="hidden h-9 px-4 rounded-full bg-rose-500/20 hover:bg-rose-600 text-rose-500 hover:text-white text-xs font-extrabold items-center gap-1.5 transition">
                         <i class="ph-bold ph-stop-circle"></i>
                         <span>Cancel</span>
                     </button>
@@ -1012,7 +1038,7 @@
     <!-- =================================================================== -->
     <div id="splitModal" onclick="if(event.target === this) window.app.closeSplitModal()" class="fixed inset-0 bg-black/75 backdrop-blur-sm z-50 hidden flex items-center justify-center p-3 sm:p-6">
         <div class="m3-dialog max-w-4xl w-full max-h-[92vh] flex flex-col overflow-hidden">
-            <div class="px-5 py-3.5 m3-surface-low flex items-center justify-between gap-2">
+            <div class="px-5 py-3.5 m3-surface-low border-b border-[var(--md-outline-variant)] flex items-center justify-between gap-2">
                 <h3 class="font-extrabold text-sm sm:text-base">Split or Trim Image</h3>
                 <button type="button" onclick="window.app.closeSplitModal()" class="h-9 w-9 m3-btn-tonal flex items-center justify-center shrink-0" title="Close">
                     <i class="ph-bold ph-x text-sm"></i>
@@ -1038,7 +1064,7 @@
                     </div>
                 </div>
 
-                <div class="relative bg-white rounded-3xl overflow-hidden mx-auto max-w-3xl">
+                <div class="relative bg-white rounded-3xl overflow-hidden mx-auto max-w-3xl border border-[var(--md-outline-variant)]">
                     <img id="splitPreviewImg" src="" alt="Preview" class="w-full h-auto block">
                     <div id="splitDividerLine" class="absolute left-0 right-0 border-t-4 border-dashed border-amber-500 pointer-events-none flex items-center justify-between px-3" style="top: 50%;">
                         <span class="-mt-6 bg-amber-500 text-slate-950 font-extrabold text-[10px] px-2.5 py-0.5 rounded-full">▲ Part 1</span>
@@ -1049,7 +1075,7 @@
                 </div>
             </div>
 
-            <div class="px-5 py-3 m3-surface-low flex items-center justify-end">
+            <div class="px-5 py-3 m3-surface-low border-t border-[var(--md-outline-variant)] flex items-center justify-end">
                 <button type="button" onclick="window.app.confirmSplitOrTrim()" class="h-10 px-6 m3-btn-filled text-xs sm:text-sm flex items-center gap-1.5 shadow-lg">
                     <i class="ph-bold ph-check"></i>
                     <span id="splitConfirmLabel">Apply</span>
@@ -1059,130 +1085,143 @@
     </div>
 
     <!-- =================================================================== -->
-    <!-- MODAL 4: FULLSCREEN WHITEBOARD (ROTATION + MANUAL TIMER + SUBLINK)  -->
+    <!-- MODAL 4: WHITEBOARD (OPTIMISED STATUS BAR + HORIZONTAL LOCK)        -->
     <!-- =================================================================== -->
     <div id="scratchpadModal" class="fixed inset-0 m3-surface z-50 hidden flex flex-col">
-        <div class="h-13 m3-surface-low px-2.5 sm:px-3.5 py-1.5 flex items-center justify-between gap-1.5 shrink-0">
-            <!-- Left Group: Close + Prev/Next + Star/Solved/Tag + Manual Timer + Hint/Ans -->
-            <div class="flex items-center gap-1.5 min-w-0 shrink-0">
-                <button type="button" onclick="window.app.closeScratchpad()" class="h-9 px-3 m3-btn-tonal text-xs font-extrabold flex items-center gap-1 shrink-0" title="Close (Esc)">
-                    <i class="ph-bold ph-x text-sm"></i>
-                    <span class="hidden sm:inline">Close</span>
+        <!-- Portrait Orientation Lock Overlay (If rotated to vertical while open) -->
+        <div id="wbPortraitBlockOverlay" class="hidden fixed inset-0 z-[60] m3-surface flex-col items-center justify-center p-6 text-center space-y-4">
+            <div class="w-14 h-14 m3-cookie-12 flex items-center justify-center mx-auto" style="background: var(--md-primary-container); color: var(--md-primary);">
+                <i class="ph-bold ph-device-rotate text-2xl"></i>
+            </div>
+            <h3 class="text-base font-extrabold">Horizontal Orientation Required</h3>
+            <p class="text-xs m3-text-muted max-w-xs">Rotate your screen to landscape mode to use the Whiteboard, or close to return to the question list.</p>
+            <button type="button" onclick="window.app.closeScratchpad()" class="h-9 px-5 m3-btn-filled text-xs">Close Whiteboard</button>
+        </div>
+
+        <!-- Optimised Compact Single-Row Whiteboard Status Bar -->
+        <div class="h-12 m3-surface-low border-b border-[var(--md-outline-variant)] px-2 sm:px-3 py-1 flex items-center justify-between gap-1.5 shrink-0 overflow-x-auto no-scrollbar">
+            <!-- Left Cluster: Close, Prev/Next, Star/Solved/Tag, Manual Timer, Hint/Ans -->
+            <div class="flex items-center gap-1 shrink-0">
+                <button type="button" onclick="window.app.closeScratchpad()" class="h-8 px-2.5 m3-btn-tonal text-[11px] font-extrabold flex items-center gap-1 shrink-0" title="Close (Esc)">
+                    <i class="ph-bold ph-arrow-left text-xs"></i>
+                    <span class="hidden xl:inline">Back</span>
                 </button>
 
-                <div class="m3-icon-group shrink-0">
+                <div class="m3-icon-group m3-icon-group-wb shrink-0">
                     <button type="button" id="padPrevBtn" onclick="window.app.navigatePadQuestion(-1)" class="m3-icon-group-btn" title="Previous (Left Arrow)">
-                        <i class="ph-bold ph-caret-left"></i>
+                        <i class="ph-bold ph-caret-left text-xs"></i>
                     </button>
-                    <span id="padQTitle" class="px-2 text-[11px] font-extrabold truncate max-w-[110px] sm:max-w-[150px]">Q.1</span>
+                    <span id="padQTitle" class="px-2 text-[11px] font-extrabold truncate max-w-[115px] lg:max-w-[155px]">Q.1</span>
                     <button type="button" id="padNextBtn" onclick="window.app.navigatePadQuestion(1)" class="m3-icon-group-btn" title="Next (Right Arrow)">
-                        <i class="ph-bold ph-caret-right"></i>
+                        <i class="ph-bold ph-caret-right text-xs"></i>
                     </button>
                 </div>
 
-                <div class="m3-icon-group shrink-0">
-                    <button type="button" id="padStarBtn" onclick="window.app.togglePadQuestionBool('starred')" class="m3-icon-group-btn" title="Star">
-                        <i id="padStarIcon" class="ph-bold ph-star"></i>
+                <div class="m3-icon-group m3-icon-group-wb shrink-0">
+                    <button type="button" id="padStarBtn" onclick="window.app.togglePadQuestionBool('starred')" class="m3-icon-group-btn" title="Star (F)">
+                        <i id="padStarIcon" class="ph-bold ph-star text-xs"></i>
                     </button>
-                    <button type="button" id="padSolvedBtn" onclick="window.app.togglePadQuestionBool('solved')" class="m3-icon-group-btn" title="Solved">
-                        <i id="padSolvedIcon" class="ph-bold ph-circle"></i>
+                    <button type="button" id="padSolvedBtn" onclick="window.app.togglePadQuestionBool('solved')" class="m3-icon-group-btn" title="Solved (S)">
+                        <i id="padSolvedIcon" class="ph-bold ph-circle text-xs"></i>
                     </button>
-                    <button type="button" id="padTagBtn" onclick="window.app.openQuestionTagMenu(window.app.getActivePadId(), this)" class="m3-icon-group-btn gap-1 text-[10px]" title="Set Note Tag">
-                        <i class="ph-bold ph-tag"></i>
-                        <span id="padTagLabel" class="hidden lg:inline">Tag</span>
+                    <button type="button" id="padTagBtn" onclick="window.app.openQuestionTagMenu(window.app.getActivePadId(), this)" class="m3-icon-group-btn gap-1 text-[10px]" title="Tag">
+                        <i class="ph-bold ph-tag text-xs"></i>
+                        <span id="padTagLabel" class="hidden 2xl:inline">Tag</span>
                     </button>
                 </div>
 
-                <!-- Manual Question Timer Pill (Starts ONLY when clicked, Double-Click resets) -->
-                <button type="button" id="padTimerBtn" onclick="window.app.toggleQuestionTimer()" ondblclick="window.app.resetQuestionTimer()" class="h-9 px-2.5 rounded-full m3-surface-high text-[11px] font-mono font-extrabold flex items-center gap-1 shrink-0" title="Click: Start / Pause Timer • Double-Click: Reset">
-                    <i id="padTimerIcon" class="ph-fill ph-play text-emerald-400 text-xs"></i>
+                <button type="button" id="padTimerBtn" onclick="window.app.toggleQuestionTimer()" ondblclick="window.app.resetQuestionTimer()" class="h-8 px-2.5 rounded-full m3-surface-high border border-[var(--md-outline-variant)] text-[11px] font-mono font-extrabold flex items-center gap-1 shrink-0" title="Click: Start/Pause (T) • Double-Click: Reset">
+                    <i id="padTimerIcon" class="ph-fill ph-play text-emerald-500 text-[10px]"></i>
                     <span id="padTimerText">00:00</span>
                 </button>
 
-                <div class="m3-icon-group shrink-0">
-                    <button type="button" id="padHintToggleBtn" onclick="window.app.togglePadHint()" class="m3-icon-group-btn gap-1 text-[11px] font-bold" title="Hint">
-                        <i class="ph-bold ph-lightbulb text-amber-400"></i>
-                        <span class="hidden md:inline">Hint</span>
+                <div class="m3-icon-group m3-icon-group-wb shrink-0">
+                    <button type="button" id="padHintToggleBtn" onclick="window.app.togglePadHint()" class="m3-icon-group-btn gap-1 text-[11px]" title="Hint (H)">
+                        <i class="ph-bold ph-lightbulb text-amber-500 text-xs"></i>
+                        <span class="hidden xl:inline">Hint</span>
                     </button>
-                    <button type="button" id="padAnsToggleBtn" onclick="window.app.togglePadAnswer()" class="m3-icon-group-btn gap-1 text-[11px] font-bold" title="Answer">
-                        <i class="ph-bold ph-key text-emerald-400"></i>
-                        <span class="hidden md:inline">Ans</span>
+                    <button type="button" id="padAnsToggleBtn" onclick="window.app.togglePadAnswer()" class="m3-icon-group-btn gap-1 text-[11px]" title="Answer (A)">
+                        <i class="ph-bold ph-key text-emerald-500 text-xs"></i>
+                        <span class="hidden xl:inline">Ans</span>
                     </button>
                 </div>
             </div>
 
-            <!-- Right Group: Tools + Shape + Style + Grid + Undo/Redo/Clear + Fullscreen -->
-            <div class="flex items-center gap-1.5 shrink-0 ml-auto">
-                <div class="m3-icon-group">
-                    <button type="button" id="wbToolSelectBtn" onclick="window.app.setWhiteboardTool('SELECT')" class="wb-mod-btn m3-icon-group-btn gap-1 text-[11px]" title="Select / Move / Resize / Rotate">
-                        <i class="ph-bold ph-cursor"></i>
+            <!-- Right Cluster: Drawing Tools, Shape/Style Pickers, Board Actions -->
+            <div class="flex items-center gap-1 shrink-0 ml-auto">
+                <div class="m3-icon-group m3-icon-group-wb">
+                    <button type="button" id="wbToolSelectBtn" onclick="window.app.setWhiteboardTool('SELECT')" class="wb-mod-btn m3-icon-group-btn" title="Select / Move / Resize / Rotate">
+                        <i class="ph-bold ph-cursor text-xs"></i>
                     </button>
-                    <button type="button" id="wbToolCropDupBtn" onclick="window.app.setWhiteboardTool('CROP_DUP')" class="wb-mod-btn m3-icon-group-btn gap-1 text-[11px]" title="Crop & Duplicate Region">
-                        <i class="ph-bold ph-crop"></i>
+                    <button type="button" id="wbToolCropDupBtn" onclick="window.app.setWhiteboardTool('CROP_DUP')" class="wb-mod-btn m3-icon-group-btn" title="Crop & Duplicate Region">
+                        <i class="ph-bold ph-crop text-xs"></i>
                     </button>
-                    <button type="button" id="wbToolPenBtn" onclick="window.app.setWhiteboardTool('PEN')" class="wb-mod-btn m3-icon-group-btn active-state gap-1 text-[11px]" title="Pen">
-                        <i class="ph-bold ph-pencil-simple"></i>
+                    <button type="button" id="wbToolPenBtn" onclick="window.app.setWhiteboardTool('PEN')" class="wb-mod-btn m3-icon-group-btn active-state" title="Pen">
+                        <i class="ph-bold ph-pencil-simple text-xs"></i>
                     </button>
-                    <button type="button" id="wbToolLaserBtn" onclick="window.app.setWhiteboardTool('LASER')" class="wb-mod-btn m3-icon-group-btn gap-1 text-[11px]" title="Laser Pointer">
-                        <i class="ph-bold ph-sparkle text-rose-400"></i>
+                    <button type="button" id="wbToolLaserBtn" onclick="window.app.setWhiteboardTool('LASER')" class="wb-mod-btn m3-icon-group-btn" title="Laser Pointer">
+                        <i class="ph-bold ph-sparkle text-rose-500 text-xs"></i>
                     </button>
-                    <button type="button" id="wbToolPanBtn" onclick="window.app.setWhiteboardTool('PAN')" class="m3-icon-group-btn gap-1 text-[11px]" title="Pan">
-                        <i class="ph-bold ph-hand-grabbing"></i>
+                    <button type="button" id="wbToolPanBtn" onclick="window.app.setWhiteboardTool('PAN')" class="m3-icon-group-btn" title="Pan Board">
+                        <i class="ph-bold ph-hand-grabbing text-xs"></i>
                     </button>
-                    <button type="button" id="eraserBtn" onclick="window.app.setWhiteboardTool('ERASER')" class="wb-mod-btn m3-icon-group-btn gap-1 text-[11px]" title="Eraser">
-                        <i class="ph-bold ph-eraser"></i>
+                    <button type="button" id="eraserBtn" onclick="window.app.setWhiteboardTool('ERASER')" class="wb-mod-btn m3-icon-group-btn" title="Eraser">
+                        <i class="ph-bold ph-eraser text-xs"></i>
                     </button>
-                    <button type="button" id="wbAutoShapeBtn" onclick="window.app.toggleAutoShape()" class="wb-mod-btn m3-icon-group-btn active-state gap-1 text-[11px]" title="Auto-Shape">
-                        <i class="ph-bold ph-magic-wand"></i>
+                    <button type="button" id="wbAutoShapeBtn" onclick="window.app.toggleAutoShape()" class="wb-mod-btn m3-icon-group-btn active-state" title="Auto-Shape">
+                        <i class="ph-bold ph-magic-wand text-xs"></i>
                     </button>
                 </div>
 
-                <button type="button" id="insertShapeMenuBtn" onclick="window.app.openInsertShapeMenu(this)" class="wb-mod-btn h-9 px-2.5 m3-dropdown-trigger text-[11px]" title="Insert Shape">
-                    <i class="ph-bold ph-shapes text-sm" style="color: var(--md-primary)"></i>
+                <button type="button" id="insertShapeMenuBtn" onclick="window.app.openInsertShapeMenu(this)" class="wb-mod-btn h-8 px-2 m3-dropdown-trigger text-[11px]" title="Insert Shape">
+                    <i class="ph-bold ph-shapes text-xs" style="color: var(--md-primary)"></i>
                     <i class="ph-bold ph-caret-down text-[9px] m3-text-muted"></i>
                 </button>
 
-                <button type="button" id="inkStyleMenuBtn" onclick="window.app.openInkStyleMenu(this)" class="wb-mod-btn h-9 px-2.5 m3-dropdown-trigger text-[11px]" title="Ink & Thickness">
-                    <span id="activeInkColorDot" class="w-3.5 h-3.5 rounded-full border border-white/40 shrink-0" style="background: #0f172a;"></span>
-                    <span id="strokeWidthDropdownLabel" class="hidden sm:inline">Med</span>
+                <button type="button" id="inkStyleMenuBtn" onclick="window.app.openInkStyleMenu(this)" class="wb-mod-btn h-8 px-2 m3-dropdown-trigger text-[11px]" title="Ink Color & Width">
+                    <span id="activeInkColorDot" class="w-3 h-3 rounded-full border border-black/30 shrink-0" style="background: #0f172a;"></span>
+                    <span id="strokeWidthDropdownLabel" class="hidden md:inline text-[10px]">Med</span>
                     <i class="ph-bold ph-caret-down text-[9px] m3-text-muted"></i>
                 </button>
 
-                <div class="m3-icon-group">
-                    <button type="button" onclick="window.app.cycleWhiteboardGrid()" class="m3-icon-group-btn" title="Switch Grid (Dots / Graph / Blank)">
-                        <i class="ph-bold ph-grid-four"></i>
-                    </button>
+                <div class="m3-icon-group m3-icon-group-wb">
                     <button type="button" onclick="window.app.whiteboardUndo()" class="wb-mod-btn m3-icon-group-btn" title="Undo (Ctrl+Z)">
-                        <i class="ph-bold ph-arrow-u-up-left"></i>
+                        <i class="ph-bold ph-arrow-u-up-left text-xs"></i>
                     </button>
                     <button type="button" onclick="window.app.whiteboardRedo()" class="wb-mod-btn m3-icon-group-btn" title="Redo (Ctrl+Y)">
-                        <i class="ph-bold ph-arrow-u-up-right"></i>
+                        <i class="ph-bold ph-arrow-u-up-right text-xs"></i>
+                    </button>
+                    <button type="button" onclick="window.app.cycleWhiteboardGrid()" class="m3-icon-group-btn" title="Grid Style">
+                        <i class="ph-bold ph-grid-four text-xs"></i>
+                    </button>
+                    <button type="button" onclick="window.app.exportWhiteboardPng()" class="m3-icon-group-btn" title="Download Whiteboard Snapshot (PNG)">
+                        <i class="ph-bold ph-download-simple text-xs"></i>
                     </button>
                     <button type="button" onclick="window.app.clearInk()" class="wb-mod-btn m3-icon-group-btn hover:!bg-rose-600 hover:!text-white" title="Reset Board">
-                        <i class="ph-bold ph-trash"></i>
+                        <i class="ph-bold ph-trash text-xs"></i>
                     </button>
-                    <button type="button" onclick="window.app.toggleFullscreen()" class="m3-icon-group-btn" title="Toggle Fullscreen">
-                        <i id="wbFullscreenIcon" class="ph-bold ph-corners-out"></i>
+                    <button type="button" onclick="window.app.toggleFullscreen()" class="m3-icon-group-btn" title="Fullscreen">
+                        <i id="wbFullscreenIcon" class="ph-bold ph-corners-out text-xs"></i>
                     </button>
                 </div>
             </div>
         </div>
 
         <!-- Collapsible Hint & Answer Key Reveal Strip -->
-        <div id="padHintAnswerDrawer" class="hidden m3-surface-high px-4 py-2 items-center justify-between gap-3 shrink-0">
+        <div id="padHintAnswerDrawer" class="hidden m3-surface-high border-b border-[var(--md-outline-variant)] px-4 py-1.5 items-center justify-between gap-3 shrink-0">
             <div class="flex flex-wrap items-center gap-3 min-w-0 flex-1 text-xs">
-                <div id="padHintBox" class="hidden items-center gap-2 px-3.5 py-1 rounded-2xl m3-surface-low">
-                    <i class="ph-fill ph-lightbulb text-amber-400 text-sm shrink-0"></i>
-                    <span class="font-bold text-amber-300 shrink-0">Hint:</span>
+                <div id="padHintBox" class="hidden items-center gap-2 px-3 py-1 rounded-2xl m3-surface-low">
+                    <i class="ph-fill ph-lightbulb text-amber-500 text-sm shrink-0"></i>
+                    <span class="font-bold shrink-0">Hint:</span>
                     <span id="padHintText" class="font-medium">Not generated.</span>
                 </div>
-                <div id="padAnsBox" class="hidden items-center gap-2 px-3.5 py-1 rounded-2xl m3-primary-pill">
+                <div id="padAnsBox" class="hidden items-center gap-2 px-3 py-1 rounded-2xl m3-primary-pill">
                     <i class="ph-fill ph-key text-sm shrink-0"></i>
                     <span class="font-bold shrink-0">Answer:</span>
                     <span id="padAnsText" class="font-extrabold font-mono">Not generated.</span>
                 </div>
             </div>
-            <button type="button" id="padSolveNowBtn" onclick="window.app.solveActivePadQuestionNow()" class="h-8 px-3.5 m3-btn-filled text-[11px] flex items-center gap-1.5 shrink-0">
+            <button type="button" id="padSolveNowBtn" onclick="window.app.solveActivePadQuestionNow()" class="h-7 px-3 m3-btn-filled text-[11px] flex items-center gap-1 shrink-0">
                 <i class="ph-bold ph-sparkle"></i>
                 <span id="padSolveNowBtnLabel">Generate</span>
             </button>
@@ -1197,13 +1236,13 @@
                 <span>Loading saved board...</span>
             </div>
 
-            <!-- Floating Selected Object / Group Action Bar (Includes Rotate & Reset Rotation!) -->
+            <!-- Floating Selected Object / Group Action Bar (Rotate & Reset Rotation) -->
             <div id="wbSelectionHud" class="hidden absolute top-3 right-4 z-10 m3-icon-group shadow-xl">
-                <button type="button" onclick="window.app.rotateSelectedWhiteboardItems(-15)" class="wb-mod-btn m3-icon-group-btn gap-1 text-[11px] font-bold" title="Rotate Counter-Clockwise (-15°)">
+                <button type="button" onclick="window.app.rotateSelectedWhiteboardItems(-15)" class="wb-mod-btn m3-icon-group-btn gap-1 text-[11px] font-bold" title="Rotate -15°">
                     <i class="ph-bold ph-arrow-counter-clockwise"></i>
                     <span class="hidden sm:inline">-15°</span>
                 </button>
-                <button type="button" onclick="window.app.rotateSelectedWhiteboardItems(15)" class="wb-mod-btn m3-icon-group-btn gap-1 text-[11px] font-bold" title="Rotate Clockwise (+15°)">
+                <button type="button" onclick="window.app.rotateSelectedWhiteboardItems(15)" class="wb-mod-btn m3-icon-group-btn gap-1 text-[11px] font-bold" title="Rotate +15°">
                     <i class="ph-bold ph-arrow-clockwise"></i>
                     <span class="hidden sm:inline">+15°</span>
                 </button>
@@ -1258,6 +1297,9 @@
     <script>
         try { indexedDB.deleteDatabase('JEEQuestionVaultDB'); } catch (_) {}
 
+        // Hardcoded Default Gist ID
+        const DEFAULT_GIST_ID = '9259f71c65f635b809f348a7216b6e53';
+
         function initM3ExpressiveShapes() {
             const makeSoftStarburst = (lobes, innerR, outerR) => {
                 const pts = 180;
@@ -1279,7 +1321,6 @@
             if (p8) p8.setAttribute('d', makeSoftStarburst(8, 0.445, 0.495));
         }
 
-        // Fast-Rotating Shape-Morphing Loader (Plump 4-Leaf Clover)
         const M3_MORPH_SHAPES = [
             (a) => 0.84 + 0.11 * Math.cos(5 * a) - 0.02 * Math.cos(10 * a),
             (a) => 0.87 + 0.068 * Math.cos(9 * a),
@@ -1364,7 +1405,8 @@
             svg.classList.remove('hidden');
             ensureM3MorphLoopRunning();
         }
-        // 3. 60fps HTML5 Canvas Sine Wave Progress Bar
+
+        // Sine Wave Progress Bar
         const waveInstances = new Map();
         let waveAnimFrame = null;
 
@@ -1507,6 +1549,12 @@
             { value: 'gemini-2.5-flash', label: 'gemini-2.5-flash' }
         ];
 
+        const SORT_MODES = [
+            { value: 'Q_NUM', short: 'Q.#', label: 'Question Number' },
+            { value: 'TIME_DESC', short: 'Time', label: 'Time Spent (High → Low)' },
+            { value: 'NEWEST', short: 'New', label: 'Newest Added' }
+        ];
+
         const WHITEBOARD_COLORS = [
             { value: '#0f172a', label: 'Black' },
             { value: '#2563eb', label: 'Blue' },
@@ -1547,12 +1595,14 @@
             chapter: 'ALL',
             status: 'ALL',
             paper: 'ALL',
+            tagFilter: 'ALL',
+            sortBy: 'Q_NUM',
             search: '',
             activePopupId: null,
             isPopupAnimating: false,
             activeSettingsPage: 'HOME',
             selectedModel: localStorage.getItem('jee_gemini_model') || 'gemini-3.5-flash-lite',
-            importMode: null, // 'PDF' | 'IMAGE'
+            importMode: null,
             pdfDoc: null,
             isExtracting: false,
             isUploadMinimized: false,
@@ -1582,9 +1632,9 @@
             padShowHint: false,
             padShowAns: false,
             timerInterval: null,
-            timerPaused: true, // Manual timer: always starts paused until user clicks it
+            timerPaused: true,
             isHandlingHash: false,
-            isSyncingCloud: false,
+            isSyncingCloud: true, // Start in loading state so initial Gist pull shows smoothly
             hasPendingCloudPush: false,
             ocrWorker: null,
             isRunningBackgroundOcr: false,
@@ -1602,9 +1652,20 @@
             return out;
         };
 
-        // ===================================================================
-        // SUB-LINK HASH ROUTER: #/paper-name/subject/chapter-name/uid
-        // ===================================================================
+        function isVerticalScreen() {
+            return window.innerHeight > window.innerWidth;
+        }
+
+        function checkWhiteboardOrientationLock() {
+            const wbModal = document.getElementById('scratchpadModal');
+            const lockOverlay = document.getElementById('wbPortraitBlockOverlay');
+            if (!wbModal || wbModal.classList.contains('hidden') || !lockOverlay) return;
+            const vertical = isVerticalScreen();
+            lockOverlay.classList.toggle('hidden', !vertical);
+            lockOverlay.classList.toggle('flex', vertical);
+        }
+
+        // Sub-Link Hash Router: #/paper-name/subject/chapter-name/uid
         function slugifyRoutePart(str, fallback = 'general') {
             const s = String(str || fallback)
                 .trim()
@@ -1649,11 +1710,11 @@
 
             state.isHandlingHash = true;
             try {
-                const isWbOpen = !document.getElementById('scratchpadModal')?.classList.contains('hidden');
-                if (isWbOpen) {
-                    window.app.openScratchpad(targetQ.id, true);
+                if (isVerticalScreen()) {
+                    window.app.openImagePopup(targetQ.id, false);
                 } else {
-                    window.app.openScratchpad(targetQ.id, false);
+                    const isWbOpen = !document.getElementById('scratchpadModal')?.classList.contains('hidden');
+                    window.app.openScratchpad(targetQ.id, isWbOpen);
                 }
             } finally {
                 state.isHandlingHash = false;
@@ -1667,14 +1728,12 @@
             padBottom: Number(localStorage.getItem('jee_pad_bottom') ?? 10)
         });
         const getGithubToken = () => (localStorage.getItem('jee_github_pat') || '').trim();
-        const getGithubGistId = () => (localStorage.getItem('jee_github_gist_id') || '').trim();
+        const getGithubGistId = () => DEFAULT_GIST_ID;
         const isCloudAutoSyncEnabled = () => localStorage.getItem('jee_cloud_autosync') !== 'false';
         const isAutoSolveHintsEnabled = () => localStorage.getItem('jee_auto_solve_hints') !== 'false';
         const getThemeMode = () => localStorage.getItem('jee_m3_theme_mode') || 'dark';
 
-        // ===================================================================
-        // MANUAL PER-QUESTION SOLVE TIMER (STARTS ONLY WHEN CLICKED)
-        // ===================================================================
+        // Manual Per-Question Solve Timer
         function formatTimeSeconds(sec) {
             const total = Math.max(0, Math.floor(Number(sec) || 0));
             const m = Math.floor(total / 60);
@@ -1718,8 +1777,8 @@
             if (padTxt) padTxt.textContent = formatted;
             if (padIcon) {
                 padIcon.className = state.timerPaused
-                    ? 'ph-fill ph-play text-emerald-400 text-xs'
-                    : 'ph-fill ph-pause text-amber-400 text-xs';
+                    ? 'ph-fill ph-play text-emerald-500 text-[10px]'
+                    : 'ph-fill ph-pause text-amber-500 text-[10px]';
             }
 
             document.querySelectorAll('.popup-timer-text').forEach(el => {
@@ -1727,8 +1786,8 @@
             });
             document.querySelectorAll('.popup-timer-icon').forEach(el => {
                 el.className = state.timerPaused
-                    ? 'popup-timer-icon ph-fill ph-play text-emerald-400 text-xs'
-                    : 'popup-timer-icon ph-fill ph-pause text-amber-400 text-xs';
+                    ? 'popup-timer-icon ph-fill ph-play text-emerald-500 text-xs'
+                    : 'popup-timer-icon ph-fill ph-pause text-amber-500 text-xs';
             });
         }
 
@@ -1804,55 +1863,57 @@
             return { h: Math.round(h * 360), s: Math.round(s * 100), l: Math.round(l * 100) };
         }
 
+        // Redesigned High-Contrast Neutral Light Mode & Deep Dark Mode Palette
         function applyMaterialThemeFromSeed(hexSeed, modeOverride = null) {
             const cleanHex = /^#[0-9A-Fa-f]{6}$/.test(hexSeed) ? hexSeed : (localStorage.getItem('jee_m3_seed_color') || '#7c3aed');
             const mode = modeOverride || getThemeMode();
             const { h, s } = hexToHsl(cleanHex);
             const root = document.documentElement;
             const sat = Math.max(68, s);
-            const hSec = (h + 24) % 360;
-            const hTer = (h + 65) % 360;
+            const hSec = (h + 20) % 360;
+            const hTer = (h + 55) % 360;
 
             root.classList.toggle('dark', mode === 'dark');
             localStorage.setItem('jee_m3_theme_mode', mode);
             localStorage.setItem('jee_m3_seed_color', cleanHex);
 
             if (mode === 'light') {
-                root.style.setProperty('--md-primary', `hsl(${h}, ${Math.min(92, sat)}%, 44%)`);
+                // Clean Neutral Alabaster/Slate Light Mode with crisp contrast
+                root.style.setProperty('--md-primary', `hsl(${h}, ${Math.min(85, sat)}%, 46%)`);
                 root.style.setProperty('--md-on-primary', `#ffffff`);
-                root.style.setProperty('--md-primary-container', `hsl(${h}, 92%, 86%)`);
-                root.style.setProperty('--md-on-primary-container', `hsl(${h}, 88%, 16%)`);
-                root.style.setProperty('--md-secondary-container', `hsl(${hSec}, 82%, 88%)`);
-                root.style.setProperty('--md-on-secondary-container', `hsl(${hSec}, 78%, 18%)`);
-                root.style.setProperty('--md-tertiary-container', `hsl(${hTer}, 88%, 88%)`);
-                root.style.setProperty('--md-on-tertiary-container', `hsl(${hTer}, 82%, 18%)`);
-                root.style.setProperty('--md-surface', `hsl(${h}, 60%, 96%)`);
-                root.style.setProperty('--md-surface-low', `hsl(${h}, 58%, 92%)`);
-                root.style.setProperty('--md-surface-container', `hsl(${h}, 56%, 89%)`);
-                root.style.setProperty('--md-surface-high', `hsl(${h}, 52%, 85%)`);
-                root.style.setProperty('--md-surface-highest', `hsl(${h}, 50%, 80%)`);
-                root.style.setProperty('--md-on-surface', `hsl(${h}, 55%, 11%)`);
-                root.style.setProperty('--md-on-surface-variant', `hsl(${h}, 36%, 32%)`);
-                root.style.setProperty('--md-outline', `hsl(${h}, 42%, 58%)`);
-                root.style.setProperty('--md-outline-variant', `hsl(${h}, 46%, 76%)`);
+                root.style.setProperty('--md-primary-container', `hsl(${h}, 78%, 92%)`);
+                root.style.setProperty('--md-on-primary-container', `hsl(${h}, 85%, 20%)`);
+                root.style.setProperty('--md-secondary-container', `#e2e8f0`);
+                root.style.setProperty('--md-on-secondary-container', `#0f172a`);
+                root.style.setProperty('--md-tertiary-container', `hsl(${hTer}, 75%, 92%)`);
+                root.style.setProperty('--md-on-tertiary-container', `hsl(${hTer}, 80%, 20%)`);
+                root.style.setProperty('--md-surface', `#f1f5f9`);
+                root.style.setProperty('--md-surface-low', `#ffffff`);
+                root.style.setProperty('--md-surface-container', `#ffffff`);
+                root.style.setProperty('--md-surface-high', `#f8fafc`);
+                root.style.setProperty('--md-surface-highest', `#e2e8f0`);
+                root.style.setProperty('--md-on-surface', `#0f172a`);
+                root.style.setProperty('--md-on-surface-variant', `#475569`);
+                root.style.setProperty('--md-outline', `#94a3b8`);
+                root.style.setProperty('--md-outline-variant', `#e2e8f0`);
             } else {
                 root.style.setProperty('--md-primary', `hsl(${h}, ${sat}%, 78%)`);
                 root.style.setProperty('--md-on-primary', `hsl(${h}, 82%, 14%)`);
                 root.style.setProperty('--md-primary-container', `hsl(${h}, 68%, 28%)`);
                 root.style.setProperty('--md-on-primary-container', `hsl(${h}, 98%, 92%)`);
-                root.style.setProperty('--md-secondary-container', `hsl(${hSec}, 48%, 24%)`);
+                root.style.setProperty('--md-secondary-container', `hsl(${hSec}, 42%, 22%)`);
                 root.style.setProperty('--md-on-secondary-container', `hsl(${hSec}, 88%, 91%)`);
-                root.style.setProperty('--md-tertiary-container', `hsl(${hTer}, 55%, 26%)`);
+                root.style.setProperty('--md-tertiary-container', `hsl(${hTer}, 50%, 25%)`);
                 root.style.setProperty('--md-on-tertiary-container', `hsl(${hTer}, 95%, 92%)`);
-                root.style.setProperty('--md-surface', `hsl(${h}, 28%, 7%)`);
-                root.style.setProperty('--md-surface-low', `hsl(${h}, 28%, 10%)`);
-                root.style.setProperty('--md-surface-container', `hsl(${h}, 28%, 13%)`);
-                root.style.setProperty('--md-surface-high', `hsl(${h}, 28%, 17%)`);
-                root.style.setProperty('--md-surface-highest', `hsl(${h}, 28%, 22%)`);
-                root.style.setProperty('--md-on-surface', `hsl(${h}, 24%, 96%)`);
-                root.style.setProperty('--md-on-surface-variant', `hsl(${h}, 18%, 74%)`);
-                root.style.setProperty('--md-outline', `hsl(${h}, 20%, 36%)`);
-                root.style.setProperty('--md-outline-variant', `hsl(${h}, 22%, 22%)`);
+                root.style.setProperty('--md-surface', `hsl(${h}, 24%, 7%)`);
+                root.style.setProperty('--md-surface-low', `hsl(${h}, 24%, 10%)`);
+                root.style.setProperty('--md-surface-container', `hsl(${h}, 24%, 13%)`);
+                root.style.setProperty('--md-surface-high', `hsl(${h}, 24%, 17%)`);
+                root.style.setProperty('--md-surface-highest', `hsl(${h}, 24%, 22%)`);
+                root.style.setProperty('--md-on-surface', `hsl(${h}, 20%, 96%)`);
+                root.style.setProperty('--md-on-surface-variant', `hsl(${h}, 15%, 72%)`);
+                root.style.setProperty('--md-outline', `hsl(${h}, 18%, 36%)`);
+                root.style.setProperty('--md-outline-variant', `hsl(${h}, 18%, 20%)`);
             }
 
             document.getElementById('themeModeDarkBtn')?.classList.toggle('active', mode === 'dark');
@@ -1913,9 +1974,7 @@
             }, 3000);
         }
 
-        // ===================================================================
-        // UNIFIED PDF + IMAGE IMPORT & AUTO-DESKEW ENGINE
-        // ===================================================================
+        // Unified PDF + Image Import & Auto-Deskew
         function estimateImageSkewAngle(img) {
             const w = 360;
             const h = Math.max(80, Math.round((img.height / (img.width || 1)) * w));
@@ -2014,7 +2073,7 @@
                 state.pdfDoc = null;
 
                 document.getElementById('selectedFileLabel').textContent = labelName;
-                document.getElementById('selectedFileTypeBadge').textContent = 'Detected: Image • Auto-straightening & OCR enabled';
+                document.getElementById('selectedFileTypeBadge').textContent = 'Image file selected';
                 document.getElementById('unifiedFileIcon').className = 'ph-duotone ph-image text-2xl';
                 document.getElementById('pdfSetupSubView').classList.add('hidden');
                 document.getElementById('pdfSetupSubView').classList.remove('grid');
@@ -2023,7 +2082,7 @@
                 const startBtn = document.getElementById('startExtractBtn');
                 const startLbl = document.getElementById('startExtractBtnLbl');
                 if (startBtn) startBtn.disabled = false;
-                if (startLbl) startLbl.textContent = 'Add Image Question';
+                if (startLbl) startLbl.textContent = 'Add Image';
 
                 const detectedAngle = estimateImageSkewAngle(img);
                 state.importDeskewAngle = detectedAngle;
@@ -2043,7 +2102,7 @@
                 state.importMode = 'PDF';
                 state.importRawImg = null;
                 document.getElementById('selectedFileLabel').textContent = file.name;
-                document.getElementById('selectedFileTypeBadge').textContent = 'Detected: PDF Document • Multi-page question extraction';
+                document.getElementById('selectedFileTypeBadge').textContent = 'PDF document selected';
                 document.getElementById('unifiedFileIcon').className = 'ph-duotone ph-file-pdf text-2xl';
                 document.getElementById('imageSetupSubView').classList.add('hidden');
                 document.getElementById('pdfSetupSubView').classList.remove('hidden');
@@ -2058,7 +2117,7 @@
                     document.getElementById('startPageInput').value = 1;
                     document.getElementById('endPageInput').value = state.pdfDoc.numPages;
                     document.getElementById('startExtractBtn').disabled = false;
-                    document.getElementById('startExtractBtnLbl').textContent = 'Extract PDF Questions';
+                    document.getElementById('startExtractBtnLbl').textContent = 'Import PDF';
                     toast(`Loaded PDF (${state.pdfDoc.numPages} pages)`, 'success');
                 } catch (_) {
                     toast('Could not read PDF file.', 'warn');
@@ -2219,7 +2278,7 @@
                     if (!liveQ) continue;
                     completed++;
                     const pct = Math.round((completed / targets.length) * 100);
-                    if (badgeTxt) badgeTxt.textContent = `Hints: ${completed}/${targets.length}`;
+                    if (badgeTxt) badgeTxt.textContent = `${completed}/${targets.length}`;
                     if (btnLbl) btnLbl.textContent = `Solving ${completed}/${targets.length}...`;
                     if (infoEl) infoEl.textContent = `Processing Q.${liveQ.questionNumber} (${liveQ.subject})...`;
                     if (waveWrap) renderM3WavyProgress(waveWrap, pct);
@@ -2356,7 +2415,7 @@
                     if (!state.questions.some(item => item.id === q.id)) continue;
                     completed++;
                     const pct = Math.round((completed / targets.length) * 100);
-                    if (badgeTxt) badgeTxt.textContent = `OCR: ${completed}/${targets.length}`;
+                    if (badgeTxt) badgeTxt.textContent = `${completed}/${targets.length}`;
                     if (settingsBtnLbl) settingsBtnLbl.textContent = `Indexing ${completed}/${targets.length} (${pct}%)...`;
                     if (settingsOcrWave) renderM3WavyProgress(settingsOcrWave, pct);
 
@@ -2398,18 +2457,7 @@
             const settingsCloudWave = document.getElementById('settingsCloudWavyBar');
             if (!syncBtn || !icon || !txt) return;
 
-            const hasToken = Boolean(getGithubToken());
             const lastSync = localStorage.getItem('jee_cloud_last_sync') || '';
-
-            if (!hasToken) {
-                setSyncButtonExpressiveProgress(false);
-                if (settingsCloudWave) settingsCloudWave.classList.add('hidden');
-                syncBtn.classList.remove('active-state');
-                icon.className = 'ph-bold ph-cloud-slash text-sm';
-                txt.textContent = 'Off';
-                if (infoEl) infoEl.textContent = 'Add a GitHub Token in Settings to enable Gist sync.';
-                return;
-            }
 
             if (status === 'syncing') {
                 setSyncButtonExpressiveProgress(true);
@@ -2434,8 +2482,8 @@
                 txt.textContent = `${state.questions.length}`;
                 if (infoEl) {
                     infoEl.textContent = lastSync
-                        ? `Last synced: ${lastSync} • Gist: ${getGithubGistId() || 'Pending'}`
-                        : 'Ready to sync.';
+                        ? `Last synced: ${lastSync} • Gist: ${DEFAULT_GIST_ID}`
+                        : `Linked Gist: ${DEFAULT_GIST_ID}`;
                 }
             }
         }
@@ -2469,6 +2517,13 @@
                 ensureQuestionAspectRatio(q);
             });
             state.questions.sort((a, b) => {
+                if (state.sortBy === 'TIME_DESC') {
+                    const tDiff = (Number(b.timeSpent) || 0) - (Number(a.timeSpent) || 0);
+                    if (tDiff !== 0) return tDiff;
+                } else if (state.sortBy === 'NEWEST') {
+                    const cDiff = (Number(b.createdAt) || 0) - (Number(a.createdAt) || 0);
+                    if (cDiff !== 0) return cDiff;
+                }
                 const nA = parseFloat(String(a.questionNumber).replace(/[^\d.]/g, '')) || 9999;
                 const nB = parseFloat(String(b.questionNumber).replace(/[^\d.]/g, '')) || 9999;
                 return nA !== nB ? nA - nB : String(a.questionNumber).localeCompare(String(b.questionNumber));
@@ -2493,35 +2548,15 @@
 
         const sanitizePaperFilename = (p) => `jee_vault_paper_${String(p || 'Default_Paper').replace(/[^a-zA-Z0-9_-]/g, '_').slice(0, 45) || 'Default'}.json`;
 
-        async function resolveOrDiscoverGistId(token, gistInp) {
-            let gistId = getGithubGistId();
-            if (gistId) return gistId;
-            const listRes = await fetch('https://api.github.com/gists?per_page=50', {
-                headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/vnd.github+json' }
-            });
-            if (listRes.ok) {
-                const gists = await listRes.json();
-                const found = gists.find(g => g.files && g.files['jee_vault_manifest.json']);
-                if (found) {
-                    gistId = found.id;
-                    localStorage.setItem('jee_github_gist_id', gistId);
-                    if (gistInp) gistInp.value = gistId;
-                }
-            }
-            return gistId;
-        }
-
         async function pushToCloudGist(manualNotify = false, allowEmptyPush = false) {
             const tokenInp = document.getElementById('githubTokenInput');
-            const gistInp = document.getElementById('githubGistIdInput');
             if (tokenInp?.value.trim()) localStorage.setItem('jee_github_pat', tokenInp.value.trim());
-            if (gistInp?.value.trim()) localStorage.setItem('jee_github_gist_id', gistInp.value.trim());
 
             const token = getGithubToken();
             if (!token) {
                 if (manualNotify) {
                     window.app.openSettingsModal(false, 'KEYS');
-                    toast('Enter your GitHub Personal Access Token first.', 'warn');
+                    toast('Enter your GitHub Personal Access Token to push changes.', 'warn');
                 }
                 return;
             }
@@ -2564,22 +2599,19 @@
                     filesPayload[sanitizePaperFilename(pName)] = { content: JSON.stringify(qList) };
                 }
 
-                let gistId = await resolveOrDiscoverGistId(token, gistInp);
-
-                if (gistId) {
-                    const checkRes = await fetch(`https://api.github.com/gists/${gistId}`, {
-                        headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/vnd.github+json' }
+                const gistId = getGithubGistId();
+                const checkRes = await fetch(`https://api.github.com/gists/${gistId}`, {
+                    headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/vnd.github+json' }
+                });
+                if (checkRes.ok) {
+                    const existingGist = await checkRes.json();
+                    Object.keys(existingGist.files || {}).forEach(oldFile => {
+                        if (oldFile.startsWith('jee_vault_paper_') && !filesPayload[oldFile]) filesPayload[oldFile] = null;
                     });
-                    if (checkRes.ok) {
-                        const existingGist = await checkRes.json();
-                        Object.keys(existingGist.files || {}).forEach(oldFile => {
-                            if (oldFile.startsWith('jee_vault_paper_') && !filesPayload[oldFile]) filesPayload[oldFile] = null;
-                        });
-                    } else if (checkRes.status === 404) gistId = '';
                 }
 
-                const res = await fetch(gistId ? `https://api.github.com/gists/${gistId}` : 'https://api.github.com/gists', {
-                    method: gistId ? 'PATCH' : 'POST',
+                const res = await fetch(`https://api.github.com/gists/${gistId}`, {
+                    method: 'PATCH',
                     headers: {
                         'Authorization': `Bearer ${token}`,
                         'Accept': 'application/vnd.github+json',
@@ -2587,21 +2619,14 @@
                     },
                     body: JSON.stringify({
                         description: 'Question Bank Cloud Storage',
-                        public: false,
                         files: filesPayload
                     })
                 });
 
                 if (!res.ok) throw new Error(`HTTP ${res.status}`);
-                const data = await res.json();
-                if (data.id) {
-                    localStorage.setItem('jee_github_gist_id', data.id);
-                    if (gistInp) gistInp.value = data.id;
-                }
-
                 localStorage.setItem('jee_cloud_last_sync', new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }));
                 updateCloudStatusUI('idle');
-                if (manualNotify) toast(`Synced ${state.questions.length} questions to GitHub Gist.`, 'success');
+                if (manualNotify) toast(`Synced ${state.questions.length} questions to Gist.`, 'success');
             } catch (err) {
                 updateCloudStatusUI('error', err.message);
                 if (manualNotify) toast(`Push failed: ${err.message}`, 'warn');
@@ -2614,37 +2639,23 @@
             }
         }
 
+        // Pulls from Hardcoded Gist ID (Works with OR without a PAT on any new tab!)
         async function pullFromCloudGist(manualNotify = false) {
             const tokenInp = document.getElementById('githubTokenInput');
-            const gistInp = document.getElementById('githubGistIdInput');
             if (tokenInp?.value.trim()) localStorage.setItem('jee_github_pat', tokenInp.value.trim());
-            if (gistInp?.value.trim()) localStorage.setItem('jee_github_gist_id', gistInp.value.trim());
 
             const token = getGithubToken();
-            if (!token) {
-                if (manualNotify) {
-                    window.app.openSettingsModal(false, 'KEYS');
-                    toast('Enter your GitHub Personal Access Token first.', 'warn');
-                }
-                return;
-            }
-
-            if (state.isSyncingCloud) return;
             state.isSyncingCloud = true;
             updateCloudStatusUI('syncing', 'Pull');
+            if (state.questions.length === 0) renderFeed();
 
             try {
-                const gistId = await resolveOrDiscoverGistId(token, gistInp);
-                if (!gistId) {
-                    state.questions = [];
-                    state.isSyncingCloud = false;
-                    sortAndRefreshQuestions();
-                    if (manualNotify) toast('No existing Gist found.', 'warn');
-                    return;
-                }
+                const gistId = getGithubGistId();
+                const headers = { 'Accept': 'application/vnd.github+json' };
+                if (token) headers['Authorization'] = `Bearer ${token}`;
 
                 const res = await fetch(`https://api.github.com/gists/${gistId}?t=${Date.now()}`, {
-                    headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/vnd.github+json' },
+                    headers,
                     cache: 'no-store'
                 });
                 if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -2683,12 +2694,13 @@
                 state.isSyncingCloud = false;
                 sortAndRefreshQuestions();
                 if (manualNotify) toast(`Loaded ${state.questions.length} questions from Gist.`, 'success');
-                if (anyMissingUid) scheduleCloudAutoSync(true);
+                if (anyMissingUid && token) scheduleCloudAutoSync(true);
                 checkAndOpenQuestionFromUrlHash();
                 runBackgroundLocalOcrForExistingQuestions(false);
             } catch (err) {
                 state.isSyncingCloud = false;
                 updateCloudStatusUI('error', err.message);
+                renderFeed();
                 if (manualNotify) toast(`Pull failed: ${err.message}`, 'warn');
             }
         }
@@ -3243,6 +3255,7 @@ RULES:
                 if (state.subject !== 'ALL' && q.subject !== state.subject) return false;
                 if (state.chapter !== 'ALL' && q.chapter !== state.chapter) return false;
                 if (state.paper !== 'ALL' && q.paperName !== state.paper) return false;
+                if (state.tagFilter !== 'ALL' && q.noteTag !== state.tagFilter) return false;
                 if (state.status === 'UNSOLVED' && q.solved) return false;
                 if (state.status === 'SOLVED' && !q.solved) return false;
                 if (state.status === 'STARRED' && !q.starred) return false;
@@ -3266,6 +3279,12 @@ RULES:
             document.querySelectorAll('.status-btn').forEach(btn => {
                 const st = btn.getAttribute('data-status');
                 btn.classList.toggle('active', st === state.status);
+            });
+
+            document.querySelectorAll('.drawer-tag-chip').forEach(chip => {
+                const t = chip.getAttribute('data-tag-chip');
+                const active = t === state.tagFilter;
+                chip.className = `drawer-tag-chip h-7 px-2.5 rounded-full text-[10px] shrink-0 transition ${active ? 'font-extrabold m3-btn-filled' : 'font-bold m3-surface-high'}`;
             });
 
             document.getElementById('activeChapterIndicator').textContent =
@@ -3370,14 +3389,14 @@ RULES:
             <article data-card-id="${q.id}" class="m3-card min-w-0" style="${borderStyle}">
                 <div class="px-2.5 py-1.5 m3-card-top-segment flex items-center justify-between gap-1.5 flex-nowrap overflow-x-auto no-scrollbar">
                     <div class="flex items-center gap-1.5 min-w-0 flex-nowrap">
-                        <span class="w-7 h-7 m3-cookie-12 font-extrabold text-[10px] flex items-center justify-center shrink-0" style="background: var(--md-primary); color: var(--md-on-primary);">Q.${q.questionNumber}</span>
+                        <span class="w-6 h-6 m3-cookie-12 font-extrabold text-[10px] flex items-center justify-center shrink-0" style="background: var(--md-primary); color: var(--md-on-primary);">Q.${q.questionNumber}</span>
 
                         <div class="m3-card-dropdown-group shrink-0">
                             <button type="button" onclick="window.app.openCardSubjMenu(${q.id}, this)" class="m3-card-dropdown-btn">
                                 <span class="card-subj-label">${shortSubj}</span>
                                 <i class="ph-bold ph-caret-down text-[9px] opacity-75"></i>
                             </button>
-                            <button type="button" onclick="window.app.openCardChapMenu(${q.id}, this)" class="m3-card-dropdown-btn max-w-[130px] sm:max-w-[175px]">
+                            <button type="button" onclick="window.app.openCardChapMenu(${q.id}, this)" class="m3-card-dropdown-btn max-w-[140px] sm:max-w-[180px]">
                                 <span class="card-chap-label truncate">${q.chapter}</span>
                                 <i class="ph-bold ph-caret-down text-[9px] opacity-75 shrink-0"></i>
                             </button>
@@ -3424,7 +3443,7 @@ RULES:
 
             if (list.length === 0) {
                 container.innerHTML = `
-                    <div class="max-w-md mx-auto my-12 m3-dialog p-7 text-center space-y-4">
+                    <div class="max-w-md w-full m-auto m3-dialog p-7 text-center space-y-4">
                         <div class="w-14 h-14 m3-cookie-12 flex items-center justify-center mx-auto" style="background: var(--md-primary-container); color: var(--md-primary);">
                             ${state.isSyncingCloud
                                 ? `<svg class="w-8 h-8" viewBox="0 0 24 24"><path class="m3-morph-loader-path" fill="currentColor" d=""></path></svg>`
@@ -3433,23 +3452,24 @@ RULES:
                         </div>
                         <h2 class="text-base font-extrabold">
                             ${state.isSyncingCloud
-                                ? 'Syncing with GitHub Gist...'
+                                ? 'Loading Questions...'
                                 : state.questions.length === 0
-                                ? 'No Questions Added'
+                                ? 'No Questions Found'
                                 : 'No Matching Questions'}
                         </h2>
                         <div id="emptyStateWaveWrap" class="${state.isSyncingCloud ? 'py-1' : 'hidden'}"></div>
                         <p class="text-xs m3-text-muted leading-relaxed">
                             ${state.isSyncingCloud
-                                ? 'Loading your question bank from cloud storage.'
+                                ? 'Fetching question bank from GitHub Gist.'
                                 : state.questions.length === 0
-                                ? 'Import a PDF or question image, or pull your existing questions from GitHub Gist.'
-                                : 'Clear your search query or change the active status and chapter filters.'}
+                                ? 'Add a PDF or question image, or pull from Gist.'
+                                : 'Clear your search query or change the active filters.'}
                         </p>
+                        ${!state.isSyncingCloud ? `
                         <div class="flex flex-wrap items-center justify-center gap-2.5 pt-1">
-                            ${state.search ? `
-                                <button onclick="window.app.clearSearch()" class="h-9 px-4 m3-btn-tonal text-xs flex items-center gap-1.5">
-                                    <i class="ph-bold ph-x"></i> Clear Search
+                            ${state.search || state.tagFilter !== 'ALL' ? `
+                                <button onclick="window.app.clearSearch(); window.app.setTagFilter('ALL');" class="h-9 px-4 m3-btn-tonal text-xs flex items-center gap-1.5">
+                                    <i class="ph-bold ph-x"></i> Reset Filters
                                 </button>
                             ` : ''}
                             <button onclick="window.app.openUploadModal()" class="h-9 px-4 m3-btn-filled text-xs flex items-center gap-1.5 shadow">
@@ -3459,6 +3479,7 @@ RULES:
                                 <i class="ph-bold ph-cloud-arrow-down"></i> Pull Gist
                             </button>
                         </div>
+                        ` : ''}
                     </div>
                 `;
                 if (state.isSyncingCloud) {
@@ -3468,9 +3489,10 @@ RULES:
                 return;
             }
 
-            const isTwoCol = window.innerWidth >= 900;
+            // Use 2 columns ONLY on wide horizontal screens so vertical tablet screens never clip card headers
+            const isTwoCol = window.innerWidth >= 1024 && !isVerticalScreen();
             if (!isTwoCol) {
-                container.innerHTML = `<div class="flex flex-col gap-4 pb-24">${list.map(buildCardHtml).join('')}</div>`;
+                container.innerHTML = `<div class="flex flex-col gap-4 pb-24 max-w-3xl mx-auto w-full">${list.map(buildCardHtml).join('')}</div>`;
             } else {
                 const colLeft = [], colRight = [];
                 let leftHeight = 0, rightHeight = 0;
@@ -3480,14 +3502,14 @@ RULES:
                     else { colRight.push(buildCardHtml(q)); rightHeight += estH; }
                 });
                 container.innerHTML = `
-                    <div class="grid grid-cols-2 gap-4 items-start pb-24">
+                    <div class="grid grid-cols-2 gap-4 items-start pb-24 w-full">
                         <div class="flex flex-col gap-4 min-w-0">${colLeft.join('')}</div>
                         <div class="flex flex-col gap-4 min-w-0">${colRight.join('')}</div>
                     </div>
                 `;
             }
         }
-                // ===================================================================
+        // ===================================================================
         // LOCKED CONTEXT NAVIGATION & 3-CARD FULL-DIALOG SWIPE CAROUSEL
         // ===================================================================
         function capturePadNavigationContext(currentQId) {
@@ -3514,12 +3536,12 @@ RULES:
             const hasPrev = idx > 0;
             const hasNext = idx < total - 1;
             const timerIconClass = state.timerPaused
-                ? 'popup-timer-icon ph-fill ph-play text-emerald-400 text-xs'
-                : 'popup-timer-icon ph-fill ph-pause text-amber-400 text-xs';
+                ? 'popup-timer-icon ph-fill ph-play text-emerald-500 text-xs'
+                : 'popup-timer-icon ph-fill ph-pause text-amber-500 text-xs';
 
             return `
             <div class="popup-carousel-card" onclick="event.stopPropagation()">
-                <div class="px-4 py-3 m3-surface-low flex items-center justify-between gap-2 shrink-0 flex-wrap">
+                <div class="px-3.5 py-2.5 m3-surface-low border-b border-[var(--md-outline-variant)] flex items-center justify-between gap-2 shrink-0 flex-wrap">
                     <div class="flex items-center gap-2 min-w-0">
                         <div class="m3-icon-group shrink-0">
                             <button type="button" ${!hasPrev ? 'disabled' : ''} onclick="window.app.navigatePopupQuestion(-1)" class="m3-icon-group-btn" title="Previous (Left Arrow / Swipe Right)">
@@ -3534,17 +3556,17 @@ RULES:
                     </div>
 
                     <div class="flex items-center gap-1.5 shrink-0 ml-auto flex-wrap">
-                        <button type="button" onclick="window.app.toggleQuestionTimer()" ondblclick="window.app.resetQuestionTimer()" class="h-9 px-2.5 rounded-full m3-surface-high text-[11px] font-mono font-extrabold flex items-center gap-1 shrink-0" title="Click: Start / Pause Timer • Double-Click: Reset">
+                        <button type="button" onclick="window.app.toggleQuestionTimer()" ondblclick="window.app.resetQuestionTimer()" class="h-9 px-2.5 rounded-full m3-surface-high border border-[var(--md-outline-variant)] text-[11px] font-mono font-extrabold flex items-center gap-1 shrink-0" title="Click: Start/Pause (T) • Double-Click: Reset">
                             <i class="${timerIconClass}"></i>
                             <span class="popup-timer-text">${formatTimeSeconds(q.timeSpent || 0)}</span>
                         </button>
 
                         <div class="m3-icon-group shrink-0">
-                            <button type="button" onclick="window.app.togglePopupQuestionBool('starred', ${q.id})" class="m3-icon-group-btn gap-1 text-xs font-bold ${q.starred ? 'active-state' : ''}" title="Star">
+                            <button type="button" onclick="window.app.togglePopupQuestionBool('starred', ${q.id})" class="m3-icon-group-btn gap-1 text-xs font-bold ${q.starred ? 'active-state' : ''}" title="Star (F)">
                                 <i class="${q.starred ? 'ph-fill ph-star' : 'ph-bold ph-star'}"></i>
                                 <span class="hidden md:inline">Star</span>
                             </button>
-                            <button type="button" onclick="window.app.togglePopupQuestionBool('solved', ${q.id})" class="m3-icon-group-btn gap-1 text-xs font-bold ${q.solved ? 'active-state' : ''}" title="Solved">
+                            <button type="button" onclick="window.app.togglePopupQuestionBool('solved', ${q.id})" class="m3-icon-group-btn gap-1 text-xs font-bold ${q.solved ? 'active-state' : ''}" title="Solved (S)">
                                 <i class="${q.solved ? 'ph-fill ph-check-circle' : 'ph-bold ph-circle'}"></i>
                                 <span class="hidden md:inline">Solved</span>
                             </button>
@@ -3555,15 +3577,15 @@ RULES:
                         </div>
 
                         <div class="m3-icon-group shrink-0">
-                            <button type="button" onclick="window.app.closeImagePopup(); window.app.openSplitModal(${q.id});" class="m3-icon-group-btn gap-1 text-xs font-bold">
+                            <button type="button" onclick="window.app.closeImagePopup(); window.app.openSplitModal(${q.id});" class="m3-icon-group-btn gap-1 text-xs font-bold" title="Split or Trim">
                                 <i class="ph-bold ph-scissors"></i>
                                 <span class="hidden sm:inline">Split</span>
                             </button>
-                            <button type="button" onclick="window.app.closeImagePopup(true); window.app.openScratchpad(${q.id}, true);" class="m3-icon-group-btn gap-1 text-xs font-bold">
+                            <button type="button" onclick="window.app.openScratchpadFromPopup(${q.id})" class="m3-icon-group-btn gap-1 text-xs font-bold" title="Open Whiteboard (Horizontal Screen Only)">
                                 <i class="ph-bold ph-pencil-line"></i>
                                 <span class="hidden sm:inline">Whiteboard</span>
                             </button>
-                            <button type="button" onclick="window.app.closeImagePopup()" class="m3-icon-group-btn gap-1 text-xs font-extrabold active-state">
+                            <button type="button" onclick="window.app.closeImagePopup()" class="m3-icon-group-btn gap-1 text-xs font-extrabold active-state" title="Close (Esc)">
                                 <i class="ph-bold ph-x"></i>
                                 <span class="hidden sm:inline">Close</span>
                             </button>
@@ -4096,11 +4118,11 @@ RULES:
 
             if (starBtn && starIcon) {
                 starBtn.classList.toggle('active-state', Boolean(q.starred));
-                starIcon.className = q.starred ? 'ph-fill ph-star' : 'ph-bold ph-star';
+                starIcon.className = q.starred ? 'ph-fill ph-star text-xs' : 'ph-bold ph-star text-xs';
             }
             if (solvedBtn && solvedIcon) {
                 solvedBtn.classList.toggle('active-state', Boolean(q.solved));
-                solvedIcon.className = q.solved ? 'ph-fill ph-check-circle' : 'ph-bold ph-circle';
+                solvedIcon.className = q.solved ? 'ph-fill ph-check-circle text-xs' : 'ph-bold ph-circle text-xs';
             }
             if (tagBtn && tagLbl) {
                 tagBtn.classList.toggle('active-state', Boolean(q.noteTag));
@@ -4486,7 +4508,6 @@ RULES:
                 ctx.strokeRect(selBounds.minX, selBounds.minY, bw, bh);
                 ctx.setLineDash([]);
 
-                // Top Rotation Stalk & Handle
                 ctx.beginPath();
                 ctx.moveTo(topMidX, selBounds.minY);
                 ctx.lineTo(topMidX, rotHandleY);
@@ -4500,7 +4521,6 @@ RULES:
                 ctx.fill();
                 ctx.stroke();
 
-                // 4 Corner Resize Handles
                 const corners = [
                     { x: selBounds.minX, y: selBounds.minY },
                     { x: selBounds.maxX, y: selBounds.minY },
@@ -5050,6 +5070,14 @@ RULES:
                 ];
                 openCustomDropdown(anchorEl, opts, state.paper, (val) => this.setPaper(val));
             },
+            openSortMenu(anchorEl) {
+                openCustomDropdown(anchorEl, SORT_MODES, state.sortBy, (val, _lbl, picked) => {
+                    state.sortBy = val;
+                    const el = document.getElementById('sortDropdownLabel');
+                    if (el && picked) el.textContent = picked.short;
+                    sortAndRefreshQuestions(false);
+                });
+            },
             openCardSubjMenu(id, anchorEl) {
                 const q = state.questions.find(i => i.id === Number(id));
                 if (!q) return;
@@ -5121,7 +5149,6 @@ RULES:
                 this.openImagePopup(pick.id);
             },
 
-            // Manual Timer Controls: Starts ONLY when user clicks
             toggleQuestionTimer() {
                 state.timerPaused = !state.timerPaused;
                 if (!state.timerPaused && !state.timerInterval) {
@@ -5168,6 +5195,10 @@ RULES:
                 this.toggleDrawer(false);
                 renderAll();
             },
+            setTagFilter(tag) {
+                state.tagFilter = tag || 'ALL';
+                renderAll();
+            },
             setStatus(st) { state.status = st; renderAll(); },
             setPaper(p) { state.paper = p; renderAll(); },
             setSearch(v) {
@@ -5200,18 +5231,18 @@ RULES:
                 if (!document.fullscreenElement) {
                     document.documentElement.requestFullscreen().catch(err => toast(`Fullscreen error: ${err.message}`, 'warn'));
                     if (icon1) icon1.className = 'ph-bold ph-corners-in text-sm';
-                    if (icon2) icon2.className = 'ph-bold ph-corners-in';
+                    if (icon2) icon2.className = 'ph-bold ph-corners-in text-xs';
                 } else {
                     document.exitFullscreen().catch(() => {});
                     if (icon1) icon1.className = 'ph-bold ph-corners-out text-sm';
-                    if (icon2) icon2.className = 'ph-bold ph-corners-out';
+                    if (icon2) icon2.className = 'ph-bold ph-corners-out text-xs';
                 }
             },
 
             pushToCloudGist,
             pullFromCloudGist,
             handleCloudBadgeClick() {
-                if (!getGithubToken()) this.openSettingsModal(false, 'KEYS');
+                if (!getGithubToken()) pullFromCloudGist(true);
                 else pushToCloudGist(true);
             },
             toggleVisibility(inputId, iconId) {
@@ -5223,7 +5254,6 @@ RULES:
                 icon.className = isPwd ? 'ph-bold ph-eye-slash text-base' : 'ph-bold ph-eye text-base';
             },
 
-            // Unified PDF & Image Import Modal
             openUploadModal(initialImageBlob = null) {
                 closeCustomDropdown();
                 if (state.isExtracting && state.isUploadMinimized) {
@@ -5243,8 +5273,8 @@ RULES:
                 state.importMode = null;
                 state.pdfDoc = null;
                 state.importRawImg = null;
-                document.getElementById('selectedFileLabel').textContent = 'Select PDF or Image File (or press Ctrl+V)';
-                document.getElementById('selectedFileTypeBadge').textContent = 'Automatically detects PDF documents and photos/screenshots';
+                document.getElementById('selectedFileLabel').textContent = 'Select PDF or Image File';
+                document.getElementById('selectedFileTypeBadge').textContent = 'Supports PDF papers and question images';
                 document.getElementById('unifiedFileIcon').className = 'ph-duotone ph-file-plus text-2xl';
                 document.getElementById('pdfSetupSubView').classList.add('hidden');
                 document.getElementById('pdfSetupSubView').classList.remove('grid');
@@ -5252,12 +5282,6 @@ RULES:
                 document.getElementById('startExtractBtn').disabled = true;
                 document.getElementById('startExtractBtnLbl').textContent = 'Import';
                 document.getElementById('uploadModal').classList.remove('hidden');
-            },
-            openImageImportModal(blob = null) {
-                this.openUploadModal(blob);
-            },
-            closeImageImportModal() {
-                this.closeUploadModal();
             },
             minimizeUploadModal() {
                 if (!state.isExtracting) return;
@@ -5387,7 +5411,7 @@ RULES:
                 } finally {
                     state.isImportingImage = false;
                     if (btn) btn.disabled = false;
-                    if (lbl) lbl.textContent = 'Add Image Question';
+                    if (lbl) lbl.textContent = 'Add Image';
                 }
             },
 
@@ -5405,6 +5429,14 @@ RULES:
                 syncUrlHashWithActiveQuestion(q);
                 renderPopupCarouselSlots();
                 document.getElementById('imagePopupModal').classList.remove('hidden');
+            },
+            openScratchpadFromPopup(id) {
+                if (isVerticalScreen()) {
+                    toast('Whiteboard is only allowed on horizontal screens.', 'warn');
+                    return;
+                }
+                this.closeImagePopup(true);
+                this.openScratchpad(id, true);
             },
             navigatePopupQuestion(dir) {
                 closeCustomDropdown();
@@ -5446,10 +5478,10 @@ RULES:
                     backBtn.classList.remove('hidden'); backBtn.classList.add('flex');
                     headerIcon.classList.add('hidden');
                     const titles = {
-                        KEYS: 'API Keys & Cloud',
+                        KEYS: 'API Keys',
                         THEME: 'Appearance',
                         BACKUP: 'Sync & Data',
-                        SCANNER: 'Answer Keys, Hints & Scanner'
+                        SCANNER: 'Solver & Crop Margins'
                     };
                     titleEl.textContent = titles[pageKey] || 'Settings';
                 }
@@ -5466,7 +5498,6 @@ RULES:
                 document.getElementById('padTopInput').value = pads.padTop;
                 document.getElementById('padBottomInput').value = pads.padBottom;
                 document.getElementById('githubTokenInput').value = getGithubToken();
-                document.getElementById('githubGistIdInput').value = getGithubGistId();
                 document.getElementById('cloudAutoSyncCheckbox').checked = isCloudAutoSyncEnabled();
                 const autoSolveChk = document.getElementById('autoSolveHintsCheckbox');
                 if (autoSolveChk) autoSolveChk.checked = isAutoSolveHintsEnabled();
@@ -5493,7 +5524,6 @@ RULES:
                 const padTop = Math.max(0, Number(document.getElementById('padTopInput').value) ?? 10);
                 const padBottom = Math.max(0, Number(document.getElementById('padBottomInput').value) ?? 10);
                 const ghToken = document.getElementById('githubTokenInput').value.trim();
-                const ghGistId = document.getElementById('githubGistIdInput').value.trim();
                 const autoSync = document.getElementById('cloudAutoSyncCheckbox').checked;
                 const autoSolve = document.getElementById('autoSolveHintsCheckbox')?.checked ?? true;
 
@@ -5502,7 +5532,6 @@ RULES:
                 localStorage.setItem('jee_pad_top', String(padTop));
                 localStorage.setItem('jee_pad_bottom', String(padBottom));
                 localStorage.setItem('jee_github_pat', ghToken);
-                localStorage.setItem('jee_github_gist_id', ghGistId);
                 localStorage.setItem('jee_cloud_autosync', String(autoSync));
                 localStorage.setItem('jee_auto_solve_hints', String(autoSolve));
 
@@ -5721,10 +5750,14 @@ RULES:
                 this.closeSplitModal();
             },
 
-            // Fullscreen Whiteboard
+            // Fullscreen Whiteboard (Denied on Vertical Orientation)
             getActivePadId: () => state.activePadId,
             openScratchpad(id, keepContext = false) {
                 closeCustomDropdown();
+                if (isVerticalScreen()) {
+                    toast('Whiteboard is only allowed on horizontal screens.', 'warn');
+                    return;
+                }
                 if (state.activePadId && !state.wbIsLoading) {
                     syncActiveBoardToQuestionGist(true);
                 }
@@ -5745,6 +5778,7 @@ RULES:
                 syncUrlHashWithActiveQuestion(q);
                 refreshScratchpadTopBarAndHints();
                 document.getElementById('scratchpadModal').classList.remove('hidden');
+                checkWhiteboardOrientationLock();
                 loadQuestionBoardInBackground(q);
             },
             closeScratchpad() {
@@ -5808,6 +5842,18 @@ RULES:
                 } finally {
                     if (btnLbl) btnLbl.textContent = 'Generate';
                 }
+            },
+            exportWhiteboardPng() {
+                const q = state.questions.find(i => i.id === Number(state.activePadId));
+                const canvas = document.getElementById('stylusCanvas');
+                if (!canvas || !q) return;
+                const a = document.createElement('a');
+                a.href = canvas.toDataURL('image/png');
+                a.download = `Q${q.questionNumber}-${slugifyRoutePart(q.subject)}-solution.png`;
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                toast('Exported Whiteboard PNG.', 'success');
             },
             setWhiteboardTool(tool) {
                 if (state.wbIsLoading && tool !== 'PAN') return;
@@ -6159,6 +6205,38 @@ RULES:
                 }
             }
 
+            // Quick Keyboard Shortcuts in Preview & Whiteboard: S (Solved), F (Star), T (Timer), H (Hint), A (Answer)
+            if ((isScratchpadOpen || isImagePopupOpen) && !e.ctrlKey && !e.metaKey && !e.altKey) {
+                const k = e.key.toLowerCase();
+                if (k === 's') {
+                    e.preventDefault();
+                    if (isScratchpadOpen) window.app.togglePadQuestionBool('solved');
+                    else window.app.togglePopupQuestionBool('solved');
+                    return;
+                }
+                if (k === 'f') {
+                    e.preventDefault();
+                    if (isScratchpadOpen) window.app.togglePadQuestionBool('starred');
+                    else window.app.togglePopupQuestionBool('starred');
+                    return;
+                }
+                if (k === 't') {
+                    e.preventDefault();
+                    window.app.toggleQuestionTimer();
+                    return;
+                }
+                if (isScratchpadOpen && k === 'h') {
+                    e.preventDefault();
+                    window.app.togglePadHint();
+                    return;
+                }
+                if (isScratchpadOpen && k === 'a') {
+                    e.preventDefault();
+                    window.app.togglePadAnswer();
+                    return;
+                }
+            }
+
             if (isScratchpadOpen) {
                 if (e.code === 'Space') isSpacePressedGlobal = true;
                 if ((e.key === 'Delete' || e.key === 'Backspace') && state.wbSelectedIds.length > 0 && !state.wbIsLoading) {
@@ -6183,6 +6261,7 @@ RULES:
         let resizeTimer = null;
         window.addEventListener('resize', () => {
             window.app.closeCustomDropdown();
+            checkWhiteboardOrientationLock();
             if (!document.getElementById('scratchpadModal').classList.contains('hidden')) {
                 renderWhiteboardCanvas();
             }
@@ -6201,9 +6280,8 @@ RULES:
                 localStorage.getItem('jee_m3_theme_mode') || 'dark'
             );
             updateApiKeyIndicator();
-            updateCloudStatusUI('idle');
             renderAll();
-            if (getGithubToken()) await pullFromCloudGist(false);
+            await pullFromCloudGist(false);
             checkAndOpenQuestionFromUrlHash();
         });
     </script>
