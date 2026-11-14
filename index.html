@@ -1014,7 +1014,7 @@
                         <div class="p-4 m3-group-item space-y-1.5">
                             <label class="block text-xs font-bold">Gemini Vision & Solver Model</label>
                             <button type="button" id="geminiModelDropdownBtn" onclick="window.app.openGeminiModelMenu(this)" class="w-full h-10 px-4 m3-surface-low rounded-full flex items-center justify-between text-xs font-bold">
-                                <span id="geminiModelDropdownLabel" class="truncate">gemini-hydrogen (Default • Free Tier Protected)</span>
+                                <span id="geminiModelDropdownLabel" class="truncate">gemini-4-hydrogen (Default • Free Tier Protected)</span>
                                 <i class="ph-bold ph-caret-down text-xs m3-text-muted"></i>
                             </button>
 
@@ -1768,7 +1768,7 @@
             ]
         };
         const GEMINI_MODELS = [
-            { value: 'gemini-hydrogen', label: 'gemini-hydrogen (Default • Free Tier Protected)' },
+            { value: 'gemini-4-hydrogen', label: 'gemini-4-hydrogen (Default • Free Tier Protected)' },
             { value: 'gemini-3.5-flash-lite', label: 'gemini-3.5-flash-lite (Fast & Accurate)' },
             { value: 'gemini-2.5-pro', label: 'gemini-2.5-pro (Highest Precision Layout Detection)' },
             { value: 'gemini-2.5-flash', label: 'gemini-2.5-flash (Balanced Speed & Vision Precision)' }
@@ -1827,7 +1827,7 @@
             activePopupId: null,
             isPopupAnimating: false,
             activeSettingsPage: 'HOME',
-            selectedModel: localStorage.getItem('jee_gemini_model') || 'gemini-hydrogen',
+            selectedModel: localStorage.getItem('jee_gemini_model') || 'gemini-4-hydrogen',
             rateLimit: {
                 dateIST: '',
                 dailyCount: 0,
@@ -1965,7 +1965,7 @@
         }
 
         const getApiKey = () => (localStorage.getItem('jee_gemini_api_key') || '').trim();
-        const getSelectedModel = () => state.selectedModel || localStorage.getItem('jee_gemini_model') || 'gemini-hydrogen';
+        const getSelectedModel = () => state.selectedModel || localStorage.getItem('jee_gemini_model') || 'gemini-4-hydrogen';
         const getVerticalPads = () => ({
             padTop: Number(localStorage.getItem('jee_pad_top') ?? 10),
             padBottom: Number(localStorage.getItem('jee_pad_bottom') ?? 10)
