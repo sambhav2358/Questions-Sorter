@@ -1014,9 +1014,10 @@
                         <div class="p-4 m3-group-item space-y-1.5">
                             <label class="block text-xs font-bold">Gemini Vision & Solver Model</label>
                             <button type="button" id="geminiModelDropdownBtn" onclick="window.app.openGeminiModelMenu(this)" class="w-full h-10 px-4 m3-surface-low rounded-full flex items-center justify-between text-xs font-bold">
-                                <span id="geminiModelDropdownLabel" class="truncate">gemini-3.5-flash-lite (Default • Fast & Accurate)</span>
+                                <span id="geminiModelDropdownLabel" class="truncate">gemini-hydrogen (Default • Free Tier Protected)</span>
                                 <i class="ph-bold ph-caret-down text-xs m3-text-muted"></i>
                             </button>
+
                         </div>
 
                         <div class="p-4 m3-group-item grid grid-cols-2 gap-3">
@@ -1766,12 +1767,13 @@
                 "Quadratic Equations & Complex Numbers", "Sequences & Series", "Permutations & Combinations", "Matrices & Determinants", "Limits, Continuity & Differentiability", "Application of Derivatives (AOD)", "Indefinite & Definite Integration", "Differential Equations & Area", "Vectors & 3D Geometry", "Probability & Trigonometry"
             ]
         };
-
         const GEMINI_MODELS = [
-            { value: 'gemini-3.5-flash-lite', label: 'gemini-3.5-flash-lite (Default • Fast & Accurate)' },
+            { value: 'gemini-hydrogen', label: 'gemini-hydrogen (Default • Free Tier Protected)' },
+            { value: 'gemini-3.5-flash-lite', label: 'gemini-3.5-flash-lite (Fast & Accurate)' },
             { value: 'gemini-2.5-pro', label: 'gemini-2.5-pro (Highest Precision Layout Detection)' },
             { value: 'gemini-2.5-flash', label: 'gemini-2.5-flash (Balanced Speed & Vision Precision)' }
         ];
+
 
         const SORT_MODES = [
             { value: 'Q_NUM', short: 'Q.#', label: 'Question Number' },
@@ -1825,7 +1827,13 @@
             activePopupId: null,
             isPopupAnimating: false,
             activeSettingsPage: 'HOME',
-            selectedModel: localStorage.getItem('jee_gemini_model') || 'gemini-3.5-flash-lite',
+            selectedModel: localStorage.getItem('jee_gemini_model') || 'gemini-hydrogen',
+            rateLimit: {
+                dateIST: '',
+                dailyCount: 0,
+                recentTimestamps: [] // Epoch ms of requests in the last 60s
+            },
+
             importMode: null,
             pdfDoc: null,
             isExtracting: false,
@@ -1957,7 +1965,7 @@
         }
 
         const getApiKey = () => (localStorage.getItem('jee_gemini_api_key') || '').trim();
-        const getSelectedModel = () => state.selectedModel || localStorage.getItem('jee_gemini_model') || 'gemini-3.5-flash-lite';
+        const getSelectedModel = () => state.selectedModel || localStorage.getItem('jee_gemini_model') || 'gemini-hydrogen';
         const getVerticalPads = () => ({
             padTop: Number(localStorage.getItem('jee_pad_top') ?? 10),
             padBottom: Number(localStorage.getItem('jee_pad_bottom') ?? 10)
@@ -2368,6 +2376,171 @@
             e.target.value = '';
         }
 
+                // ===================================================================
+        // STRICT IST RATE LIMITER (MAX 19/DAY IST & MAX 4/MINUTE, GIST-SYNCED)
+        // ===================================================================
+        const MAX_DAILY_REQ_IST = 19;
+        const MAX_RPM_REQ = 4;
+
+        function getCurrentISTDateString() {
+            // IST is UTC + 5:30
+            const now = new Date();
+            const utcMs = now.getTime() + (now.getTimezoneOffset() * 60000);
+            const istDate = new Date(utcMs + (5.5 * 3600000));
+            return istDate.toISOString().slice(0, 10); // YYYY-MM-DD in IST
+        }
+
+        function normalizeRateLimitObj(raw) {
+            const todayIST = getCurrentISTDateString();
+            const nowMs = Date.now();
+            if (!raw || raw.dateIST !== todayIST) {
+                return { dateIST: todayIST, dailyCount: 0, recentTimestamps: [] };
+            }
+            const recent = Array.isArray(raw.recentTimestamps)
+                ? raw.recentTimestamps.map(Number).filter(ts => nowMs - ts < 60000)
+                : [];
+            return {
+                dateIST: todayIST,
+                dailyCount: Math.max(0, Number(raw.dailyCount) || 0),
+                recentTimestamps: recent
+            };
+        }
+
+        async function fetchRateLimitFromGist() {
+            const gistId = getGithubGistId();
+            const token = getGithubToken();
+            const headers = { 'Accept': 'application/vnd.github+json' };
+            if (token) headers['Authorization'] = `Bearer ${token}`;
+
+            try {
+                const res = await fetch(`https://api.github.com/gists/${gistId}?t=${Date.now()}`, {
+                    headers,
+                    cache: 'no-store'
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    const manifestStr = data.files?.['jee_vault_manifest.json']?.content;
+                    if (manifestStr) {
+                        const manifest = JSON.parse(manifestStr);
+                        if (manifest.rateLimit) {
+                            const remoteRL = normalizeRateLimitObj(manifest.rateLimit);
+                            const localRL = normalizeRateLimitObj(state.rateLimit);
+                            state.rateLimit = {
+                                dateIST: remoteRL.dateIST,
+                                dailyCount: Math.max(remoteRL.dailyCount, localRL.dailyCount),
+                                recentTimestamps: Array.from(new Set([...remoteRL.recentTimestamps, ...localRL.recentTimestamps])).sort()
+                            };
+                            localStorage.setItem('jee_rate_limit_cache', JSON.stringify(state.rateLimit));
+                            return state.rateLimit;
+                        }
+                    }
+                }
+            } catch (e) {
+                console.warn('Could not verify rate limit from Gist, falling back to local cache:', e);
+            }
+            const cached = JSON.parse(localStorage.getItem('jee_rate_limit_cache') || 'null');
+            state.rateLimit = normalizeRateLimitObj(cached || state.rateLimit);
+            return state.rateLimit;
+        }
+
+        async function saveRateLimitToGist() {
+            localStorage.setItem('jee_rate_limit_cache', JSON.stringify(state.rateLimit));
+            const token = getGithubToken();
+            if (!token) return;
+
+            try {
+                const gistId = getGithubGistId();
+                const paperGroups = {};
+                state.questions.forEach(q => {
+                    const pName = q.paperName || 'Default Paper';
+                    (paperGroups[pName] = paperGroups[pName] || []).push(q);
+                });
+
+                const manifestPayload = {
+                    app: 'JEE Sorter Cloud Vault',
+                    updatedAt: new Date().toISOString(),
+                    totalQuestions: state.questions.length,
+                    rateLimit: state.rateLimit,
+                    papers: Object.keys(paperGroups).map(p => ({
+                        paperName: p,
+                        fileName: sanitizePaperFilename(p),
+                        count: paperGroups[p].length
+                    }))
+                };
+
+                await fetch(`https://api.github.com/gists/${gistId}`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Accept': 'application/vnd.github+json',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        files: {
+                            'jee_vault_manifest.json': {
+                                content: JSON.stringify(manifestPayload, null, 2)
+                            }
+                        }
+                    })
+                });
+            } catch (e) {
+                console.warn('Failed to push rateLimit to Gist:', e);
+            }
+        }
+
+        async function executeRateLimitedGeminiFetch(apiUrl, payload, abortSignal = null) {
+            while (true) {
+                if (abortSignal?.aborted) throw new DOMException('Aborted', 'AbortError');
+
+                // 1. Always verify latest usage from GitHub Gist before sending request
+                await fetchRateLimitFromGist();
+
+                // 2. Check Daily Limit (19 requests/day IST)
+                if (state.rateLimit.dailyCount >= MAX_DAILY_REQ_IST) {
+                    const msg = `Daily limit reached (${state.rateLimit.dailyCount}/${MAX_DAILY_REQ_IST} requests for ${state.rateLimit.dateIST} IST). Paused until midnight IST.`;
+                    toast(msg, 'warn');
+                    throw new Error(msg);
+                }
+
+                // 3. Check Per-Minute Limit (4 requests/minute)
+                const nowMs = Date.now();
+                state.rateLimit.recentTimestamps = state.rateLimit.recentTimestamps.filter(ts => nowMs - ts < 60000);
+
+                if (state.rateLimit.recentTimestamps.length >= MAX_RPM_REQ) {
+                    const oldestInWindow = state.rateLimit.recentTimestamps[0];
+                    const waitMs = Math.max(1000, 60500 - (nowMs - oldestInWindow));
+                    const waitSec = Math.ceil(waitMs / 1000);
+                    toast(`Rate limit: 4 req/min reached. Cooling down for ${waitSec}s...`, 'info');
+
+                    await new Promise((resolve, reject) => {
+                        const timer = setTimeout(resolve, waitMs);
+                        if (abortSignal) {
+                            abortSignal.addEventListener('abort', () => {
+                                clearTimeout(timer);
+                                reject(new DOMException('Aborted', 'AbortError'));
+                            }, { once: true });
+                        }
+                    });
+                    continue; // Re-verify after waiting
+                }
+
+                // 4. Record this request immediately & save to Gist
+                state.rateLimit.dailyCount += 1;
+                state.rateLimit.recentTimestamps.push(Date.now());
+                await saveRateLimitToGist();
+                toast(`Gemini Request ${state.rateLimit.dailyCount}/${MAX_DAILY_REQ_IST} today (IST)`, 'info');
+
+                // 5. Execute the actual Gemini API call
+                return await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload),
+                    signal: abortSignal
+                });
+            }
+        }
+
+        
         async function classifyAndSolveImportedImageWithGemini(base64Jpeg) {
             const apiKey = getApiKey();
             if (!apiKey) return null;
@@ -2401,11 +2574,7 @@
             };
 
             try {
-                const res = await fetch(apiUrl, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
+                const res = await executeRateLimitedGeminiFetch(apiUrl, payload);
                 if (!res.ok) return null;
                 const data = await res.json();
                 const txt = data.candidates?.[0]?.content?.parts?.[0]?.text;
@@ -2449,14 +2618,10 @@ Analyze this JEE question image (${q.subject} - ${q.chapter}).
                 }
             };
 
-            let delay = 1000;
+                        let delay = 1000;
             for (let attempt = 0; attempt < 3; attempt++) {
                 try {
-                    const res = await fetch(apiUrl, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(payload)
-                    });
+                    const res = await executeRateLimitedGeminiFetch(apiUrl, payload);
                     if (!res.ok) throw new Error(`HTTP ${res.status}`);
                     const data = await res.json();
                     const txt = data.candidates?.[0]?.content?.parts?.[0]?.text;
@@ -2467,7 +2632,7 @@ Analyze this JEE question image (${q.subject} - ${q.chapter}).
                         hint: String(parsed.hint || '').trim()
                     };
                 } catch (e) {
-                    if (attempt === 2) throw e;
+                    if (String(e.message).includes('Daily limit reached') || attempt === 2) throw e;
                     await new Promise(r => setTimeout(r, delay));
                     delay *= 2;
                 }
@@ -2532,6 +2697,7 @@ Analyze this JEE question image (${q.subject} - ${q.chapter}).
                         }
                     } catch (err) {
                         console.warn(`Solver skipped Q.${liveQ.questionNumber}:`, err);
+                        if (String(err.message).includes('Daily limit reached')) break;
                     }
                 }
 
@@ -2821,12 +2987,13 @@ Analyze this JEE question image (${q.subject} - ${q.chapter}).
                     (paperGroups[pName] = paperGroups[pName] || []).push(q);
                 });
 
-                const filesPayload = {
+                 const filesPayload = {
                     'jee_vault_manifest.json': {
                         content: JSON.stringify({
                             app: 'JEE Sorter Cloud Vault',
                             updatedAt: new Date().toISOString(),
                             totalQuestions: state.questions.length,
+                            rateLimit: normalizeRateLimitObj(state.rateLimit),
                             papers: Object.keys(paperGroups).map(p => ({
                                 paperName: p,
                                 fileName: sanitizePaperFilename(p),
@@ -2901,6 +3068,16 @@ Analyze this JEE question image (${q.subject} - ${q.chapter}).
                 if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
                 const gistData = await res.json();
+                const manifestContent = gistData.files?.['jee_vault_manifest.json']?.content;
+                if (manifestContent) {
+                    try {
+                        const parsedManifest = JSON.parse(manifestContent);
+                        if (parsedManifest.rateLimit) {
+                            state.rateLimit = normalizeRateLimitObj(parsedManifest.rateLimit);
+                            localStorage.setItem('jee_rate_limit_cache', JSON.stringify(state.rateLimit));
+                        }
+                    } catch (_) {}
+                }
                 const restoredQuestions = [];
                 let anyMissingUid = false;
 
@@ -3210,18 +3387,13 @@ CRITICAL RULES FOR ZERO TEXT CLIPPING & ZERO CLUBBING:
             let delay = 1200;
             for (let attempt = 0; attempt < 3; attempt++) {
                 try {
-                    const res = await fetch(apiUrl, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(payload),
-                        signal: abortSignal
-                    });
+                    const res = await executeRateLimitedGeminiFetch(apiUrl, payload, abortSignal);
                     if (!res.ok) throw new Error(`HTTP ${res.status}: ${(await res.text()).slice(0, 120)}`);
                     const data = await res.json();
                     const txt = data.candidates?.[0]?.content?.parts?.[0]?.text;
                     return txt ? JSON.parse(txt) : { questions: [] };
                 } catch (e) {
-                    if (e.name === 'AbortError' || state.cancelExtractionRequested) throw e;
+                    if (e.name === 'AbortError' || state.cancelExtractionRequested || String(e.message).includes('Daily limit reached')) throw e;
                     if (attempt === 2) throw e;
                     await new Promise(r => setTimeout(r, delay));
                     delay *= 2;
