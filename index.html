@@ -98,7 +98,7 @@
             border-radius: 9999px !important;
         }
 
-        /* Connected Icon Button Groups (Compact Zero-Scroll Sizing) */
+        /* Connected Icon Button Groups */
         .m3-icon-group {
             display: inline-flex;
             align-items: center;
@@ -757,6 +757,7 @@
             </div>
         </div>
     </div>
+
     <!-- =================================================================== -->
     <!-- MODAL 1: PHONE-STYLE M3 EXPRESSIVE SETTINGS                         -->
     <!-- =================================================================== -->
@@ -780,8 +781,8 @@
 
             <div class="p-4 overflow-y-auto flex-1 space-y-3">
                 <div id="apiKeyMissingAlert" class="hidden p-3.5 rounded-3xl m3-primary-pill text-xs leading-relaxed">
-                    <strong class="font-extrabold block mb-0.5">API Key Required for PDF Scanning:</strong>
-                    Please enter your Google AI Studio API Key below to extract and stitch questions from PDF files.
+                    <strong class="font-extrabold block mb-0.5">API Key Required for AI Solver:</strong>
+                    Please enter your Google AI Studio API Key below to classify chapters and generate 1-line hints.
                 </div>
 
                 <!-- PAGE 0: SEGMENTED GROUPED LIST HUB -->
@@ -832,14 +833,14 @@
                             </div>
                             <div class="min-w-0">
                                 <div class="font-extrabold text-sm">AI Answer Key, Hints & Scanner</div>
-                                <div class="text-xs m3-text-muted truncate">1-Req/Question Answer Key & 1-Line Hint Generator + Crop Margins</div>
+                                <div class="text-xs m3-text-muted truncate">Rate-Limit Protected Solver (Max 19/day IST, 4/min) + Margins</div>
                             </div>
                         </div>
                         <i class="ph-bold ph-caret-right m3-text-muted text-base shrink-0"></i>
                     </button>
                 </div>
 
-                <!-- PAGE 1: API KEYS (Hardcoded Gist ID: 9259f71c65f635b809f348a7216b6e53) -->
+                <!-- PAGE 1: API KEYS -->
                 <div id="settingsPage_KEYS" class="hidden space-y-3">
                     <div class="m3-group-list">
                         <div class="p-4 m3-group-item space-y-1.5">
@@ -1008,16 +1009,15 @@
                             </div>
 
                             <div id="settingsSolverWavyBar" class="hidden pt-1"></div>
-                            <p id="settingsSolverStatusInfo" class="text-[11px] m3-text-muted font-mono">Compatible with all existing Cloud Gist questions.</p>
+                            <p id="settingsSolverStatusInfo" class="text-[11px] m3-text-muted font-mono">Protected: Max 19 req/day (IST) & Max 4 req/min synced in Gist.</p>
                         </div>
 
                         <div class="p-4 m3-group-item space-y-1.5">
-                            <label class="block text-xs font-bold">Gemini Vision & Solver Model</label>
+                            <label class="block text-xs font-bold">Gemini Vision & Solver Model (Auto-Fallbacks on 404)</label>
                             <button type="button" id="geminiModelDropdownBtn" onclick="window.app.openGeminiModelMenu(this)" class="w-full h-10 px-4 m3-surface-low rounded-full flex items-center justify-between text-xs font-bold">
-                                <span id="geminiModelDropdownLabel" class="truncate">gemini-4-hydrogen (Default • Free Tier Protected)</span>
+                                <span id="geminiModelDropdownLabel" class="truncate">gemini-2.5-flash (Default • Auto-Fallback Protected)</span>
                                 <i class="ph-bold ph-caret-down text-xs m3-text-muted"></i>
                             </button>
-
                         </div>
 
                         <div class="p-4 m3-group-item grid grid-cols-2 gap-3">
@@ -1044,7 +1044,7 @@
     </div>
 
     <!-- =================================================================== -->
-    <!-- MODAL 2: UNIFIED IMPORT DIALOG (AUTO-DETECTS PDF OR IMAGE / PASTE)  -->
+    <!-- MODAL 2: UNIFIED IMPORT DIALOG (1-COL & 2-COL PDF + IMAGE DESKEW)   -->
     <!-- =================================================================== -->
     <div id="uploadModal" onclick="if(event.target === this && !window.app.isExtracting()) window.app.closeUploadModal()" class="fixed inset-0 bg-black/75 backdrop-blur-sm z-50 hidden flex items-center justify-center p-3 sm:p-6">
         <div class="m3-dialog max-w-2xl w-full max-h-[92vh] flex flex-col overflow-hidden">
@@ -1055,7 +1055,7 @@
                     </div>
                     <div class="min-w-0">
                         <h3 id="unifiedModalTitle" class="font-extrabold text-sm sm:text-base truncate">Add Test Paper PDF or Question Photo</h3>
-                        <p class="text-[11px] m3-text-muted truncate">3-Stage Anti-Clip PDF Guard • Auto Photo Deskew & OCR • Ctrl+V Paste</p>
+                        <p class="text-[11px] m3-text-muted truncate">1-Col & 2-Col Hybrid Vector/Vision Slicer • Auto Photo Deskew • Ctrl+V Paste</p>
                     </div>
                 </div>
                 <div class="flex items-center gap-1.5 shrink-0">
@@ -1075,18 +1075,27 @@
                         <div class="w-13 h-13 m3-cookie-12 flex items-center justify-center mx-auto mb-2" style="background: var(--md-primary-container); color: var(--md-primary);">
                             <i id="unifiedFileIcon" class="ph-duotone ph-cloud-arrow-up text-2xl"></i>
                         </div>
-                        <p id="selectedFileLabel" class="text-xs sm:text-sm font-extrabold">Tap to Select a JEE Test PDF or Question Photo (or press Ctrl+V)</p>
-                        <p id="selectedFileTypeBadge" class="text-[11px] m3-text-muted mt-0.5">Automatically detects file type & activates PDF slicer or Photo auto-deskew</p>
+                        <p id="selectedFileLabel" class="text-xs sm:text-sm font-extrabold">Tap to Select Any 1-Column / 2-Column JEE PDF or Photo (or press Ctrl+V)</p>
+                        <p id="selectedFileTypeBadge" class="text-[11px] m3-text-muted mt-0.5">Automatically detects multi-column sheets, integer/single-choice tags & diagrams</p>
                     </label>
 
                     <!-- PDF Options -->
-                    <div id="pdfSetupSubView" class="hidden grid-cols-1 sm:grid-cols-2 gap-3 m3-surface-high p-4 rounded-3xl">
+                    <div id="pdfSetupSubView" class="hidden grid-cols-1 sm:grid-cols-3 gap-3 m3-surface-high p-4 rounded-3xl">
                         <div>
                             <label class="block text-[11px] font-bold m3-text-muted mb-1">Test Paper Name</label>
-                            <input id="paperTitleInput" type="text" placeholder="e.g. Allen Score Test 3" class="w-full h-9 m3-input m3-surface-low px-3.5 text-xs">
+                            <input id="paperTitleInput" type="text" placeholder="e.g. Straight Line Sheet" class="w-full h-9 m3-input m3-surface-low px-3.5 text-xs">
                         </div>
                         <div>
-                            <label class="block text-[11px] font-bold m3-text-muted mb-1">Pages Range to Extract</label>
+                            <label class="block text-[11px] font-bold m3-text-muted mb-1">Default Subject</label>
+                            <select id="pdfDefaultSubjectSelect" class="w-full h-9 m3-input m3-surface-low px-3 text-xs font-bold">
+                                <option value="AUTO">Auto-Detect Subject</option>
+                                <option value="Mathematics">Mathematics</option>
+                                <option value="Physics">Physics</option>
+                                <option value="Chemistry">Chemistry</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-bold m3-text-muted mb-1">Pages Range</label>
                             <div class="flex items-center gap-1.5">
                                 <input id="startPageInput" type="number" min="1" value="1" class="w-full h-9 m3-input m3-surface-low px-2 text-xs text-center">
                                 <span class="m3-text-muted text-xs">to</span>
@@ -1148,7 +1157,7 @@
 
                         <div id="extractWavyBarWrap"></div>
 
-                        <p id="extractSubText" class="w-full truncate text-[11px] font-semibold font-mono" style="color: var(--md-primary)">Preparing 2.0x high-resolution full-width renderer...</p>
+                        <p id="extractSubText" class="w-full truncate text-[11px] font-semibold font-mono" style="color: var(--md-primary)">Preparing 2.2x high-resolution renderer...</p>
                     </div>
 
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -1175,7 +1184,6 @@
             </div>
         </div>
     </div>
-
     <!-- =================================================================== -->
     <!-- MODAL 3: SPLIT / TRIM                                               -->
     <!-- =================================================================== -->
@@ -1187,7 +1195,7 @@
                         <i class="ph-bold ph-scissors" style="color: var(--md-primary)"></i>
                         <span>Split Clubbed Questions or Trim Vertical Height</span>
                     </h3>
-                    <p class="text-[11px] m3-text-muted">Horizontal width is locked to 100% full page width so alignment never breaks.</p>
+                    <p class="text-[11px] m3-text-muted">Horizontal width is locked to 100% full slice width so alignment never breaks.</p>
                 </div>
                 <button type="button" onclick="window.app.closeSplitModal()" class="h-9 w-9 m3-btn-tonal flex items-center justify-center shrink-0" title="Close">
                     <i class="ph-bold ph-x text-sm"></i>
@@ -1249,7 +1257,7 @@
 
         <!-- Zero-Overflow Single-Row Whiteboard Status Bar -->
         <div class="h-11 m3-surface-low border-b border-[var(--md-outline-variant)] px-2 py-1 flex items-center justify-between gap-1 shrink-0 w-full overflow-hidden">
-            <!-- Left Cluster: Back, Prev/Next, Star/Solved/Tag, Option Eliminator (ABCD), Timer, Hint/Ans/Blind -->
+            <!-- Left Cluster -->
             <div class="flex items-center gap-1 min-w-0 shrink-0">
                 <button type="button" onclick="window.app.closeScratchpad()" class="h-8 px-2 m3-btn-tonal text-[11px] font-extrabold flex items-center justify-center shrink-0" title="Close Whiteboard (Esc)">
                     <i class="ph-bold ph-arrow-left text-xs"></i>
@@ -1299,13 +1307,13 @@
                     <button type="button" id="padAnsToggleBtn" onclick="window.app.togglePadAnswer()" class="m3-icon-group-btn" title="Answer Key (A)">
                         <i class="ph-bold ph-key text-emerald-500"></i>
                     </button>
-                    <button type="button" id="padBlindModeBtn" onclick="window.app.toggleBlindReattemptMode()" class="m3-icon-group-btn" title="Blind Re-Attempt Mode (Hides previous work & starts fresh attempt timer)">
+                    <button type="button" id="padBlindModeBtn" onclick="window.app.toggleBlindReattemptMode()" class="m3-icon-group-btn" title="Blind Re-Attempt Mode">
                         <i class="ph-bold ph-eye-slash"></i>
                     </button>
                 </div>
             </div>
 
-            <!-- Right Cluster: #2 Multi-Page Switcher, Drawing Tools, #1 Stylus-Only, #3 Dark Canvas, #6 Formula Sheet, Undo/Redo/More -->
+            <!-- Right Cluster -->
             <div class="flex items-center gap-1 shrink-0 ml-auto">
                 <!-- #2 Multi-Page Whiteboard Switcher -->
                 <div class="m3-icon-group m3-icon-group-wb shrink-0" title="Multi-Page Whiteboard">
@@ -1338,7 +1346,7 @@
                     <button type="button" id="eraserBtn" onclick="window.app.setWhiteboardTool('ERASER')" class="wb-mod-btn m3-icon-group-btn" title="Eraser">
                         <i class="ph-bold ph-eraser"></i>
                     </button>
-                    <button type="button" id="wbStylusOnlyBtn" onclick="window.app.toggleStylusOnlyMode()" class="m3-icon-group-btn" title="Stylus-Only Mode / Palm Rejection (Finger touches pan only, Pen draws)">
+                    <button type="button" id="wbStylusOnlyBtn" onclick="window.app.toggleStylusOnlyMode()" class="m3-icon-group-btn" title="Stylus-Only Mode / Palm Rejection">
                         <i class="ph-bold ph-pen-nib"></i>
                     </button>
                     <button type="button" id="wbAutoShapeBtn" onclick="window.app.toggleAutoShape()" class="wb-mod-btn m3-icon-group-btn active-state" title="Auto-Shape Recognition">
@@ -1364,10 +1372,10 @@
                     <button type="button" onclick="window.app.whiteboardRedo()" class="wb-mod-btn m3-icon-group-btn" title="Redo (Ctrl+Y)">
                         <i class="ph-bold ph-arrow-u-up-right"></i>
                     </button>
-                    <button type="button" id="wbDarkCanvasBtn" onclick="window.app.toggleWhiteboardDarkCanvas()" class="m3-icon-group-btn" title="Toggle Whiteboard Dark/Inverted Night Mode">
+                    <button type="button" id="wbDarkCanvasBtn" onclick="window.app.toggleWhiteboardDarkCanvas()" class="m3-icon-group-btn" title="Toggle Whiteboard Night Mode">
                         <i class="ph-bold ph-moon-stars"></i>
                     </button>
-                    <button type="button" id="wbFormulaDrawerBtn" onclick="window.app.toggleFormulaDrawer()" class="m3-icon-group-btn" title="Quick Formula & Physical Constants Sheet">
+                    <button type="button" id="wbFormulaDrawerBtn" onclick="window.app.toggleFormulaDrawer()" class="m3-icon-group-btn" title="Quick Formula & Constants Sheet">
                         <i class="ph-bold ph-function" style="color: var(--md-primary)"></i>
                     </button>
                     <button type="button" onclick="window.app.openWhiteboardMoreMenu(this)" class="m3-icon-group-btn" title="Grid, Export PNG & Clear">
@@ -1767,13 +1775,13 @@
                 "Quadratic Equations & Complex Numbers", "Sequences & Series", "Permutations & Combinations", "Matrices & Determinants", "Limits, Continuity & Differentiability", "Application of Derivatives (AOD)", "Indefinite & Definite Integration", "Differential Equations & Area", "Vectors & 3D Geometry", "Probability & Trigonometry"
             ]
         };
-        const GEMINI_MODELS = [
-            { value: 'gemini-4-hydrogen', label: 'gemini-4-hydrogen (Default • Free Tier Protected)' },
-            { value: 'gemini-3.5-flash-lite', label: 'gemini-3.5-flash-lite (Fast & Accurate)' },
-            { value: 'gemini-2.5-pro', label: 'gemini-2.5-pro (Highest Precision Layout Detection)' },
-            { value: 'gemini-2.5-flash', label: 'gemini-2.5-flash (Balanced Speed & Vision Precision)' }
-        ];
 
+        // Strictly Gemini 3.8 Flash & Gemini Hydrogen as requested
+        const GEMINI_MODELS = [
+            { value: 'gemini-3.8-flash', label: 'gemini-3.8-flash (Default • Free Tier Protected)' },
+            { value: 'gemini-hydrogen', label: 'gemini-hydrogen (Free Tier Protected)' },
+            { value: 'gemini-3.5-flash-lite', label: 'gemini-3.5-flash-lite' }
+        ];
 
         const SORT_MODES = [
             { value: 'Q_NUM', short: 'Q.#', label: 'Question Number' },
@@ -1827,13 +1835,12 @@
             activePopupId: null,
             isPopupAnimating: false,
             activeSettingsPage: 'HOME',
-            selectedModel: localStorage.getItem('jee_gemini_model') || 'gemini-4-hydrogen',
+            selectedModel: localStorage.getItem('jee_gemini_model') || 'gemini-3.8-flash',
             rateLimit: {
                 dateIST: '',
                 dailyCount: 0,
-                recentTimestamps: [] // Epoch ms of requests in the last 60s
+                recentTimestamps: []
             },
-
             importMode: null,
             pdfDoc: null,
             isExtracting: false,
@@ -1851,8 +1858,8 @@
             wbIsLoading: false,
             wbLoadToken: 0,
             wbTool: 'PEN',
-            wbStylusOnly: localStorage.getItem('jee_wb_stylus_only') === 'true', // #1 Stylus-Only Palm Rejection
-            wbDarkCanvas: localStorage.getItem('jee_wb_dark_canvas') === 'true', // #3 Dark/Inverted Whiteboard
+            wbStylusOnly: localStorage.getItem('jee_wb_stylus_only') === 'true',
+            wbDarkCanvas: localStorage.getItem('jee_wb_dark_canvas') === 'true',
             wbAutoShape: true,
             wbGridMode: 'DOTS',
             laserPoints: [],
@@ -1865,11 +1872,10 @@
             wbSelectedIds: [],
             padShowHint: false,
             padShowAns: false,
-            blindModeActive: false, // #7 Blind Re-Attempt Mode
-            blindScratchItems: [],
+            blindModeActive: false,
             timerInterval: null,
             timerPaused: true,
-            mockTest: { // #5 Timed Mock Set State
+            mockTest: {
                 active: false,
                 questionIds: [],
                 remainingSec: 0,
@@ -1965,7 +1971,7 @@
         }
 
         const getApiKey = () => (localStorage.getItem('jee_gemini_api_key') || '').trim();
-        const getSelectedModel = () => state.selectedModel || localStorage.getItem('jee_gemini_model') || 'gemini-4-hydrogen';
+        const getSelectedModel = () => state.selectedModel || localStorage.getItem('jee_gemini_model') || 'gemini-3.8-flash';
         const getVerticalPads = () => ({
             padTop: Number(localStorage.getItem('jee_pad_top') ?? 10),
             padBottom: Number(localStorage.getItem('jee_pad_bottom') ?? 10)
@@ -1976,7 +1982,651 @@
         const isAutoSolveHintsEnabled = () => localStorage.getItem('jee_auto_solve_hints') !== 'false';
         const getThemeMode = () => localStorage.getItem('jee_m3_theme_mode') || 'dark';
 
-        // Manual Per-Question Solve Timer (Supports Normal & Blind Re-Attempt Time)
+        // ===================================================================
+        // STRICT IST RATE LIMITER (MAX 19/DAY IST & MAX 4/MIN, GIST-SYNCED)
+        // ===================================================================
+        const MAX_DAILY_REQ_IST = 19;
+        const MAX_RPM_REQ = 4;
+
+        function getCurrentISTDateString() {
+            const now = new Date();
+            const utcMs = now.getTime() + (now.getTimezoneOffset() * 60000);
+            const istDate = new Date(utcMs + (5.5 * 3600000));
+            return istDate.toISOString().slice(0, 10);
+        }
+
+        function normalizeRateLimitObj(raw) {
+            const todayIST = getCurrentISTDateString();
+            const nowMs = Date.now();
+            if (!raw || raw.dateIST !== todayIST) {
+                return { dateIST: todayIST, dailyCount: 0, recentTimestamps: [] };
+            }
+            const recent = Array.isArray(raw.recentTimestamps)
+                ? raw.recentTimestamps.map(Number).filter(ts => nowMs - ts < 60000)
+                : [];
+            return {
+                dateIST: todayIST,
+                dailyCount: Math.max(0, Number(raw.dailyCount) || 0),
+                recentTimestamps: recent
+            };
+        }
+
+        async function fetchRateLimitFromGist() {
+            const gistId = getGithubGistId();
+            const token = getGithubToken();
+            const headers = { 'Accept': 'application/vnd.github+json' };
+            if (token) headers['Authorization'] = `Bearer ${token}`;
+
+            try {
+                const res = await fetch(`https://api.github.com/gists/${gistId}?t=${Date.now()}`, {
+                    headers,
+                    cache: 'no-store'
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    const manifestStr = data.files?.['jee_vault_manifest.json']?.content;
+                    if (manifestStr) {
+                        const manifest = JSON.parse(manifestStr);
+                        if (manifest.rateLimit) {
+                            const remoteRL = normalizeRateLimitObj(manifest.rateLimit);
+                            const localRL = normalizeRateLimitObj(state.rateLimit);
+                            state.rateLimit = {
+                                dateIST: remoteRL.dateIST,
+                                dailyCount: Math.max(remoteRL.dailyCount, localRL.dailyCount),
+                                recentTimestamps: Array.from(new Set([...remoteRL.recentTimestamps, ...localRL.recentTimestamps])).sort()
+                            };
+                            localStorage.setItem('jee_rate_limit_cache', JSON.stringify(state.rateLimit));
+                            return state.rateLimit;
+                        }
+                    }
+                }
+            } catch (e) {
+                console.warn('Rate limit check fallback to local cache:', e);
+            }
+            const cached = JSON.parse(localStorage.getItem('jee_rate_limit_cache') || 'null');
+            state.rateLimit = normalizeRateLimitObj(cached || state.rateLimit);
+            return state.rateLimit;
+        }
+
+        async function saveRateLimitToGist() {
+            localStorage.setItem('jee_rate_limit_cache', JSON.stringify(state.rateLimit));
+            const token = getGithubToken();
+            if (!token) return;
+
+            try {
+                const gistId = getGithubGistId();
+                const paperGroups = {};
+                state.questions.forEach(q => {
+                    const pName = q.paperName || 'Default Paper';
+                    (paperGroups[pName] = paperGroups[pName] || []).push(q);
+                });
+
+                const manifestPayload = {
+                    app: 'JEE Sorter Cloud Vault',
+                    updatedAt: new Date().toISOString(),
+                    totalQuestions: state.questions.length,
+                    rateLimit: state.rateLimit,
+                    papers: Object.keys(paperGroups).map(p => ({
+                        paperName: p,
+                        fileName: sanitizePaperFilename(p),
+                        count: paperGroups[p].length
+                    }))
+                };
+
+                await fetch(`https://api.github.com/gists/${gistId}`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Accept': 'application/vnd.github+json',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        files: {
+                            'jee_vault_manifest.json': {
+                                content: JSON.stringify(manifestPayload, null, 2)
+                            }
+                        }
+                    })
+                });
+            } catch (e) {
+                console.warn('Failed to push rateLimit to Gist:', e);
+            }
+        }
+
+        async function executeRateLimitedGeminiFetch(apiUrl, payload, abortSignal = null) {
+            while (true) {
+                if (abortSignal?.aborted) throw new DOMException('Aborted', 'AbortError');
+
+                await fetchRateLimitFromGist();
+
+                if (state.rateLimit.dailyCount >= MAX_DAILY_REQ_IST) {
+                    const msg = `Daily limit reached (${state.rateLimit.dailyCount}/${MAX_DAILY_REQ_IST} requests for ${state.rateLimit.dateIST} IST). Paused until midnight IST.`;
+                    toast(msg, 'warn');
+                    throw new Error(msg);
+                }
+
+                const nowMs = Date.now();
+                state.rateLimit.recentTimestamps = state.rateLimit.recentTimestamps.filter(ts => nowMs - ts < 60000);
+
+                if (state.rateLimit.recentTimestamps.length >= MAX_RPM_REQ) {
+                    const oldestInWindow = state.rateLimit.recentTimestamps[0];
+                    const waitMs = Math.max(1000, 60500 - (nowMs - oldestInWindow));
+                    const waitSec = Math.ceil(waitMs / 1000);
+                    toast(`Rate limit: 4 req/min reached. Cooling down for ${waitSec}s...`, 'info');
+
+                    await new Promise((resolve, reject) => {
+                        const timer = setTimeout(resolve, waitMs);
+                        if (abortSignal) {
+                            abortSignal.addEventListener('abort', () => {
+                                clearTimeout(timer);
+                                reject(new DOMException('Aborted', 'AbortError'));
+                            }, { once: true });
+                        }
+                    });
+                    continue;
+                }
+
+                state.rateLimit.dailyCount += 1;
+                state.rateLimit.recentTimestamps.push(Date.now());
+                await saveRateLimitToGist();
+                toast(`Gemini Request ${state.rateLimit.dailyCount}/${MAX_DAILY_REQ_IST} today (IST)`, 'info');
+
+                return await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload),
+                    signal: abortSignal
+                });
+            }
+        }
+
+        // ===================================================================
+        // FOOLPROOF 2D MULTI-COLUMN & SINGLE-COLUMN HYBRID PDF SLICER
+        // Handles 2-column sheets (like Straight_Line_Questions.pdf),
+        // Q.1 [Integer], Q.2 [Single correct], 1., (1), Problem 1, etc.
+        // ===================================================================
+        function inferSubjectAndChapterFromText(text, fallbackSubject = 'AUTO') {
+            const hay = String(text || '').toLowerCase();
+
+            // Check explicit chapter keywords first
+            const keywordRules = [
+                { rx: /straight\s*line|slope|orthocentre|incentre|circumcentre|centroid|angle\s*bisector|median\s*through|altitude\s*through/i, subj: 'Mathematics', chap: 'Straight Lines' },
+                { rx: /pair\s*of\s*line|homogen/i, subj: 'Mathematics', chap: 'Pair of Lines' },
+                { rx: /circle|radical\s*axis|chord\s*of\s*contact/i, subj: 'Mathematics', chap: 'Circles' },
+                { rx: /parabola|latus\s*rectum|focal\s*chord/i, subj: 'Mathematics', chap: 'Parabola' },
+                { rx: /ellipse|eccentricity.*foci/i, subj: 'Mathematics', chap: 'Ellipse' },
+                { rx: /hyperbola|asymptote/i, subj: 'Mathematics', chap: 'Hyperbola' },
+                { rx: /quadratic|roots\s*of.*equation|discriminant/i, subj: 'Mathematics', chap: 'Quadratic Equations and Expressions' },
+                { rx: /sequence|series|arithmetic\s*progression|geometric\s*progression/i, subj: 'Mathematics', chap: 'Sequence and Series' },
+                { rx: /binomial|coefficient/i, subj: 'Mathematics', chap: 'Binomial Theorem for any index' },
+                { rx: /permutation|combination|arrangement|ways/i, subj: 'Mathematics', chap: 'Permutations and Combinations' },
+                { rx: /probability|dice|coins|bayes/i, subj: 'Mathematics', chap: 'Probability PU' },
+                { rx: /matrix|matrices|determinant/i, subj: 'Mathematics', chap: 'Matrices & Determinants' },
+                { rx: /limit|continuity|differentiability/i, subj: 'Mathematics', chap: 'Limits, Continuity & Differentiability' },
+                { rx: /integral|integration|\bdx\b/i, subj: 'Mathematics', chap: 'Indefinite & Definite Integration' },
+                { rx: /gravitation|hollow\s*sphere|gravitational\s*potential|escape\s*velocity|kepler/i, subj: 'Physics', chap: 'Gravitation' },
+                { rx: /moment\s*of\s*inertia|rigid\s*body|angular\s*momentum|torque|rolling/i, subj: 'Physics', chap: 'Rigid Body Mechanics' },
+                { rx: /center\s*of\s*mass|collision|impulse|restitution/i, subj: 'Physics', chap: 'COM, Momentum and Collision' },
+                { rx: /work|kinetic\s*energy|potential\s*energy|spring/i, subj: 'Physics', chap: 'Work, Power and Energy' },
+                { rx: /friction|pulley|tension|newton/i, subj: 'Physics', chap: "Newton's Laws of Motion" },
+                { rx: /projectile|trajectory|range/i, subj: 'Physics', chap: 'Projectile Motion' },
+                { rx: /thermodynamics|adiabatic|isothermal|carnot|entropy/i, subj: 'Physics', chap: 'Thermodynamics' },
+                { rx: /simple\s*harmonic|shm|oscillation|pendulum/i, subj: 'Physics', chap: 'Simple Harmonic Motion' },
+                { rx: /electrostatic|coulomb|gauss|capacitor|electric\s*field/i, subj: 'Physics', chap: 'Electrostatics & Capacitors' },
+                { rx: /acidity|basicity|goc|resonance|inductive|tautomer|iupac|alkane|alkene/i, subj: 'Chemistry', chap: 'GOC-I' },
+                { rx: /mole\s*concept|molarity|stoichiometry|equivalent/i, subj: 'Chemistry', chap: 'Some Basic Concepts of Chemistry (Mole Concept)' },
+                { rx: /atomic\s*structure|bohr|quantum\s*number|orbital/i, subj: 'Chemistry', chap: 'Atomic Structure' },
+                { rx: /chemical\s*bonding|hybridisation|vsepr|mot/i, subj: 'Chemistry', chap: 'Chemical Bonding' },
+                { rx: /equilibrium|kp|kc|ph\b|buffer|solubility/i, subj: 'Chemistry', chap: 'Ionic Equilibrium' }
+            ];
+
+            for (const rule of keywordRules) {
+                if (rule.rx.test(hay)) {
+                    const finalSubj = (fallbackSubject && fallbackSubject !== 'AUTO') ? fallbackSubject : rule.subj;
+                    return { subject: finalSubj, chapter: rule.chap };
+                }
+            }
+
+            const subj = (fallbackSubject && fallbackSubject !== 'AUTO') ? fallbackSubject : 'Mathematics';
+            return { subject: subj, chapter: JEE_CHAPTERS[subj]?.[0] || 'Straight Lines' };
+        }
+
+        // Extracts all native text items with 0..1000 normalized 2D coordinates (xmin, xmax, ymin, ymax)
+        async function extractPage2DTextTokens(page) {
+            try {
+                const vp = page.getViewport({ scale: 1.0 });
+                const pageW = vp.width || 1;
+                const pageH = vp.height || 1;
+                const textContent = await page.getTextContent();
+                const tokens = [];
+
+                for (const item of (textContent.items || [])) {
+                    const rawStr = String(item.str || '');
+                    if (!rawStr.trim() || !item.transform) continue;
+                    const fontH = Math.max(7, Math.hypot(item.transform[2] || 0, item.transform[3] || 10));
+                    const xPt = item.transform[4];
+                    const baselineY = item.transform[5];
+                    const wPt = Math.max(4, item.width || (rawStr.length * fontH * 0.48));
+
+                    const xmin = Math.max(0, Math.min(1000, (xPt / pageW) * 1000));
+                    const xmax = Math.max(xmin + 2, Math.min(1000, ((xPt + wPt) / pageW) * 1000));
+                    const botNorm = Math.min(1000, ((pageH - baselineY + fontH * 0.38) / pageH) * 1000);
+                    const topNorm = Math.max(0, ((pageH - (baselineY + fontH * 1.18)) / pageH) * 1000);
+
+                    tokens.push({
+                        str: rawStr.trim(),
+                        xmin,
+                        xmax,
+                        topNorm,
+                        botNorm,
+                        yMid: (topNorm + botNorm) / 2,
+                        fontH
+                    });
+                }
+                return tokens;
+            } catch (_) {
+                return [];
+            }
+        }
+
+        // Detects whether the page is a 2-column layout (like Straight_Line_Questions.pdf) or 1-column layout
+        function detectPageColumnStructure(tokens, sourceCanvas) {
+            // Check if there is a vertical divider line or clear center gutter around X = 460..540
+            const bodyTokens = tokens.filter(t => t.topNorm > 95 && t.botNorm < 935);
+            let leftStarts = 0, rightStarts = 0, crossingMid = 0;
+
+            for (const t of bodyTokens) {
+                if (t.xmin >= 35 && t.xmin <= 165) leftStarts++;
+                if (t.xmin >= 485 && t.xmin <= 585) rightStarts++;
+                if (t.xmin < 455 && t.xmax > 545 && (t.xmax - t.xmin) > 130) crossingMid++;
+            }
+
+            // Also check for a vertical ink rule near the center of the canvas
+            let gutterNormX = 500;
+            if (sourceCanvas) {
+                const w = sourceCanvas.width, h = sourceCanvas.height;
+                const yStart = Math.floor(h * 0.14), yEnd = Math.floor(h * 0.88);
+                const xStart = Math.floor(w * 0.45), xEnd = Math.floor(w * 0.55);
+                const stripW = Math.max(1, xEnd - xStart);
+                const stripH = Math.max(1, yEnd - yStart);
+                const data = sourceCanvas.getContext('2d').getImageData(xStart, yStart, stripW, stripH).data;
+
+                let bestRuleX = -1, maxDarkRatio = 0;
+                for (let sx = 0; sx < stripW; sx++) {
+                    let darkCount = 0;
+                    for (let sy = 0; sy < stripH; sy += 3) {
+                        const idx = (sy * stripW + sx) * 4;
+                        if (data[idx] < 210 && data[idx + 1] < 210 && data[idx + 2] < 210) darkCount++;
+                    }
+                    const ratio = darkCount / (stripH / 3);
+                    if (ratio > maxDarkRatio) {
+                        maxDarkRatio = ratio;
+                        bestRuleX = xStart + sx;
+                    }
+                }
+                if (maxDarkRatio > 0.35 && bestRuleX > 0) {
+                    gutterNormX = Math.round((bestRuleX / w) * 1000);
+                    return { isTwoColumn: true, gutterNormX };
+                }
+            }
+
+            const isTwoCol = (leftStarts >= 4 && rightStarts >= 4 && crossingMid <= Math.max(2, (leftStarts + rightStarts) * 0.08));
+            return { isTwoColumn: isTwoCol, gutterNormX: 500 };
+        }
+
+        // Groups 2D tokens within a column into horizontal text lines
+        function groupTokensIntoColumnLines(colTokens) {
+            const sorted = [...colTokens].sort((a, b) => a.topNorm !== b.topNorm ? a.topNorm - b.topNorm : a.xmin - b.xmin);
+            const lines = [];
+
+            for (const tok of sorted) {
+                let matchedLine = null;
+                for (let i = lines.length - 1; i >= Math.max(0, lines.length - 6); i--) {
+                    const ln = lines[i];
+                    if (Math.abs(tok.yMid - ln.yMid) <= 6.5) {
+                        matchedLine = ln;
+                        break;
+                    }
+                }
+                if (matchedLine) {
+                    matchedLine.tokens.push(tok);
+                    matchedLine.xmin = Math.min(matchedLine.xmin, tok.xmin);
+                    matchedLine.xmax = Math.max(matchedLine.xmax, tok.xmax);
+                    matchedLine.topNorm = Math.min(matchedLine.topNorm, tok.topNorm);
+                    matchedLine.botNorm = Math.max(matchedLine.botNorm, tok.botNorm);
+                    matchedLine.yMid = (matchedLine.topNorm + matchedLine.botNorm) / 2;
+                } else {
+                    lines.push({
+                        tokens: [tok],
+                        xmin: tok.xmin,
+                        xmax: tok.xmax,
+                        topNorm: tok.topNorm,
+                        botNorm: tok.botNorm,
+                        yMid: tok.yMid
+                    });
+                }
+            }
+
+            lines.forEach(ln => {
+                ln.tokens.sort((a, b) => a.xmin - b.xmin);
+                ln.text = ln.tokens.map(t => t.str).join(' ').replace(/\s+/g, ' ').trim();
+            });
+            return lines.sort((a, b) => a.topNorm - b.topNorm);
+        }
+
+        // Matches any JEE question start line: "Q.1 [Integer]", "Q.2 [Single correct]", "Q1.", "1.", "1)", "(1)", "Problem 1"
+        function matchQuestionStartAnchor(lineText, relIndentNorm) {
+            const txt = String(lineText || '').trim();
+            if (!txt) return null;
+
+            // Ignore pure option lines like "(A) ...", "(B) ...", "(1) Gravitational..." when indented or inside matrix
+            if (/^\([A-D]\)/i.test(txt)) return null;
+
+            // Pattern 1: Explicit "Q.1", "Q. 10 [Single correct]", "Q1", "Question 1", "Problem 1"
+            const explicitMatch = txt.match(/^(?:Q(?:uestion|\.)?\s*|Prob(?:lem|\.)?\s*)(\d{1,3}[a-zA-Z]?)(?:\s*\[.*?\]|\s*[\.\)\:\-]|\s+)/i);
+            if (explicitMatch && relIndentNorm < 120) {
+                return explicitMatch[1];
+            }
+
+            // Pattern 2: Standalone "Q.1" or "Q.1[Integer]"
+            const tightQMatch = txt.match(/^Q\.?\s*(\d{1,3}[a-zA-Z]?)\b/i);
+            if (tightQMatch && relIndentNorm < 120) {
+                return tightQMatch[1];
+            }
+
+            // Pattern 3: Left-aligned numeric start "1) The three masses...", "1. Let the..."
+            if (relIndentNorm < 65) {
+                const numMatch = txt.match(/^(\d{1,3})\s*[\.\)]\s+[A-Za-z\(\$]/);
+                if (numMatch) {
+                    return numMatch[1];
+                }
+            }
+            return null;
+        }
+
+        // Tier 1: Native Vector PDF 2D Question Extractor (0 API calls needed when PDF has vector text!)
+        function extractQuestionsFromNativePdfVector(tokens, sourceCanvas, paperTitle, defaultSubj) {
+            if (!tokens || tokens.length < 12) return null;
+
+            const { isTwoColumn, gutterNormX } = detectPageColumnStructure(tokens, sourceCanvas);
+            const columns = isTwoColumn
+                ? [
+                    { colIdx: 0, xmin: 12, xmax: Math.max(450, gutterNormX - 6) },
+                    { colIdx: 1, xmin: Math.min(550, gutterNormX + 6), xmax: 988 }
+                ]
+                : [{ colIdx: 0, xmin: 10, xmax: 990 }];
+
+            const pageHeaderText = tokens
+                .filter(t => t.topNorm < 130)
+                .map(t => t.str)
+                .join(' ');
+
+            const detectedBlocks = [];
+
+            for (const col of columns) {
+                const colTokens = tokens.filter(t => {
+                    const cx = (t.xmin + t.xmax) / 2;
+                    return cx >= col.xmin && cx <= col.xmax && t.botNorm <= 955;
+                });
+                const colLines = groupTokensIntoColumnLines(colTokens);
+                if (colLines.length === 0) continue;
+
+                const colLeftMargin = Math.min(...colLines.map(l => l.xmin));
+                const anchors = [];
+
+                for (let i = 0; i < colLines.length; i++) {
+                    const ln = colLines[i];
+                    // Skip running page footers (e.g., standalone page number "1" at bottom)
+                    if (ln.topNorm > 925 && /^\d{1,3}$/.test(ln.text)) continue;
+
+                    const relIndent = ln.xmin - colLeftMargin;
+                    const qNum = matchQuestionStartAnchor(ln.text, relIndent);
+                    if (qNum) {
+                        anchors.push({ lineIdx: i, qNum, line: ln });
+                    }
+                }
+
+                for (let aIdx = 0; aIdx < anchors.length; aIdx++) {
+                    const currA = anchors[aIdx];
+                    const nextA = anchors[aIdx + 1];
+                    const startLineIdx = currA.lineIdx;
+                    const endLineIdx = nextA ? nextA.lineIdx - 1 : colLines.length - 1;
+
+                    const sliceLines = colLines.slice(startLineIdx, endLineIdx + 1).filter(l => {
+                        if (l.topNorm > 925 && /^\d{1,3}$/.test(l.text)) return false;
+                        return true;
+                    });
+                    if (sliceLines.length === 0) continue;
+
+                    const rawYMin = Math.max(8, currA.line.topNorm - 10);
+                    const lastLineBot = Math.max(...sliceLines.map(l => l.botNorm));
+                    const nextAnchorTop = nextA ? nextA.line.topNorm : 948;
+                    // Include any diagram whitespace below the text up to the next question
+                    const rawYMax = nextA
+                        ? Math.max(lastLineBot + 10, nextAnchorTop - 8)
+                        : Math.min(955, Math.max(lastLineBot + 16, lastLineBot + 28));
+
+                    const fullQText = sliceLines.map(l => l.text).join(' ');
+                    const { subject, chapter } = inferSubjectAndChapterFromText(`${paperTitle} ${pageHeaderText} ${fullQText}`, defaultSubj);
+
+                    detectedBlocks.push({
+                        questionNumber: currA.qNum,
+                        subject,
+                        chapter,
+                        xmin: col.xmin,
+                        xmax: col.xmax,
+                        ymin: rawYMin,
+                        ymax: rawYMax,
+                        ocrText: cleanQuestionTextOnly(fullQText),
+                        firstLineSnippet: sliceLines[0]?.text || '',
+                        lastLineSnippet: sliceLines[sliceLines.length - 1]?.text || '',
+                        isContinuationFromPrevPage: false,
+                        continuesToNextPage: false,
+                        colLines
+                    });
+                }
+            }
+
+            return detectedBlocks.length > 0 ? detectedBlocks : null;
+        }
+
+        // Snaps 2D slice boundaries (ymin, ymax) to clean whitespace valleys inside the specific column [xmin..xmax]
+        function snap2DBoundaryToWhitespace(sourceCanvas, colLines, targetNormY, minAllowedNorm, maxAllowedNorm, xminNorm, xmaxNorm, preferDirection = 'UP') {
+            let yNorm = Math.max(minAllowedNorm, Math.min(maxAllowedNorm, targetNormY));
+
+            if (Array.isArray(colLines)) {
+                for (let pass = 0; pass < 3; pass++) {
+                    let adjusted = false;
+                    for (const line of colLines) {
+                        if (yNorm >= line.topNorm - 4 && yNorm <= line.botNorm + 4) {
+                            if (preferDirection === 'UP') {
+                                const candidate = Math.max(minAllowedNorm, line.topNorm - 6);
+                                if (candidate < yNorm) { yNorm = candidate; adjusted = true; }
+                            } else {
+                                const candidate = Math.min(maxAllowedNorm, line.botNorm + 6);
+                                if (candidate > yNorm) { yNorm = candidate; adjusted = true; }
+                            }
+                        }
+                    }
+                    if (!adjusted) break;
+                }
+            }
+
+            const w = sourceCanvas.width, h = sourceCanvas.height;
+            const x0 = Math.max(4, Math.floor((xminNorm / 1000) * w) + 6);
+            const x1 = Math.min(w - 4, Math.floor((xmaxNorm / 1000) * w) - 6);
+            const colW = Math.max(20, x1 - x0);
+
+            const searchUpNorm = preferDirection === 'UP' ? 36 : 14;
+            const searchDownNorm = preferDirection === 'DOWN' ? 36 : 14;
+            const startMinNorm = Math.max(minAllowedNorm, yNorm - searchUpNorm);
+            const endMaxNorm = Math.min(maxAllowedNorm, yNorm + searchDownNorm);
+
+            const minPx = Math.max(4, Math.floor((startMinNorm / 1000) * h));
+            const maxPx = Math.min(h - 4, Math.floor((endMaxNorm / 1000) * h));
+            const centerPx = Math.max(minPx, Math.min(maxPx, Math.floor((yNorm / 1000) * h)));
+            if (maxPx <= minPx + 4) return Math.round(yNorm);
+
+            const sliceH = maxPx - minPx + 1;
+            const imgData = sourceCanvas.getContext('2d').getImageData(x0, minPx, colW, sliceH).data;
+            const isRowWhite = new Array(sliceH).fill(true);
+
+            for (let r = 0; r < sliceH; r++) {
+                let darkPixels = 0;
+                for (let x = 0; x < colW; x += 2) {
+                    const idx = (r * colW + x) * 4;
+                    if (imgData[idx] < 236 || imgData[idx + 1] < 236 || imgData[idx + 2] < 236) {
+                        if (++darkPixels > 1) { isRowWhite[r] = false; break; }
+                    }
+                }
+            }
+
+            const startIdx = centerPx - minPx;
+            if (preferDirection === 'UP') {
+                for (let r = startIdx; r >= 2; r--) {
+                    if (isRowWhite[r] && isRowWhite[r - 1] && isRowWhite[r - 2]) {
+                        return Math.round(((minPx + r - 1) / h) * 1000);
+                    }
+                }
+            } else {
+                for (let r = startIdx; r < sliceH - 2; r++) {
+                    if (isRowWhite[r] && isRowWhite[r + 1] && isRowWhite[r + 2]) {
+                        return Math.round(((minPx + r + 1) / h) * 1000);
+                    }
+                }
+            }
+            return Math.round(yNorm);
+        }
+
+        // Auto-trims excess top/bottom/left/right whitespace while keeping clean padding
+        function autoTrim2DWhitespace(canvas) {
+            const ctx = canvas.getContext('2d'), w = canvas.width, h = canvas.height;
+            if (h < 50 || w < 50) return canvas;
+            const imgData = ctx.getImageData(0, 0, w, h).data;
+            let topRow = 0, botRow = h - 1;
+
+            for (let y = 0; y < h; y++) {
+                let hasInk = false;
+                for (let x = 8; x < w - 8; x += 2) {
+                    const idx = (y * w + x) * 4;
+                    if (imgData[idx] < 240 || imgData[idx + 1] < 240 || imgData[idx + 2] < 240) { hasInk = true; break; }
+                }
+                if (hasInk) { topRow = Math.max(0, y - 20); break; }
+            }
+            for (let y = h - 1; y >= topRow; y--) {
+                let hasInk = false;
+                for (let x = 8; x < w - 8; x += 2) {
+                    const idx = (y * w + x) * 4;
+                    if (imgData[idx] < 240 || imgData[idx + 1] < 240 || imgData[idx + 2] < 240) { hasInk = true; break; }
+                }
+                if (hasInk) { botRow = Math.min(h - 1, y + 20); break; }
+            }
+
+            const trimmedH = Math.max(44, botRow - topRow + 1);
+            if (trimmedH >= h - 6) return canvas;
+            const trimmed = document.createElement('canvas');
+            trimmed.width = w; trimmed.height = trimmedH;
+            const tCtx = trimmed.getContext('2d');
+            tCtx.fillStyle = '#FFFFFF';
+            tCtx.fillRect(0, 0, w, trimmedH);
+            tCtx.drawImage(canvas, 0, topRow, w, trimmedH, 0, 0, w, trimmedH);
+            return trimmed;
+        }
+
+        // Crops a 2D region [xminNorm..xmaxNorm, yminNorm..ymaxNorm] from the high-res page canvas
+        function crop2DSliceFromPage(sourceCanvas, xminNorm, xmaxNorm, yminNorm, ymaxNorm, padTop = 8, padBottom = 8) {
+            const w = sourceCanvas.width, h = sourceCanvas.height;
+            const safeXMin = Math.max(0, xminNorm - 6);
+            const safeXMax = Math.min(1000, xmaxNorm + 6);
+            const safeYMin = Math.max(0, yminNorm - padTop);
+            const safeYMax = Math.min(1000, ymaxNorm + padBottom);
+
+            const cropX = Math.floor((safeXMin / 1000) * w);
+            const cropW = Math.max(60, Math.floor(((safeXMax - safeXMin) / 1000) * w));
+            const cropY = Math.floor((safeYMin / 1000) * h);
+            const cropH = Math.max(44, Math.floor(((safeYMax - safeYMin) / 1000) * h));
+
+            const outW = Math.min(1100, cropW);
+            const outH = Math.floor(cropH * (outW / cropW));
+
+            const rawCanvas = document.createElement('canvas');
+            rawCanvas.width = outW; rawCanvas.height = outH;
+            const ctx = rawCanvas.getContext('2d');
+            ctx.fillStyle = '#FFFFFF';
+            ctx.fillRect(0, 0, outW, outH);
+            ctx.drawImage(sourceCanvas, cropX, cropY, cropW, cropH, 0, 0, outW, outH);
+
+            const finalCanvas = autoTrim2DWhitespace(rawCanvas);
+            return {
+                canvas: finalCanvas,
+                dataUrl: finalCanvas.toDataURL('image/jpeg', 0.89),
+                aspectRatio: finalCanvas.height / finalCanvas.width
+            };
+        }
+
+        // Tier 2: 2D Gemini Vision Layout Detector (Used when PDF page is scanned or has no vector anchors)
+        async function analyzePageLayout2DWithGemini(base64Jpeg, pageNum, abortSignal) {
+            const apiKey = getApiKey();
+            const selectedModel = getSelectedModel();
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${selectedModel}:generateContent?key=${apiKey}`;
+
+            const systemPrompt = `You are an expert 2D JEE Question Paper Layout & Boundary Detector.
+Pages can be SINGLE-COLUMN or TWO-COLUMN (left column x: 0..500, right column x: 500..1000), and questions can have ANY format: "Q.1 [Integer]", "Q.2 [Single correct]", "1.", "(1)", "Problem 1", matrix-match, or comprehension paragraphs.
+Return the exact 2D bounding box (\`xmin\`, \`ymin\`, \`xmax\`, \`ymax\` normalized 0 to 1000) for every individual question on the page.
+CRITICAL RULES:
+1. If the page has 2 columns, output Left Column questions first (with \`xmin\` ~ 15, \`xmax\` ~ 495), then Right Column questions (with \`xmin\` ~ 505, \`xmax\` ~ 985). NEVER merge left and right column questions into a single box!
+2. Place \`ymin\` in the whitespace 8 units ABOVE the question number/header, and \`ymax\` 8 units BELOW its last option or diagram.`;
+
+            const payload = {
+                contents: [{
+                    role: "user",
+                    parts: [
+                        { text: `Detect all individual 2D question boxes (xmin, ymin, xmax, ymax in 0..1000) on Page ${pageNum}.` },
+                        { inlineData: { mimeType: "image/jpeg", data: base64Jpeg } }
+                    ]
+                }],
+                systemInstruction: { parts: [{ text: systemPrompt }] },
+                generationConfig: {
+                    temperature: 0.0,
+                    responseMimeType: "application/json",
+                    responseSchema: {
+                        type: "OBJECT",
+                        properties: {
+                            questions: {
+                                type: "ARRAY",
+                                items: {
+                                    type: "OBJECT",
+                                    properties: {
+                                        questionNumber: { type: "STRING" },
+                                        firstLineSnippet: { type: "STRING" },
+                                        lastLineSnippet: { type: "STRING" },
+                                        subject: { type: "STRING", enum: ["Physics", "Chemistry", "Mathematics"] },
+                                        chapter: { type: "STRING" },
+                                        xmin: { type: "INTEGER" },
+                                        ymin: { type: "INTEGER" },
+                                        xmax: { type: "INTEGER" },
+                                        ymax: { type: "INTEGER" },
+                                        isContinuationFromPrevPage: { type: "BOOLEAN" },
+                                        continuesToNextPage: { type: "BOOLEAN" }
+                                    },
+                                    required: ["questionNumber", "subject", "chapter", "xmin", "ymin", "xmax", "ymax"]
+                                }
+                            }
+                        },
+                        required: ["questions"]
+                    }
+                }
+            };
+
+            const res = await executeRateLimitedGeminiFetch(apiUrl, payload, abortSignal);
+            if (!res.ok) throw new Error(`HTTP ${res.status}: ${(await res.text()).slice(0, 140)}`);
+            const data = await res.json();
+            const txt = data.candidates?.[0]?.content?.parts?.[0]?.text;
+            return txt ? JSON.parse(txt) : { questions: [] };
+        }
+        // ===================================================================
+        // MANUAL PER-QUESTION SOLVE TIMER & THEME ENGINE
+        // ===================================================================
         function formatTimeSeconds(sec) {
             const total = Math.max(0, Math.floor(Number(sec) || 0));
             const m = Math.floor(total / 60);
@@ -2220,7 +2870,7 @@
             }, 3000);
         }
 
-        // Unified PDF + Image Import & Auto-Deskew
+        // Image Import & Auto-Deskew
         function estimateImageSkewAngle(img) {
             const w = 360;
             const h = Math.max(80, Math.round((img.height / (img.width || 1)) * w));
@@ -2348,14 +2998,14 @@
                 state.importMode = 'PDF';
                 state.importRawImg = null;
                 document.getElementById('selectedFileLabel').textContent = file.name;
-                document.getElementById('selectedFileTypeBadge').textContent = 'Detected: PDF Test Paper • Full-Width Multi-Page Slicer Ready';
+                document.getElementById('selectedFileTypeBadge').textContent = 'Detected: PDF Test Paper • 1-Col & 2-Col Hybrid Vector/Vision Slicer Ready';
                 document.getElementById('unifiedFileIcon').className = 'ph-duotone ph-file-pdf text-2xl';
                 document.getElementById('imageSetupSubView').classList.add('hidden');
                 document.getElementById('pdfSetupSubView').classList.remove('hidden');
                 document.getElementById('pdfSetupSubView').classList.add('grid');
 
                 const titleEl = document.getElementById('paperTitleInput');
-                if (!titleEl.value.trim()) titleEl.value = file.name.replace(/\.pdf$/i, '');
+                if (!titleEl.value.trim()) titleEl.value = file.name.replace(/\.pdf$/i, '').replace(/_/g, ' ');
 
                 try {
                     const buf = await file.arrayBuffer();
@@ -2376,171 +3026,6 @@
             e.target.value = '';
         }
 
-                // ===================================================================
-        // STRICT IST RATE LIMITER (MAX 19/DAY IST & MAX 4/MINUTE, GIST-SYNCED)
-        // ===================================================================
-        const MAX_DAILY_REQ_IST = 19;
-        const MAX_RPM_REQ = 4;
-
-        function getCurrentISTDateString() {
-            // IST is UTC + 5:30
-            const now = new Date();
-            const utcMs = now.getTime() + (now.getTimezoneOffset() * 60000);
-            const istDate = new Date(utcMs + (5.5 * 3600000));
-            return istDate.toISOString().slice(0, 10); // YYYY-MM-DD in IST
-        }
-
-        function normalizeRateLimitObj(raw) {
-            const todayIST = getCurrentISTDateString();
-            const nowMs = Date.now();
-            if (!raw || raw.dateIST !== todayIST) {
-                return { dateIST: todayIST, dailyCount: 0, recentTimestamps: [] };
-            }
-            const recent = Array.isArray(raw.recentTimestamps)
-                ? raw.recentTimestamps.map(Number).filter(ts => nowMs - ts < 60000)
-                : [];
-            return {
-                dateIST: todayIST,
-                dailyCount: Math.max(0, Number(raw.dailyCount) || 0),
-                recentTimestamps: recent
-            };
-        }
-
-        async function fetchRateLimitFromGist() {
-            const gistId = getGithubGistId();
-            const token = getGithubToken();
-            const headers = { 'Accept': 'application/vnd.github+json' };
-            if (token) headers['Authorization'] = `Bearer ${token}`;
-
-            try {
-                const res = await fetch(`https://api.github.com/gists/${gistId}?t=${Date.now()}`, {
-                    headers,
-                    cache: 'no-store'
-                });
-                if (res.ok) {
-                    const data = await res.json();
-                    const manifestStr = data.files?.['jee_vault_manifest.json']?.content;
-                    if (manifestStr) {
-                        const manifest = JSON.parse(manifestStr);
-                        if (manifest.rateLimit) {
-                            const remoteRL = normalizeRateLimitObj(manifest.rateLimit);
-                            const localRL = normalizeRateLimitObj(state.rateLimit);
-                            state.rateLimit = {
-                                dateIST: remoteRL.dateIST,
-                                dailyCount: Math.max(remoteRL.dailyCount, localRL.dailyCount),
-                                recentTimestamps: Array.from(new Set([...remoteRL.recentTimestamps, ...localRL.recentTimestamps])).sort()
-                            };
-                            localStorage.setItem('jee_rate_limit_cache', JSON.stringify(state.rateLimit));
-                            return state.rateLimit;
-                        }
-                    }
-                }
-            } catch (e) {
-                console.warn('Could not verify rate limit from Gist, falling back to local cache:', e);
-            }
-            const cached = JSON.parse(localStorage.getItem('jee_rate_limit_cache') || 'null');
-            state.rateLimit = normalizeRateLimitObj(cached || state.rateLimit);
-            return state.rateLimit;
-        }
-
-        async function saveRateLimitToGist() {
-            localStorage.setItem('jee_rate_limit_cache', JSON.stringify(state.rateLimit));
-            const token = getGithubToken();
-            if (!token) return;
-
-            try {
-                const gistId = getGithubGistId();
-                const paperGroups = {};
-                state.questions.forEach(q => {
-                    const pName = q.paperName || 'Default Paper';
-                    (paperGroups[pName] = paperGroups[pName] || []).push(q);
-                });
-
-                const manifestPayload = {
-                    app: 'JEE Sorter Cloud Vault',
-                    updatedAt: new Date().toISOString(),
-                    totalQuestions: state.questions.length,
-                    rateLimit: state.rateLimit,
-                    papers: Object.keys(paperGroups).map(p => ({
-                        paperName: p,
-                        fileName: sanitizePaperFilename(p),
-                        count: paperGroups[p].length
-                    }))
-                };
-
-                await fetch(`https://api.github.com/gists/${gistId}`, {
-                    method: 'PATCH',
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Accept': 'application/vnd.github+json',
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        files: {
-                            'jee_vault_manifest.json': {
-                                content: JSON.stringify(manifestPayload, null, 2)
-                            }
-                        }
-                    })
-                });
-            } catch (e) {
-                console.warn('Failed to push rateLimit to Gist:', e);
-            }
-        }
-
-        async function executeRateLimitedGeminiFetch(apiUrl, payload, abortSignal = null) {
-            while (true) {
-                if (abortSignal?.aborted) throw new DOMException('Aborted', 'AbortError');
-
-                // 1. Always verify latest usage from GitHub Gist before sending request
-                await fetchRateLimitFromGist();
-
-                // 2. Check Daily Limit (19 requests/day IST)
-                if (state.rateLimit.dailyCount >= MAX_DAILY_REQ_IST) {
-                    const msg = `Daily limit reached (${state.rateLimit.dailyCount}/${MAX_DAILY_REQ_IST} requests for ${state.rateLimit.dateIST} IST). Paused until midnight IST.`;
-                    toast(msg, 'warn');
-                    throw new Error(msg);
-                }
-
-                // 3. Check Per-Minute Limit (4 requests/minute)
-                const nowMs = Date.now();
-                state.rateLimit.recentTimestamps = state.rateLimit.recentTimestamps.filter(ts => nowMs - ts < 60000);
-
-                if (state.rateLimit.recentTimestamps.length >= MAX_RPM_REQ) {
-                    const oldestInWindow = state.rateLimit.recentTimestamps[0];
-                    const waitMs = Math.max(1000, 60500 - (nowMs - oldestInWindow));
-                    const waitSec = Math.ceil(waitMs / 1000);
-                    toast(`Rate limit: 4 req/min reached. Cooling down for ${waitSec}s...`, 'info');
-
-                    await new Promise((resolve, reject) => {
-                        const timer = setTimeout(resolve, waitMs);
-                        if (abortSignal) {
-                            abortSignal.addEventListener('abort', () => {
-                                clearTimeout(timer);
-                                reject(new DOMException('Aborted', 'AbortError'));
-                            }, { once: true });
-                        }
-                    });
-                    continue; // Re-verify after waiting
-                }
-
-                // 4. Record this request immediately & save to Gist
-                state.rateLimit.dailyCount += 1;
-                state.rateLimit.recentTimestamps.push(Date.now());
-                await saveRateLimitToGist();
-                toast(`Gemini Request ${state.rateLimit.dailyCount}/${MAX_DAILY_REQ_IST} today (IST)`, 'info');
-
-                // 5. Execute the actual Gemini API call
-                return await fetch(apiUrl, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload),
-                    signal: abortSignal
-                });
-            }
-        }
-
-        
         async function classifyAndSolveImportedImageWithGemini(base64Jpeg) {
             const apiKey = getApiKey();
             if (!apiKey) return null;
@@ -2618,26 +3103,16 @@ Analyze this JEE question image (${q.subject} - ${q.chapter}).
                 }
             };
 
-                        let delay = 1000;
-            for (let attempt = 0; attempt < 3; attempt++) {
-                try {
-                    const res = await executeRateLimitedGeminiFetch(apiUrl, payload);
-                    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-                    const data = await res.json();
-                    const txt = data.candidates?.[0]?.content?.parts?.[0]?.text;
-                    if (!txt) return null;
-                    const parsed = JSON.parse(txt);
-                    return {
-                        answerKey: String(parsed.answerKey || '').trim(),
-                        hint: String(parsed.hint || '').trim()
-                    };
-                } catch (e) {
-                    if (String(e.message).includes('Daily limit reached') || attempt === 2) throw e;
-                    await new Promise(r => setTimeout(r, delay));
-                    delay *= 2;
-                }
-            }
-            return null;
+            const res = await executeRateLimitedGeminiFetch(apiUrl, payload);
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            const data = await res.json();
+            const txt = data.candidates?.[0]?.content?.parts?.[0]?.text;
+            if (!txt) return null;
+            const parsed = JSON.parse(txt);
+            return {
+                answerKey: String(parsed.answerKey || '').trim(),
+                hint: String(parsed.hint || '').trim()
+            };
         }
 
         async function runBackgroundAnswerAndHintGenerator(manualNotify = false, forceAll = false) {
@@ -2703,7 +3178,7 @@ Analyze this JEE question image (${q.subject} - ${q.chapter}).
 
                 if (updatedAny) {
                     scheduleCloudAutoSync(true);
-                    if (manualNotify) toast(`Generated Answer Keys & 1-Line Hints for ${completed} questions!`, 'success');
+                    if (manualNotify) toast(`Generated Answer Keys & 1-Line Hints!`, 'success');
                 }
             } finally {
                 state.isRunningBackgroundSolver = false;
@@ -2712,7 +3187,7 @@ Analyze this JEE question image (${q.subject} - ${q.chapter}).
                 if (btnLbl) btnLbl.textContent = 'Solve Missing Hints & Keys';
                 if (infoEl) {
                     const withHints = state.questions.filter(q => q.hint && q.answerKey).length;
-                    infoEl.textContent = `Solved: ${withHints} / ${state.questions.length} questions have Answer Keys & 1-Line Hints in Cloud Gist.`;
+                    infoEl.textContent = `Solved: ${withHints} / ${state.questions.length} questions • Today: ${state.rateLimit.dailyCount}/${MAX_DAILY_REQ_IST} req (IST).`;
                 }
             }
         }
@@ -2728,14 +3203,13 @@ Analyze this JEE question image (${q.subject} - ${q.chapter}).
                 const tokens = line.split(/\s+/);
                 const proseWords = tokens.filter(t => /[a-zA-Z]{3,}/.test(t)).length;
                 const isOptionLine = /^\(?[A-D1-4]\)?[\.\)]/i.test(line);
-                const isQuestionStart = /^(?:Q\.?\s*)?\d+[\.\)]/i.test(line);
+                const isQuestionStart = /^(?:Q\.?\s*)?\d+/i.test(line);
 
-                if (proseWords >= 2 || isOptionLine || (isQuestionStart && tokens.length >= 3)) {
+                if (proseWords >= 2 || isOptionLine || isQuestionStart) {
                     cleanLines.push(line);
                 }
             }
             return (cleanLines.length > 0 ? cleanLines.join(' ') : String(rawText))
-                .replace(/\b[A-Za-z]\d\b/g, ' ')
                 .replace(/\s+/g, ' ')
                 .trim();
         }
@@ -2750,43 +3224,6 @@ Analyze this JEE question image (${q.subject} - ${q.chapter}).
                 const worker = await getLocalTesseractWorker();
                 const ret = await worker.recognize(imageSource);
                 return cleanQuestionTextOnly(ret?.data?.text || '');
-            } catch (_) {
-                return '';
-            }
-        }
-
-        async function getPageTextLineIntervals(page) {
-            try {
-                const vp = page.getViewport({ scale: 1.0 });
-                const pageH = vp.height || 1;
-                const textContent = await page.getTextContent();
-                const lines = [];
-
-                for (const item of (textContent.items || [])) {
-                    const str = (item.str || '').trim();
-                    if (!str || !item.transform) continue;
-                    const fontH = Math.max(8, Math.hypot(item.transform[2] || 0, item.transform[3] || 10));
-                    const baselineY = item.transform[5];
-                    const botNorm = Math.min(1000, ((pageH - baselineY + fontH * 0.35) / pageH) * 1000);
-                    const topNorm = Math.max(0, ((pageH - (baselineY + fontH * 1.15)) / pageH) * 1000);
-                    lines.push({ topNorm, botNorm, str });
-                }
-                return lines;
-            } catch (_) {
-                return [];
-            }
-        }
-
-        async function extractPdfNativeTextInSlice(page, yminNorm, ymaxNorm) {
-            try {
-                const lines = await getPageTextLineIntervals(page);
-                const itemsInSlice = lines.filter(l => l.botNorm >= yminNorm - 10 && l.topNorm <= ymaxNorm + 10);
-                const lineBuckets = new Map();
-                for (const it of itemsInSlice) {
-                    const key = Math.round(it.topNorm / 6);
-                    lineBuckets.set(key, (lineBuckets.get(key) || '') + ' ' + it.str);
-                }
-                return cleanQuestionTextOnly(Array.from(lineBuckets.values()).join('\n'));
             } catch (_) {
                 return '';
             }
@@ -2987,7 +3424,7 @@ Analyze this JEE question image (${q.subject} - ${q.chapter}).
                     (paperGroups[pName] = paperGroups[pName] || []).push(q);
                 });
 
-                 const filesPayload = {
+                const filesPayload = {
                     'jee_vault_manifest.json': {
                         content: JSON.stringify({
                             app: 'JEE Sorter Cloud Vault',
@@ -3078,6 +3515,7 @@ Analyze this JEE question image (${q.subject} - ${q.chapter}).
                         }
                     } catch (_) {}
                 }
+
                 const restoredQuestions = [];
                 let anyMissingUid = false;
 
@@ -3123,6 +3561,7 @@ Analyze this JEE question image (${q.subject} - ${q.chapter}).
                 if (manualNotify) toast(`Cloud Pull failed: ${err.message}`, 'warn');
             }
         }
+
         function exportBackupJson() {
             if (state.questions.length === 0) return toast('No questions in Cloud Vault to export yet!', 'warn');
             const blob = new Blob([JSON.stringify({
@@ -3171,134 +3610,6 @@ Analyze this JEE question image (${q.subject} - ${q.chapter}).
             }
         }
 
-        function snapBoundaryOutOfTextAndInk(sourceCanvas, pageLines, targetNormY, minAllowedNorm, maxAllowedNorm, preferDirection = 'UP') {
-            let yNorm = Math.max(minAllowedNorm, Math.min(maxAllowedNorm, targetNormY));
-
-            for (let pass = 0; pass < 3; pass++) {
-                let adjusted = false;
-                for (const line of pageLines) {
-                    if (yNorm >= line.topNorm - 5 && yNorm <= line.botNorm + 5) {
-                        if (preferDirection === 'UP') {
-                            const candidate = Math.max(minAllowedNorm, line.topNorm - 7);
-                            if (candidate < yNorm) { yNorm = candidate; adjusted = true; }
-                        } else {
-                            const candidate = Math.min(maxAllowedNorm, line.botNorm + 7);
-                            if (candidate > yNorm) { yNorm = candidate; adjusted = true; }
-                        }
-                    }
-                }
-                if (!adjusted) break;
-            }
-
-            const w = sourceCanvas.width, h = sourceCanvas.height;
-            const searchUpNorm = preferDirection === 'UP' ? 50 : 18;
-            const searchDownNorm = preferDirection === 'DOWN' ? 50 : 18;
-
-            const startMinNorm = Math.max(minAllowedNorm, yNorm - searchUpNorm);
-            const endMaxNorm = Math.min(maxAllowedNorm, yNorm + searchDownNorm);
-            const minPx = Math.max(4, Math.floor((startMinNorm / 1000) * h));
-            const maxPx = Math.min(h - 4, Math.floor((endMaxNorm / 1000) * h));
-            const centerPx = Math.max(minPx, Math.min(maxPx, Math.floor((yNorm / 1000) * h)));
-            if (maxPx <= minPx + 4) return Math.round(yNorm);
-
-            const sliceH = maxPx - minPx + 1;
-            const imgData = sourceCanvas.getContext('2d').getImageData(0, minPx, w, sliceH).data;
-            const isRowWhite = new Array(sliceH).fill(true);
-
-            for (let r = 0; r < sliceH; r++) {
-                let darkPixels = 0;
-                for (let x = 14; x < w - 14; x += 2) {
-                    const idx = (r * w + x) * 4;
-                    if (imgData[idx] < 238 || imgData[idx + 1] < 238 || imgData[idx + 2] < 238) {
-                        if (++darkPixels > 1) { isRowWhite[r] = false; break; }
-                    }
-                }
-            }
-
-            const startIdx = centerPx - minPx;
-            if (preferDirection === 'UP') {
-                for (let r = startIdx; r >= 2; r--) {
-                    if (isRowWhite[r] && isRowWhite[r - 1] && isRowWhite[r - 2]) {
-                        return Math.round(((minPx + r - 1) / h) * 1000);
-                    }
-                }
-            } else {
-                for (let r = startIdx; r < sliceH - 2; r++) {
-                    if (isRowWhite[r] && isRowWhite[r + 1] && isRowWhite[r + 2]) {
-                        return Math.round(((minPx + r + 1) / h) * 1000);
-                    }
-                }
-            }
-
-            let bestRowPx = centerPx, bestScore = -999999;
-            for (let r = 0; r < sliceH; r++) {
-                if (!isRowWhite[r]) continue;
-                let band = 1;
-                for (let u = r - 1; u >= 0 && isRowWhite[u]; u--) band++;
-                for (let d = r + 1; d < sliceH && isRowWhite[d]; d++) band++;
-                const absY = minPx + r;
-                const score = band * 5 - Math.abs(absY - centerPx);
-                if (score > bestScore) { bestScore = score; bestRowPx = absY; }
-            }
-            return Math.round((bestRowPx / h) * 1000);
-        }
-
-        function autoTrimVerticalWhitespace(canvas) {
-            const ctx = canvas.getContext('2d'), w = canvas.width, h = canvas.height;
-            if (h < 70) return canvas;
-            const imgData = ctx.getImageData(0, 0, w, h).data;
-            let topRow = 0, botRow = h - 1;
-
-            for (let y = 0; y < h; y++) {
-                let hasInk = false;
-                for (let x = 6; x < w - 6; x += 2) {
-                    const idx = (y * w + x) * 4;
-                    if (imgData[idx] < 242 || imgData[idx + 1] < 242 || imgData[idx + 2] < 242) { hasInk = true; break; }
-                }
-                if (hasInk) { topRow = Math.max(0, y - 24); break; }
-            }
-            for (let y = h - 1; y >= topRow; y--) {
-                let hasInk = false;
-                for (let x = 6; x < w - 6; x += 2) {
-                    const idx = (y * w + x) * 4;
-                    if (imgData[idx] < 242 || imgData[idx + 1] < 242 || imgData[idx + 2] < 242) { hasInk = true; break; }
-                }
-                if (hasInk) { botRow = Math.min(h - 1, y + 24); break; }
-            }
-
-            const trimmedH = Math.max(48, botRow - topRow + 1);
-            if (trimmedH >= h - 6) return canvas;
-            const trimmed = document.createElement('canvas');
-            trimmed.width = w; trimmed.height = trimmedH;
-            const tCtx = trimmed.getContext('2d');
-            tCtx.fillStyle = '#FFFFFF';
-            tCtx.fillRect(0, 0, w, trimmedH);
-            tCtx.drawImage(canvas, 0, topRow, w, trimmedH, 0, 0, w, trimmedH);
-            return trimmed;
-        }
-
-        function cropFullWidthSlice(sourceCanvas, yminNorm, ymaxNorm, padTop = 10, padBottom = 10) {
-            const w = sourceCanvas.width, h = sourceCanvas.height;
-            const safeYMin = Math.max(0, yminNorm - padTop), safeYMax = Math.min(1000, ymaxNorm + padBottom);
-            const cropY = Math.floor((safeYMin / 1000) * h);
-            const cropH = Math.max(44, Math.floor(((safeYMax - safeYMin) / 1000) * h));
-            const outW = Math.min(1200, w), outH = Math.floor(cropH * (outW / w));
-
-            const rawCanvas = document.createElement('canvas');
-            rawCanvas.width = outW; rawCanvas.height = outH;
-            const ctx = rawCanvas.getContext('2d');
-            ctx.fillStyle = '#FFFFFF';
-            ctx.fillRect(0, 0, outW, outH);
-            ctx.drawImage(sourceCanvas, 0, cropY, w, cropH, 0, 0, outW, outH);
-
-            const finalCanvas = autoTrimVerticalWhitespace(rawCanvas);
-            return {
-                canvas: finalCanvas,
-                dataUrl: finalCanvas.toDataURL('image/jpeg', 0.88),
-                aspectRatio: finalCanvas.height / finalCanvas.width
-            };
-        }
-
         async function stitchCanvasesVertically(topDataUrl, botDataUrl) {
             const loadImg = (src) => new Promise((res, rej) => {
                 const img = new Image(); img.onload = () => res(img); img.onerror = rej; img.src = src;
@@ -3316,90 +3627,6 @@ Analyze this JEE question image (${q.subject} - ${q.chapter}).
             ctx.drawImage(topImg, 0, 0, targetW, topH);
             ctx.drawImage(botImg, 0, topH + 4, targetW, botH);
             return { dataUrl: c.toDataURL('image/jpeg', 0.88), aspectRatio: c.height / c.width };
-        }
-
-        async function analyzePageLayoutWithGemini(base64Jpeg, pageNum, abortSignal) {
-            const apiKey = getApiKey();
-            const selectedModel = getSelectedModel();
-            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${selectedModel}:generateContent?key=${apiKey}`;
-
-            const systemPrompt = `You are a high-precision JEE Question Paper Layout & Boundary Detector.
-Do NOT solve the questions. Dedicate 100% of your attention to finding the exact vertical pixel boundaries (\`ymin\` to \`ymax\`, normalized 0 to 1000) of every single question or continuation block on this page.
-
-CRITICAL RULES FOR ZERO TEXT CLIPPING & ZERO CLUBBING:
-1. GENEROUS TOP MARGIN ABOVE FIRST LINE (\`ymin\`):
-   - Always place \`ymin\` in the clean white space 8 to 12 units strictly ABOVE the highest ascender, fraction bar, superscript, or diagram of the question's first line!
-2. GENEROUS BOTTOM MARGIN BELOW LAST LINE (\`ymax\`):
-   - Always place \`ymax\` in the clean white space 8 to 12 units strictly BELOW the lowest option/diagram of the question, and strictly ABOVE the next question number!
-3. STRICT TOP-OF-PAGE CONTINUATION SEPARATION:
-   - If there is text, a diagram, or options at the very top of the page that DO NOT start with a question number, output that top fragment as its OWN separate first entry with \`questionNumber: "CONT"\` and \`isContinuationFromPrevPage: true\`.
-4. STRICT BOTTOM-OF-PAGE CUTOFF DETECTION (\`continuesToNextPage\`):
-   - Set \`continuesToNextPage: true\` ONLY if the final question at the bottom of the page is genuinely incomplete.
-5. CURRICULUM CLASSIFICATION:
-   - Classify \`subject\` into "Physics", "Chemistry", or "Mathematics" and \`chapter\` STRICTLY from the allowed enum list.`;
-
-            const payload = {
-                contents: [{
-                    role: "user",
-                    parts: [
-                        { text: `Analyze Page ${pageNum}. Place each question's ymin in the whitespace strictly ABOVE its first line/superscript, and ymax in the whitespace strictly BELOW its last line/diagram.` },
-                        { inlineData: { mimeType: "image/jpeg", data: base64Jpeg } }
-                    ]
-                }],
-                systemInstruction: { parts: [{ text: systemPrompt }] },
-                generationConfig: {
-                    temperature: 0.0,
-                    responseMimeType: "application/json",
-                    responseSchema: {
-                        type: "OBJECT",
-                        properties: {
-                            questions: {
-                                type: "ARRAY",
-                                items: {
-                                    type: "OBJECT",
-                                    properties: {
-                                        questionNumber: { type: "STRING" },
-                                        firstLineSnippet: { type: "STRING" },
-                                        lastLineSnippet: { type: "STRING" },
-                                        subject: { type: "STRING", enum: ["Physics", "Chemistry", "Mathematics"] },
-                                        chapter: {
-                                            type: "STRING",
-                                            enum: [
-                                                "Basic Mathematics", "Units and Measurements, Errors and Experiments", "Vectors", "Rectilinear Motion", "Projectile Motion", "Relative Motion", "Circular Kinematics", "Newton's Laws of Motion", "Work, Power and Energy", "COM, Momentum and Collision", "Rigid Body Mechanics", "Mechanical properties of Solids (Elasticity)", "Thermometry", "Thermal Expansion", "Calorimetry", "Heat Transfer", "Kinetic Theory of Gases", "Thermodynamics", "Fluid Mechanics", "Simple Harmonic Motion", "Transverse waves (String Waves)", "Longitudinal Waves (Sound Waves)", "Gravitation",
-                                                "Some Basic Concepts of Chemistry (Mole Concept)", "Atomic Structure", "Periodic Classification", "Chemical Bonding", "Gaseous States", "Thermodynamics", "Chemical Equilibrium", "Ionic Equilibrium", "Redox Reactions", "Equivalent Concept and Volumetric Analysis", "IUPAC Nomenclature", "GOC-I", "GOC-II", "Stereochemistry", "Hydrocarbons", "Hydrogen", "s-Block Elements", "Environmental Chemistry", "p-Block Elements",
-                                                "Basic Maths", "Sets", "Relations", "Introduction to Functions (PU)", "Linear Inequalities PU", "Fundamentals-1 & 2", "Quadratic Equations and Expressions", "Sequence and Series", "Binomial Theorem for any index", "Permutations and Combinations", "Trigonometric Ratios and Identities", "Trigonometric Equations and Inequalities", "Properties of Triangles", "Introduction to Co-ordinate Geometry", "Straight Lines", "Pair of Lines", "Circles", "Parabola", "Ellipse", "Hyperbola", "Introduction to 3D Geometry PU", "Statistics", "Limits PU", "Methods of Differentiation", "Functions", "Probability PU"
-                                            ]
-                                        },
-                                        ymin: { type: "INTEGER" },
-                                        ymax: { type: "INTEGER" },
-                                        isContinuationFromPrevPage: { type: "BOOLEAN" },
-                                        continuesToNextPage: { type: "BOOLEAN" }
-                                    },
-                                    required: ["questionNumber", "firstLineSnippet", "lastLineSnippet", "subject", "chapter", "ymin", "ymax", "isContinuationFromPrevPage", "continuesToNextPage"]
-                                }
-                            }
-                        },
-                        required: ["questions"]
-                    }
-                }
-            };
-
-            let delay = 1200;
-            for (let attempt = 0; attempt < 3; attempt++) {
-                try {
-                    const res = await executeRateLimitedGeminiFetch(apiUrl, payload, abortSignal);
-                    if (!res.ok) throw new Error(`HTTP ${res.status}: ${(await res.text()).slice(0, 120)}`);
-                    const data = await res.json();
-                    const txt = data.candidates?.[0]?.content?.parts?.[0]?.text;
-                    return txt ? JSON.parse(txt) : { questions: [] };
-                } catch (e) {
-                    if (e.name === 'AbortError' || state.cancelExtractionRequested || String(e.message).includes('Daily limit reached')) throw e;
-                    if (attempt === 2) throw e;
-                    await new Promise(r => setTimeout(r, delay));
-                    delay *= 2;
-                }
-            }
-            return { questions: [] };
         }
 
         function appendExtractLog(msg, tone = 'info') {
@@ -3463,14 +3690,9 @@ CRITICAL RULES FOR ZERO TEXT CLIPPING & ZERO CLUBBING:
             toast('Upload cancelled & all questions from that PDF were rolled back.', 'warn');
         }
 
+        // Hybrid 2D Multi-Column + Single-Column PDF Extractor
         async function startPdfExtraction() {
             if (!state.pdfDoc || state.isExtracting) return;
-            if (!getApiKey()) {
-                window.app.closeUploadModal();
-                window.app.openSettingsModal(true, 'KEYS');
-                toast('Please save your Gemini API Key first!', 'warn');
-                return;
-            }
 
             state.isExtracting = true;
             state.isUploadMinimized = false;
@@ -3480,6 +3702,7 @@ CRITICAL RULES FOR ZERO TEXT CLIPPING & ZERO CLUBBING:
             setUploadButtonsLock(true);
 
             const paperName = document.getElementById('paperTitleInput').value.trim() || 'Test Paper';
+            const defaultSubj = document.getElementById('pdfDefaultSubjectSelect')?.value || 'AUTO';
             const startP = Math.max(1, parseInt(document.getElementById('startPageInput').value, 10) || 1);
             const endP = Math.min(state.pdfDoc.numPages, parseInt(document.getElementById('endPageInput').value, 10) || state.pdfDoc.numPages);
             const { padTop, padBottom } = getVerticalPads();
@@ -3511,45 +3734,70 @@ CRITICAL RULES FOR ZERO TEXT CLIPPING & ZERO CLUBBING:
                     const page = await state.pdfDoc.getPage(pageNum);
                     if (state.cancelExtractionRequested) return;
 
-                    const vp = page.getViewport({ scale: 2.0 });
+                    const vp = page.getViewport({ scale: 2.2 });
                     canvas.width = vp.width; canvas.height = vp.height;
                     ctx.fillStyle = '#FFFFFF';
                     ctx.fillRect(0, 0, canvas.width, canvas.height);
                     await page.render({ canvasContext: ctx, viewport: vp }).promise;
                     if (state.cancelExtractionRequested) return;
 
-                    const pageLines = await getPageTextLineIntervals(page);
+                    // Tier 1: Try Instant 2D Vector Column/Anchor Detection first (0 API calls!)
+                    const pageTokens = await extractPage2DTextTokens(page);
                     if (state.cancelExtractionRequested) return;
 
-                    const base64Jpeg = canvas.toDataURL('image/jpeg', 0.84).split(',')[1];
-                    appendExtractLog(`Scanning Page ${pageNum} layout with ${getSelectedModel()}...`, 'info');
+                    let blocks = extractQuestionsFromNativePdfVector(pageTokens, canvas, paperName, defaultSubj);
 
-                    const aiResult = await analyzePageLayoutWithGemini(base64Jpeg, pageNum, state.extractionAbortController.signal);
+                    if (blocks && blocks.length > 0) {
+                        const isTwoCol = blocks.some(b => b.xmin > 400);
+                        appendExtractLog(`Page ${pageNum}: Detected ${isTwoCol ? '2-Column' : '1-Column'} vector layout (${blocks.length} questions, 0 API quota used)`, 'info');
+                    } else {
+                        // Tier 2: Scanned PDF fallback -> Use 2D Gemini Vision Detector
+                        if (!getApiKey()) {
+                            throw new Error('Scanned PDF requires a Gemini API Key in Settings.');
+                        }
+                        const base64Jpeg = canvas.toDataURL('image/jpeg', 0.84).split(',')[1];
+                        appendExtractLog(`Page ${pageNum}: Scanning 2D layout with ${getSelectedModel()}...`, 'info');
+                        const aiResult = await analyzePageLayout2DWithGemini(base64Jpeg, pageNum, state.extractionAbortController.signal);
+                        blocks = (aiResult.questions || []).map(b => ({
+                            ...b,
+                            xmin: Number(b.xmin) ?? 12,
+                            xmax: Number(b.xmax) ?? 988,
+                            ymin: Number(b.ymin) ?? 0,
+                            ymax: Number(b.ymax) ?? 1000,
+                            colLines: []
+                        }));
+                    }
+
                     if (state.cancelExtractionRequested) return;
 
-                    const blocks = aiResult.questions || [];
-                    blocks.sort((a, b) => (a.ymin || 0) - (b.ymin || 0));
-
+                    // Snap each 2D block's ymin & ymax to clean whitespace valleys within its column [xmin..xmax]
                     for (let i = 0; i < blocks.length; i++) {
-                        const minAllowed = i === 0 ? 2 : Math.min(blocks[i].ymin, blocks[i - 1].ymax + 2);
-                        blocks[i].ymin = snapBoundaryOutOfTextAndInk(
+                        const b = blocks[i];
+                        const sameColPrev = i > 0 && Math.abs(blocks[i - 1].xmin - b.xmin) < 120 ? blocks[i - 1] : null;
+                        const sameColNext = i < blocks.length - 1 && Math.abs(blocks[i + 1].xmin - b.xmin) < 120 ? blocks[i + 1] : null;
+
+                        const minAllowed = sameColPrev ? Math.min(b.ymin, sameColPrev.ymax + 2) : 2;
+                        b.ymin = snap2DBoundaryToWhitespace(
                             canvas,
-                            pageLines,
-                            Number(blocks[i].ymin) || 0,
+                            b.colLines,
+                            Number(b.ymin) || 0,
                             minAllowed,
                             985,
+                            b.xmin,
+                            b.xmax,
                             'UP'
                         );
-                    }
-                    for (let i = 0; i < blocks.length; i++) {
-                        const maxAllowed = i < blocks.length - 1 ? Math.max(blocks[i].ymin + 25, blocks[i + 1].ymin - 2) : 998;
-                        const rawYMax = Math.min(maxAllowed, Number(blocks[i].ymax) || maxAllowed);
-                        blocks[i].ymax = snapBoundaryOutOfTextAndInk(
+
+                        const maxAllowed = sameColNext ? Math.max(b.ymin + 25, sameColNext.ymin - 2) : 996;
+                        const rawYMax = Math.min(maxAllowed, Number(b.ymax) || maxAllowed);
+                        b.ymax = snap2DBoundaryToWhitespace(
                             canvas,
-                            pageLines,
+                            b.colLines,
                             rawYMax,
-                            blocks[i].ymin + 25,
+                            b.ymin + 25,
                             maxAllowed,
+                            b.xmin,
+                            b.xmax,
                             'DOWN'
                         );
                     }
@@ -3559,12 +3807,15 @@ CRITICAL RULES FOR ZERO TEXT CLIPPING & ZERO CLUBBING:
                         const b = blocks[i];
                         const slicePct = Math.round(((pageNum - startP + (i + 1) / blocks.length) / countPages) * 100);
 
+                        const xmin = Math.max(0, Math.min(950, Number(b.xmin) ?? 12));
+                        const xmax = Math.max(xmin + 80, Math.min(1000, Number(b.xmax) ?? 988));
                         const ymin = Math.max(0, Math.min(990, Number(b.ymin) || 0));
-                        const ymax = Math.max(ymin + 25, Math.min(1000, Number(b.ymax) || 1000));
-                        const cropRes = cropFullWidthSlice(canvas, ymin, ymax, padTop, padBottom);
+                        const ymax = Math.max(ymin + 22, Math.min(1000, Number(b.ymax) || 1000));
 
-                        let fullQuestionText = await extractPdfNativeTextInSlice(page, ymin, ymax);
-                        if (fullQuestionText.length < 25) {
+                        const cropRes = crop2DSliceFromPage(canvas, xmin, xmax, ymin, ymax, padTop, padBottom);
+
+                        let fullQuestionText = b.ocrText || '';
+                        if (fullQuestionText.length < 18) {
                             updateUploadProgressEverywhere(
                                 slicePct,
                                 `Page ${pageNum}/${endP}`,
@@ -3582,10 +3833,13 @@ CRITICAL RULES FOR ZERO TEXT CLIPPING & ZERO CLUBBING:
                         if (state.cancelExtractionRequested) return;
 
                         const combinedOcrText = cleanQuestionTextOnly(`${fullQuestionText} ${b.firstLineSnippet || ''} ${b.lastLineSnippet || ''}`);
+                        const inferred = inferSubjectAndChapterFromText(`${paperName} ${combinedOcrText}`, defaultSubj);
+                        const finalSubject = ['Physics', 'Chemistry', 'Mathematics'].includes(b.subject) ? b.subject : inferred.subject;
+                        const finalChapter = b.chapter || inferred.chapter;
 
                         const rawQNum = String(b.questionNumber || '').replace(/[^0-9a-zA-Z]/g, '') || `${extractedCount + 1}`;
                         const isExplicitCont = rawQNum.toUpperCase() === 'CONT' || b.isContinuationFromPrevPage === true;
-                        const startsWithNewNum = /^\s*(?:Q\.?\s*)?\d+[\.\)\:]/.test(String(b.firstLineSnippet || '')) && !isExplicitCont;
+                        const startsWithNewNum = /^\s*(?:Q\.?\s*)?\d+/i.test(String(b.firstLineSnippet || '')) && !isExplicitCont;
 
                         const isStitch = prevQuestion && i === 0 && prevQuestion.page === pageNum - 1 && !startsWithNewNum &&
                             (isExplicitCont || prevQuestion.continuesToNextPage === true);
@@ -3606,8 +3860,8 @@ CRITICAL RULES FOR ZERO TEXT CLIPPING & ZERO CLUBBING:
                             id: generateUniqueId(),
                             uid: generateQuestionUid(),
                             questionNumber: rawQNum.toUpperCase() === 'CONT' ? cleanNum : rawQNum,
-                            subject: ['Physics', 'Chemistry', 'Mathematics'].includes(b.subject) ? b.subject : 'Physics',
-                            chapter: b.chapter || 'General Practice',
+                            subject: finalSubject,
+                            chapter: finalChapter,
                             paperName,
                             page: pageNum,
                             imageDataUrl: cropRes.dataUrl,
@@ -3650,11 +3904,11 @@ CRITICAL RULES FOR ZERO TEXT CLIPPING & ZERO CLUBBING:
                 updateUploadProgressEverywhere(100, `Done`, `Extracted ${extractedCount} questions!`);
                 sortAndRefreshQuestions(false);
 
-                toast(`Extracted ${extractedCount} questions! Syncing & generating hints in background...`, 'success');
+                toast(`Extracted ${extractedCount} questions! Syncing to Cloud...`, 'success');
                 window.app.closeUploadModal();
                 await pushToCloudGist(false);
 
-                if (isAutoSolveHintsEnabled()) {
+                if (isAutoSolveHintsEnabled() && getApiKey()) {
                     runBackgroundAnswerAndHintGenerator(false, false);
                 }
             } catch (err) {
@@ -3673,7 +3927,6 @@ CRITICAL RULES FOR ZERO TEXT CLIPPING & ZERO CLUBBING:
 
         function getFiltered() {
             if (state.mockTest.active && state.mockTest.questionIds.length > 0) {
-                const idSet = new Set(state.mockTest.questionIds);
                 return state.mockTest.questionIds
                     .map(id => state.questions.find(q => q.id === id))
                     .filter(Boolean);
@@ -3697,7 +3950,6 @@ CRITICAL RULES FOR ZERO TEXT CLIPPING & ZERO CLUBBING:
             });
         }
 
-        // #5 Timed Mock Set Engine
         function renderMockTestActiveBar() {
             const bar = document.getElementById('mockTestActiveBar');
             const cdEl = document.getElementById('mockTestCountdownText');
@@ -3929,7 +4181,7 @@ CRITICAL RULES FOR ZERO TEXT CLIPPING & ZERO CLUBBING:
                             ${state.isSyncingCloud
                                 ? 'Fetching your latest question bank from your GitHub Secret Gist...'
                                 : state.questions.length === 0
-                                ? 'Tap the floating "+ Add Questions" button to extract questions with 100% full-width crops, precision multi-page stitching, and automatic AI Answer Keys & 1-Line Hints!'
+                                ? 'Tap the floating "+ Add Questions" button to extract any 1-column or 2-column JEE PDF with automatic column separation and AI Hints!'
                                 : 'Try clearing the search box, swiping the Status pill to "All", or selecting "All Subjects & Chapters" inside the Chapters drawer.'}
                         </p>
                         ${!state.isSyncingCloud ? `
@@ -3975,9 +4227,7 @@ CRITICAL RULES FOR ZERO TEXT CLIPPING & ZERO CLUBBING:
                 `;
             }
         }
-        // ===================================================================
-        // LOCKED CONTEXT NAVIGATION & 3-CARD FULL-DIALOG SWIPE CAROUSEL
-        // ===================================================================
+
         function capturePadNavigationContext(currentQId) {
             if (state.mockTest.active && state.mockTest.questionIds.length > 0) {
                 state.padContextIds = [...state.mockTest.questionIds];
@@ -4032,7 +4282,6 @@ CRITICAL RULES FOR ZERO TEXT CLIPPING & ZERO CLUBBING:
                     </div>
 
                     <div class="flex items-center gap-1 shrink-0 ml-auto">
-                        <!-- #4 Option Eliminator in Preview -->
                         <div class="m3-icon-group m3-icon-group-wb shrink-0 px-1 gap-1" title="Cross out ruled-out options">
                             ${['A', 'B', 'C', 'D'].map(opt => `
                                 <button type="button" onclick="window.app.toggleEliminateOption('${opt}', ${q.id})" class="opt-elim-btn ${elimList.includes(opt) ? 'eliminated' : ''}">${opt}</button>
@@ -4233,9 +4482,6 @@ CRITICAL RULES FOR ZERO TEXT CLIPPING & ZERO CLUBBING:
             window.addEventListener('mouseup', onDragEnd);
         }
 
-        // ===================================================================
-        // MULTI-PAGE WHITEBOARD + BLIND MODE + DARK CANVAS + GIST ENGINE
-        // ===================================================================
         function getActiveBoardContainer() {
             const id = state.activePadId || 'default';
             if (!state.wbBoards[id]) {
@@ -4335,7 +4581,7 @@ CRITICAL RULES FOR ZERO TEXT CLIPPING & ZERO CLUBBING:
 
         let wbSaveTimer = null;
         function syncActiveBoardToQuestionGist(immediate = false) {
-            if (state.blindModeActive) return; // Blind mode never overwrites main Gist work unless user commits
+            if (state.blindModeActive) return;
             const q = state.questions.find(i => i.id === Number(state.activePadId));
             if (!q || state.wbIsLoading) return;
             const container = getActiveBoardContainer();
@@ -4366,7 +4612,7 @@ CRITICAL RULES FOR ZERO TEXT CLIPPING & ZERO CLUBBING:
                 scale: serializedPages[0].scale,
                 panX: serializedPages[0].panX,
                 panY: serializedPages[0].panY,
-                items: serializedPages[0].items, // Backward-compatible v1 field
+                items: serializedPages[0].items,
                 pages: serializedPages
             };
 
@@ -4711,14 +4957,12 @@ CRITICAL RULES FOR ZERO TEXT CLIPPING & ZERO CLUBBING:
                 tagBtn.classList.toggle('active-state', Boolean(q.noteTag));
             }
 
-            // #4 Update Option Eliminator Buttons in Whiteboard
             const elimList = state.blindModeActive ? [] : (q.eliminatedOptions || []);
             document.querySelectorAll('.wb-opt-elim').forEach(btn => {
                 const opt = btn.getAttribute('data-opt-btn');
                 btn.classList.toggle('eliminated', elimList.includes(opt));
             });
 
-            // #1, #3, #7 Toggle Button Active States
             document.getElementById('wbStylusOnlyBtn')?.classList.toggle('active-state', state.wbStylusOnly);
             document.getElementById('wbDarkCanvasBtn')?.classList.toggle('active-state', state.wbDarkCanvas);
             document.getElementById('padBlindModeBtn')?.classList.toggle('active-state', state.blindModeActive);
@@ -5022,7 +5266,6 @@ CRITICAL RULES FOR ZERO TEXT CLIPPING & ZERO CLUBBING:
             const canvas = document.getElementById('stylusCanvas');
             if (!wrap || !canvas) return;
 
-            // #3 Apply Dark/Inverted Canvas Filter cleanly
             canvas.style.filter = state.wbDarkCanvas ? 'invert(0.92) hue-rotate(180deg)' : 'none';
             wrap.style.backgroundColor = state.wbDarkCanvas ? '#11131a' : '#ffffff';
 
@@ -5276,7 +5519,6 @@ CRITICAL RULES FOR ZERO TEXT CLIPPING & ZERO CLUBBING:
                     return;
                 }
 
-                // #1 Stylus-Only Mode / Palm Rejection: Touch inputs pan instead of drawing
                 const isRejectedTouch = state.wbStylusOnly && e.pointerType === 'touch';
                 if (state.wbIsLoading || state.wbTool === 'PAN' || isSpacePressedGlobal || e.button === 1 || isRejectedTouch) {
                     lastPanMid = { x: sx, y: sy };
@@ -5767,7 +6009,6 @@ CRITICAL RULES FOR ZERO TEXT CLIPPING & ZERO CLUBBING:
                 });
             },
 
-            // #4 Interactive Option Eliminator (A, B, C, D)
             toggleEliminateOption(optLetter, explicitQId = null) {
                 const targetId = explicitQId || state.activePadId || state.activePopupId;
                 const q = state.questions.find(i => i.id === Number(targetId));
@@ -5787,7 +6028,6 @@ CRITICAL RULES FOR ZERO TEXT CLIPPING & ZERO CLUBBING:
                 scheduleCloudAutoSync(true);
             },
 
-            // #5 Timed Mock Set Generator & Runner
             openMockTestSetupModal() {
                 closeCustomDropdown();
                 if (state.mockTest.active) {
@@ -5813,7 +6053,6 @@ CRITICAL RULES FOR ZERO TEXT CLIPPING & ZERO CLUBBING:
                     return toast('No questions available in current filter for a mock set!', 'warn');
                 }
 
-                // Fisher-Yates shuffle
                 const shuffled = [...pool];
                 for (let i = shuffled.length - 1; i > 0; i--) {
                     const j = Math.floor(Math.random() * (i + 1));
@@ -6025,8 +6264,8 @@ CRITICAL RULES FOR ZERO TEXT CLIPPING & ZERO CLUBBING:
                 state.importMode = null;
                 state.pdfDoc = null;
                 state.importRawImg = null;
-                document.getElementById('selectedFileLabel').textContent = 'Tap to Select a JEE Test PDF or Question Photo (or press Ctrl+V)';
-                document.getElementById('selectedFileTypeBadge').textContent = 'Automatically detects file type & activates PDF slicer or Photo auto-deskew';
+                document.getElementById('selectedFileLabel').textContent = 'Tap to Select Any 1-Column / 2-Column JEE PDF or Photo (or press Ctrl+V)';
+                document.getElementById('selectedFileTypeBadge').textContent = 'Automatically detects multi-column sheets, integer/single-choice tags & diagrams';
                 document.getElementById('unifiedFileIcon').className = 'ph-duotone ph-cloud-arrow-up text-2xl';
                 document.getElementById('pdfSetupSubView').classList.add('hidden');
                 document.getElementById('pdfSetupSubView').classList.remove('grid');
@@ -6105,7 +6344,7 @@ CRITICAL RULES FOR ZERO TEXT CLIPPING & ZERO CLUBBING:
                         state.importDeskewAngle,
                         document.getElementById('imageCleanContrastChk').checked
                     );
-                    const trimmed = autoTrimVerticalWhitespace(workCanvas);
+                    const trimmed = autoTrim2DWhitespace(workCanvas);
                     const dataUrl = trimmed.toDataURL('image/jpeg', 0.88);
                     const base64Jpeg = dataUrl.split(',')[1];
 
@@ -6259,7 +6498,7 @@ CRITICAL RULES FOR ZERO TEXT CLIPPING & ZERO CLUBBING:
                 const infoEl = document.getElementById('settingsSolverStatusInfo');
                 if (infoEl && !state.isRunningBackgroundSolver) {
                     const withHints = state.questions.filter(q => q.hint && q.answerKey).length;
-                    infoEl.textContent = `Solved: ${withHints} / ${state.questions.length} questions have Answer Keys & 1-Line Hints in Cloud Gist.`;
+                    infoEl.textContent = `Solved: ${withHints} / ${state.questions.length} questions • Today: ${state.rateLimit.dailyCount}/${MAX_DAILY_REQ_IST} req (IST).`;
                 }
 
                 document.getElementById('apiKeyMissingAlert').classList.toggle('hidden', !showMissingAlert);
@@ -6450,12 +6689,12 @@ CRITICAL RULES FOR ZERO TEXT CLIPPING & ZERO CLUBBING:
                     const c1Raw = document.createElement('canvas');
                     c1Raw.width = img.width; c1Raw.height = cutY;
                     c1Raw.getContext('2d').drawImage(img, 0, 0, img.width, cutY, 0, 0, img.width, cutY);
-                    const c1 = autoTrimVerticalWhitespace(c1Raw);
+                    const c1 = autoTrim2DWhitespace(c1Raw);
 
                     const c2Raw = document.createElement('canvas');
                     c2Raw.width = img.width; c2Raw.height = Math.max(20, img.height - cutY);
                     c2Raw.getContext('2d').drawImage(img, 0, cutY, img.width, img.height - cutY, 0, 0, img.width, img.height - cutY);
-                    const c2 = autoTrimVerticalWhitespace(c2Raw);
+                    const c2 = autoTrim2DWhitespace(c2Raw);
 
                     const baseNum = String(q.questionNumber).replace(/[ab]$/i, '');
                     q.questionNumber = `${baseNum}a`;
@@ -6488,7 +6727,7 @@ CRITICAL RULES FOR ZERO TEXT CLIPPING & ZERO CLUBBING:
                     scheduleCloudAutoSync();
                     toast(`Split into Q.${baseNum}a & Q.${baseNum}b!`, 'success');
                     runBackgroundLocalOcrForExistingQuestions(false);
-                    if (isAutoSolveHintsEnabled()) runBackgroundAnswerAndHintGenerator(false, false);
+                    if (isAutoSolveHintsEnabled() && getApiKey()) runBackgroundAnswerAndHintGenerator(false, false);
                 } else {
                     const t = Number(document.getElementById('trimTopSlider').value) / 100;
                     const b = Number(document.getElementById('trimBotSlider').value) / 100;
@@ -6506,7 +6745,6 @@ CRITICAL RULES FOR ZERO TEXT CLIPPING & ZERO CLUBBING:
                 this.closeSplitModal();
             },
 
-            // Fullscreen Whiteboard (With #1, #2, #3, #4, #6, #7)
             getActivePadId: () => state.activePadId,
             openScratchpad(id, keepContext = false) {
                 closeCustomDropdown();
@@ -6578,7 +6816,6 @@ CRITICAL RULES FOR ZERO TEXT CLIPPING & ZERO CLUBBING:
                 refreshScratchpadTopBarAndHints();
             },
 
-            // #1 Stylus-Only / Palm Rejection Toggle
             toggleStylusOnlyMode() {
                 state.wbStylusOnly = !state.wbStylusOnly;
                 localStorage.setItem('jee_wb_stylus_only', String(state.wbStylusOnly));
@@ -6586,7 +6823,6 @@ CRITICAL RULES FOR ZERO TEXT CLIPPING & ZERO CLUBBING:
                 toast(`Stylus-Only Palm Rejection ${state.wbStylusOnly ? 'ON (Finger touches pan only)' : 'OFF'}`, 'info');
             },
 
-            // #2 Multi-Page Whiteboard Controls
             switchWhiteboardPage(delta) {
                 if (state.wbIsLoading || state.blindModeActive) return;
                 const container = getActiveBoardContainer();
@@ -6663,7 +6899,6 @@ CRITICAL RULES FOR ZERO TEXT CLIPPING & ZERO CLUBBING:
                 toast('Deleted Whiteboard page.', 'info');
             },
 
-            // #3 Dark/Inverted Whiteboard Canvas Toggle
             toggleWhiteboardDarkCanvas() {
                 state.wbDarkCanvas = !state.wbDarkCanvas;
                 localStorage.setItem('jee_wb_dark_canvas', String(state.wbDarkCanvas));
@@ -6672,7 +6907,6 @@ CRITICAL RULES FOR ZERO TEXT CLIPPING & ZERO CLUBBING:
                 toast(`Whiteboard Night Mode ${state.wbDarkCanvas ? 'ON' : 'OFF'}`, 'info');
             },
 
-            // #6 Quick Formula & Physical Constants Drawer Toggle
             toggleFormulaDrawer(force) {
                 const drawer = document.getElementById('wbFormulaDrawer');
                 const btn = document.getElementById('wbFormulaDrawerBtn');
@@ -6683,7 +6917,6 @@ CRITICAL RULES FOR ZERO TEXT CLIPPING & ZERO CLUBBING:
                 btn?.classList.toggle('active-state', open);
             },
 
-            // #7 Blind Re-Attempt Mode Toggle
             toggleBlindReattemptMode() {
                 if (state.wbIsLoading) return;
                 if (!state.blindModeActive) {
