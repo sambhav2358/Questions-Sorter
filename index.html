@@ -5576,8 +5576,26 @@ Analyze this JEE question image (${q.subject} - ${q.chapter}).
                 ansBox.classList.toggle('hidden', !state.padShowAns);
                 ansBox.classList.toggle('inline-flex', state.padShowAns);
             }
-            if (hintTxt) hintTxt.innerHTML = markdownParser.render(q.hint || 'Click "Generate with Gemini" to get a 1-line hint →');
-            if (ansTxt) ansTxt.innerHTML = markdownParser.render(q.answerKey || 'Not solved yet');
+            if (hintTxt) {
+                const rawHint = q.hint || 'Click "Generate with Gemini 3.8" to get a 1-line hint →';
+                // Automatically render KaTeX inline math delimiters ($...$)
+                const renderedHint = rawHint.replace(/\$([^\$\n]+?)\$/g, (match, math) => {
+                    try {
+                        return typeof katex !== 'undefined' ? katex.renderToString(math.trim(), { displayMode: false, throwOnError: false }) : match;
+                    } catch (_) { return match; }
+                });
+                hintTxt.innerHTML = renderedHint;
+            }
+        
+            if (ansTxt) {
+                const rawAns = q.answerKey || 'Not solved yet';
+                const renderedAns = rawAns.replace(/\$([^\$\n]+?)\$/g, (match, math) => {
+                    try {
+                        return typeof katex !== 'undefined' ? katex.renderToString(math.trim(), { displayMode: false, throwOnError: false }) : match;
+                    } catch (_) { return match; }
+                });
+                ansTxt.innerHTML = renderedAns;
+            }
             if (solveBtn) solveBtn.classList.toggle('hidden', Boolean(q.hint && q.answerKey));
         }
 
