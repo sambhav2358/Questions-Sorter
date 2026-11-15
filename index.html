@@ -11,8 +11,9 @@
     <script>pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';</script>
     <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/KaTeX@0.16.8/dist/katex.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/KaTeX@0.16.8/dist/katex.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
     <style>
         :root {
             --md-primary: hsl(252, 95%, 78%);
@@ -5495,8 +5496,53 @@ Analyze this JEE question image (${q.subject} - ${q.chapter}).
                 ungrpBtn.classList.toggle('inline-flex', hasGrouped);
             }
         }
+        function renderMarkdownAndLatex(rawStr) {
+            if (!rawStr) return '';
+            let text = String(rawStr);
 
-                function refreshScratchpadTopBarAndHints() {
+            // 1. Extract and render LaTeX math blocks first so Marked.js doesn't mangle underscores (e.g. $B_1$)
+            const mathPlaceholders = [];
+            const storeMath = (mathExpr, displayMode) => {
+                const token = `@@MATH_TOKEN_${mathPlaceholders.length}@@`;
+                let rendered = mathExpr;
+                try {
+                    if (typeof window.katex !== 'undefined') {
+                        rendered = window.katex.renderToString(mathExpr.trim(), {
+                            displayMode,
+                            throwOnError: false
+                        });
+                    }
+                } catch (_) {}
+                mathPlaceholders.push({ token, html: rendered });
+                return token;
+            };
+
+            // Match $$...$$ and \[...\] (Block Math)
+            text = text.replace(/\$\$([\s\S]+?)\$\$/g, (_, m) => storeMath(m, true));
+            text = text.replace(/\\\[([\s\S]+?)\\\]/g, (_, m) => storeMath(m, true));
+
+            // Match $...$ and \(...\) (Inline Math)
+            text = text.replace(/\$([^\$\n]+?)\$/g, (_, m) => storeMath(m, false));
+            text = text.replace(/\\\(([\s\S]+?)\\\)/g, (_, m) => storeMath(m, false));
+
+            // 2. Render Markdown inline (bold, italics, code) via Marked.js if loaded
+            let html = text;
+            try {
+                if (typeof window.marked !== 'undefined') {
+                    html = typeof window.marked.parseInline === 'function'
+                        ? window.marked.parseInline(text)
+                        : window.marked.parse(text).replace(/^<p>|<\/p>\n?$/g, '');
+                }
+            } catch (_) {}
+
+            // 3. Restore rendered KaTeX HTML spans
+            for (const item of mathPlaceholders) {
+                html = html.split(item.token).join(item.html);
+            }
+            return html;
+        }
+
+        function refreshScratchpadTopBarAndHints() {
             const q = state.questions.find(i => i.id === Number(state.activePadId));
             if (!q) return;
 
@@ -5526,7 +5572,7 @@ Analyze this JEE question image (${q.subject} - ${q.chapter}).
             }
             if (solvedBtn && solvedIcon) {
                 solvedBtn.classList.toggle('active-state', Boolean(q.solved));
-                solvedIcon.className = solvedBtn ? 'ph-fill ph-check-circle' : 'ph-bold ph-circle';
+                solvedIcon.className = q.solved ? 'ph-fill ph-check-circle' : 'ph-bold ph-circle';
             }
             if (tagBtn) {
                 tagBtn.classList.toggle('active-state', Boolean(q.noteTag));
@@ -5577,28 +5623,21 @@ Analyze this JEE question image (${q.subject} - ${q.chapter}).
                 ansBox.classList.toggle('inline-flex', state.padShowAns);
             }
 
-            // KaTeX-rendered Hint Text
             if (hintTxt) {
-                const rawHint = q.hint || 'Click "Generate with Gemini 3.8" to get a 1-line hint →';
-                hintTxt.innerHTML = rawHint.replace(/\$([^\$\n]+?)\$/g, (match, math) => {
-                    try {
-                        return typeof katex !== 'undefined' ? katex.renderToString(math.trim(), { displayMode: false, throwOnError: false }) : match;
-                    } catch (_) { return match; }
-                });
+                hintTxt.innerHTML = renderMarkdownAndLatex(
+                    q.hint || 'Click "Generate with Gemini 3.8" to get a 1-line hint →'
+                );
             }
-
-            // KaTeX-rendered Answer Key Text
             if (ansTxt) {
-                const rawAns = q.answerKey || 'Not solved yet';
-                ansTxt.innerHTML = rawAns.replace(/\$([^\$\n]+?)\$/g, (match, math) => {
-                    try {
-                        return typeof katex !== 'undefined' ? katex.renderToString(math.trim(), { displayMode: false, throwOnError: false }) : match;
-                    } catch (_) { return match; }
-                });
+                ansTxt.innerHTML = renderMarkdownAndLatex(
+                    q.answerKey || 'Not solved yet'
+                );
             }
 
             if (solveBtn) solveBtn.classList.toggle('hidden', Boolean(q.hint && q.answerKey));
         }
+
+        
         function rdpSimplify(points, epsilon) {
             if (points.length < 3) return points;
             let dmax = 0, index = 0;
