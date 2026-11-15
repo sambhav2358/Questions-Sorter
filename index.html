@@ -618,50 +618,102 @@
             animation: m3DialogSpringOut 0.2s var(--m3-smooth) forwards !important;
         }
 
-        /* Whiteboard Morph / Expand Transition */
+                /* GPU-Composited 60fps Whiteboard Open/Close & Slide Transitions */
         @keyframes m3WhiteboardExpandIn {
-            0% { opacity: 0; transform: scale(0.91); border-radius: 36px; }
-            100% { opacity: 1; transform: scale(1); border-radius: 0px; }
+            0% { opacity: 0; transform: translate3d(0, 14px, 0) scale(0.955); }
+            100% { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
         }
         @keyframes m3WhiteboardShrinkOut {
-            0% { opacity: 1; transform: scale(1); border-radius: 0px; }
-            100% { opacity: 0; transform: scale(0.92); border-radius: 36px; }
+            0% { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
+            100% { opacity: 0; transform: translate3d(0, 14px, 0) scale(0.96); }
         }
         @keyframes m3WbSlideNextIn {
-            from { opacity: 0.35; transform: translate3d(56px, 0, 0) scale(0.985); }
-            to { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
+            from { opacity: 0.4; transform: translate3d(48px, 0, 0); }
+            to { opacity: 1; transform: translate3d(0, 0, 0); }
         }
         @keyframes m3WbSlidePrevIn {
-            from { opacity: 0.35; transform: translate3d(-56px, 0, 0) scale(0.985); }
-            to { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
+            from { opacity: 0.4; transform: translate3d(-48px, 0, 0); }
+            to { opacity: 1; transform: translate3d(0, 0, 0); }
         }
-        .wb-enter-anim { animation: m3WhiteboardExpandIn 0.3s cubic-bezier(0.22, 1, 0.36, 1) forwards; }
-        .wb-exit-anim { animation: m3WhiteboardShrinkOut 0.22s cubic-bezier(0.4, 0, 1, 1) forwards; pointer-events: none; }
-        .wb-question-slide-next { animation: m3WbSlideNextIn 0.24s cubic-bezier(0.22, 1, 0.36, 1) forwards; }
-        .wb-question-slide-prev { animation: m3WbSlidePrevIn 0.24s cubic-bezier(0.22, 1, 0.36, 1) forwards; }
+        #scratchpadModal {
+            will-change: transform, opacity;
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
+        }
+        .wb-enter-anim {
+            animation: m3WhiteboardExpandIn 0.24s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        }
+        .wb-exit-anim {
+            animation: m3WhiteboardShrinkOut 0.18s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+            pointer-events: none;
+        }
+        .wb-question-slide-next {
+            animation: m3WbSlideNextIn 0.22s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        }
+        .wb-question-slide-prev {
+            animation: m3WbSlidePrevIn 0.22s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        }
 
-        /* Telegram-Style Settings Page Horizontal Push/Pop Transitions */
+        /* Single-Cell Grid Overlay so Settings Pages NEVER Stack Vertically */
+        .settings-pages-stage {
+            display: grid;
+            grid-template-columns: 100%;
+            align-items: start;
+            position: relative;
+        }
+        .settings-pages-stage > #apiKeyMissingAlert {
+            margin-bottom: 12px;
+        }
+        #settingsPage_HOME,
+        #settingsPage_KEYS,
+        #settingsPage_THEME,
+        #settingsPage_BACKUP,
+        #settingsPage_SCANNER {
+            grid-column: 1;
+            grid-row: 2;
+            width: 100%;
+            margin-top: 0 !important;
+            will-change: transform, opacity;
+            backface-visibility: hidden;
+        }
+
+        /* Telegram-Style Horizontal Push/Pop (Overlaid in the exact same grid cell) */
         @keyframes tgPushInRight {
-            from { opacity: 0; transform: translate3d(42%, 0, 0); }
+            from { opacity: 0; transform: translate3d(36%, 0, 0); }
             to { opacity: 1; transform: translate3d(0, 0, 0); }
         }
         @keyframes tgPushOutLeft {
             from { opacity: 1; transform: translate3d(0, 0, 0); }
-            to { opacity: 0; transform: translate3d(-26%, 0, 0); }
+            to { opacity: 0; transform: translate3d(-24%, 0, 0); }
         }
         @keyframes tgPopInLeft {
-            from { opacity: 0; transform: translate3d(-32%, 0, 0); }
+            from { opacity: 0; transform: translate3d(-28%, 0, 0); }
             to { opacity: 1; transform: translate3d(0, 0, 0); }
         }
         @keyframes tgPopOutRight {
             from { opacity: 1; transform: translate3d(0, 0, 0); }
-            to { opacity: 0; transform: translate3d(42%, 0, 0); }
+            to { opacity: 0; transform: translate3d(36%, 0, 0); }
         }
-        .tg-page-push-in { animation: tgPushInRight 0.26s cubic-bezier(0.22, 1, 0.36, 1) forwards; }
-        .tg-page-push-out { animation: tgPushOutLeft 0.22s cubic-bezier(0.22, 1, 0.36, 1) forwards; pointer-events: none; }
-        .tg-page-pop-in { animation: tgPopInLeft 0.26s cubic-bezier(0.22, 1, 0.36, 1) forwards; }
-        .tg-page-pop-out { animation: tgPopOutRight 0.22s cubic-bezier(0.22, 1, 0.36, 1) forwards; pointer-events: none; }
+        .tg-page-push-in {
+            animation: tgPushInRight 0.24s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+            z-index: 2;
+        }
+        .tg-page-push-out {
+            animation: tgPushOutLeft 0.24s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+            pointer-events: none;
+            z-index: 1;
+        }
+        .tg-page-pop-in {
+            animation: tgPopInLeft 0.24s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+            z-index: 2;
+        }
+        .tg-page-pop-out {
+            animation: tgPopOutRight 0.24s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+            pointer-events: none;
+            z-index: 1;
+        }
 
+        
         /* Fluid Sliding Pill Indicator for Connected Segmented Groups (.m3-segmented-group) */
         .m3-segmented-group {
             position: relative;
@@ -1053,7 +1105,7 @@
                 </button>
             </div>
 
-            <div class="p-4 overflow-y-auto flex-1 space-y-3">
+            <div class="p-4 overflow-y-auto overflow-x-hidden flex-1 settings-pages-stage">
                 <div id="apiKeyMissingAlert" class="hidden p-3.5 rounded-3xl m3-primary-pill text-xs leading-relaxed">
                     <strong class="font-extrabold block mb-0.5">API Key Required for Gemini 3.8 Flash:</strong>
                     Please enter your Google AI Studio API Key below to verify PDF borders and generate Answer Keys & Hints.
@@ -6924,70 +6976,6 @@ Analyze this JEE question image (${q.subject} - ${q.chapter}).
                     scheduleCloudAutoSync(true);
                 });
             },
-
-            // --- Telegram-Style Horizontal Page Swipe in Settings ---
-            openSettingsPage(pageKey = 'HOME', skipAnim = false) {
-                closeCustomDropdown();
-                const prevKey = state.activeSettingsPage || 'HOME';
-                state.activeSettingsPage = pageKey;
-                const allKeys = ['HOME', 'KEYS', 'THEME', 'BACKUP', 'SCANNER'];
-
-                if (skipAnim || prevKey === pageKey) {
-                    allKeys.forEach(p => {
-                        const el = document.getElementById(`settingsPage_${p}`);
-                        if (!el) return;
-                        el.classList.remove('tg-page-push-in', 'tg-page-push-out', 'tg-page-pop-in', 'tg-page-pop-out');
-                        el.classList.toggle('hidden', p !== pageKey);
-                    });
-                } else {
-                    const isPushingSubpage = prevKey === 'HOME' && pageKey !== 'HOME';
-                    const outEl = document.getElementById(`settingsPage_${prevKey}`);
-                    const inEl = document.getElementById(`settingsPage_${pageKey}`);
-
-                    allKeys.forEach(p => {
-                        if (p !== prevKey && p !== pageKey) {
-                            document.getElementById(`settingsPage_${p}`)?.classList.add('hidden');
-                        }
-                    });
-
-                    if (outEl && inEl) {
-                        outEl.classList.remove('tg-page-push-in', 'tg-page-push-out', 'tg-page-pop-in', 'tg-page-pop-out');
-                        inEl.classList.remove('hidden', 'tg-page-push-in', 'tg-page-push-out', 'tg-page-pop-in', 'tg-page-pop-out');
-
-                        outEl.classList.add(isPushingSubpage ? 'tg-page-push-out' : 'tg-page-pop-out');
-                        inEl.classList.add(isPushingSubpage ? 'tg-page-push-in' : 'tg-page-pop-in');
-
-                        setTimeout(() => {
-                            outEl.classList.add('hidden');
-                            outEl.classList.remove('tg-page-push-out', 'tg-page-pop-out');
-                            inEl.classList.remove('tg-page-push-in', 'tg-page-pop-in');
-                            updateAllSegmentedGliders();
-                        }, 240);
-                    }
-                }
-
-                const backBtn = document.getElementById('settingsBackBtn');
-                const headerIcon = document.getElementById('settingsHeaderIcon');
-                const titleEl = document.getElementById('settingsHeaderTitle');
-
-                if (pageKey === 'HOME') {
-                    backBtn.classList.add('hidden'); backBtn.classList.remove('flex');
-                    headerIcon.classList.remove('hidden');
-                    titleEl.textContent = 'Settings';
-                } else {
-                    backBtn.classList.remove('hidden'); backBtn.classList.add('flex');
-                    headerIcon.classList.add('hidden');
-                    const titles = {
-                        KEYS: 'API Keys & Cloud Credentials',
-                        THEME: 'Appearance & Material You Theme',
-                        BACKUP: 'Cloud Sync, Export & Vault Tools',
-                        SCANNER: 'Gemini 3.8 Flash Solver & Scanner'
-                    };
-                    titleEl.textContent = titles[pageKey] || 'Settings';
-                }
-                requestAnimationFrame(() => updateAllSegmentedGliders());
-            },
-
             openSettingsModal(showMissingAlert = false, initialPage = 'HOME') {
                 closeCustomDropdown();
                 document.getElementById('apiKeyInput').value = getApiKey();
@@ -7048,7 +7036,81 @@ Analyze this JEE question image (${q.subject} - ${q.chapter}).
                 });
             },
 
-            // --- Animated Whiteboard Open, Close & 3-Finger Slide Navigation ---
+                        openSettingsPage(pageKey = 'HOME', skipAnim = false) {
+                closeCustomDropdown();
+                const prevKey = state.activeSettingsPage || 'HOME';
+                state.activeSettingsPage = pageKey;
+                const allKeys = ['HOME', 'KEYS', 'THEME', 'BACKUP', 'SCANNER'];
+
+                if (this._settingsAnimTimer) {
+                    clearTimeout(this._settingsAnimTimer);
+                    this._settingsAnimTimer = null;
+                }
+
+                const stageEl = document.querySelector('.settings-pages-stage');
+                if (stageEl) stageEl.scrollTop = 0;
+
+                if (skipAnim || prevKey === pageKey) {
+                    allKeys.forEach(p => {
+                        const el = document.getElementById(`settingsPage_${p}`);
+                        if (!el) return;
+                        el.classList.remove('tg-page-push-in', 'tg-page-push-out', 'tg-page-pop-in', 'tg-page-pop-out');
+                        el.classList.toggle('hidden', p !== pageKey);
+                    });
+                } else {
+                    const isPushingSubpage = prevKey === 'HOME' && pageKey !== 'HOME';
+                    const outEl = document.getElementById(`settingsPage_${prevKey}`);
+                    const inEl = document.getElementById(`settingsPage_${pageKey}`);
+
+                    allKeys.forEach(p => {
+                        if (p !== prevKey && p !== pageKey) {
+                            const other = document.getElementById(`settingsPage_${p}`);
+                            if (other) {
+                                other.classList.add('hidden');
+                                other.classList.remove('tg-page-push-in', 'tg-page-push-out', 'tg-page-pop-in', 'tg-page-pop-out');
+                            }
+                        }
+                    });
+
+                    if (outEl && inEl) {
+                        outEl.classList.remove('tg-page-push-in', 'tg-page-push-out', 'tg-page-pop-in', 'tg-page-pop-out');
+                        inEl.classList.remove('hidden', 'tg-page-push-in', 'tg-page-push-out', 'tg-page-pop-in', 'tg-page-pop-out');
+
+                        outEl.classList.add(isPushingSubpage ? 'tg-page-push-out' : 'tg-page-pop-out');
+                        inEl.classList.add(isPushingSubpage ? 'tg-page-push-in' : 'tg-page-pop-in');
+
+                        this._settingsAnimTimer = setTimeout(() => {
+                            outEl.classList.add('hidden');
+                            outEl.classList.remove('tg-page-push-out', 'tg-page-pop-out');
+                            inEl.classList.remove('tg-page-push-in', 'tg-page-pop-in');
+                            this._settingsAnimTimer = null;
+                            updateAllSegmentedGliders();
+                        }, 240);
+                    }
+                }
+
+                const backBtn = document.getElementById('settingsBackBtn');
+                const headerIcon = document.getElementById('settingsHeaderIcon');
+                const titleEl = document.getElementById('settingsHeaderTitle');
+
+                if (pageKey === 'HOME') {
+                    backBtn.classList.add('hidden'); backBtn.classList.remove('flex');
+                    headerIcon.classList.remove('hidden');
+                    titleEl.textContent = 'Settings';
+                } else {
+                    backBtn.classList.remove('hidden'); backBtn.classList.add('flex');
+                    headerIcon.classList.add('hidden');
+                    const titles = {
+                        KEYS: 'API Keys & Cloud Credentials',
+                        THEME: 'Appearance & Material You Theme',
+                        BACKUP: 'Cloud Sync, Export & Vault Tools',
+                        SCANNER: 'Gemini 3.8 Flash Solver & Scanner'
+                    };
+                    titleEl.textContent = titles[pageKey] || 'Settings';
+                }
+                requestAnimationFrame(() => updateAllSegmentedGliders());
+            },
+
             getActivePadId: () => state.activePadId,
             openScratchpad(id, keepContext = false, slideDir = 0) {
                 closeCustomDropdown();
@@ -7081,19 +7143,35 @@ Analyze this JEE question image (${q.subject} - ${q.chapter}).
                 const wrap = document.getElementById('padCanvasWrap');
                 const wasHidden = wbModal.classList.contains('hidden');
 
+                if (wbModal._closeTimer) {
+                    clearTimeout(wbModal._closeTimer);
+                    wbModal._closeTimer = null;
+                }
+
                 wbModal.classList.remove('hidden', 'wb-exit-anim');
+                checkWhiteboardOrientationLock();
+
                 if (wasHidden) {
                     wbModal.classList.remove('wb-enter-anim');
                     void wbModal.offsetWidth;
                     wbModal.classList.add('wb-enter-anim');
-                } else if (slideDir !== 0 && wrap) {
-                    wrap.classList.remove('wb-question-slide-next', 'wb-question-slide-prev');
-                    void wrap.offsetWidth;
-                    wrap.classList.add(slideDir > 0 ? 'wb-question-slide-next' : 'wb-question-slide-prev');
+                    // Let the GPU start the 60fps open animation first before heavy canvas allocation
+                    setTimeout(() => {
+                        wbModal.classList.remove('wb-enter-anim');
+                    }, 250);
+                    requestAnimationFrame(() => {
+                        requestAnimationFrame(() => {
+                            loadQuestionBoardInBackground(q);
+                        });
+                    });
+                } else {
+                    if (slideDir !== 0 && wrap) {
+                        wrap.classList.remove('wb-question-slide-next', 'wb-question-slide-prev');
+                        void wrap.offsetWidth;
+                        wrap.classList.add(slideDir > 0 ? 'wb-question-slide-next' : 'wb-question-slide-prev');
+                    }
+                    loadQuestionBoardInBackground(q);
                 }
-
-                checkWhiteboardOrientationLock();
-                loadQuestionBoardInBackground(q);
             },
             closeScratchpad() {
                 closeCustomDropdown();
@@ -7108,19 +7186,28 @@ Analyze this JEE question image (${q.subject} - ${q.chapter}).
                 if (!state.mockTest.active) state.blindModeActive = false;
                 clearQuestionUrlHash();
 
+                // Update lightweight counters only; individual cards are already updated in-place via toggleQBool!
+                refreshCountsAndDrawerOnly();
+
                 const wbModal = document.getElementById('scratchpadModal');
                 if (wbModal && !wbModal.classList.contains('hidden')) {
                     wbModal.classList.remove('wb-enter-anim');
                     wbModal.classList.add('wb-exit-anim');
-                    setTimeout(() => {
+                    if (wbModal._closeTimer) clearTimeout(wbModal._closeTimer);
+                    wbModal._closeTimer = setTimeout(() => {
                         wbModal.classList.add('hidden');
                         wbModal.classList.remove('wb-exit-anim');
-                        renderAll();
-                    }, 210);
-                } else {
-                    renderAll();
+                        wbModal._closeTimer = null;
+                        // Only rebuild feed if status/tag filter requires hiding solved/unsolved cards
+                        if (state.status !== 'ALL' || state.tagFilter !== 'ALL') {
+                            requestAnimationFrame(() => renderFeed());
+                        }
+                    }, 185);
                 }
             },
+
+            // --- Animated Whiteboard Open, Close & 3-Finger Slide Navigation ---
+            getActivePadId: () => state.activePadId,
             navigatePadQuestion(dir) {
                 closeCustomDropdown();
                 const q = state.questions.find(i => i.id === Number(state.activePadId));
