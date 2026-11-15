@@ -500,15 +500,15 @@
             from { opacity: 0; transform: scale(0.94) translateY(10px); }
             to { opacity: 1; transform: scale(1) translateY(0); }
         }
-
+        
         .m3-dialog {
             background-color: var(--md-surface-container);
             border: 1px solid var(--md-outline-variant);
             border-radius: 32px;
             box-shadow: 0 28px 64px rgba(0, 0, 0, 0.48);
-            animation: m3DialogIn 0.24s var(--m3-smooth);
             margin: auto;
             max-width: calc(100vw - 24px);
+            will-change: transform, opacity;
         }
 
         .popup-carousel-card {
@@ -658,14 +658,17 @@
         .wb-question-slide-prev {
             animation: m3WbSlidePrevIn 0.22s cubic-bezier(0.22, 1, 0.36, 1) forwards;
         }
-
-        /* Single-Cell Grid Overlay so Settings Pages NEVER Stack Vertically */
+        
+        /* Single-Cell Grid Overlay + Smooth Simultaneous Height Morphing */
         .settings-pages-stage {
             display: grid;
             grid-template-columns: 100%;
             align-items: start;
             position: relative;
+            transition: height 0.24s cubic-bezier(0.22, 1, 0.36, 1);
+            will-change: height;
         }
+
         .settings-pages-stage > #apiKeyMissingAlert {
             margin-bottom: 12px;
         }
@@ -7255,8 +7258,7 @@ Analyze this JEE question image (${q.subject} - ${q.chapter}).
                     state.activeSplitId = null;
                 });
             },
-
-                        openSettingsPage(pageKey = 'HOME', skipAnim = false) {
+            openSettingsPage(pageKey = 'HOME', skipAnim = false) {
                 closeCustomDropdown();
                 const prevKey = state.activeSettingsPage || 'HOME';
                 state.activeSettingsPage = pageKey;
@@ -7271,6 +7273,7 @@ Analyze this JEE question image (${q.subject} - ${q.chapter}).
                 if (stageEl) stageEl.scrollTop = 0;
 
                 if (skipAnim || prevKey === pageKey) {
+                    if (stageEl) stageEl.style.height = '';
                     allKeys.forEach(p => {
                         const el = document.getElementById(`settingsPage_${p}`);
                         if (!el) return;
@@ -7292,10 +7295,23 @@ Analyze this JEE question image (${q.subject} - ${q.chapter}).
                         }
                     });
 
-                    if (outEl && inEl) {
-                        outEl.classList.remove('tg-page-push-in', 'tg-page-push-out', 'tg-page-pop-in', 'tg-page-pop-out');
-                        inEl.classList.remove('hidden', 'tg-page-push-in', 'tg-page-push-out', 'tg-page-pop-in', 'tg-page-pop-out');
+                    if (outEl && inEl && stageEl) {
+                        // 1. Measure current total stage height before showing incoming page
+                        const startH = stageEl.offsetHeight;
 
+                        // 2. Temporarily swap visibility to measure exact target height of the incoming page
+                        outEl.classList.add('hidden');
+                        inEl.classList.remove('hidden', 'tg-page-push-in', 'tg-page-push-out', 'tg-page-pop-in', 'tg-page-pop-out');
+                        stageEl.style.height = 'auto';
+                        const endH = stageEl.offsetHeight;
+
+                        // 3. Unhide both pages in the same grid cell and lock starting height
+                        outEl.classList.remove('hidden', 'tg-page-push-in', 'tg-page-push-out', 'tg-page-pop-in', 'tg-page-pop-out');
+                        stageEl.style.height = `${startH}px`;
+                        void stageEl.offsetHeight; // Force reflow so the browser registers startH
+
+                        // 4. Trigger horizontal slide AND smooth height transition at the exact same frame
+                        stageEl.style.height = `${endH}px`;
                         outEl.classList.add(isPushingSubpage ? 'tg-page-push-out' : 'tg-page-pop-out');
                         inEl.classList.add(isPushingSubpage ? 'tg-page-push-in' : 'tg-page-pop-in');
 
@@ -7303,9 +7319,10 @@ Analyze this JEE question image (${q.subject} - ${q.chapter}).
                             outEl.classList.add('hidden');
                             outEl.classList.remove('tg-page-push-out', 'tg-page-pop-out');
                             inEl.classList.remove('tg-page-push-in', 'tg-page-pop-in');
+                            stageEl.style.height = '';
                             this._settingsAnimTimer = null;
                             updateAllSegmentedGliders();
-                        }, 240);
+                        }, 245);
                     }
                 }
 
