@@ -5496,7 +5496,7 @@ Analyze this JEE question image (${q.subject} - ${q.chapter}).
             }
         }
 
-        function refreshScratchpadTopBarAndHints() {
+                function refreshScratchpadTopBarAndHints() {
             const q = state.questions.find(i => i.id === Number(state.activePadId));
             if (!q) return;
 
@@ -5526,7 +5526,7 @@ Analyze this JEE question image (${q.subject} - ${q.chapter}).
             }
             if (solvedBtn && solvedIcon) {
                 solvedBtn.classList.toggle('active-state', Boolean(q.solved));
-                solvedIcon.className = q.solved ? 'ph-fill ph-check-circle' : 'ph-bold ph-circle';
+                solvedIcon.className = solvedBtn ? 'ph-fill ph-check-circle' : 'ph-bold ph-circle';
             }
             if (tagBtn) {
                 tagBtn.classList.toggle('active-state', Boolean(q.noteTag));
@@ -5576,29 +5576,29 @@ Analyze this JEE question image (${q.subject} - ${q.chapter}).
                 ansBox.classList.toggle('hidden', !state.padShowAns);
                 ansBox.classList.toggle('inline-flex', state.padShowAns);
             }
+
+            // KaTeX-rendered Hint Text
             if (hintTxt) {
                 const rawHint = q.hint || 'Click "Generate with Gemini 3.8" to get a 1-line hint →';
-                // Automatically render KaTeX inline math delimiters ($...$)
-                const renderedHint = rawHint.replace(/\$([^\$\n]+?)\$/g, (match, math) => {
+                hintTxt.innerHTML = rawHint.replace(/\$([^\$\n]+?)\$/g, (match, math) => {
                     try {
                         return typeof katex !== 'undefined' ? katex.renderToString(math.trim(), { displayMode: false, throwOnError: false }) : match;
                     } catch (_) { return match; }
                 });
-                hintTxt.innerHTML = renderedHint;
             }
-        
+
+            // KaTeX-rendered Answer Key Text
             if (ansTxt) {
                 const rawAns = q.answerKey || 'Not solved yet';
-                const renderedAns = rawAns.replace(/\$([^\$\n]+?)\$/g, (match, math) => {
+                ansTxt.innerHTML = rawAns.replace(/\$([^\$\n]+?)\$/g, (match, math) => {
                     try {
                         return typeof katex !== 'undefined' ? katex.renderToString(math.trim(), { displayMode: false, throwOnError: false }) : match;
                     } catch (_) { return match; }
                 });
-                ansTxt.innerHTML = renderedAns;
             }
+
             if (solveBtn) solveBtn.classList.toggle('hidden', Boolean(q.hint && q.answerKey));
         }
-
         function rdpSimplify(points, epsilon) {
             if (points.length < 3) return points;
             let dmax = 0, index = 0;
