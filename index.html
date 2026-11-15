@@ -11,6 +11,8 @@
     <script>pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';</script>
     <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/KaTeX@0.16.8/dist/katex.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/KaTeX@0.16.8/dist/katex.min.js"></script>
     <style>
         :root {
             --md-primary: hsl(252, 95%, 78%);
@@ -2077,21 +2079,39 @@
             { value: 'Trap', label: 'Trap' },
             { value: 'Redo', label: 'Redo' }
         ];
-
-                // ===================================================================
-        // MARKDOWN & LATEX PARSER HELPER FOR HINTS, ANSWERS & OCR TEXT
+        
+        // ===================================================================
+        // MARKDOWN & KATEX MATH PARSER HELPER
         // ===================================================================
         const markdownParser = {
             render(rawText) {
                 if (!rawText) return '';
                 let text = String(rawText);
+
+                // 1. Render Block Math ($$...$$)
+                text = text.replace(/\$\$([\s\S]*?)\$\$/g, (match, math) => {
+                    try {
+                        return typeof katex !== 'undefined' ? katex.renderToString(math.trim(), { displayMode: true, throwOnError: false }) : match;
+                    } catch (e) { return match; }
+                });
+
+                // 2. Render Inline Math ($...$)
+                text = text.replace(/\$([^\$\n]+?)\$/g, (match, math) => {
+                    try {
+                        return typeof katex !== 'undefined' ? katex.renderToString(math.trim(), { displayMode: false, throwOnError: false }) : match;
+                    } catch (e) { return match; }
+                });
+
+                // 3. Parse Markdown via Marked.js if present
                 let html = typeof marked !== 'undefined' ? marked.parse(text) : text
                     .replace(/&/g, "&amp;")
                     .replace(/</g, "&lt;")
                     .replace(/>/g, "&gt;");
+
                 return html;
             }
         };
+
         
         const state = {
             questions: [],
