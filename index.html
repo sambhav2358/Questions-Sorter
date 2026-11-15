@@ -10,6 +10,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
     <script>pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';</script>
     <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <style>
         :root {
             --md-primary: hsl(252, 95%, 78%);
@@ -2077,6 +2078,21 @@
             { value: 'Redo', label: 'Redo' }
         ];
 
+                // ===================================================================
+        // MARKDOWN & LATEX PARSER HELPER FOR HINTS, ANSWERS & OCR TEXT
+        // ===================================================================
+        const markdownParser = {
+            render(rawText) {
+                if (!rawText) return '';
+                let text = String(rawText);
+                let html = typeof marked !== 'undefined' ? marked.parse(text) : text
+                    .replace(/&/g, "&amp;")
+                    .replace(/</g, "&lt;")
+                    .replace(/>/g, "&gt;");
+                return html;
+            }
+        };
+        
         const state = {
             questions: [],
             nextId: 1,
@@ -5540,8 +5556,8 @@ Analyze this JEE question image (${q.subject} - ${q.chapter}).
                 ansBox.classList.toggle('hidden', !state.padShowAns);
                 ansBox.classList.toggle('inline-flex', state.padShowAns);
             }
-            if (hintTxt) hintTxt.textContent = q.hint || 'Click "Generate with Gemini 3.8" to get a 1-line hint →';
-            if (ansTxt) ansTxt.textContent = q.answerKey || 'Not solved yet';
+            if (hintTxt) hintTxt.innerHTML = markdownParser.render(q.hint || 'Click "Generate with Gemini" to get a 1-line hint →');
+            if (ansTxt) ansTxt.innerHTML = markdownParser.render(q.answerKey || 'Not solved yet');
             if (solveBtn) solveBtn.classList.toggle('hidden', Boolean(q.hint && q.answerKey));
         }
 
