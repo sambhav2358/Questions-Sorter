@@ -579,6 +579,116 @@
 
         #stylusCanvas { touch-action: none; }
         #popupCarouselViewport { touch-action: pan-y; }
+
+        /* =================================================================== */
+        /* EXPRESSIVE DIALOG, TELEGRAM SWIPE, WHITEBOARD & SLIDING PILL CSS    */
+        /* =================================================================== */
+        @keyframes m3BackdropIn {
+            from { opacity: 0; backdrop-filter: blur(0px); }
+            to { opacity: 1; backdrop-filter: blur(6px); }
+        }
+        @keyframes m3BackdropOut {
+            from { opacity: 1; backdrop-filter: blur(6px); }
+            to { opacity: 0; backdrop-filter: blur(0px); }
+        }
+        @keyframes m3DialogSpringIn {
+            0% { opacity: 0; transform: scale(0.84) translateY(26px); }
+            65% { opacity: 1; transform: scale(1.018) translateY(-3px); }
+            100% { opacity: 1; transform: scale(1) translateY(0); }
+        }
+        @keyframes m3DialogSpringOut {
+            0% { opacity: 1; transform: scale(1) translateY(0); }
+            100% { opacity: 0; transform: scale(0.88) translateY(20px); }
+        }
+
+        /* Apply spring entrance & exit to all modal backdrops & dialogs */
+        .modal-anim-in {
+            animation: m3BackdropIn 0.24s var(--m3-smooth) forwards;
+        }
+        .modal-anim-in > .m3-dialog,
+        .modal-anim-in .popup-carousel-card {
+            animation: m3DialogSpringIn 0.34s var(--m3-spring) forwards;
+        }
+        .modal-anim-out {
+            animation: m3BackdropOut 0.2s var(--m3-smooth) forwards !important;
+            pointer-events: none !important;
+        }
+        .modal-anim-out > .m3-dialog,
+        .modal-anim-out .popup-carousel-card {
+            animation: m3DialogSpringOut 0.2s var(--m3-smooth) forwards !important;
+        }
+
+        /* Whiteboard Morph / Expand Transition */
+        @keyframes m3WhiteboardExpandIn {
+            0% { opacity: 0; transform: scale(0.91); border-radius: 36px; }
+            100% { opacity: 1; transform: scale(1); border-radius: 0px; }
+        }
+        @keyframes m3WhiteboardShrinkOut {
+            0% { opacity: 1; transform: scale(1); border-radius: 0px; }
+            100% { opacity: 0; transform: scale(0.92); border-radius: 36px; }
+        }
+        @keyframes m3WbSlideNextIn {
+            from { opacity: 0.35; transform: translate3d(56px, 0, 0) scale(0.985); }
+            to { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
+        }
+        @keyframes m3WbSlidePrevIn {
+            from { opacity: 0.35; transform: translate3d(-56px, 0, 0) scale(0.985); }
+            to { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
+        }
+        .wb-enter-anim { animation: m3WhiteboardExpandIn 0.3s cubic-bezier(0.22, 1, 0.36, 1) forwards; }
+        .wb-exit-anim { animation: m3WhiteboardShrinkOut 0.22s cubic-bezier(0.4, 0, 1, 1) forwards; pointer-events: none; }
+        .wb-question-slide-next { animation: m3WbSlideNextIn 0.24s cubic-bezier(0.22, 1, 0.36, 1) forwards; }
+        .wb-question-slide-prev { animation: m3WbSlidePrevIn 0.24s cubic-bezier(0.22, 1, 0.36, 1) forwards; }
+
+        /* Telegram-Style Settings Page Horizontal Push/Pop Transitions */
+        @keyframes tgPushInRight {
+            from { opacity: 0; transform: translate3d(42%, 0, 0); }
+            to { opacity: 1; transform: translate3d(0, 0, 0); }
+        }
+        @keyframes tgPushOutLeft {
+            from { opacity: 1; transform: translate3d(0, 0, 0); }
+            to { opacity: 0; transform: translate3d(-26%, 0, 0); }
+        }
+        @keyframes tgPopInLeft {
+            from { opacity: 0; transform: translate3d(-32%, 0, 0); }
+            to { opacity: 1; transform: translate3d(0, 0, 0); }
+        }
+        @keyframes tgPopOutRight {
+            from { opacity: 1; transform: translate3d(0, 0, 0); }
+            to { opacity: 0; transform: translate3d(42%, 0, 0); }
+        }
+        .tg-page-push-in { animation: tgPushInRight 0.26s cubic-bezier(0.22, 1, 0.36, 1) forwards; }
+        .tg-page-push-out { animation: tgPushOutLeft 0.22s cubic-bezier(0.22, 1, 0.36, 1) forwards; pointer-events: none; }
+        .tg-page-pop-in { animation: tgPopInLeft 0.26s cubic-bezier(0.22, 1, 0.36, 1) forwards; }
+        .tg-page-pop-out { animation: tgPopOutRight 0.22s cubic-bezier(0.22, 1, 0.36, 1) forwards; pointer-events: none; }
+
+        /* Fluid Sliding Pill Indicator for Connected Segmented Groups (.m3-segmented-group) */
+        .m3-segmented-group {
+            position: relative;
+            isolation: isolate;
+        }
+        .m3-seg-glider {
+            position: absolute;
+            top: 2.5px;
+            bottom: 2.5px;
+            left: 0;
+            border-radius: 9999px;
+            background-color: var(--md-primary);
+            box-shadow: 0 2px 10px -1px rgba(0, 0, 0, 0.35);
+            transition: transform 0.32s cubic-bezier(0.28, 1.22, 0.54, 1), width 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+            z-index: 0;
+            pointer-events: none;
+        }
+        .m3-segmented-group.has-glider .m3-seg-btn {
+            position: relative;
+            z-index: 1;
+            background-color: transparent !important;
+            transition: color 0.2s ease, transform 0.15s ease;
+        }
+        .m3-segmented-group.has-glider .m3-seg-btn:hover:not(.active) {
+            background-color: rgba(255, 255, 255, 0.05) !important;
+        }
+
     </style>
 </head>
 <body class="h-[100dvh] w-screen overflow-hidden flex flex-col select-none m3-surface">
@@ -3499,6 +3609,7 @@ Analyze this JEE question image (${q.subject} - ${q.chapter}).
 
             document.getElementById('themeModeDarkBtn')?.classList.toggle('active', mode === 'dark');
             document.getElementById('themeModeLightBtn')?.classList.toggle('active', mode === 'light');
+            requestAnimationFrame(() => updateAllSegmentedGliders());
             const picker = document.getElementById('customThemeColorPicker');
             if (picker) picker.value = cleanHex;
             renderDrawerChapters();
@@ -4566,6 +4677,8 @@ Analyze this JEE question image (${q.subject} - ${q.chapter}).
                 const st = btn.getAttribute('data-status');
                 btn.classList.toggle('active', st === state.status);
             });
+            requestAnimationFrame(() => updateAllSegmentedGliders());
+
 
             document.querySelectorAll('.drawer-tag-chip').forEach(chip => {
                 const t = chip.getAttribute('data-tag-chip');
@@ -6538,13 +6651,117 @@ Analyze this JEE question image (${q.subject} - ${q.chapter}).
         }
 
         // ===================================================================
+        // UI ANIMATION HELPERS: DIALOGS, SLIDING PILLS & 3-FINGER WB SWIPE
+        // ===================================================================
+        function animateModalOpen(modalId) {
+            const el = document.getElementById(modalId);
+            if (!el) return;
+            if (el._closeTimer) {
+                clearTimeout(el._closeTimer);
+                el._closeTimer = null;
+            }
+            el.classList.remove('hidden', 'modal-anim-out');
+            el.classList.add('modal-anim-in');
+            requestAnimationFrame(() => updateAllSegmentedGliders());
+        }
+
+        function animateModalClose(modalId, onAfterClose = null) {
+            const el = document.getElementById(modalId);
+            if (!el || el.classList.contains('hidden')) {
+                if (onAfterClose) onAfterClose();
+                return;
+            }
+            el.classList.remove('modal-anim-in');
+            el.classList.add('modal-anim-out');
+            if (el._closeTimer) clearTimeout(el._closeTimer);
+            el._closeTimer = setTimeout(() => {
+                el.classList.add('hidden');
+                el.classList.remove('modal-anim-out');
+                el._closeTimer = null;
+                if (onAfterClose) onAfterClose();
+            }, 195);
+        }
+
+        // Updates the sliding pill glider on every .m3-segmented-group (All/Unsolved/Solved/Starred, Dark/Light, Split/Trim)
+        function updateSegmentedGlider(groupEl) {
+            if (!groupEl) return;
+            const activeBtn = groupEl.querySelector('.m3-seg-btn.active');
+            if (!activeBtn) return;
+
+            let glider = groupEl.querySelector('.m3-seg-glider');
+            if (!glider) {
+                glider = document.createElement('span');
+                glider.className = 'm3-seg-glider';
+                groupEl.prepend(glider);
+                groupEl.classList.add('has-glider');
+            }
+
+            if (activeBtn.offsetWidth > 0) {
+                glider.style.width = `${activeBtn.offsetWidth}px`;
+                glider.style.transform = `translate3d(${activeBtn.offsetLeft}px, 0, 0)`;
+            }
+        }
+
+        function updateAllSegmentedGliders() {
+            document.querySelectorAll('.m3-segmented-group').forEach(updateSegmentedGlider);
+        }
+
+        // 3-Finger Horizontal Swipe Gesture ONLY inside the Whiteboard (Respects locked filter context)
+        function initWhiteboardThreeFingerSwipe() {
+            const wbModal = document.getElementById('scratchpadModal');
+            if (!wbModal || wbModal._has3FingerSwipe) return;
+            wbModal._has3FingerSwipe = true;
+
+            let tracking3F = false;
+            let startAvgX = 0;
+            let startAvgY = 0;
+            let lastTriggeredAt = 0;
+
+            wbModal.addEventListener('touchstart', (e) => {
+                if (e.touches.length === 3) {
+                    tracking3F = true;
+                    startAvgX = (e.touches[0].clientX + e.touches[1].clientX + e.touches[2].clientX) / 3;
+                    startAvgY = (e.touches[0].clientY + e.touches[1].clientY + e.touches[2].clientY) / 3;
+                } else if (e.touches.length > 3) {
+                    tracking3F = false;
+                }
+            }, { passive: true });
+
+            wbModal.addEventListener('touchmove', (e) => {
+                if (!tracking3F || e.touches.length !== 3) return;
+                const now = performance.now();
+                if (now - lastTriggeredAt < 420) return;
+
+                const currAvgX = (e.touches[0].clientX + e.touches[1].clientX + e.touches[2].clientX) / 3;
+                const currAvgY = (e.touches[0].clientY + e.touches[1].clientY + e.touches[2].clientY) / 3;
+                const dx = currAvgX - startAvgX;
+                const dy = currAvgY - startAvgY;
+
+                if (Math.abs(dx) > 68 && Math.abs(dx) > Math.abs(dy) * 1.35) {
+                    tracking3F = false;
+                    lastTriggeredAt = now;
+                    if (dx < 0) {
+                        // 3-Finger Swipe Left -> Next Question in Locked Filter Context
+                        window.app.navigatePadQuestion(1);
+                    } else {
+                        // 3-Finger Swipe Right -> Previous Question in Locked Filter Context
+                        window.app.navigatePadQuestion(-1);
+                    }
+                }
+            }, { passive: true });
+
+            wbModal.addEventListener('touchend', (e) => {
+                if (e.touches.length < 3) tracking3F = false;
+            }, { passive: true });
+        }
+
+        // ===================================================================
         // GLOBAL APP CONTROLLER
         // ===================================================================
         window.app = {
             isExtracting: () => state.isExtracting,
             closeCustomDropdown,
-
-            // Live AI Solver Console Controls
+                        // --- Animated Solver Modal ---
             openSolverModal() {
                 closeCustomDropdown();
                 state.isSolverMinimized = false;
@@ -6561,23 +6778,24 @@ Analyze this JEE question image (${q.subject} - ${q.chapter}).
                     renderM3WavyProgress('solverModalWavyBarWrap', state.questions.length ? Math.round((solvedCount / state.questions.length) * 100) : 6);
                 }
                 updateQuotaBadgesEverywhere();
-                document.getElementById('solverModal').classList.remove('hidden');
+                animateModalOpen('solverModal');
                 if (!waveAnimFrame) waveAnimFrame = requestAnimationFrame(stepAllWavyBars);
                 ensureM3MorphLoopRunning();
             },
             minimizeSolverModal() {
                 closeCustomDropdown();
-                document.getElementById('solverModal').classList.add('hidden');
-                if (state.isRunningBackgroundSolver) {
-                    state.isSolverMinimized = true;
-                    const minBar = document.getElementById('minimizedSolverBar');
-                    if (minBar) {
-                        minBar.classList.remove('hidden');
-                        minBar.classList.add('flex');
+                animateModalClose('solverModal', () => {
+                    if (state.isRunningBackgroundSolver) {
+                        state.isSolverMinimized = true;
+                        const minBar = document.getElementById('minimizedSolverBar');
+                        if (minBar) {
+                            minBar.classList.remove('hidden');
+                            minBar.classList.add('flex');
+                        }
+                        if (!waveAnimFrame) waveAnimFrame = requestAnimationFrame(stepAllWavyBars);
+                        ensureM3MorphLoopRunning();
                     }
-                    if (!waveAnimFrame) waveAnimFrame = requestAnimationFrame(stepAllWavyBars);
-                    ensureM3MorphLoopRunning();
-                }
+                });
             },
             closeSolverModal() {
                 if (state.isRunningBackgroundSolver) {
@@ -6585,8 +6803,337 @@ Analyze this JEE question image (${q.subject} - ${q.chapter}).
                     return;
                 }
                 closeCustomDropdown();
-                document.getElementById('solverModal').classList.add('hidden');
+                animateModalClose('solverModal');
             },
+
+            // --- Animated Mock Test Modals ---
+            openMockTestSetupModal() {
+                closeCustomDropdown();
+                if (state.mockTest.active) {
+                    return toast('Mock test is already running! Click Submit Test to finish.', 'info');
+                }
+                animateModalOpen('mockTestSetupModal');
+            },
+            closeMockTestSetupModal() {
+                animateModalClose('mockTestSetupModal');
+            },
+            closeMockTestSummaryModal() {
+                animateModalClose('mockTestSummaryModal');
+            },
+
+            // --- Animated Upload Modal ---
+            openUploadModal(initialImageBlob = null) {
+                closeCustomDropdown();
+                if (state.isExtracting && state.isUploadMinimized) {
+                    this.restoreUploadModal();
+                    return;
+                }
+                setUploadButtonsLock(false);
+                document.getElementById('uploadSetupView').classList.remove('hidden');
+                document.getElementById('uploadProgressView').classList.add('hidden');
+
+                if (initialImageBlob) {
+                    animateModalOpen('uploadModal');
+                    loadSingleImageForImport(initialImageBlob, initialImageBlob.name || 'Pasted Image');
+                    return;
+                }
+
+                state.importMode = null;
+                state.pdfDoc = null;
+                state.importRawImg = null;
+                document.getElementById('selectedFileLabel').textContent = 'Tap to Select Any 1-Column / 2-Column JEE PDF or Photo (or press Ctrl+V)';
+                document.getElementById('selectedFileTypeBadge').textContent = 'Computes local 2D candidate borders & verifies them with Gemini 3.8 Flash';
+                document.getElementById('unifiedFileIcon').className = 'ph-duotone ph-cloud-arrow-up text-2xl';
+                document.getElementById('pdfSetupSubView').classList.add('hidden');
+                document.getElementById('pdfSetupSubView').classList.remove('grid');
+                document.getElementById('imageSetupSubView').classList.add('hidden');
+                document.getElementById('startExtractBtn').disabled = true;
+                document.getElementById('startExtractBtnLbl').textContent = 'Extract Questions';
+                animateModalOpen('uploadModal');
+            },
+            minimizeUploadModal() {
+                if (!state.isExtracting) return;
+                closeCustomDropdown();
+                state.isUploadMinimized = true;
+                animateModalClose('uploadModal', () => {
+                    const minBar = document.getElementById('minimizedUploadBar');
+                    if (minBar) {
+                        minBar.classList.remove('hidden');
+                        minBar.classList.add('flex');
+                    }
+                    if (!waveAnimFrame) waveAnimFrame = requestAnimationFrame(stepAllWavyBars);
+                    ensureM3MorphLoopRunning();
+                });
+            },
+            restoreUploadModal() {
+                closeCustomDropdown();
+                state.isUploadMinimized = false;
+                const minBar = document.getElementById('minimizedUploadBar');
+                if (minBar) {
+                    minBar.classList.add('hidden');
+                    minBar.classList.remove('flex');
+                }
+                animateModalOpen('uploadModal');
+                if (!waveAnimFrame) waveAnimFrame = requestAnimationFrame(stepAllWavyBars);
+                ensureM3MorphLoopRunning();
+            },
+            closeUploadModal() {
+                closeCustomDropdown();
+                if (!state.isExtracting && !state.isImportingImage) {
+                    animateModalClose('uploadModal', () => {
+                        state.importRawImg = null;
+                    });
+                }
+            },
+
+            // --- Animated Image Preview & Smooth Morph into Whiteboard ---
+            getActivePopupId: () => state.activePopupId,
+            openImagePopup(id, keepContext = false) {
+                closeCustomDropdown();
+                const q = state.questions.find(i => i.id === Number(id));
+                if (!q) return;
+                if (!keepContext || !Array.isArray(state.padContextIds) || !state.padContextIds.includes(q.id)) {
+                    capturePadNavigationContext(q.id);
+                }
+                state.activePopupId = q.id;
+                state.isPopupAnimating = false;
+                initQuestionTimerIdle();
+                syncUrlHashWithActiveQuestion(q);
+                renderPopupCarouselSlots();
+                animateModalOpen('imagePopupModal');
+            },
+            openScratchpadFromPopup(id) {
+                if (isVerticalScreen()) {
+                    toast('Whiteboard is only allowed on horizontal screens.', 'warn');
+                    return;
+                }
+                // Smoothly animate the preview card out while morphing the Whiteboard in
+                this.closeImagePopup(true);
+                setTimeout(() => {
+                    this.openScratchpad(id, true);
+                }, 110);
+            },
+            closeImagePopup(keepHash = false) {
+                closeCustomDropdown();
+                stopQuestionTimer();
+                state.isPopupAnimating = false;
+                animateModalClose('imagePopupModal', () => {
+                    state.activePopupId = null;
+                    if (!keepHash) clearQuestionUrlHash();
+                    renderAll();
+                    scheduleCloudAutoSync(true);
+                });
+            },
+
+            // --- Telegram-Style Horizontal Page Swipe in Settings ---
+            openSettingsPage(pageKey = 'HOME', skipAnim = false) {
+                closeCustomDropdown();
+                const prevKey = state.activeSettingsPage || 'HOME';
+                state.activeSettingsPage = pageKey;
+                const allKeys = ['HOME', 'KEYS', 'THEME', 'BACKUP', 'SCANNER'];
+
+                if (skipAnim || prevKey === pageKey) {
+                    allKeys.forEach(p => {
+                        const el = document.getElementById(`settingsPage_${p}`);
+                        if (!el) return;
+                        el.classList.remove('tg-page-push-in', 'tg-page-push-out', 'tg-page-pop-in', 'tg-page-pop-out');
+                        el.classList.toggle('hidden', p !== pageKey);
+                    });
+                } else {
+                    const isPushingSubpage = prevKey === 'HOME' && pageKey !== 'HOME';
+                    const outEl = document.getElementById(`settingsPage_${prevKey}`);
+                    const inEl = document.getElementById(`settingsPage_${pageKey}`);
+
+                    allKeys.forEach(p => {
+                        if (p !== prevKey && p !== pageKey) {
+                            document.getElementById(`settingsPage_${p}`)?.classList.add('hidden');
+                        }
+                    });
+
+                    if (outEl && inEl) {
+                        outEl.classList.remove('tg-page-push-in', 'tg-page-push-out', 'tg-page-pop-in', 'tg-page-pop-out');
+                        inEl.classList.remove('hidden', 'tg-page-push-in', 'tg-page-push-out', 'tg-page-pop-in', 'tg-page-pop-out');
+
+                        outEl.classList.add(isPushingSubpage ? 'tg-page-push-out' : 'tg-page-pop-out');
+                        inEl.classList.add(isPushingSubpage ? 'tg-page-push-in' : 'tg-page-pop-in');
+
+                        setTimeout(() => {
+                            outEl.classList.add('hidden');
+                            outEl.classList.remove('tg-page-push-out', 'tg-page-pop-out');
+                            inEl.classList.remove('tg-page-push-in', 'tg-page-pop-in');
+                            updateAllSegmentedGliders();
+                        }, 240);
+                    }
+                }
+
+                const backBtn = document.getElementById('settingsBackBtn');
+                const headerIcon = document.getElementById('settingsHeaderIcon');
+                const titleEl = document.getElementById('settingsHeaderTitle');
+
+                if (pageKey === 'HOME') {
+                    backBtn.classList.add('hidden'); backBtn.classList.remove('flex');
+                    headerIcon.classList.remove('hidden');
+                    titleEl.textContent = 'Settings';
+                } else {
+                    backBtn.classList.remove('hidden'); backBtn.classList.add('flex');
+                    headerIcon.classList.add('hidden');
+                    const titles = {
+                        KEYS: 'API Keys & Cloud Credentials',
+                        THEME: 'Appearance & Material You Theme',
+                        BACKUP: 'Cloud Sync, Export & Vault Tools',
+                        SCANNER: 'Gemini 3.8 Flash Solver & Scanner'
+                    };
+                    titleEl.textContent = titles[pageKey] || 'Settings';
+                }
+                requestAnimationFrame(() => updateAllSegmentedGliders());
+            },
+
+            openSettingsModal(showMissingAlert = false, initialPage = 'HOME') {
+                closeCustomDropdown();
+                document.getElementById('apiKeyInput').value = getApiKey();
+                const currentMod = GEMINI_MODELS.find(m => m.value === getSelectedModel()) || GEMINI_MODELS[0];
+                const modLbl = document.getElementById('geminiModelDropdownLabel');
+                if (modLbl) modLbl.textContent = currentMod.label;
+
+                const pads = getVerticalPads();
+                document.getElementById('padTopInput').value = pads.padTop;
+                document.getElementById('padBottomInput').value = pads.padBottom;
+                document.getElementById('githubTokenInput').value = getGithubToken();
+                document.getElementById('cloudAutoSyncCheckbox').checked = isCloudAutoSyncEnabled();
+                const autoSolveChk = document.getElementById('autoSolveHintsCheckbox');
+                if (autoSolveChk) autoSolveChk.checked = isAutoSolveHintsEnabled();
+
+                updateQuotaBadgesEverywhere();
+
+                document.getElementById('apiKeyMissingAlert').classList.toggle('hidden', !showMissingAlert);
+                updateCloudStatusUI(state.isSyncingCloud ? 'syncing' : 'idle');
+                this.openSettingsPage(showMissingAlert ? 'KEYS' : initialPage, true);
+                animateModalOpen('settingsModal');
+            },
+            closeSettingsModal() {
+                closeCustomDropdown();
+                animateModalClose('settingsModal');
+            },
+
+            // --- Animated Clear Vault & Split Modals ---
+            confirmClearVault() {
+                closeCustomDropdown();
+                if (state.questions.length === 0) return toast('Question vault is already empty!', 'info');
+                document.getElementById('clearConfirmCount').textContent = state.questions.length;
+                const chk = document.getElementById('clearVaultDoubleCheck');
+                const btn = document.getElementById('finalClearVaultBtn');
+                if (chk) chk.checked = false;
+                if (btn) btn.disabled = true;
+                animateModalOpen('clearConfirmModal');
+            },
+            closeClearConfirmModal() {
+                animateModalClose('clearConfirmModal');
+            },
+            openSplitModal(id) {
+                closeCustomDropdown();
+                const q = state.questions.find(i => i.id === Number(id));
+                if (!q) return;
+                state.activeSplitId = Number(id);
+                document.getElementById('splitPreviewImg').src = q.imageDataUrl;
+                document.getElementById('splitCutSlider').value = 50;
+                document.getElementById('trimTopSlider').value = 0;
+                document.getElementById('trimBotSlider').value = 100;
+                this.setSplitMode('SPLIT');
+                animateModalOpen('splitModal');
+            },
+            closeSplitModal() {
+                closeCustomDropdown();
+                animateModalClose('splitModal', () => {
+                    state.activeSplitId = null;
+                });
+            },
+
+            // --- Animated Whiteboard Open, Close & 3-Finger Slide Navigation ---
+            getActivePadId: () => state.activePadId,
+            openScratchpad(id, keepContext = false, slideDir = 0) {
+                closeCustomDropdown();
+                if (isVerticalScreen()) {
+                    toast('Whiteboard is only allowed on horizontal screens.', 'warn');
+                    return;
+                }
+                if (state.activePadId && !state.wbIsLoading) {
+                    syncActiveBoardToQuestionGist(true);
+                }
+                const q = state.questions.find(i => i.id === Number(id));
+                if (!q) return;
+                if (!keepContext || !Array.isArray(state.padContextIds) || !state.padContextIds.includes(q.id)) {
+                    capturePadNavigationContext(q.id);
+                }
+                state.activePadId = Number(id);
+                state.padShowHint = false;
+                state.padShowAns = false;
+                if (!state.mockTest.active) state.blindModeActive = false;
+                state.wbSelectedIds = [];
+                state.wbScale = 1.0;
+                state.wbPanX = 0;
+                state.wbPanY = 0;
+
+                initQuestionTimerIdle();
+                syncUrlHashWithActiveQuestion(q);
+                refreshScratchpadTopBarAndHints();
+
+                const wbModal = document.getElementById('scratchpadModal');
+                const wrap = document.getElementById('padCanvasWrap');
+                const wasHidden = wbModal.classList.contains('hidden');
+
+                wbModal.classList.remove('hidden', 'wb-exit-anim');
+                if (wasHidden) {
+                    wbModal.classList.remove('wb-enter-anim');
+                    void wbModal.offsetWidth;
+                    wbModal.classList.add('wb-enter-anim');
+                } else if (slideDir !== 0 && wrap) {
+                    wrap.classList.remove('wb-question-slide-next', 'wb-question-slide-prev');
+                    void wrap.offsetWidth;
+                    wrap.classList.add(slideDir > 0 ? 'wb-question-slide-next' : 'wb-question-slide-prev');
+                }
+
+                checkWhiteboardOrientationLock();
+                loadQuestionBoardInBackground(q);
+            },
+            closeScratchpad() {
+                closeCustomDropdown();
+                stopQuestionTimer();
+                if (state.activePadId && !state.wbIsLoading && !state.blindModeActive) {
+                    syncActiveBoardToQuestionGist(true);
+                }
+                state.wbLoadToken++;
+                setWhiteboardLoadingLock(false);
+                state.wbSelectedIds = [];
+                state.activePadId = null;
+                if (!state.mockTest.active) state.blindModeActive = false;
+                clearQuestionUrlHash();
+
+                const wbModal = document.getElementById('scratchpadModal');
+                if (wbModal && !wbModal.classList.contains('hidden')) {
+                    wbModal.classList.remove('wb-enter-anim');
+                    wbModal.classList.add('wb-exit-anim');
+                    setTimeout(() => {
+                        wbModal.classList.add('hidden');
+                        wbModal.classList.remove('wb-exit-anim');
+                        renderAll();
+                    }, 210);
+                } else {
+                    renderAll();
+                }
+            },
+            navigatePadQuestion(dir) {
+                closeCustomDropdown();
+                const q = state.questions.find(i => i.id === Number(state.activePadId));
+                if (!q) return;
+                const activeList = getLockedPadContextList(q.id);
+                const idx = activeList.findIndex(item => item.id === q.id);
+                const nextQ = activeList[idx + dir];
+                if (!nextQ) {
+                    return toast(dir > 0 ? 'Reached last question in current filter' : 'At first question in current filter', 'info');
+                }
+                this.openScratchpad(nextQ.id, true, dir);
+            },
+
             stopBackgroundSolver() {
                 if (!state.isRunningBackgroundSolver) return;
                 state.stopSolverRequested = true;
@@ -6713,17 +7260,6 @@ Analyze this JEE question image (${q.subject} - ${q.chapter}).
                 }
                 scheduleCloudAutoSync(true);
             },
-
-            openMockTestSetupModal() {
-                closeCustomDropdown();
-                if (state.mockTest.active) {
-                    return toast('Mock test is already running! Click Submit Test to finish.', 'info');
-                }
-                document.getElementById('mockTestSetupModal').classList.remove('hidden');
-            },
-            closeMockTestSetupModal() {
-                document.getElementById('mockTestSetupModal').classList.add('hidden');
-            },
             startMockTestSession() {
                 const count = Math.max(1, Math.min(60, parseInt(document.getElementById('mockQCountInput').value, 10) || 10));
                 const mins = Math.max(1, Math.min(240, parseInt(document.getElementById('mockTimeMinsInput').value, 10) || 30));
@@ -6812,9 +7348,6 @@ Analyze this JEE question image (${q.subject} - ${q.chapter}).
                     </div>
                 `;
                 document.getElementById('mockTestSummaryModal').classList.remove('hidden');
-            },
-            closeMockTestSummaryModal() {
-                document.getElementById('mockTestSummaryModal').classList.add('hidden');
             },
 
             pickRandomQuestion() {
@@ -6930,36 +7463,6 @@ Analyze this JEE question image (${q.subject} - ${q.chapter}).
                 inp.type = isPwd ? 'text' : 'password';
                 icon.className = isPwd ? 'ph-bold ph-eye-slash text-base' : 'ph-bold ph-eye text-base';
             },
-
-            openUploadModal(initialImageBlob = null) {
-                closeCustomDropdown();
-                if (state.isExtracting && state.isUploadMinimized) {
-                    this.restoreUploadModal();
-                    return;
-                }
-                setUploadButtonsLock(false);
-                document.getElementById('uploadSetupView').classList.remove('hidden');
-                document.getElementById('uploadProgressView').classList.add('hidden');
-
-                if (initialImageBlob) {
-                    document.getElementById('uploadModal').classList.remove('hidden');
-                    loadSingleImageForImport(initialImageBlob, initialImageBlob.name || 'Pasted Image');
-                    return;
-                }
-
-                state.importMode = null;
-                state.pdfDoc = null;
-                state.importRawImg = null;
-                document.getElementById('selectedFileLabel').textContent = 'Tap to Select Any 1-Column / 2-Column JEE PDF or Photo (or press Ctrl+V)';
-                document.getElementById('selectedFileTypeBadge').textContent = 'Computes local 2D candidate borders & verifies them with Gemini 3.8 Flash';
-                document.getElementById('unifiedFileIcon').className = 'ph-duotone ph-cloud-arrow-up text-2xl';
-                document.getElementById('pdfSetupSubView').classList.add('hidden');
-                document.getElementById('pdfSetupSubView').classList.remove('grid');
-                document.getElementById('imageSetupSubView').classList.add('hidden');
-                document.getElementById('startExtractBtn').disabled = true;
-                document.getElementById('startExtractBtnLbl').textContent = 'Extract Questions';
-                document.getElementById('uploadModal').classList.remove('hidden');
-            },
             minimizeUploadModal() {
                 if (!state.isExtracting) return;
                 closeCustomDropdown();
@@ -6972,25 +7475,6 @@ Analyze this JEE question image (${q.subject} - ${q.chapter}).
                 }
                 if (!waveAnimFrame) waveAnimFrame = requestAnimationFrame(stepAllWavyBars);
                 ensureM3MorphLoopRunning();
-            },
-            restoreUploadModal() {
-                closeCustomDropdown();
-                state.isUploadMinimized = false;
-                const minBar = document.getElementById('minimizedUploadBar');
-                if (minBar) {
-                    minBar.classList.add('hidden');
-                    minBar.classList.remove('flex');
-                }
-                document.getElementById('uploadModal').classList.remove('hidden');
-                if (!waveAnimFrame) waveAnimFrame = requestAnimationFrame(stepAllWavyBars);
-                ensureM3MorphLoopRunning();
-            },
-            closeUploadModal() {
-                closeCustomDropdown();
-                if (!state.isExtracting && !state.isImportingImage) {
-                    document.getElementById('uploadModal').classList.add('hidden');
-                    state.importRawImg = null;
-                }
             },
             onUnifiedFileSelected,
             startUnifiedImportAction() {
@@ -7095,28 +7579,6 @@ Analyze this JEE question image (${q.subject} - ${q.chapter}).
             },
 
             getActivePopupId: () => state.activePopupId,
-            openImagePopup(id, keepContext = false) {
-                closeCustomDropdown();
-                const q = state.questions.find(i => i.id === Number(id));
-                if (!q) return;
-                if (!keepContext || !Array.isArray(state.padContextIds) || !state.padContextIds.includes(q.id)) {
-                    capturePadNavigationContext(q.id);
-                }
-                state.activePopupId = q.id;
-                state.isPopupAnimating = false;
-                initQuestionTimerIdle();
-                syncUrlHashWithActiveQuestion(q);
-                renderPopupCarouselSlots();
-                document.getElementById('imagePopupModal').classList.remove('hidden');
-            },
-            openScratchpadFromPopup(id) {
-                if (isVerticalScreen()) {
-                    toast('Whiteboard is only allowed on horizontal screens.', 'warn');
-                    return;
-                }
-                this.closeImagePopup(true);
-                this.openScratchpad(id, true);
-            },
             navigatePopupQuestion(dir) {
                 closeCustomDropdown();
                 animatePopupCarouselToNeighbor(dir);
@@ -7127,70 +7589,6 @@ Analyze this JEE question image (${q.subject} - ${q.chapter}).
                 if (!q) return;
                 this.toggleQBool(q.id, field);
                 renderPopupCarouselSlots();
-            },
-            closeImagePopup(keepHash = false) {
-                closeCustomDropdown();
-                stopQuestionTimer();
-                state.isPopupAnimating = false;
-                document.getElementById('imagePopupModal').classList.add('hidden');
-                state.activePopupId = null;
-                if (!keepHash) clearQuestionUrlHash();
-                renderAll();
-                scheduleCloudAutoSync(true);
-            },
-
-            openSettingsPage(pageKey = 'HOME') {
-                closeCustomDropdown();
-                state.activeSettingsPage = pageKey;
-                ['HOME', 'KEYS', 'THEME', 'BACKUP', 'SCANNER'].forEach(p => {
-                    document.getElementById(`settingsPage_${p}`)?.classList.toggle('hidden', p !== pageKey);
-                });
-                const backBtn = document.getElementById('settingsBackBtn');
-                const headerIcon = document.getElementById('settingsHeaderIcon');
-                const titleEl = document.getElementById('settingsHeaderTitle');
-
-                if (pageKey === 'HOME') {
-                    backBtn.classList.add('hidden'); backBtn.classList.remove('flex');
-                    headerIcon.classList.remove('hidden');
-                    titleEl.textContent = 'Settings';
-                } else {
-                    backBtn.classList.remove('hidden'); backBtn.classList.add('flex');
-                    headerIcon.classList.add('hidden');
-                    const titles = {
-                        KEYS: 'API Keys & Cloud Credentials',
-                        THEME: 'Appearance & Material You Theme',
-                        BACKUP: 'Cloud Sync, Export & Vault Tools',
-                        SCANNER: 'Gemini 3.8 Flash Solver & Scanner'
-                    };
-                    titleEl.textContent = titles[pageKey] || 'Settings';
-                }
-            },
-
-            openSettingsModal(showMissingAlert = false, initialPage = 'HOME') {
-                closeCustomDropdown();
-                document.getElementById('apiKeyInput').value = getApiKey();
-                const currentMod = GEMINI_MODELS.find(m => m.value === getSelectedModel()) || GEMINI_MODELS[0];
-                const modLbl = document.getElementById('geminiModelDropdownLabel');
-                if (modLbl) modLbl.textContent = currentMod.label;
-
-                const pads = getVerticalPads();
-                document.getElementById('padTopInput').value = pads.padTop;
-                document.getElementById('padBottomInput').value = pads.padBottom;
-                document.getElementById('githubTokenInput').value = getGithubToken();
-                document.getElementById('cloudAutoSyncCheckbox').checked = isCloudAutoSyncEnabled();
-                const autoSolveChk = document.getElementById('autoSolveHintsCheckbox');
-                if (autoSolveChk) autoSolveChk.checked = isAutoSolveHintsEnabled();
-
-                updateQuotaBadgesEverywhere();
-
-                document.getElementById('apiKeyMissingAlert').classList.toggle('hidden', !showMissingAlert);
-                updateCloudStatusUI(state.isSyncingCloud ? 'syncing' : 'idle');
-                this.openSettingsPage(showMissingAlert ? 'KEYS' : initialPage);
-                document.getElementById('settingsModal').classList.remove('hidden');
-            },
-            closeSettingsModal() {
-                closeCustomDropdown();
-                document.getElementById('settingsModal').classList.add('hidden');
             },
             async saveSettings(closeModalAfter = true) {
                 closeCustomDropdown();
@@ -7274,20 +7672,6 @@ Analyze this JEE question image (${q.subject} - ${q.chapter}).
                 scheduleCloudAutoSync();
                 toast('Question deleted & syncing to Cloud');
             },
-
-            confirmClearVault() {
-                closeCustomDropdown();
-                if (state.questions.length === 0) return toast('Question vault is already empty!', 'info');
-                document.getElementById('clearConfirmCount').textContent = state.questions.length;
-                const chk = document.getElementById('clearVaultDoubleCheck');
-                const btn = document.getElementById('finalClearVaultBtn');
-                if (chk) chk.checked = false;
-                if (btn) btn.disabled = true;
-                document.getElementById('clearConfirmModal').classList.remove('hidden');
-            },
-            closeClearConfirmModal() {
-                document.getElementById('clearConfirmModal').classList.add('hidden');
-            },
             executeClearVault() {
                 const chk = document.getElementById('clearVaultDoubleCheck');
                 if (!chk || !chk.checked) return;
@@ -7315,24 +7699,7 @@ Analyze this JEE question image (${q.subject} - ${q.chapter}).
 
             exportBackupJson,
             importBackupJson,
-
-            openSplitModal(id) {
-                closeCustomDropdown();
-                const q = state.questions.find(i => i.id === Number(id));
-                if (!q) return;
-                state.activeSplitId = Number(id);
-                document.getElementById('splitPreviewImg').src = q.imageDataUrl;
-                document.getElementById('splitCutSlider').value = 50;
-                document.getElementById('trimTopSlider').value = 0;
-                document.getElementById('trimBotSlider').value = 100;
-                this.setSplitMode('SPLIT');
-                document.getElementById('splitModal').classList.remove('hidden');
-            },
-            closeSplitModal() {
-                closeCustomDropdown();
-                document.getElementById('splitModal').classList.add('hidden');
-                state.activeSplitId = null;
-            },
+            
             setSplitMode(m) {
                 state.splitMode = m;
                 const isSplit = m === 'SPLIT';
@@ -7346,6 +7713,7 @@ Analyze this JEE question image (${q.subject} - ${q.chapter}).
                 document.getElementById('trimBotMask').classList.toggle('hidden', isSplit);
                 document.getElementById('splitConfirmLabel').textContent = isSplit ? 'Split into 2 Questions Now' : 'Save Trimmed Crop';
                 this.updateSplitPreview();
+                requestAnimationFrame(() => updateAllSegmentedGliders());
             },
             updateSplitPreview() {
                 if (state.splitMode === 'SPLIT') {
@@ -7428,61 +7796,7 @@ Analyze this JEE question image (${q.subject} - ${q.chapter}).
             },
 
             getActivePadId: () => state.activePadId,
-            openScratchpad(id, keepContext = false) {
-                closeCustomDropdown();
-                if (isVerticalScreen()) {
-                    toast('Whiteboard is only allowed on horizontal screens.', 'warn');
-                    return;
-                }
-                if (state.activePadId && !state.wbIsLoading) {
-                    syncActiveBoardToQuestionGist(true);
-                }
-                const q = state.questions.find(i => i.id === Number(id));
-                if (!q) return;
-                if (!keepContext || !Array.isArray(state.padContextIds) || !state.padContextIds.includes(q.id)) {
-                    capturePadNavigationContext(q.id);
-                }
-                state.activePadId = Number(id);
-                state.padShowHint = false;
-                state.padShowAns = false;
-                if (!state.mockTest.active) state.blindModeActive = false;
-                state.wbSelectedIds = [];
-                state.wbScale = 1.0;
-                state.wbPanX = 0;
-                state.wbPanY = 0;
-
-                initQuestionTimerIdle();
-                syncUrlHashWithActiveQuestion(q);
-                refreshScratchpadTopBarAndHints();
-                document.getElementById('scratchpadModal').classList.remove('hidden');
-                checkWhiteboardOrientationLock();
-                loadQuestionBoardInBackground(q);
-            },
-            closeScratchpad() {
-                closeCustomDropdown();
-                stopQuestionTimer();
-                if (state.activePadId && !state.wbIsLoading && !state.blindModeActive) {
-                    syncActiveBoardToQuestionGist(true);
-                }
-                state.wbLoadToken++;
-                setWhiteboardLoadingLock(false);
-                state.wbSelectedIds = [];
-                state.activePadId = null;
-                if (!state.mockTest.active) state.blindModeActive = false;
-                clearQuestionUrlHash();
-                document.getElementById('scratchpadModal').classList.add('hidden');
-                renderAll();
-            },
-            navigatePadQuestion(dir) {
-                closeCustomDropdown();
-                const q = state.questions.find(i => i.id === Number(state.activePadId));
-                if (!q) return;
-                const activeList = getLockedPadContextList(q.id);
-                const idx = activeList.findIndex(item => item.id === q.id);
-                const nextQ = activeList[idx + dir];
-                if (!nextQ) return;
-                this.openScratchpad(nextQ.id, true);
-            },
+            
             togglePadQuestionBool(field) {
                 const q = state.questions.find(i => i.id === Number(state.activePadId));
                 if (!q) return;
@@ -8104,21 +8418,24 @@ Analyze this JEE question image (${q.subject} - ${q.chapter}).
             resizeTimer = setTimeout(() => {
                 if (!state.isExtracting) renderFeed();
             }, 150);
+            updateAllSegmentedGliders();
         });
-
-        window.addEventListener('DOMContentLoaded', async () => {
+                window.addEventListener('DOMContentLoaded', async () => {
             initM3ExpressiveShapes();
             initSwipeableStatusSegmentedBar();
             initPopupSwipeNavigation();
+            initWhiteboardThreeFingerSwipe();
             applyMaterialThemeFromSeed(
                 localStorage.getItem('jee_m3_seed_color') || '#7c3aed',
                 localStorage.getItem('jee_m3_theme_mode') || 'dark'
             );
             updateApiKeyIndicator();
             renderAll();
+            updateAllSegmentedGliders();
             await pullFromCloudGist(false);
             checkAndOpenQuestionFromUrlHash();
         });
+
     </script>
 </body>
 </html>
