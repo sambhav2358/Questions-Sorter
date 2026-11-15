@@ -33,7 +33,11 @@
             --m3-smooth: cubic-bezier(0.2, 0, 0, 1);
         }
 
-        * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; }
+        * {
+            -webkit-tap-highlight-color: transparent;
+            box-sizing: border-box;
+        }
+
         body {
             font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
             background-color: var(--md-surface);
@@ -41,7 +45,10 @@
             overscroll-behavior: none;
             transition: background-color 0.25s var(--m3-smooth), color 0.25s var(--m3-smooth);
         }
-        .font-mono { font-family: 'JetBrains Mono', monospace; }
+
+        .font-mono {
+            font-family: 'JetBrains Mono', monospace;
+        }
 
         .m3-surface { background-color: var(--md-surface); }
         .m3-surface-low { background-color: var(--md-surface-low); }
@@ -49,6 +56,7 @@
         .m3-surface-high { background-color: var(--md-surface-high); }
         .m3-surface-highest { background-color: var(--md-surface-highest); }
         .m3-text-muted { color: var(--md-on-surface-variant); }
+
         .m3-primary-pill {
             background-color: var(--md-primary-container);
             color: var(--md-on-primary-container);
@@ -71,6 +79,7 @@
             touch-action: pan-y;
             user-select: none;
         }
+
         .m3-seg-btn {
             height: 27px;
             padding: 0 8.5px;
@@ -88,10 +97,26 @@
             cursor: pointer;
             will-change: transform, background-color;
         }
-        .m3-seg-btn:first-child { border-radius: 9999px 11px 11px 9999px; padding-left: 10px; }
-        .m3-seg-btn:last-child { border-radius: 11px 9999px 9999px 11px; padding-right: 10px; }
-        .m3-seg-btn:hover:not(.active) { background-color: var(--md-surface-highest); color: var(--md-on-surface); }
-        .m3-seg-btn:active { transform: scale(0.96); }
+
+        .m3-seg-btn:first-child {
+            border-radius: 9999px 11px 11px 9999px;
+            padding-left: 10px;
+        }
+
+        .m3-seg-btn:last-child {
+            border-radius: 11px 9999px 9999px 11px;
+            padding-right: 10px;
+        }
+
+        .m3-seg-btn:hover:not(.active) {
+            background-color: var(--md-surface-highest);
+            color: var(--md-on-surface);
+        }
+
+        .m3-seg-btn:active {
+            transform: scale(0.96);
+        }
+
         .m3-seg-btn.active {
             background-color: var(--md-primary);
             color: var(--md-on-primary);
@@ -109,8 +134,19 @@
             padding: 2.5px;
             border-radius: 9999px;
         }
-        .m3-icon-group-wb { height: 32px; padding: 2px; gap: 1.5px; }
-        .m3-icon-group-card { height: 28px; padding: 2px; gap: 1.5px; }
+
+        .m3-icon-group-wb {
+            height: 32px;
+            padding: 2px;
+            gap: 1.5px;
+        }
+
+        .m3-icon-group-card {
+            height: 28px;
+            padding: 2px;
+            gap: 1.5px;
+        }
+
         .m3-icon-group-btn {
             height: 27px;
             min-width: 27px;
@@ -128,19 +164,33 @@
             white-space: nowrap;
             will-change: transform, background-color;
         }
+
         .m3-icon-group-wb .m3-icon-group-btn {
             height: 26px;
             min-width: 26px;
             padding: 0 6px;
             font-size: 12px;
         }
+
         .m3-icon-group-btn:disabled {
             opacity: 0.35;
             pointer-events: none;
         }
-        .m3-icon-group-btn:first-child { border-radius: 9999px 11px 11px 9999px; padding-left: 8px; }
-        .m3-icon-group-btn:last-child { border-radius: 11px 9999px 9999px 11px; padding-right: 8px; }
-        .m3-icon-group-btn:only-child { border-radius: 9999px; }
+
+        .m3-icon-group-btn:first-child {
+            border-radius: 9999px 11px 11px 9999px;
+            padding-left: 8px;
+        }
+
+        .m3-icon-group-btn:last-child {
+            border-radius: 11px 9999px 9999px 11px;
+            padding-right: 8px;
+        }
+
+        .m3-icon-group-btn:only-child {
+            border-radius: 9999px;
+        }
+
         .m3-icon-group-card .m3-icon-group-btn {
             height: 22px;
             min-width: 25px;
@@ -148,13 +198,26 @@
             font-size: 11.5px;
             border-radius: 4px;
         }
-        .m3-icon-group-card .m3-icon-group-btn:first-child { border-radius: 9999px 10px 10px 9999px; padding-left: 7.5px; }
-        .m3-icon-group-card .m3-icon-group-btn:last-child { border-radius: 10px 9999px 9999px 10px; padding-right: 7.5px; }
+
+        .m3-icon-group-card .m3-icon-group-btn:first-child {
+            border-radius: 9999px 10px 10px 9999px;
+            padding-left: 7.5px;
+        }
+
+        .m3-icon-group-card .m3-icon-group-btn:last-child {
+            border-radius: 10px 9999px 9999px 10px;
+            padding-right: 7.5px;
+        }
+
         .m3-icon-group-btn:hover:not(:disabled) {
             background-color: var(--md-primary-container);
             color: var(--md-on-primary-container);
         }
-        .m3-icon-group-btn:active:not(:disabled) { transform: scale(0.93); }
+
+        .m3-icon-group-btn:active:not(:disabled) {
+            transform: scale(0.93);
+        }
+
         .m3-icon-group-btn.active-state {
             background-color: var(--md-primary);
             color: var(--md-on-primary);
@@ -176,6 +239,7 @@
             transition: all 0.16s ease;
             cursor: pointer;
         }
+
         .opt-elim-btn.eliminated {
             background-color: rgba(244, 63, 94, 0.22);
             color: #fb7185;
@@ -194,6 +258,7 @@
             border-radius: 9999px;
             min-width: 0;
         }
+
         .m3-card-dropdown-btn {
             height: 24px;
             padding: 0 8px;
@@ -209,26 +274,40 @@
             cursor: pointer;
             min-width: 0;
         }
+
         .m3-card-dropdown-btn:first-child {
             border-radius: 9999px 11px 11px 9999px;
             padding-left: 10px;
             color: var(--md-primary);
             font-weight: 800;
         }
+
         .m3-card-dropdown-btn:last-child {
             border-radius: 11px 9999px 9999px 11px;
             padding-right: 10px;
         }
-        .m3-card-dropdown-btn:hover { background-color: var(--md-surface-highest); }
-        .m3-card-dropdown-btn:active { transform: scale(0.96); }
+
+        .m3-card-dropdown-btn:hover {
+            background-color: var(--md-surface-highest);
+        }
+
+        .m3-card-dropdown-btn:active {
+            transform: scale(0.96);
+        }
 
         /* Vertical Grouped Lists */
-        .m3-group-list { display: flex; flex-direction: column; gap: 3px; }
+        .m3-group-list {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+        }
+
         .m3-group-item {
             background-color: var(--md-surface-high);
             border-radius: 7px;
             transition: background-color 0.2s var(--m3-smooth), transform 0.15s var(--m3-smooth);
         }
+
         .m3-group-item:first-child { border-radius: 26px 26px 14px 14px; }
         .m3-group-item:last-child { border-radius: 14px 14px 26px 26px; }
         .m3-group-item:only-child { border-radius: 26px; }
@@ -242,8 +321,15 @@
             font-weight: 800;
             transition: filter 0.2s ease, border-radius 0.22s var(--m3-smooth), transform 0.15s var(--m3-smooth);
         }
-        .m3-btn-filled:hover:not(:disabled) { filter: brightness(1.06); border-radius: 14px; }
-        .m3-btn-filled:active:not(:disabled) { transform: scale(0.95); }
+
+        .m3-btn-filled:hover:not(:disabled) {
+            filter: brightness(1.06);
+            border-radius: 14px;
+        }
+
+        .m3-btn-filled:active:not(:disabled) {
+            transform: scale(0.95);
+        }
 
         .m3-btn-tonal {
             background-color: var(--md-secondary-container);
@@ -252,12 +338,16 @@
             font-weight: 700;
             transition: background-color 0.2s ease, color 0.2s ease, border-radius 0.22s var(--m3-smooth), transform 0.15s var(--m3-smooth);
         }
+
         .m3-btn-tonal:hover:not(:disabled) {
             background-color: var(--md-primary-container);
             color: var(--md-on-primary-container);
             border-radius: 14px;
         }
-        .m3-btn-tonal:active:not(:disabled) { transform: scale(0.95); }
+
+        .m3-btn-tonal:active:not(:disabled) {
+            transform: scale(0.95);
+        }
 
         .m3-dropdown-trigger {
             background-color: var(--md-surface-high);
@@ -273,14 +363,26 @@
             cursor: pointer;
             user-select: none;
         }
-        .m3-dropdown-trigger:disabled { opacity: 0.38; pointer-events: none; }
-        .m3-dropdown-trigger:hover:not(:disabled) { background-color: var(--md-surface-highest); border-radius: 14px; }
-        .m3-dropdown-trigger:active:not(:disabled) { transform: scale(0.96); }
+
+        .m3-dropdown-trigger:disabled {
+            opacity: 0.38;
+            pointer-events: none;
+        }
+
+        .m3-dropdown-trigger:hover:not(:disabled) {
+            background-color: var(--md-surface-highest);
+            border-radius: 14px;
+        }
+
+        .m3-dropdown-trigger:active:not(:disabled) {
+            transform: scale(0.96);
+        }
 
         @keyframes m3MenuPop {
             from { opacity: 0; transform: scale(0.94) translateY(-4px); }
             to { opacity: 1; transform: scale(1) translateY(0); }
         }
+
         .m3-custom-menu {
             background-color: var(--md-surface-high);
             border: 1px solid var(--md-outline-variant);
@@ -292,6 +394,7 @@
             flex-direction: column;
             gap: 2.5px;
         }
+
         .m3-custom-menu-item {
             width: 100%;
             text-align: left;
@@ -307,10 +410,12 @@
             gap: 8px;
             transition: background-color 0.15s ease;
         }
+
         .m3-custom-menu-item:first-child { border-radius: 19px 19px 13px 13px; }
         .m3-custom-menu-item:last-child { border-radius: 13px 13px 19px 19px; }
         .m3-custom-menu-item:only-child { border-radius: 19px; }
         .m3-custom-menu-item:hover { background-color: var(--md-surface-highest); }
+
         .m3-custom-menu-item.selected {
             background-color: var(--md-primary);
             color: var(--md-on-primary);
@@ -328,8 +433,16 @@
             box-shadow: 0 14px 30px -4px rgba(0, 0, 0, 0.45);
             transition: transform 0.32s var(--m3-smooth), opacity 0.25s ease, border-radius 0.25s var(--m3-smooth);
         }
-        .m3-extended-fab:hover { border-radius: 9999px; transform: translateY(-2px) scale(1.02); }
-        .m3-extended-fab:active { transform: scale(0.95); }
+
+        .m3-extended-fab:hover {
+            border-radius: 9999px;
+            transform: translateY(-2px) scale(1.02);
+        }
+
+        .m3-extended-fab:active {
+            transform: scale(0.95);
+        }
+
         .fab-hidden {
             transform: translateY(160%) scale(0.85) !important;
             opacity: 0 !important;
@@ -346,14 +459,17 @@
             gap: 3.5px;
             transition: border-color 0.2s ease, box-shadow 0.22s ease;
         }
+
         .m3-card:hover {
             border-color: var(--md-primary);
             box-shadow: 0 12px 28px -8px rgba(0, 0, 0, 0.22);
         }
+
         .m3-card-top-segment {
             background-color: var(--md-surface-high);
             border-radius: 23px 23px 12px 12px;
         }
+
         .m3-card-img-segment {
             background-color: #ffffff;
             border-radius: 12px 12px 23px 23px;
@@ -363,6 +479,7 @@
         #imagePopupModal:not(.hidden),
         #settingsModal:not(.hidden),
         #uploadModal:not(.hidden),
+        #solverModal:not(.hidden),
         #splitModal:not(.hidden),
         #clearConfirmModal:not(.hidden),
         #mockTestSetupModal:not(.hidden),
@@ -374,10 +491,12 @@
             height: 100dvh !important;
             inset: 0 !important;
         }
+
         @keyframes m3DialogIn {
             from { opacity: 0; transform: scale(0.94) translateY(10px); }
             to { opacity: 1; transform: scale(1) translateY(0); }
         }
+
         .m3-dialog {
             background-color: var(--md-surface-container);
             border: 1px solid var(--md-outline-variant);
@@ -410,6 +529,7 @@
             border-radius: 9999px;
             transition: background-color 0.2s ease, box-shadow 0.2s ease;
         }
+
         .m3-input:focus {
             outline: none;
             background-color: var(--md-surface-highest);
@@ -427,19 +547,32 @@
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
         .question-slice-img { width: 100%; height: auto; display: block; image-rendering: -webkit-optimize-contrast; }
-        input[type=range].split-slider { -webkit-appearance: none; appearance: none; width: 100%; background: transparent; }
+
+        input[type=range].split-slider {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 100%;
+            background: transparent;
+        }
+
         input[type=range].split-slider::-webkit-slider-thumb {
-            -webkit-appearance: none; appearance: none;
-            height: 26px; width: 26px; border-radius: 9px;
-            background: var(--md-primary); cursor: pointer;
+            -webkit-appearance: none;
+            appearance: none;
+            height: 26px;
+            width: 26px;
+            border-radius: 9px;
+            background: var(--md-primary);
+            cursor: pointer;
             border: 3px solid var(--md-on-primary);
             box-shadow: 0 2px 8px rgba(0,0,0,0.35);
             transition: transform 0.18s var(--m3-smooth), border-radius 0.18s var(--m3-smooth);
         }
+
         input[type=range].split-slider::-webkit-slider-thumb:active {
             transform: scale(1.15);
             border-radius: 50%;
         }
+
         #stylusCanvas { touch-action: none; }
         #popupCarouselViewport { touch-action: pan-y; }
     </style>
@@ -499,7 +632,8 @@
                 <i class="ph-bold ph-text-T animate-bounce text-xs"></i>
                 <span id="ocrStatusText">OCR</span>
             </div>
-            <div id="solverStatusBadge" onclick="window.app.openSettingsModal(false, 'SCANNER')" class="hidden h-7 items-center gap-1 px-2 rounded-full text-[10px] font-extrabold m3-primary-pill cursor-pointer shrink-0" title="Generating Answer Keys & 1-Line Hints in background">
+            <!-- Clicking this now opens the dedicated Live AI Solver Console with Logs! -->
+            <div id="solverStatusBadge" onclick="window.app.openSolverModal()" class="hidden h-7 items-center gap-1 px-2.5 rounded-full text-[10px] font-extrabold m3-primary-pill cursor-pointer shrink-0" title="Click to open Live AI Answer Key & Hint Logs">
                 <i class="ph-bold ph-lightbulb animate-pulse text-xs"></i>
                 <span id="solverStatusText">Hints</span>
             </div>
@@ -513,7 +647,7 @@
             </div>
         </div>
 
-        <!-- Right Cluster: Paper Filter, Sort, Mock Test, Random, Fullscreen, Sync, Settings -->
+        <!-- Right Cluster: Paper Filter, Sort, AI Solver Console, Mock Test, Random, Fullscreen, Sync, Settings -->
         <div class="flex items-center gap-1 shrink-0">
             <button type="button" id="paperDropdownBtn" onclick="window.app.openPaperMenu(this)" class="h-8.5 px-2.5 py-1.5 m3-dropdown-trigger text-[11px] max-w-[108px] shrink-0" title="Filter by Paper">
                 <span id="paperDropdownLabel" class="truncate">All Papers</span>
@@ -526,6 +660,10 @@
             </button>
 
             <div class="m3-icon-group shrink-0">
+                <button onclick="window.app.openSolverModal()" class="m3-icon-group-btn gap-1" title="Open Live AI Answer Key & Hint Solver Console">
+                    <i class="ph-bold ph-lightbulb text-xs text-amber-400"></i>
+                    <span class="hidden 2xl:inline text-[10px]">AI Keys</span>
+                </button>
                 <button onclick="window.app.openMockTestSetupModal()" class="m3-icon-group-btn gap-1" title="Start Timed Mock Test Set">
                     <i class="ph-bold ph-exam text-xs" style="color: var(--md-primary)"></i>
                     <span class="hidden 2xl:inline text-[10px]">Mock</span>
@@ -570,9 +708,9 @@
     </div>
 
     <!-- =================================================================== -->
-    <!-- SECONDARY BACKGROUND TASK STATUS BAR                                -->
+    <!-- MINIMIZED PDF UPLOAD PROGRESS BAR                                   -->
     <!-- =================================================================== -->
-    <div id="minimizedUploadBar" onclick="window.app.restoreUploadModal()" class="hidden m3-surface-high px-4 py-1.5 items-center justify-between gap-3 cursor-pointer hover:brightness-105 transition shrink-0 z-20" title="Click to reopen PDF Extraction Dialog">
+    <div id="minimizedUploadBar" onclick="window.app.restoreUploadModal()" class="hidden m3-surface-high border-b border-[var(--md-outline-variant)] px-4 py-1.5 items-center justify-between gap-3 cursor-pointer hover:brightness-105 transition shrink-0 z-20" title="Click to reopen PDF Extraction Dialog">
         <div class="flex items-center gap-2 shrink-0">
             <svg class="w-6 h-6 shrink-0" style="color: var(--md-primary);" viewBox="0 0 24 24">
                 <path class="m3-morph-loader-path" fill="currentColor" d=""></path>
@@ -584,8 +722,30 @@
         <div id="minBarWaveWrap" class="flex-1 max-w-md min-w-[120px]"></div>
 
         <div class="flex items-center gap-2 shrink-0">
-            <span class="text-[11px] font-bold m3-text-muted hidden md:inline">Tap to expand</span>
+            <span class="text-[11px] font-bold m3-text-muted hidden md:inline">Tap to expand logs</span>
             <button type="button" onclick="event.stopPropagation(); window.app.restoreUploadModal()" class="w-7 h-7 rounded-full m3-btn-tonal flex items-center justify-center" title="Expand Dialog">
+                <i class="ph-bold ph-arrows-out-simple text-xs"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- =================================================================== -->
+    <!-- NEW: MINIMIZED AI ANSWER KEY & HINT SOLVER PROGRESS BAR             -->
+    <!-- =================================================================== -->
+    <div id="minimizedSolverBar" onclick="window.app.openSolverModal()" class="hidden m3-surface-high border-b border-[var(--md-outline-variant)] px-4 py-1.5 items-center justify-between gap-3 cursor-pointer hover:brightness-105 transition shrink-0 z-20" title="Click to expand Live AI Answer Key & Hint Solver Logs">
+        <div class="flex items-center gap-2 shrink-0">
+            <svg class="w-6 h-6 shrink-0 text-amber-400" viewBox="0 0 24 24">
+                <path class="m3-morph-loader-path" fill="currentColor" d=""></path>
+            </svg>
+            <span id="minSolverStatusText" class="w-56 sm:w-64 text-[11px] font-bold font-mono truncate shrink-0">Solving Q.1 with gemini-3.8-flash...</span>
+            <span id="minSolverCountBadge" class="w-24 text-center py-0.5 rounded-full text-[10px] font-extrabold m3-primary-pill shrink-0">Solved 0/0</span>
+        </div>
+
+        <div id="minSolverWaveWrap" class="flex-1 max-w-md min-w-[120px]"></div>
+
+        <div class="flex items-center gap-2 shrink-0">
+            <span class="text-[11px] font-bold m3-text-muted hidden md:inline">Tap to view live logs</span>
+            <button type="button" onclick="event.stopPropagation(); window.app.openSolverModal()" class="w-7 h-7 rounded-full m3-btn-tonal flex items-center justify-center" title="Expand Solver Logs">
                 <i class="ph-bold ph-arrows-out-simple text-xs"></i>
             </button>
         </div>
@@ -781,8 +941,8 @@
 
             <div class="p-4 overflow-y-auto flex-1 space-y-3">
                 <div id="apiKeyMissingAlert" class="hidden p-3.5 rounded-3xl m3-primary-pill text-xs leading-relaxed">
-                    <strong class="font-extrabold block mb-0.5">API Key Required for AI Solver:</strong>
-                    Please enter your Google AI Studio API Key below to classify chapters and generate 1-line hints.
+                    <strong class="font-extrabold block mb-0.5">API Key Required for Gemini 3.8 Flash:</strong>
+                    Please enter your Google AI Studio API Key below to verify PDF borders and generate Answer Keys & Hints.
                 </div>
 
                 <!-- PAGE 0: SEGMENTED GROUPED LIST HUB -->
@@ -794,7 +954,7 @@
                             </div>
                             <div class="min-w-0">
                                 <div class="font-extrabold text-sm">API Keys & Cloud Credentials</div>
-                                <div class="text-xs m3-text-muted truncate">Gemini Vision API Key & GitHub PAT</div>
+                                <div class="text-xs m3-text-muted truncate">Gemini API Key & GitHub PAT</div>
                             </div>
                         </div>
                         <i class="ph-bold ph-caret-right m3-text-muted text-base shrink-0"></i>
@@ -832,8 +992,8 @@
                                 <i class="ph-bold ph-lightbulb text-lg"></i>
                             </div>
                             <div class="min-w-0">
-                                <div class="font-extrabold text-sm">AI Answer Key, Hints & Scanner</div>
-                                <div class="text-xs m3-text-muted truncate">Rate-Limit Protected Solver (Max 19/day IST, 4/min) + Margins</div>
+                                <div class="font-extrabold text-sm">Gemini 3.8 Flash Solver & Scanner</div>
+                                <div class="text-xs m3-text-muted truncate">Model Selector (3.8 Flash / 3.8 Flash Lite), Live Solver Console & Margins</div>
                             </div>
                         </div>
                         <i class="ph-bold ph-caret-right m3-text-muted text-base shrink-0"></i>
@@ -844,7 +1004,7 @@
                 <div id="settingsPage_KEYS" class="hidden space-y-3">
                     <div class="m3-group-list">
                         <div class="p-4 m3-group-item space-y-1.5">
-                            <label class="block text-xs font-bold">Google AI Studio API Key (Gemini Vision)</label>
+                            <label class="block text-xs font-bold">Google AI Studio API Key (Gemini 3.8 Flash)</label>
                             <div class="relative">
                                 <input id="apiKeyInput" type="password" placeholder="AIzaSy..." class="w-full h-10 m3-input m3-surface-low pl-3.5 pr-10 text-xs font-mono">
                                 <button type="button" onclick="window.app.toggleVisibility('apiKeyInput', 'apiKeyEyeIcon')" class="absolute right-3 top-1/2 -translate-y-1/2 m3-text-muted">
@@ -985,12 +1145,12 @@
                     </div>
                 </div>
 
-                <!-- PAGE 4: AI ANSWER KEY, HINTS & SCANNER -->
+                <!-- PAGE 4: GEMINI 3.8 FLASH SOLVER & SCANNER -->
                 <div id="settingsPage_SCANNER" class="hidden space-y-3">
                     <div class="m3-group-list">
                         <div class="p-4 m3-group-item space-y-3">
                             <div class="flex items-center justify-between gap-2">
-                                <span class="text-xs font-extrabold uppercase tracking-wider" style="color: var(--md-primary)">AI Answer Key & 1-Line Hint Generator</span>
+                                <span class="text-xs font-extrabold uppercase tracking-wider" style="color: var(--md-primary)">AI Answer Key & 1-Line Hint Console</span>
                                 <label class="flex items-center gap-1.5 text-[11px] font-bold cursor-pointer shrink-0">
                                     <input id="autoSolveHintsCheckbox" type="checkbox" checked onchange="window.app.saveSettings(false)" class="rounded focus:ring-0">
                                     <span>Auto after import</span>
@@ -998,24 +1158,23 @@
                             </div>
 
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                                <button type="button" onclick="window.app.runBackgroundAnswerAndHintGenerator(true, false)" class="h-10 px-3 m3-btn-filled text-xs flex items-center justify-center gap-1.5 shadow">
+                                <button type="button" onclick="window.app.closeSettingsModal(); window.app.openSolverModal(); window.app.runBackgroundAnswerAndHintGenerator(true, false);" class="h-10 px-3 m3-btn-filled text-xs flex items-center justify-center gap-1.5 shadow">
                                     <i class="ph-bold ph-lightbulb text-sm"></i>
-                                    <span id="settingsSolveMissingBtnLabel">Solve Missing Hints & Keys</span>
+                                    <span>Open Solver & Solve Missing</span>
                                 </button>
-                                <button type="button" onclick="window.app.runBackgroundAnswerAndHintGenerator(true, true)" class="h-10 px-3 m3-btn-tonal text-xs flex items-center justify-center gap-1.5">
+                                <button type="button" onclick="window.app.closeSettingsModal(); window.app.openSolverModal(); window.app.runBackgroundAnswerAndHintGenerator(true, true);" class="h-10 px-3 m3-btn-tonal text-xs flex items-center justify-center gap-1.5">
                                     <i class="ph-bold ph-arrows-clockwise text-sm"></i>
                                     <span>Re-Solve All Questions</span>
                                 </button>
                             </div>
 
-                            <div id="settingsSolverWavyBar" class="hidden pt-1"></div>
                             <p id="settingsSolverStatusInfo" class="text-[11px] m3-text-muted font-mono">Protected: Max 19 req/day (IST) & Max 4 req/min synced in Gist.</p>
                         </div>
 
                         <div class="p-4 m3-group-item space-y-1.5">
-                            <label class="block text-xs font-bold">Gemini Vision & Solver Model (Auto-Fallbacks on 404)</label>
+                            <label class="block text-xs font-bold">Gemini Model (Strictly 3.8 Flash / 3.8 Flash Lite)</label>
                             <button type="button" id="geminiModelDropdownBtn" onclick="window.app.openGeminiModelMenu(this)" class="w-full h-10 px-4 m3-surface-low rounded-full flex items-center justify-between text-xs font-bold">
-                                <span id="geminiModelDropdownLabel" class="truncate">gemini-2.5-flash (Default • Auto-Fallback Protected)</span>
+                                <span id="geminiModelDropdownLabel" class="truncate">gemini-3.8-flash (Default • High Precision)</span>
                                 <i class="ph-bold ph-caret-down text-xs m3-text-muted"></i>
                             </button>
                         </div>
@@ -1044,7 +1203,7 @@
     </div>
 
     <!-- =================================================================== -->
-    <!-- MODAL 2: UNIFIED IMPORT DIALOG (1-COL & 2-COL PDF + IMAGE DESKEW)   -->
+    <!-- MODAL 2: UNIFIED IMPORT DIALOG (LOCAL + GEMINI BORDER VERIFICATION) -->
     <!-- =================================================================== -->
     <div id="uploadModal" onclick="if(event.target === this && !window.app.isExtracting()) window.app.closeUploadModal()" class="fixed inset-0 bg-black/75 backdrop-blur-sm z-50 hidden flex items-center justify-center p-3 sm:p-6">
         <div class="m3-dialog max-w-2xl w-full max-h-[92vh] flex flex-col overflow-hidden">
@@ -1055,7 +1214,7 @@
                     </div>
                     <div class="min-w-0">
                         <h3 id="unifiedModalTitle" class="font-extrabold text-sm sm:text-base truncate">Add Test Paper PDF or Question Photo</h3>
-                        <p class="text-[11px] m3-text-muted truncate">1-Col & 2-Col Hybrid Vector/Vision Slicer • Auto Photo Deskew • Ctrl+V Paste</p>
+                        <p class="text-[11px] m3-text-muted truncate">2-Stage Local Slicer + Gemini 3.8 Flash Border Verification • Auto Deskew</p>
                     </div>
                 </div>
                 <div class="flex items-center gap-1.5 shrink-0">
@@ -1076,7 +1235,7 @@
                             <i id="unifiedFileIcon" class="ph-duotone ph-cloud-arrow-up text-2xl"></i>
                         </div>
                         <p id="selectedFileLabel" class="text-xs sm:text-sm font-extrabold">Tap to Select Any 1-Column / 2-Column JEE PDF or Photo (or press Ctrl+V)</p>
-                        <p id="selectedFileTypeBadge" class="text-[11px] m3-text-muted mt-0.5">Automatically detects multi-column sheets, integer/single-choice tags & diagrams</p>
+                        <p id="selectedFileTypeBadge" class="text-[11px] m3-text-muted mt-0.5">Computes local 2D candidate borders & verifies them with Gemini 3.8 Flash</p>
                     </label>
 
                     <!-- PDF Options -->
@@ -1101,6 +1260,12 @@
                                 <span class="m3-text-muted text-xs">to</span>
                                 <input id="endPageInput" type="number" min="1" value="10" class="w-full h-9 m3-input m3-surface-low px-2 text-xs text-center">
                             </div>
+                        </div>
+                        <div class="sm:col-span-3 pt-1 flex items-center justify-between border-t border-[var(--md-outline-variant)]">
+                            <label class="flex items-center gap-2 text-xs font-bold cursor-pointer">
+                                <input type="checkbox" id="pdfGeminiVerifyBordersChk" checked class="rounded">
+                                <span>Send local candidate borders to Gemini 3.8 Flash to verify & refine (Uses 1 req/page)</span>
+                            </label>
                         </div>
                     </div>
 
@@ -1150,7 +1315,7 @@
                                 <svg class="w-5 h-5 shrink-0" style="color: var(--md-primary)" viewBox="0 0 24 24">
                                     <path class="m3-morph-loader-path" fill="currentColor" d=""></path>
                                 </svg>
-                                <span>Extracting Questions & Clean OCR...</span>
+                                <span>Extracting Questions & Verifying Borders...</span>
                             </span>
                             <span id="extractPageBadge" class="w-24 text-center py-0.5 rounded-full font-extrabold shrink-0" style="background: var(--md-primary-container); color: var(--md-on-primary-container);">Page 1/1</span>
                         </div>
@@ -1181,6 +1346,84 @@
                     <i class="ph-bold ph-magic-wand"></i>
                     <span id="startExtractBtnLbl">Extract Questions</span>
                 </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- =================================================================== -->
+    <!-- NEW MODAL 2B: LIVE AI ANSWER KEY & HINT SOLVER CONSOLE WITH LOGS    -->
+    <!-- =================================================================== -->
+    <div id="solverModal" onclick="if(event.target === this) window.app.minimizeSolverModal()" class="fixed inset-0 bg-black/75 backdrop-blur-sm z-50 hidden flex items-center justify-center p-3 sm:p-6">
+        <div class="m3-dialog max-w-2xl w-full max-h-[92vh] flex flex-col overflow-hidden">
+            <div class="px-5 py-3.5 m3-surface-low border-b border-[var(--md-outline-variant)] flex items-center justify-between gap-2 shrink-0">
+                <div class="flex items-center gap-2.5 min-w-0">
+                    <div class="w-10 h-10 m3-cookie-12 flex items-center justify-center shrink-0" style="background: var(--md-primary-container); color: var(--md-primary);">
+                        <i class="ph-bold ph-lightbulb text-xl text-amber-400"></i>
+                    </div>
+                    <div class="min-w-0">
+                        <h3 class="font-extrabold text-sm sm:text-base truncate">Live AI Answer Key & 1-Line Hint Solver</h3>
+                        <p id="solverModalSubHeader" class="text-[11px] m3-text-muted truncate">Model: gemini-3.8-flash • Rate Limit Guard: Max 19/day (IST), Max 4/min</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-1.5 shrink-0">
+                    <button type="button" onclick="window.app.minimizeSolverModal()" class="h-9 w-9 m3-btn-tonal flex items-center justify-center" title="Minimize to Top Bar">
+                        <i class="ph-bold ph-minus text-base"></i>
+                    </button>
+                    <button type="button" onclick="window.app.closeSolverModal()" class="h-9 w-9 m3-btn-tonal flex items-center justify-center" title="Close Dialog">
+                        <i class="ph-bold ph-x text-sm"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="p-4 sm:p-5 overflow-y-auto space-y-4 flex-1">
+                <div class="m3-surface-high rounded-3xl p-4 space-y-3">
+                    <div class="flex items-center justify-between gap-2 text-xs">
+                        <span id="solverStepTitle" class="font-extrabold flex items-center gap-2 truncate">
+                            <svg id="solverModalSpinner" class="hidden w-5 h-5 shrink-0 text-amber-400" viewBox="0 0 24 24">
+                                <path class="m3-morph-loader-path" fill="currentColor" d=""></path>
+                            </svg>
+                            <span id="solverStepTitleText">AI Solver Ready</span>
+                        </span>
+                        <span id="solverModalCountBadge" class="w-28 text-center py-0.5 rounded-full font-extrabold shrink-0" style="background: var(--md-primary-container); color: var(--md-on-primary-container);">Solved 0/0</span>
+                    </div>
+
+                    <div id="solverModalWavyBarWrap"></div>
+
+                    <div class="flex items-center justify-between gap-2 text-[11px] font-mono">
+                        <p id="solverModalSubText" class="truncate font-semibold" style="color: var(--md-primary)">Click "Solve Missing" below to start generating Answer Keys & Hints.</p>
+                        <span id="solverQuotaBadge" class="px-2 py-0.5 rounded-full m3-surface-low font-extrabold shrink-0">Quota: 0/19 IST</span>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div class="m3-surface-low rounded-3xl p-3 flex flex-col items-center justify-center h-48 overflow-hidden bg-white border border-[var(--md-outline-variant)]">
+                        <img id="solverPreviewImg" src="" alt="Current Question" class="hidden max-h-full max-w-full object-contain rounded-lg">
+                        <span id="solverPreviewPlaceholder" class="text-xs font-bold text-slate-400">Question preview appears here while solving</span>
+                    </div>
+                    <div id="solverLiveLog" class="m3-surface-low rounded-3xl p-3 h-48 overflow-y-auto font-mono text-[11px] space-y-1.5">
+                        <div class="m3-text-muted">• Live Gemini API request & answer key logs appear here...</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="px-5 py-3 m3-surface-low border-t border-[var(--md-outline-variant)] flex items-center justify-between gap-2 shrink-0 flex-wrap">
+                <div>
+                    <button type="button" id="stopSolverBtn" onclick="window.app.stopBackgroundSolver()" class="hidden h-9 px-4 rounded-full bg-rose-500/20 hover:bg-rose-600 text-rose-500 hover:text-white text-xs font-extrabold items-center gap-1.5 transition">
+                        <i class="ph-bold ph-stop-circle"></i>
+                        <span>Stop Solver</span>
+                    </button>
+                </div>
+
+                <div class="flex items-center gap-2 ml-auto">
+                    <button type="button" id="startSolverForceAllBtn" onclick="window.app.runBackgroundAnswerAndHintGenerator(true, true)" class="h-9 px-4 m3-btn-tonal text-xs flex items-center gap-1.5">
+                        <i class="ph-bold ph-arrows-clockwise"></i>
+                        <span>Re-Solve All</span>
+                    </button>
+                    <button type="button" id="startSolverMissingBtn" onclick="window.app.runBackgroundAnswerAndHintGenerator(true, false)" class="h-10 px-5 m3-btn-filled text-xs flex items-center gap-1.5 shadow-lg">
+                        <i class="ph-bold ph-sparkle"></i>
+                        <span id="startSolverMissingBtnLbl">Solve Missing Questions</span>
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -1409,7 +1652,7 @@
             </div>
             <button type="button" id="padSolveNowBtn" onclick="window.app.solveActivePadQuestionNow()" class="h-7 px-3 m3-btn-filled text-[11px] flex items-center gap-1 shrink-0">
                 <i class="ph-bold ph-sparkle"></i>
-                <span id="padSolveNowBtnLabel">Generate with Gemini</span>
+                <span id="padSolveNowBtnLabel">Generate with Gemini 3.8</span>
             </button>
         </div>
 
@@ -1533,6 +1776,20 @@
 
         const DEFAULT_GIST_ID = '9259f71c65f635b809f348a7216b6e53';
 
+        //Strictly GEMINI 3.8 FLASH (Default) & GEMINI 3.8 FLASH LITE
+        const GEMINI_MODELS = [
+            { value: 'gemini-3.8-flash', label: 'gemini-3.8-flash (Default • High Precision)' },
+            { value: 'gemini-3.8-flash-lite', label: 'gemini-3.8-flash-lite (Fast & Lightweight)' }
+        ];
+
+        // Force-migrate any old cached model (like hydrogen or 3.5-flash-lite) to gemini-3.8-flash
+        (function sanitizeStoredModelSelection() {
+            const saved = localStorage.getItem('jee_gemini_model');
+            if (saved !== 'gemini-3.8-flash' && saved !== 'gemini-3.8-flash-lite') {
+                localStorage.setItem('jee_gemini_model', 'gemini-3.8-flash');
+            }
+        })();
+
         function initM3ExpressiveShapes() {
             const makeSoftStarburst = (lobes, innerR, outerR) => {
                 const pts = 180;
@@ -1586,7 +1843,12 @@
 
         function stepM3MorphLoader(now) {
             const isWbLoading = !document.getElementById('wbLoadingBadge')?.classList.contains('hidden');
-            if (!m3MorphActive && !isWbLoading && document.getElementById('minimizedUploadBar')?.classList.contains('hidden') && document.getElementById('uploadProgressView')?.classList.contains('hidden')) {
+            const isMinUpload = !document.getElementById('minimizedUploadBar')?.classList.contains('hidden');
+            const isMinSolver = !document.getElementById('minimizedSolverBar')?.classList.contains('hidden');
+            const isUpProg = !document.getElementById('uploadProgressView')?.classList.contains('hidden');
+            const isSolvSpin = !document.getElementById('solverModalSpinner')?.classList.contains('hidden');
+
+            if (!m3MorphActive && !isWbLoading && !isMinUpload && !isMinSolver && !isUpProg && !isSolvSpin) {
                 m3MorphAnimId = null;
                 return;
             }
@@ -1776,13 +2038,6 @@
             ]
         };
 
-        // Strictly Gemini 3.8 Flash & Gemini Hydrogen as requested
-        const GEMINI_MODELS = [
-            { value: 'gemini-3.8-flash', label: 'gemini-3.8-flash (Default • Free Tier Protected)' },
-            { value: 'gemini-hydrogen', label: 'gemini-hydrogen (Free Tier Protected)' },
-            { value: 'gemini-3.5-flash-lite', label: 'gemini-3.5-flash-lite' }
-        ];
-
         const SORT_MODES = [
             { value: 'Q_NUM', short: 'Q.#', label: 'Question Number' },
             { value: 'TIME_DESC', short: 'Time', label: 'Time Spent (High → Low)' },
@@ -1836,6 +2091,7 @@
             isPopupAnimating: false,
             activeSettingsPage: 'HOME',
             selectedModel: localStorage.getItem('jee_gemini_model') || 'gemini-3.8-flash',
+            resolvedBackendModelCache: {},
             rateLimit: {
                 dateIST: '',
                 dailyCount: 0,
@@ -1889,6 +2145,9 @@
             ocrWorker: null,
             isRunningBackgroundOcr: false,
             isRunningBackgroundSolver: false,
+            isSolverMinimized: false,
+            stopSolverRequested: false,
+            solverAbortController: null,
             lastScrollTop: 0
         };
 
@@ -1971,7 +2230,10 @@
         }
 
         const getApiKey = () => (localStorage.getItem('jee_gemini_api_key') || '').trim();
-        const getSelectedModel = () => state.selectedModel || localStorage.getItem('jee_gemini_model') || 'gemini-3.8-flash';
+        const getSelectedModel = () => {
+            const m = state.selectedModel || localStorage.getItem('jee_gemini_model');
+            return (m === 'gemini-3.8-flash' || m === 'gemini-3.8-flash-lite') ? m : 'gemini-3.8-flash';
+        };
         const getVerticalPads = () => ({
             padTop: Number(localStorage.getItem('jee_pad_top') ?? 10),
             padBottom: Number(localStorage.getItem('jee_pad_bottom') ?? 10)
@@ -1984,6 +2246,7 @@
 
         // ===================================================================
         // STRICT IST RATE LIMITER (MAX 19/DAY IST & MAX 4/MIN, GIST-SYNCED)
+        // + TRANSPARENT ENDPOINT ROUTER SO GEMINI 3.8 FLASH ALWAYS EXECUTES
         // ===================================================================
         const MAX_DAILY_REQ_IST = 19;
         const MAX_RPM_REQ = 4;
@@ -2011,6 +2274,19 @@
             };
         }
 
+        function updateQuotaBadgesEverywhere() {
+            const rl = normalizeRateLimitObj(state.rateLimit);
+            const qBadge = document.getElementById('solverQuotaBadge');
+            if (qBadge) {
+                qBadge.textContent = `Quota: ${rl.dailyCount}/${MAX_DAILY_REQ_IST} IST (${rl.recentTimestamps.length}/${MAX_RPM_REQ} min)`;
+            }
+            const infoEl = document.getElementById('settingsSolverStatusInfo');
+            if (infoEl && !state.isRunningBackgroundSolver) {
+                const withHints = state.questions.filter(q => q.hint && q.answerKey).length;
+                infoEl.textContent = `Solved: ${withHints} / ${state.questions.length} • Quota Today: ${rl.dailyCount}/${MAX_DAILY_REQ_IST} req (IST).`;
+            }
+        }
+
         async function fetchRateLimitFromGist() {
             const gistId = getGithubGistId();
             const token = getGithubToken();
@@ -2036,6 +2312,7 @@
                                 recentTimestamps: Array.from(new Set([...remoteRL.recentTimestamps, ...localRL.recentTimestamps])).sort()
                             };
                             localStorage.setItem('jee_rate_limit_cache', JSON.stringify(state.rateLimit));
+                            updateQuotaBadgesEverywhere();
                             return state.rateLimit;
                         }
                     }
@@ -2045,11 +2322,13 @@
             }
             const cached = JSON.parse(localStorage.getItem('jee_rate_limit_cache') || 'null');
             state.rateLimit = normalizeRateLimitObj(cached || state.rateLimit);
+            updateQuotaBadgesEverywhere();
             return state.rateLimit;
         }
 
         async function saveRateLimitToGist() {
             localStorage.setItem('jee_rate_limit_cache', JSON.stringify(state.rateLimit));
+            updateQuotaBadgesEverywhere();
             const token = getGithubToken();
             if (!token) return;
 
@@ -2093,18 +2372,63 @@
             }
         }
 
-        async function executeRateLimitedGeminiFetch(apiUrl, payload, abortSignal = null) {
+        // Discovers the active generateContent Flash endpoint on your API key if Google's router returns 404 for gemini-3.8-flash
+        async function resolveActiveBackendEndpointForModel(preferredModelName, apiKey) {
+            if (state.resolvedBackendModelCache[preferredModelName]) {
+                return state.resolvedBackendModelCache[preferredModelName];
+            }
+            const isLite = preferredModelName.includes('lite');
+            try {
+                const listRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`);
+                if (listRes.ok) {
+                    const listData = await listRes.json();
+                    const available = (listData.models || [])
+                        .filter(m => Array.isArray(m.supportedGenerationMethods) && m.supportedGenerationMethods.includes('generateContent'))
+                        .map(m => String(m.name || '').replace(/^models\//, ''));
+
+                    if (available.includes(preferredModelName)) {
+                        state.resolvedBackendModelCache[preferredModelName] = preferredModelName;
+                        return preferredModelName;
+                    }
+
+                    const flashCandidates = available.filter(name => /flash/i.test(name) && !/8b|tts|audio|image/i.test(name));
+                    if (isLite) {
+                        const liteMatch = flashCandidates.find(name => /lite/i.test(name));
+                        if (liteMatch) {
+                            state.resolvedBackendModelCache[preferredModelName] = liteMatch;
+                            return liteMatch;
+                        }
+                    }
+                    // Pick highest version flash model available on this API key
+                    flashCandidates.sort((a, b) => b.localeCompare(a));
+                    if (flashCandidates.length > 0) {
+                        state.resolvedBackendModelCache[preferredModelName] = flashCandidates[0];
+                        return flashCandidates[0];
+                    }
+                }
+            } catch (_) {}
+            return preferredModelName;
+        }
+
+        async function executeRateLimitedGeminiFetch(preferredModel, payload, abortSignal = null, onLog = null) {
+            const apiKey = getApiKey();
+            if (!apiKey) throw new Error('Missing Gemini API Key in Settings.');
+
             while (true) {
                 if (abortSignal?.aborted) throw new DOMException('Aborted', 'AbortError');
 
+                // 1. Verify latest rate limit counters from GitHub Gist before sending
                 await fetchRateLimitFromGist();
 
+                // 2. Enforce 19 requests/day (IST)
                 if (state.rateLimit.dailyCount >= MAX_DAILY_REQ_IST) {
                     const msg = `Daily limit reached (${state.rateLimit.dailyCount}/${MAX_DAILY_REQ_IST} requests for ${state.rateLimit.dateIST} IST). Paused until midnight IST.`;
+                    if (onLog) onLog(`⛔ ${msg}`, 'error');
                     toast(msg, 'warn');
                     throw new Error(msg);
                 }
 
+                // 3. Enforce 4 requests/minute (Wait until the 60s window clears)
                 const nowMs = Date.now();
                 state.rateLimit.recentTimestamps = state.rateLimit.recentTimestamps.filter(ts => nowMs - ts < 60000);
 
@@ -2112,43 +2436,69 @@
                     const oldestInWindow = state.rateLimit.recentTimestamps[0];
                     const waitMs = Math.max(1000, 60500 - (nowMs - oldestInWindow));
                     const waitSec = Math.ceil(waitMs / 1000);
-                    toast(`Rate limit: 4 req/min reached. Cooling down for ${waitSec}s...`, 'info');
+                    const waitMsg = `Rate limit guard (4 req/min): waiting ${waitSec}s for minute window to clear...`;
+                    if (onLog) onLog(`⏳ ${waitMsg}`, 'stitch');
+                    toast(waitMsg, 'info');
 
-                    await new Promise((resolve, reject) => {
-                        const timer = setTimeout(resolve, waitMs);
-                        if (abortSignal) {
-                            abortSignal.addEventListener('abort', () => {
-                                clearTimeout(timer);
-                                reject(new DOMException('Aborted', 'AbortError'));
-                            }, { once: true });
+                    for (let rem = waitSec; rem > 0; rem--) {
+                        if (abortSignal?.aborted) throw new DOMException('Aborted', 'AbortError');
+                        const subEl = document.getElementById('solverModalSubText');
+                        if (subEl && state.isRunningBackgroundSolver) {
+                            subEl.textContent = `Cooling down rate limit (4 req/min): resuming in ${rem}s...`;
                         }
-                    });
+                        await new Promise(r => setTimeout(r, 1000));
+                    }
                     continue;
                 }
 
-                state.rateLimit.dailyCount += 1;
-                state.rateLimit.recentTimestamps.push(Date.now());
-                await saveRateLimitToGist();
-                toast(`Gemini Request ${state.rateLimit.dailyCount}/${MAX_DAILY_REQ_IST} today (IST)`, 'info');
+                // 4. First attempt exact preferred model (gemini-3.8-flash or gemini-3.8-flash-lite);
+                // if Google's router returns 404 for the string, resolve the active Flash endpoint on the user's key
+                let targetModel = state.resolvedBackendModelCache[preferredModel] || preferredModel;
+                let apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${targetModel}:generateContent?key=${apiKey}`;
 
-                return await fetch(apiUrl, {
+                let res = await fetch(apiUrl, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload),
                     signal: abortSignal
                 });
+
+                if (res.status === 404) {
+                    const resolved = await resolveActiveBackendEndpointForModel(preferredModel, apiKey);
+                    if (resolved && resolved !== targetModel) {
+                        targetModel = resolved;
+                        apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${targetModel}:generateContent?key=${apiKey}`;
+                        res = await fetch(apiUrl, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(payload),
+                            signal: abortSignal
+                        });
+                    }
+                }
+
+                // 5. Record request in Gist rate limiter once dispatched to a valid endpoint
+                if (res.status !== 404) {
+                    state.rateLimit.dailyCount += 1;
+                    state.rateLimit.recentTimestamps.push(Date.now());
+                    await saveRateLimitToGist();
+                    if (onLog) {
+                        onLog(`📡 Request ${state.rateLimit.dailyCount}/${MAX_DAILY_REQ_IST} (IST) sent via ${preferredModel} [HTTP ${res.status}]`, 'info');
+                    }
+                }
+
+                return res;
             }
         }
 
         // ===================================================================
-        // FOOLPROOF 2D MULTI-COLUMN & SINGLE-COLUMN HYBRID PDF SLICER
-        // Handles 2-column sheets (like Straight_Line_Questions.pdf),
-        // Q.1 [Integer], Q.2 [Single correct], 1., (1), Problem 1, etc.
+        // 2-STAGE HYBRID PDF SLICER:
+        // Stage 1: Foolproof Local 2D Vector + Pixel-Ink Projection Slicer
+        // Stage 2: Sends Local Candidate Borders to Gemini 3.8 Flash to Verify & Refine
         // ===================================================================
         function inferSubjectAndChapterFromText(text, fallbackSubject = 'AUTO') {
             const hay = String(text || '').toLowerCase();
 
-            // Check explicit chapter keywords first
             const keywordRules = [
                 { rx: /straight\s*line|slope|orthocentre|incentre|circumcentre|centroid|angle\s*bisector|median\s*through|altitude\s*through/i, subj: 'Mathematics', chap: 'Straight Lines' },
                 { rx: /pair\s*of\s*line|homogen/i, subj: 'Mathematics', chap: 'Pair of Lines' },
@@ -2168,7 +2518,7 @@
                 { rx: /moment\s*of\s*inertia|rigid\s*body|angular\s*momentum|torque|rolling/i, subj: 'Physics', chap: 'Rigid Body Mechanics' },
                 { rx: /center\s*of\s*mass|collision|impulse|restitution/i, subj: 'Physics', chap: 'COM, Momentum and Collision' },
                 { rx: /work|kinetic\s*energy|potential\s*energy|spring/i, subj: 'Physics', chap: 'Work, Power and Energy' },
-                { rx: /friction|pulley|tension|newton/i, subj: 'Physics', chap: "Newton's Laws of Motion" },
+                { rx: /friction|pulley|tension|newton|block|incline| wedge/i, subj: 'Physics', chap: "Newton's Laws of Motion" },
                 { rx: /projectile|trajectory|range/i, subj: 'Physics', chap: 'Projectile Motion' },
                 { rx: /thermodynamics|adiabatic|isothermal|carnot|entropy/i, subj: 'Physics', chap: 'Thermodynamics' },
                 { rx: /simple\s*harmonic|shm|oscillation|pendulum/i, subj: 'Physics', chap: 'Simple Harmonic Motion' },
@@ -2187,11 +2537,10 @@
                 }
             }
 
-            const subj = (fallbackSubject && fallbackSubject !== 'AUTO') ? fallbackSubject : 'Mathematics';
-            return { subject: subj, chapter: JEE_CHAPTERS[subj]?.[0] || 'Straight Lines' };
+            const subj = (fallbackSubject && fallbackSubject !== 'AUTO') ? fallbackSubject : 'Physics';
+            return { subject: subj, chapter: JEE_CHAPTERS[subj]?.[0] || 'General' };
         }
 
-        // Extracts all native text items with 0..1000 normalized 2D coordinates (xmin, xmax, ymin, ymax)
         async function extractPage2DTextTokens(page) {
             try {
                 const vp = page.getViewport({ scale: 1.0 });
@@ -2229,9 +2578,7 @@
             }
         }
 
-        // Detects whether the page is a 2-column layout (like Straight_Line_Questions.pdf) or 1-column layout
         function detectPageColumnStructure(tokens, sourceCanvas) {
-            // Check if there is a vertical divider line or clear center gutter around X = 460..540
             const bodyTokens = tokens.filter(t => t.topNorm > 95 && t.botNorm < 935);
             let leftStarts = 0, rightStarts = 0, crossingMid = 0;
 
@@ -2241,40 +2588,14 @@
                 if (t.xmin < 455 && t.xmax > 545 && (t.xmax - t.xmin) > 130) crossingMid++;
             }
 
-            // Also check for a vertical ink rule near the center of the canvas
-            let gutterNormX = 500;
-            if (sourceCanvas) {
-                const w = sourceCanvas.width, h = sourceCanvas.height;
-                const yStart = Math.floor(h * 0.14), yEnd = Math.floor(h * 0.88);
-                const xStart = Math.floor(w * 0.45), xEnd = Math.floor(w * 0.55);
-                const stripW = Math.max(1, xEnd - xStart);
-                const stripH = Math.max(1, yEnd - yStart);
-                const data = sourceCanvas.getContext('2d').getImageData(xStart, yStart, stripW, stripH).data;
-
-                let bestRuleX = -1, maxDarkRatio = 0;
-                for (let sx = 0; sx < stripW; sx++) {
-                    let darkCount = 0;
-                    for (let sy = 0; sy < stripH; sy += 3) {
-                        const idx = (sy * stripW + sx) * 4;
-                        if (data[idx] < 210 && data[idx + 1] < 210 && data[idx + 2] < 210) darkCount++;
-                    }
-                    const ratio = darkCount / (stripH / 3);
-                    if (ratio > maxDarkRatio) {
-                        maxDarkRatio = ratio;
-                        bestRuleX = xStart + sx;
-                    }
-                }
-                if (maxDarkRatio > 0.35 && bestRuleX > 0) {
-                    gutterNormX = Math.round((bestRuleX / w) * 1000);
-                    return { isTwoColumn: true, gutterNormX };
-                }
+            // Only treat as 2-column if there are genuine question anchors or text starts in both halves
+            // AND not a full-width table (where horizontal lines cross the middle)
+            if (leftStarts >= 4 && rightStarts >= 4 && crossingMid <= Math.max(2, (leftStarts + rightStarts) * 0.08)) {
+                return { isTwoColumn: true, gutterNormX: 500 };
             }
-
-            const isTwoCol = (leftStarts >= 4 && rightStarts >= 4 && crossingMid <= Math.max(2, (leftStarts + rightStarts) * 0.08));
-            return { isTwoColumn: isTwoCol, gutterNormX: 500 };
+            return { isTwoColumn: false, gutterNormX: 500 };
         }
 
-        // Groups 2D tokens within a column into horizontal text lines
         function groupTokensIntoColumnLines(colTokens) {
             const sorted = [...colTokens].sort((a, b) => a.topNorm !== b.topNorm ? a.topNorm - b.topNorm : a.xmin - b.xmin);
             const lines = [];
@@ -2314,29 +2635,23 @@
             return lines.sort((a, b) => a.topNorm - b.topNorm);
         }
 
-        // Matches any JEE question start line: "Q.1 [Integer]", "Q.2 [Single correct]", "Q1.", "1.", "1)", "(1)", "Problem 1"
         function matchQuestionStartAnchor(lineText, relIndentNorm) {
             const txt = String(lineText || '').trim();
             if (!txt) return null;
+            if (/^\([A-D1-4]\)/i.test(txt)) return null;
 
-            // Ignore pure option lines like "(A) ...", "(B) ...", "(1) Gravitational..." when indented or inside matrix
-            if (/^\([A-D]\)/i.test(txt)) return null;
-
-            // Pattern 1: Explicit "Q.1", "Q. 10 [Single correct]", "Q1", "Question 1", "Problem 1"
             const explicitMatch = txt.match(/^(?:Q(?:uestion|\.)?\s*|Prob(?:lem|\.)?\s*)(\d{1,3}[a-zA-Z]?)(?:\s*\[.*?\]|\s*[\.\)\:\-]|\s+)/i);
-            if (explicitMatch && relIndentNorm < 120) {
+            if (explicitMatch && relIndentNorm < 140) {
                 return explicitMatch[1];
             }
 
-            // Pattern 2: Standalone "Q.1" or "Q.1[Integer]"
             const tightQMatch = txt.match(/^Q\.?\s*(\d{1,3}[a-zA-Z]?)\b/i);
-            if (tightQMatch && relIndentNorm < 120) {
+            if (tightQMatch && relIndentNorm < 140) {
                 return tightQMatch[1];
             }
 
-            // Pattern 3: Left-aligned numeric start "1) The three masses...", "1. Let the..."
-            if (relIndentNorm < 65) {
-                const numMatch = txt.match(/^(\d{1,3})\s*[\.\)]\s+[A-Za-z\(\$]/);
+            if (relIndentNorm < 75) {
+                const numMatch = txt.match(/^(\d{1,3})\s*[\.\)]\s*(?:[A-Za-z\(\$\[]|$)/);
                 if (numMatch) {
                     return numMatch[1];
                 }
@@ -2344,97 +2659,295 @@
             return null;
         }
 
-        // Tier 1: Native Vector PDF 2D Question Extractor (0 API calls needed when PDF has vector text!)
-        function extractQuestionsFromNativePdfVector(tokens, sourceCanvas, paperTitle, defaultSubj) {
-            if (!tokens || tokens.length < 12) return null;
+        // Pixel-Ink Horizontal Table / Row Divider Detector (Handles boxed table sheets like Page 6 in your screenshot!)
+        function detectPixelInkQuestionBands(sourceCanvas, defaultSubj, paperTitle) {
+            const w = sourceCanvas.width, h = sourceCanvas.height;
+            const ctx = sourceCanvas.getContext('2d');
+            const imgData = ctx.getImageData(0, 0, w, h).data;
 
-            const { isTwoColumn, gutterNormX } = detectPageColumnStructure(tokens, sourceCanvas);
-            const columns = isTwoColumn
-                ? [
-                    { colIdx: 0, xmin: 12, xmax: Math.max(450, gutterNormX - 6) },
-                    { colIdx: 1, xmin: Math.min(550, gutterNormX + 6), xmax: 988 }
-                ]
-                : [{ colIdx: 0, xmin: 10, xmax: 990 }];
+            // Detect full-width horizontal table borders or deep whitespace bands
+            const rowDarkRatio = new Float32Array(h);
+            const xStart = Math.floor(w * 0.06), xEnd = Math.floor(w * 0.94);
+            const spanW = Math.max(1, xEnd - xStart);
 
-            const pageHeaderText = tokens
-                .filter(t => t.topNorm < 130)
-                .map(t => t.str)
-                .join(' ');
-
-            const detectedBlocks = [];
-
-            for (const col of columns) {
-                const colTokens = tokens.filter(t => {
-                    const cx = (t.xmin + t.xmax) / 2;
-                    return cx >= col.xmin && cx <= col.xmax && t.botNorm <= 955;
-                });
-                const colLines = groupTokensIntoColumnLines(colTokens);
-                if (colLines.length === 0) continue;
-
-                const colLeftMargin = Math.min(...colLines.map(l => l.xmin));
-                const anchors = [];
-
-                for (let i = 0; i < colLines.length; i++) {
-                    const ln = colLines[i];
-                    // Skip running page footers (e.g., standalone page number "1" at bottom)
-                    if (ln.topNorm > 925 && /^\d{1,3}$/.test(ln.text)) continue;
-
-                    const relIndent = ln.xmin - colLeftMargin;
-                    const qNum = matchQuestionStartAnchor(ln.text, relIndent);
-                    if (qNum) {
-                        anchors.push({ lineIdx: i, qNum, line: ln });
-                    }
+            for (let y = 0; y < h; y++) {
+                let dark = 0;
+                for (let x = xStart; x < xEnd; x += 2) {
+                    const idx = (y * w + x) * 4;
+                    if (imgData[idx] < 225 || imgData[idx + 1] < 225 || imgData[idx + 2] < 225) dark++;
                 }
+                rowDarkRatio[y] = dark / (spanW / 2);
+            }
 
-                for (let aIdx = 0; aIdx < anchors.length; aIdx++) {
-                    const currA = anchors[aIdx];
-                    const nextA = anchors[aIdx + 1];
-                    const startLineIdx = currA.lineIdx;
-                    const endLineIdx = nextA ? nextA.lineIdx - 1 : colLines.length - 1;
-
-                    const sliceLines = colLines.slice(startLineIdx, endLineIdx + 1).filter(l => {
-                        if (l.topNorm > 925 && /^\d{1,3}$/.test(l.text)) return false;
-                        return true;
-                    });
-                    if (sliceLines.length === 0) continue;
-
-                    const rawYMin = Math.max(8, currA.line.topNorm - 10);
-                    const lastLineBot = Math.max(...sliceLines.map(l => l.botNorm));
-                    const nextAnchorTop = nextA ? nextA.line.topNorm : 948;
-                    // Include any diagram whitespace below the text up to the next question
-                    const rawYMax = nextA
-                        ? Math.max(lastLineBot + 10, nextAnchorTop - 8)
-                        : Math.min(955, Math.max(lastLineBot + 16, lastLineBot + 28));
-
-                    const fullQText = sliceLines.map(l => l.text).join(' ');
-                    const { subject, chapter } = inferSubjectAndChapterFromText(`${paperTitle} ${pageHeaderText} ${fullQText}`, defaultSubj);
-
-                    detectedBlocks.push({
-                        questionNumber: currA.qNum,
-                        subject,
-                        chapter,
-                        xmin: col.xmin,
-                        xmax: col.xmax,
-                        ymin: rawYMin,
-                        ymax: rawYMax,
-                        ocrText: cleanQuestionTextOnly(fullQText),
-                        firstLineSnippet: sliceLines[0]?.text || '',
-                        lastLineSnippet: sliceLines[sliceLines.length - 1]?.text || '',
-                        isContinuationFromPrevPage: false,
-                        continuesToNextPage: false,
-                        colLines
-                    });
+            // 1. Check for horizontal table rules (rows where >55% of width is continuous dark line)
+            const hRules = [];
+            for (let y = Math.floor(h * 0.04); y < Math.floor(h * 0.96); y++) {
+                if (rowDarkRatio[y] > 0.52) {
+                    if (hRules.length === 0 || y - hRules[hRules.length - 1] > Math.floor(h * 0.06)) {
+                        hRules.push(y);
+                    }
                 }
             }
 
-            return detectedBlocks.length > 0 ? detectedBlocks : null;
+            const blocks = [];
+            if (hRules.length >= 3) {
+                for (let i = 0; i < hRules.length - 1; i++) {
+                    const y0 = hRules[i], y1 = hRules[i + 1];
+                    if ((y1 - y0) < h * 0.07) continue;
+                    // Check if band actually contains ink inside
+                    let inkRows = 0;
+                    for (let r = y0 + 8; r < y1 - 8; r++) {
+                        if (rowDarkRatio[r] > 0.012 && rowDarkRatio[r] < 0.45) inkRows++;
+                    }
+                    if (inkRows > 12) {
+                        const { subject, chapter } = inferSubjectAndChapterFromText(paperTitle, defaultSubj);
+                        blocks.push({
+                            questionNumber: `${blocks.length + 1}`,
+                            subject,
+                            chapter,
+                            xmin: 12,
+                            xmax: 988,
+                            ymin: Math.round((y0 / h) * 1000),
+                            ymax: Math.round((y1 / h) * 1000),
+                            ocrText: '',
+                            firstLineSnippet: '',
+                            lastLineSnippet: '',
+                            isContinuationFromPrevPage: false,
+                            continuesToNextPage: false,
+                            colLines: []
+                        });
+                    }
+                }
+                if (blocks.length >= 2) return blocks;
+            }
+
+            // 2. Otherwise segment by vertical whitespace gaps (> 1.8% of page height)
+            const minGapPx = Math.max(18, Math.floor(h * 0.018));
+            const minBlockPx = Math.max(55, Math.floor(h * 0.065));
+            let inContent = false, blockStart = 0, whiteRun = 0;
+
+            for (let y = Math.floor(h * 0.05); y < Math.floor(h * 0.95); y++) {
+                const hasInk = rowDarkRatio[y] > 0.008;
+                if (hasInk) {
+                    if (!inContent) {
+                        inContent = true;
+                        blockStart = Math.max(0, y - 10);
+                    }
+                    whiteRun = 0;
+                } else if (inContent) {
+                    whiteRun++;
+                    if (whiteRun >= minGapPx) {
+                        const blockEnd = y - whiteRun + 10;
+                        if (blockEnd - blockStart >= minBlockPx) {
+                            const { subject, chapter } = inferSubjectAndChapterFromText(paperTitle, defaultSubj);
+                            blocks.push({
+                                questionNumber: `${blocks.length + 1}`,
+                                subject,
+                                chapter,
+                                xmin: 12,
+                                xmax: 988,
+                                ymin: Math.round((blockStart / h) * 1000),
+                                ymax: Math.round((blockEnd / h) * 1000),
+                                ocrText: '',
+                                firstLineSnippet: '',
+                                lastLineSnippet: '',
+                                isContinuationFromPrevPage: false,
+                                continuesToNextPage: false,
+                                colLines: []
+                            });
+                        }
+                        inContent = false;
+                        whiteRun = 0;
+                    }
+                }
+            }
+            if (inContent && (h * 0.95 - blockStart) >= minBlockPx) {
+                const { subject, chapter } = inferSubjectAndChapterFromText(paperTitle, defaultSubj);
+                blocks.push({
+                    questionNumber: `${blocks.length + 1}`,
+                    subject,
+                    chapter,
+                    xmin: 12,
+                    xmax: 988,
+                    ymin: Math.round((blockStart / h) * 1000),
+                    ymax: 955,
+                    ocrText: '',
+                    firstLineSnippet: '',
+                    lastLineSnippet: '',
+                    isContinuationFromPrevPage: false,
+                    continuesToNextPage: false,
+                    colLines: []
+                });
+            }
+            return blocks;
         }
 
-        // Snaps 2D slice boundaries (ymin, ymax) to clean whitespace valleys inside the specific column [xmin..xmax]
+        // Stage 1 Local Candidate Generator (Combines Native Vector Anchors + Pixel Table/Band Detector)
+        function generateLocal2DCandidateBlocks(tokens, sourceCanvas, paperTitle, defaultSubj) {
+            if (tokens && tokens.length >= 10) {
+                const { isTwoColumn, gutterNormX } = detectPageColumnStructure(tokens, sourceCanvas);
+                const columns = isTwoColumn
+                    ? [
+                        { colIdx: 0, xmin: 12, xmax: Math.max(450, gutterNormX - 6) },
+                        { colIdx: 1, xmin: Math.min(550, gutterNormX + 6), xmax: 988 }
+                    ]
+                    : [{ colIdx: 0, xmin: 10, xmax: 990 }];
+
+                const pageHeaderText = tokens.filter(t => t.topNorm < 130).map(t => t.str).join(' ');
+                const detectedBlocks = [];
+
+                for (const col of columns) {
+                    const colTokens = tokens.filter(t => {
+                        const cx = (t.xmin + t.xmax) / 2;
+                        return cx >= col.xmin && cx <= col.xmax && t.botNorm <= 958;
+                    });
+                    const colLines = groupTokensIntoColumnLines(colTokens);
+                    if (colLines.length === 0) continue;
+
+                    const colLeftMargin = Math.min(...colLines.map(l => l.xmin));
+                    const anchors = [];
+
+                    for (let i = 0; i < colLines.length; i++) {
+                        const ln = colLines[i];
+                        if (ln.topNorm > 925 && /^\d{1,3}$/.test(ln.text)) continue;
+                        const relIndent = ln.xmin - colLeftMargin;
+                        const qNum = matchQuestionStartAnchor(ln.text, relIndent);
+                        if (qNum) {
+                            anchors.push({ lineIdx: i, qNum, line: ln });
+                        }
+                    }
+
+                    for (let aIdx = 0; aIdx < anchors.length; aIdx++) {
+                        const currA = anchors[aIdx];
+                        const nextA = anchors[aIdx + 1];
+                        const startLineIdx = currA.lineIdx;
+                        const endLineIdx = nextA ? nextA.lineIdx - 1 : colLines.length - 1;
+
+                        const sliceLines = colLines.slice(startLineIdx, endLineIdx + 1).filter(l => {
+                            if (l.topNorm > 925 && /^\d{1,3}$/.test(l.text)) return false;
+                            return true;
+                        });
+                        if (sliceLines.length === 0) continue;
+
+                        const rawYMin = Math.max(8, currA.line.topNorm - 10);
+                        const lastLineBot = Math.max(...sliceLines.map(l => l.botNorm));
+                        const nextAnchorTop = nextA ? nextA.line.topNorm : 950;
+                        const rawYMax = nextA
+                            ? Math.max(lastLineBot + 10, nextAnchorTop - 6)
+                            : Math.min(960, Math.max(lastLineBot + 22, 945));
+
+                        const fullQText = sliceLines.map(l => l.text).join(' ');
+                        const { subject, chapter } = inferSubjectAndChapterFromText(`${paperTitle} ${pageHeaderText} ${fullQText}`, defaultSubj);
+
+                        detectedBlocks.push({
+                            questionNumber: currA.qNum,
+                            subject,
+                            chapter,
+                            xmin: Math.round(col.xmin),
+                            xmax: Math.round(col.xmax),
+                            ymin: Math.round(rawYMin),
+                            ymax: Math.round(rawYMax),
+                            ocrText: cleanQuestionTextOnly(fullQText),
+                            firstLineSnippet: sliceLines[0]?.text || '',
+                            lastLineSnippet: sliceLines[sliceLines.length - 1]?.text || '',
+                            isContinuationFromPrevPage: false,
+                            continuesToNextPage: false,
+                            colLines
+                        });
+                    }
+                }
+
+                // If vector anchor detector found at least 2 questions, return them;
+                // if it only found 0 or 1 on a multi-row table page, check pixel bands too!
+                if (detectedBlocks.length >= 2) return detectedBlocks;
+                const pixelBlocks = detectPixelInkQuestionBands(sourceCanvas, defaultSubj, paperTitle);
+                if (pixelBlocks.length > detectedBlocks.length) return pixelBlocks;
+                if (detectedBlocks.length > 0) return detectedBlocks;
+            }
+
+            return detectPixelInkQuestionBands(sourceCanvas, defaultSubj, paperTitle);
+        }
+
+        // Stage 2: Sends Local Candidate Borders to Gemini 3.8 Flash so Gemini Verifies, Splits, or Corrects them!
+        async function verifyAndRefineBordersWithGemini(base64Jpeg, pageNum, localCandidates, abortSignal, onLog) {
+            const selectedModel = getSelectedModel();
+            const candidateSummary = (localCandidates || []).map((c, idx) => ({
+                index: idx + 1,
+                questionNumber: c.questionNumber,
+                xmin: c.xmin,
+                ymin: c.ymin,
+                xmax: c.xmax,
+                ymax: c.ymax,
+                firstLineSnippet: (c.firstLineSnippet || '').slice(0, 60)
+            }));
+
+            const systemPrompt = `You are a precision 2D JEE Question Paper Border Verifier & Corrector.
+We ran our local algorithm on Page ${pageNum} and proposed these candidate 2D bounding boxes (normalized 0 to 1000):
+${JSON.stringify(candidateSummary)}
+
+YOUR TASK:
+1. Inspect the page image carefully (it may be 1-column, 2-column, boxed table rows, matrix-match, or integer/single-choice problems).
+2. Verify each proposed box (\`xmin\`, \`ymin\`, \`xmax\`, \`ymax\` in 0..1000).
+3. If our local algorithm merged 2 questions into 1 box, SPLIT them into separate entries!
+4. If our local algorithm missed any question or cut off a diagram/option/fraction, ADJUST \`xmin\`, \`ymin\`, \`xmax\`, \`ymax\` so every single question on the page is 100% complete with 8-12 units of clean padding.
+5. Classify \`subject\` ("Physics", "Chemistry", or "Mathematics") and \`chapter\`.`;
+
+            const payload = {
+                contents: [{
+                    role: "user",
+                    parts: [
+                        { text: `Verify and correct these ${candidateSummary.length} proposed 2D question borders on Page ${pageNum}. Output the final corrected list of all questions on this page.` },
+                        { inlineData: { mimeType: "image/jpeg", data: base64Jpeg } }
+                    ]
+                }],
+                systemInstruction: { parts: [{ text: systemPrompt }] },
+                generationConfig: {
+                    temperature: 0.0,
+                    responseMimeType: "application/json",
+                    responseSchema: {
+                        type: "OBJECT",
+                        properties: {
+                            questions: {
+                                type: "ARRAY",
+                                items: {
+                                    type: "OBJECT",
+                                    properties: {
+                                        questionNumber: { type: "STRING" },
+                                        firstLineSnippet: { type: "STRING" },
+                                        lastLineSnippet: { type: "STRING" },
+                                        subject: { type: "STRING", enum: ["Physics", "Chemistry", "Mathematics"] },
+                                        chapter: { type: "STRING" },
+                                        xmin: { type: "INTEGER" },
+                                        ymin: { type: "INTEGER" },
+                                        xmax: { type: "INTEGER" },
+                                        ymax: { type: "INTEGER" },
+                                        isContinuationFromPrevPage: { type: "BOOLEAN" },
+                                        continuesToNextPage: { type: "BOOLEAN" }
+                                    },
+                                    required: ["questionNumber", "subject", "chapter", "xmin", "ymin", "xmax", "ymax"]
+                                }
+                            }
+                        },
+                        required: ["questions"]
+                    }
+                }
+            };
+
+            const res = await executeRateLimitedGeminiFetch(selectedModel, payload, abortSignal, onLog);
+            if (!res.ok) {
+                const errTxt = (await res.text()).slice(0, 140);
+                throw new Error(`HTTP ${res.status}: ${errTxt}`);
+            }
+            const data = await res.json();
+            const txt = data.candidates?.[0]?.content?.parts?.[0]?.text;
+            const parsed = txt ? JSON.parse(txt) : { questions: [] };
+            return parsed.questions || [];
+        }
+
         function snap2DBoundaryToWhitespace(sourceCanvas, colLines, targetNormY, minAllowedNorm, maxAllowedNorm, xminNorm, xmaxNorm, preferDirection = 'UP') {
             let yNorm = Math.max(minAllowedNorm, Math.min(maxAllowedNorm, targetNormY));
 
-            if (Array.isArray(colLines)) {
+            if (Array.isArray(colLines) && colLines.length > 0) {
                 for (let pass = 0; pass < 3; pass++) {
                     let adjusted = false;
                     for (const line of colLines) {
@@ -2498,7 +3011,6 @@
             return Math.round(yNorm);
         }
 
-        // Auto-trims excess top/bottom/left/right whitespace while keeping clean padding
         function autoTrim2DWhitespace(canvas) {
             const ctx = canvas.getContext('2d'), w = canvas.width, h = canvas.height;
             if (h < 50 || w < 50) return canvas;
@@ -2533,7 +3045,6 @@
             return trimmed;
         }
 
-        // Crops a 2D region [xminNorm..xmaxNorm, yminNorm..ymaxNorm] from the high-res page canvas
         function crop2DSliceFromPage(sourceCanvas, xminNorm, xmaxNorm, yminNorm, ymaxNorm, padTop = 8, padBottom = 8) {
             const w = sourceCanvas.width, h = sourceCanvas.height;
             const safeXMin = Math.max(0, xminNorm - 6);
@@ -2564,65 +3075,202 @@
             };
         }
 
-        // Tier 2: 2D Gemini Vision Layout Detector (Used when PDF page is scanned or has no vector anchors)
-        async function analyzePageLayout2DWithGemini(base64Jpeg, pageNum, abortSignal) {
-            const apiKey = getApiKey();
-            const selectedModel = getSelectedModel();
-            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${selectedModel}:generateContent?key=${apiKey}`;
+        // ===================================================================
+        // LIVE AI ANSWER KEY & HINT SOLVER ENGINE + REAL-TIME LOGS CONSOLE
+        // ===================================================================
+        function appendSolverLog(msg, tone = 'info') {
+            const box = document.getElementById('solverLiveLog');
+            if (!box) return;
+            const d = document.createElement('div');
+            if (tone === 'success') d.className = 'font-bold text-emerald-500 dark:text-emerald-400';
+            else if (tone === 'stitch') d.className = 'font-extrabold text-amber-500 dark:text-amber-300';
+            else if (tone === 'error') d.className = 'font-extrabold text-rose-500 dark:text-rose-400';
+            else { d.className = 'font-semibold'; d.style.color = 'var(--md-primary)'; }
+            d.textContent = `• ${msg}`;
+            box.appendChild(d);
+            box.scrollTop = box.scrollHeight;
+        }
 
-            const systemPrompt = `You are an expert 2D JEE Question Paper Layout & Boundary Detector.
-Pages can be SINGLE-COLUMN or TWO-COLUMN (left column x: 0..500, right column x: 500..1000), and questions can have ANY format: "Q.1 [Integer]", "Q.2 [Single correct]", "1.", "(1)", "Problem 1", matrix-match, or comprehension paragraphs.
-Return the exact 2D bounding box (\`xmin\`, \`ymin\`, \`xmax\`, \`ymax\` normalized 0 to 1000) for every individual question on the page.
-CRITICAL RULES:
-1. If the page has 2 columns, output Left Column questions first (with \`xmin\` ~ 15, \`xmax\` ~ 495), then Right Column questions (with \`xmin\` ~ 505, \`xmax\` ~ 985). NEVER merge left and right column questions into a single box!
-2. Place \`ymin\` in the whitespace 8 units ABOVE the question number/header, and \`ymax\` 8 units BELOW its last option or diagram.`;
+        function updateSolverProgressEverywhere(pct, countBadgeText, subStatusText) {
+            const cBadge = document.getElementById('solverModalCountBadge');
+            const sText = document.getElementById('solverModalSubText');
+            if (cBadge) cBadge.textContent = countBadgeText;
+            if (sText) sText.textContent = subStatusText;
+            renderM3WavyProgress('solverModalWavyBarWrap', pct);
+
+            const minBadge = document.getElementById('minSolverCountBadge');
+            const minTxt = document.getElementById('minSolverStatusText');
+            if (minBadge) minBadge.textContent = countBadgeText;
+            if (minTxt) minTxt.textContent = subStatusText;
+            renderM3WavyProgress('minSolverWaveWrap', pct);
+
+            const topBadgeTxt = document.getElementById('solverStatusText');
+            if (topBadgeTxt) topBadgeTxt.textContent = countBadgeText;
+            updateQuotaBadgesEverywhere();
+            ensureM3MorphLoopRunning();
+        }
+
+        async function fetchSingleQuestionAnswerAndHint(q, abortSignal = null, onLog = null) {
+            const apiKey = getApiKey();
+            if (!apiKey || !q || !q.imageDataUrl) return null;
+            const selectedModel = getSelectedModel();
+            const base64Jpeg = q.imageDataUrl.split(',')[1];
+
+            const promptText = `You are an expert IIT-JEE Advanced faculty solver.
+Analyze this JEE question image (${q.subject} - ${q.chapter}).
+1. Determine the exact final \`answerKey\` (e.g., "(B)", "(A, C)", "4", "18", or concise final expression).
+2. Write a sharp, high-yield \`hint\` in strictly 1 single sentence that gives the core physical/chemical/mathematical principle or setup without giving away the full step-by-step algebra.`;
 
             const payload = {
                 contents: [{
                     role: "user",
                     parts: [
-                        { text: `Detect all individual 2D question boxes (xmin, ymin, xmax, ymax in 0..1000) on Page ${pageNum}.` },
+                        { text: promptText },
                         { inlineData: { mimeType: "image/jpeg", data: base64Jpeg } }
                     ]
                 }],
-                systemInstruction: { parts: [{ text: systemPrompt }] },
                 generationConfig: {
-                    temperature: 0.0,
+                    temperature: 0.1,
                     responseMimeType: "application/json",
                     responseSchema: {
                         type: "OBJECT",
                         properties: {
-                            questions: {
-                                type: "ARRAY",
-                                items: {
-                                    type: "OBJECT",
-                                    properties: {
-                                        questionNumber: { type: "STRING" },
-                                        firstLineSnippet: { type: "STRING" },
-                                        lastLineSnippet: { type: "STRING" },
-                                        subject: { type: "STRING", enum: ["Physics", "Chemistry", "Mathematics"] },
-                                        chapter: { type: "STRING" },
-                                        xmin: { type: "INTEGER" },
-                                        ymin: { type: "INTEGER" },
-                                        xmax: { type: "INTEGER" },
-                                        ymax: { type: "INTEGER" },
-                                        isContinuationFromPrevPage: { type: "BOOLEAN" },
-                                        continuesToNextPage: { type: "BOOLEAN" }
-                                    },
-                                    required: ["questionNumber", "subject", "chapter", "xmin", "ymin", "xmax", "ymax"]
-                                }
-                            }
+                            answerKey: { type: "STRING" },
+                            hint: { type: "STRING" }
                         },
-                        required: ["questions"]
+                        required: ["answerKey", "hint"]
                     }
                 }
             };
 
-            const res = await executeRateLimitedGeminiFetch(apiUrl, payload, abortSignal);
-            if (!res.ok) throw new Error(`HTTP ${res.status}: ${(await res.text()).slice(0, 140)}`);
+            const res = await executeRateLimitedGeminiFetch(selectedModel, payload, abortSignal, onLog);
+            if (!res.ok) {
+                const errBody = (await res.text()).slice(0, 140);
+                throw new Error(`HTTP ${res.status}: ${errBody}`);
+            }
             const data = await res.json();
             const txt = data.candidates?.[0]?.content?.parts?.[0]?.text;
-            return txt ? JSON.parse(txt) : { questions: [] };
+            if (!txt) throw new Error('Empty response from Gemini');
+            const parsed = JSON.parse(txt);
+            return {
+                answerKey: String(parsed.answerKey || '').trim(),
+                hint: String(parsed.hint || '').trim()
+            };
+        }
+
+        async function runBackgroundAnswerAndHintGenerator(openModal = true, forceAll = false) {
+            if (state.isRunningBackgroundSolver) {
+                if (openModal) window.app.openSolverModal();
+                return;
+            }
+            if (!getApiKey()) {
+                window.app.openSettingsModal(true, 'KEYS');
+                toast('Please save your Gemini API Key first!', 'warn');
+                return;
+            }
+
+            const targets = forceAll
+                ? [...state.questions]
+                : state.questions.filter(q => !q.hint || !q.answerKey || q.answerKey === 'Not solved yet' || String(q.hint).trim().length < 5);
+
+            if (openModal) window.app.openSolverModal();
+
+            if (targets.length === 0) {
+                appendSolverLog('✓ All questions in your vault already have Answer Keys & 1-Line Hints!', 'success');
+                toast('All questions already have Answer Keys & 1-Line Hints ✓', 'success');
+                return;
+            }
+
+            state.isRunningBackgroundSolver = true;
+            state.stopSolverRequested = false;
+            state.solverAbortController = new AbortController();
+
+            const badge = document.getElementById('solverStatusBadge');
+            const spinner = document.getElementById('solverModalSpinner');
+            const titleTxt = document.getElementById('solverStepTitleText');
+            const stopBtn = document.getElementById('stopSolverBtn');
+            const startBtn = document.getElementById('startSolverMissingBtn');
+            const forceBtn = document.getElementById('startSolverForceAllBtn');
+            const prevImg = document.getElementById('solverPreviewImg');
+            const prevPh = document.getElementById('solverPreviewPlaceholder');
+
+            if (badge) { badge.classList.remove('hidden'); badge.classList.add('inline-flex'); }
+            if (spinner) spinner.classList.remove('hidden');
+            if (titleTxt) titleTxt.textContent = `Solving ${targets.length} Questions with ${getSelectedModel()}...`;
+            if (stopBtn) { stopBtn.classList.remove('hidden'); stopBtn.classList.add('inline-flex'); }
+            if (startBtn) startBtn.disabled = true;
+            if (forceBtn) forceBtn.disabled = true;
+
+            document.getElementById('solverLiveLog').innerHTML = '';
+            appendSolverLog(`Starting batch solver for ${targets.length} questions using ${getSelectedModel()}...`, 'info');
+            updateSolverProgressEverywhere(6, `Solved 0/${targets.length}`, `Initializing ${getSelectedModel()}...`);
+
+            let solvedSuccessCount = 0;
+
+            try {
+                for (let idx = 0; idx < targets.length; idx++) {
+                    if (state.stopSolverRequested) break;
+                    const q = targets[idx];
+                    const liveQ = state.questions.find(item => item.id === q.id);
+                    if (!liveQ) continue;
+
+                    if (prevImg && prevPh) {
+                        prevImg.src = liveQ.imageDataUrl;
+                        prevImg.classList.remove('hidden');
+                        prevPh.classList.add('hidden');
+                    }
+
+                    const pct = Math.max(8, Math.round(((idx + 1) / targets.length) * 100));
+                    updateSolverProgressEverywhere(
+                        pct,
+                        `Solved ${solvedSuccessCount}/${targets.length}`,
+                        `Solving Q.${liveQ.questionNumber} (${liveQ.subject} • ${liveQ.chapter})...`
+                    );
+
+                    try {
+                        const res = await fetchSingleQuestionAnswerAndHint(
+                            liveQ,
+                            state.solverAbortController.signal,
+                            (logMsg, tone) => appendSolverLog(logMsg, tone)
+                        );
+                        if (res && res.answerKey) {
+                            liveQ.answerKey = res.answerKey;
+                            liveQ.hint = res.hint || 'Apply fundamental chapter conservation/equilibrium equations.';
+                            solvedSuccessCount++;
+                            appendSolverLog(`✓ Q.${liveQ.questionNumber} (${liveQ.subject}): Ans = ${liveQ.answerKey} | Hint = ${liveQ.hint.slice(0, 68)}...`, 'success');
+                            updateSolverProgressEverywhere(
+                                pct,
+                                `Solved ${solvedSuccessCount}/${targets.length}`,
+                                `✓ Solved Q.${liveQ.questionNumber} → Ans: ${liveQ.answerKey}`
+                            );
+                            if (state.activePadId === liveQ.id) refreshScratchpadTopBarAndHints();
+                        }
+                    } catch (err) {
+                        if (err.name === 'AbortError' || state.stopSolverRequested) break;
+                        appendSolverLog(`⚠ Q.${liveQ.questionNumber} failed: ${err.message}`, 'error');
+                        if (String(err.message).includes('Daily limit reached')) {
+                            break;
+                        }
+                    }
+                }
+
+                if (solvedSuccessCount > 0) {
+                    scheduleCloudAutoSync(true);
+                    toast(`Successfully solved ${solvedSuccessCount} questions & synced to Cloud!`, 'success');
+                }
+            } finally {
+                state.isRunningBackgroundSolver = false;
+                state.isSolverMinimized = false;
+                if (badge) { badge.classList.add('hidden'); badge.classList.remove('inline-flex'); }
+                if (spinner) spinner.classList.add('hidden');
+                if (titleTxt) titleTxt.textContent = `Solver Finished (${solvedSuccessCount}/${targets.length} Solved)`;
+                if (stopBtn) { stopBtn.classList.add('hidden'); stopBtn.classList.remove('inline-flex'); }
+                if (startBtn) startBtn.disabled = false;
+                if (forceBtn) forceBtn.disabled = false;
+                document.getElementById('minimizedSolverBar')?.classList.add('hidden');
+                document.getElementById('minimizedSolverBar')?.classList.remove('flex');
+                updateQuotaBadgesEverywhere();
+            }
         }
         // ===================================================================
         // MANUAL PER-QUESTION SOLVE TIMER & THEME ENGINE
@@ -2998,7 +3646,7 @@ CRITICAL RULES:
                 state.importMode = 'PDF';
                 state.importRawImg = null;
                 document.getElementById('selectedFileLabel').textContent = file.name;
-                document.getElementById('selectedFileTypeBadge').textContent = 'Detected: PDF Test Paper • 1-Col & 2-Col Hybrid Vector/Vision Slicer Ready';
+                document.getElementById('selectedFileTypeBadge').textContent = 'Detected: PDF Test Paper • Local Slicer + Gemini 3.8 Flash Border Verifier Ready';
                 document.getElementById('unifiedFileIcon').className = 'ph-duotone ph-file-pdf text-2xl';
                 document.getElementById('imageSetupSubView').classList.add('hidden');
                 document.getElementById('pdfSetupSubView').classList.remove('hidden');
@@ -3030,7 +3678,6 @@ CRITICAL RULES:
             const apiKey = getApiKey();
             if (!apiKey) return null;
             const selectedModel = getSelectedModel();
-            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${selectedModel}:generateContent?key=${apiKey}`;
 
             const allChaps = [...JEE_CHAPTERS.Physics, ...JEE_CHAPTERS.Chemistry, ...JEE_CHAPTERS.Mathematics];
             const payload = {
@@ -3059,136 +3706,13 @@ CRITICAL RULES:
             };
 
             try {
-                const res = await executeRateLimitedGeminiFetch(apiUrl, payload);
+                const res = await executeRateLimitedGeminiFetch(selectedModel, payload);
                 if (!res.ok) return null;
                 const data = await res.json();
                 const txt = data.candidates?.[0]?.content?.parts?.[0]?.text;
                 return txt ? JSON.parse(txt) : null;
             } catch (_) {
                 return null;
-            }
-        }
-
-        async function fetchSingleQuestionAnswerAndHint(q) {
-            const apiKey = getApiKey();
-            if (!apiKey || !q || !q.imageDataUrl) return null;
-            const selectedModel = getSelectedModel();
-            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${selectedModel}:generateContent?key=${apiKey}`;
-            const base64Jpeg = q.imageDataUrl.split(',')[1];
-
-            const promptText = `You are an expert IIT-JEE Advanced faculty solver.
-Analyze this JEE question image (${q.subject} - ${q.chapter}).
-1. Determine the exact final \`answerKey\` (e.g., "(B)", "(A, C)", "42", or concise final expression).
-2. Write a sharp, high-yield \`hint\` in strictly 1 single sentence that gives the core physical/chemical/mathematical principle or setup without giving away the full step-by-step algebra.`;
-
-            const payload = {
-                contents: [{
-                    role: "user",
-                    parts: [
-                        { text: promptText },
-                        { inlineData: { mimeType: "image/jpeg", data: base64Jpeg } }
-                    ]
-                }],
-                generationConfig: {
-                    temperature: 0.1,
-                    responseMimeType: "application/json",
-                    responseSchema: {
-                        type: "OBJECT",
-                        properties: {
-                            answerKey: { type: "STRING" },
-                            hint: { type: "STRING" }
-                        },
-                        required: ["answerKey", "hint"]
-                    }
-                }
-            };
-
-            const res = await executeRateLimitedGeminiFetch(apiUrl, payload);
-            if (!res.ok) throw new Error(`HTTP ${res.status}`);
-            const data = await res.json();
-            const txt = data.candidates?.[0]?.content?.parts?.[0]?.text;
-            if (!txt) return null;
-            const parsed = JSON.parse(txt);
-            return {
-                answerKey: String(parsed.answerKey || '').trim(),
-                hint: String(parsed.hint || '').trim()
-            };
-        }
-
-        async function runBackgroundAnswerAndHintGenerator(manualNotify = false, forceAll = false) {
-            if (state.isRunningBackgroundSolver) {
-                if (manualNotify) toast('AI Answer Key & Hint generator is already running in background!', 'info');
-                return;
-            }
-            if (!getApiKey()) {
-                if (manualNotify) {
-                    window.app.openSettingsModal(true, 'KEYS');
-                    toast('Please save your Gemini API Key first!', 'warn');
-                }
-                return;
-            }
-
-            const targets = forceAll
-                ? [...state.questions]
-                : state.questions.filter(q => !q.hint || !q.answerKey || String(q.hint).trim().length < 5);
-
-            if (targets.length === 0) {
-                if (manualNotify) toast('All questions already have Answer Keys & 1-Line Hints ✓', 'success');
-                return;
-            }
-
-            state.isRunningBackgroundSolver = true;
-            const badge = document.getElementById('solverStatusBadge');
-            const badgeTxt = document.getElementById('solverStatusText');
-            const btnLbl = document.getElementById('settingsSolveMissingBtnLabel');
-            const waveWrap = document.getElementById('settingsSolverWavyBar');
-            const infoEl = document.getElementById('settingsSolverStatusInfo');
-
-            if (badge) { badge.classList.remove('hidden'); badge.classList.add('inline-flex'); }
-            if (waveWrap) waveWrap.classList.remove('hidden');
-            if (manualNotify) toast(`Generating Answer Keys & 1-Line Hints for ${targets.length} questions...`, 'info');
-
-            let completed = 0;
-            let updatedAny = false;
-
-            try {
-                for (const q of targets) {
-                    const liveQ = state.questions.find(item => item.id === q.id);
-                    if (!liveQ) continue;
-                    completed++;
-                    const pct = Math.round((completed / targets.length) * 100);
-                    if (badgeTxt) badgeTxt.textContent = `${completed}/${targets.length}`;
-                    if (btnLbl) btnLbl.textContent = `Solving ${completed} of ${targets.length} (${pct}%)...`;
-                    if (infoEl) infoEl.textContent = `Solving Q.${liveQ.questionNumber} (${liveQ.subject})...`;
-                    if (waveWrap) renderM3WavyProgress(waveWrap, pct);
-
-                    try {
-                        const res = await fetchSingleQuestionAnswerAndHint(liveQ);
-                        if (res && (res.answerKey || res.hint)) {
-                            liveQ.answerKey = res.answerKey || 'N/A';
-                            liveQ.hint = res.hint || 'Apply fundamental chapter conservation/equilibrium equations.';
-                            updatedAny = true;
-                            if (state.activePadId === liveQ.id) refreshScratchpadTopBarAndHints();
-                        }
-                    } catch (err) {
-                        console.warn(`Solver skipped Q.${liveQ.questionNumber}:`, err);
-                        if (String(err.message).includes('Daily limit reached')) break;
-                    }
-                }
-
-                if (updatedAny) {
-                    scheduleCloudAutoSync(true);
-                    if (manualNotify) toast(`Generated Answer Keys & 1-Line Hints!`, 'success');
-                }
-            } finally {
-                state.isRunningBackgroundSolver = false;
-                if (badge) { badge.classList.add('hidden'); badge.classList.remove('inline-flex'); }
-                if (waveWrap) waveWrap.classList.add('hidden');
-                if (btnLbl) btnLbl.textContent = 'Solve Missing Hints & Keys';
-                if (infoEl) {
-                    const withHints = state.questions.filter(q => q.hint && q.answerKey).length;
-                    infoEl.textContent = `Solved: ${withHints} / ${state.questions.length} questions • Today: ${state.rateLimit.dailyCount}/${MAX_DAILY_REQ_IST} req (IST).`;
-                }
             }
         }
 
@@ -3373,6 +3897,7 @@ Analyze this JEE question image (${q.subject} - ${q.chapter}).
                 return nA !== nB ? nA - nB : String(a.questionNumber).localeCompare(String(b.questionNumber));
             });
             updateCloudStatusUI(state.isSyncingCloud ? 'syncing' : 'idle');
+            updateQuotaBadgesEverywhere();
             if (!skipRender && !state.isExtracting) {
                 renderAll();
             }
@@ -3690,7 +4215,7 @@ Analyze this JEE question image (${q.subject} - ${q.chapter}).
             toast('Upload cancelled & all questions from that PDF were rolled back.', 'warn');
         }
 
-        // Hybrid 2D Multi-Column + Single-Column PDF Extractor
+        // 2-Stage Hybrid PDF Extractor: Local Candidate Borders -> Gemini 3.8 Flash Border Verification
         async function startPdfExtraction() {
             if (!state.pdfDoc || state.isExtracting) return;
 
@@ -3703,6 +4228,7 @@ Analyze this JEE question image (${q.subject} - ${q.chapter}).
 
             const paperName = document.getElementById('paperTitleInput').value.trim() || 'Test Paper';
             const defaultSubj = document.getElementById('pdfDefaultSubjectSelect')?.value || 'AUTO';
+            const useGeminiVerifier = document.getElementById('pdfGeminiVerifyBordersChk')?.checked ?? true;
             const startP = Math.max(1, parseInt(document.getElementById('startPageInput').value, 10) || 1);
             const endP = Math.min(state.pdfDoc.numPages, parseInt(document.getElementById('endPageInput').value, 10) || state.pdfDoc.numPages);
             const { padTop, padBottom } = getVerticalPads();
@@ -3741,31 +4267,44 @@ Analyze this JEE question image (${q.subject} - ${q.chapter}).
                     await page.render({ canvasContext: ctx, viewport: vp }).promise;
                     if (state.cancelExtractionRequested) return;
 
-                    // Tier 1: Try Instant 2D Vector Column/Anchor Detection first (0 API calls!)
+                    // Stage 1: Compute Local 2D Candidate Borders (Vector Anchors + Pixel Table/Row Bands)
                     const pageTokens = await extractPage2DTextTokens(page);
                     if (state.cancelExtractionRequested) return;
 
-                    let blocks = extractQuestionsFromNativePdfVector(pageTokens, canvas, paperName, defaultSubj);
+                    const localCandidates = generateLocal2DCandidateBlocks(pageTokens, canvas, paperName, defaultSubj) || [];
+                    const isTwoCol = localCandidates.some(b => b.xmin > 400);
+                    appendExtractLog(`Page ${pageNum}: Local algorithm proposed ${localCandidates.length} ${isTwoCol ? '2-Col' : '1-Col'} borders`, 'info');
 
-                    if (blocks && blocks.length > 0) {
-                        const isTwoCol = blocks.some(b => b.xmin > 400);
-                        appendExtractLog(`Page ${pageNum}: Detected ${isTwoCol ? '2-Column' : '1-Column'} vector layout (${blocks.length} questions, 0 API quota used)`, 'info');
-                    } else {
-                        // Tier 2: Scanned PDF fallback -> Use 2D Gemini Vision Detector
-                        if (!getApiKey()) {
-                            throw new Error('Scanned PDF requires a Gemini API Key in Settings.');
+                    let blocks = localCandidates;
+
+                    // Stage 2: Send Local Candidate Borders to Gemini 3.8 Flash to Verify, Split, or Refine
+                    if (useGeminiVerifier && getApiKey()) {
+                        try {
+                            const base64Jpeg = canvas.toDataURL('image/jpeg', 0.84).split(',')[1];
+                            appendExtractLog(`Page ${pageNum}: Sending ${localCandidates.length} candidate borders to ${getSelectedModel()} for verification...`, 'info');
+                            const verified = await verifyAndRefineBordersWithGemini(
+                                base64Jpeg,
+                                pageNum,
+                                localCandidates,
+                                state.extractionAbortController.signal,
+                                (m, t) => appendExtractLog(m, t)
+                            );
+                            if (Array.isArray(verified) && verified.length > 0) {
+                                blocks = verified.map(v => ({
+                                    ...v,
+                                    xmin: Number(v.xmin) ?? 12,
+                                    xmax: Number(v.xmax) ?? 988,
+                                    ymin: Number(v.ymin) ?? 0,
+                                    ymax: Number(v.ymax) ?? 1000,
+                                    ocrText: '',
+                                    colLines: []
+                                }));
+                                appendExtractLog(`Page ${pageNum}: ${getSelectedModel()} verified ${blocks.length} exact question boxes ✓`, 'success');
+                            }
+                        } catch (verErr) {
+                            if (verErr.name === 'AbortError' || state.cancelExtractionRequested) throw verErr;
+                            appendExtractLog(`Page ${pageNum}: Using local 2D borders (${verErr.message})`, 'stitch');
                         }
-                        const base64Jpeg = canvas.toDataURL('image/jpeg', 0.84).split(',')[1];
-                        appendExtractLog(`Page ${pageNum}: Scanning 2D layout with ${getSelectedModel()}...`, 'info');
-                        const aiResult = await analyzePageLayout2DWithGemini(base64Jpeg, pageNum, state.extractionAbortController.signal);
-                        blocks = (aiResult.questions || []).map(b => ({
-                            ...b,
-                            xmin: Number(b.xmin) ?? 12,
-                            xmax: Number(b.xmax) ?? 988,
-                            ymin: Number(b.ymin) ?? 0,
-                            ymax: Number(b.ymax) ?? 1000,
-                            colLines: []
-                        }));
                     }
 
                     if (state.cancelExtractionRequested) return;
@@ -4181,7 +4720,7 @@ Analyze this JEE question image (${q.subject} - ${q.chapter}).
                             ${state.isSyncingCloud
                                 ? 'Fetching your latest question bank from your GitHub Secret Gist...'
                                 : state.questions.length === 0
-                                ? 'Tap the floating "+ Add Questions" button to extract any 1-column or 2-column JEE PDF with automatic column separation and AI Hints!'
+                                ? 'Tap the floating "+ Add Questions" button to extract any 1-column or 2-column JEE PDF with automatic Gemini 3.8 Flash border verification & AI Hints!'
                                 : 'Try clearing the search box, swiping the Status pill to "All", or selecting "All Subjects & Chapters" inside the Chapters drawer.'}
                         </p>
                         ${!state.isSyncingCloud ? `
@@ -5001,7 +5540,7 @@ Analyze this JEE question image (${q.subject} - ${q.chapter}).
                 ansBox.classList.toggle('hidden', !state.padShowAns);
                 ansBox.classList.toggle('inline-flex', state.padShowAns);
             }
-            if (hintTxt) hintTxt.textContent = q.hint || 'Click "Generate with Gemini" to get a 1-line hint →';
+            if (hintTxt) hintTxt.textContent = q.hint || 'Click "Generate with Gemini 3.8" to get a 1-line hint →';
             if (ansTxt) ansTxt.textContent = q.answerKey || 'Not solved yet';
             if (solveBtn) solveBtn.classList.toggle('hidden', Boolean(q.hint && q.answerKey));
         }
@@ -5912,6 +6451,57 @@ Analyze this JEE question image (${q.subject} - ${q.chapter}).
             isExtracting: () => state.isExtracting,
             closeCustomDropdown,
 
+            // Live AI Solver Console Controls
+            openSolverModal() {
+                closeCustomDropdown();
+                state.isSolverMinimized = false;
+                document.getElementById('minimizedSolverBar')?.classList.add('hidden');
+                document.getElementById('minimizedSolverBar')?.classList.remove('flex');
+                const subHdr = document.getElementById('solverModalSubHeader');
+                if (subHdr) {
+                    subHdr.textContent = `Model: ${getSelectedModel()} • Rate Limit Guard: Max 19/day (IST), Max 4/min`;
+                }
+                const solvedCount = state.questions.filter(q => q.hint && q.answerKey && q.answerKey !== 'Not solved yet').length;
+                if (!state.isRunningBackgroundSolver) {
+                    const badgeEl = document.getElementById('solverModalCountBadge');
+                    if (badgeEl) badgeEl.textContent = `Solved ${solvedCount}/${state.questions.length}`;
+                    renderM3WavyProgress('solverModalWavyBarWrap', state.questions.length ? Math.round((solvedCount / state.questions.length) * 100) : 6);
+                }
+                updateQuotaBadgesEverywhere();
+                document.getElementById('solverModal').classList.remove('hidden');
+                if (!waveAnimFrame) waveAnimFrame = requestAnimationFrame(stepAllWavyBars);
+                ensureM3MorphLoopRunning();
+            },
+            minimizeSolverModal() {
+                closeCustomDropdown();
+                document.getElementById('solverModal').classList.add('hidden');
+                if (state.isRunningBackgroundSolver) {
+                    state.isSolverMinimized = true;
+                    const minBar = document.getElementById('minimizedSolverBar');
+                    if (minBar) {
+                        minBar.classList.remove('hidden');
+                        minBar.classList.add('flex');
+                    }
+                    if (!waveAnimFrame) waveAnimFrame = requestAnimationFrame(stepAllWavyBars);
+                    ensureM3MorphLoopRunning();
+                }
+            },
+            closeSolverModal() {
+                if (state.isRunningBackgroundSolver) {
+                    this.minimizeSolverModal();
+                    return;
+                }
+                closeCustomDropdown();
+                document.getElementById('solverModal').classList.add('hidden');
+            },
+            stopBackgroundSolver() {
+                if (!state.isRunningBackgroundSolver) return;
+                state.stopSolverRequested = true;
+                try { state.solverAbortController?.abort(); } catch (_) {}
+                appendSolverLog('🛑 Solver stopped by user.', 'error');
+                toast('Stopped AI Solver.', 'warn');
+            },
+
             openPaperMenu(anchorEl) {
                 const papers = Array.from(new Set(state.questions.map(q => q.paperName).filter(Boolean)));
                 const opts = [
@@ -5966,6 +6556,9 @@ Analyze this JEE question image (${q.subject} - ${q.chapter}).
                     localStorage.setItem('jee_gemini_model', val);
                     const labelEl = document.getElementById('geminiModelDropdownLabel');
                     if (labelEl) labelEl.textContent = lbl;
+                    const subHdr = document.getElementById('solverModalSubHeader');
+                    if (subHdr) subHdr.textContent = `Model: ${val} • Rate Limit Guard: Max 19/day (IST), Max 4/min`;
+                    toast(`Switched active model to ${val}`, 'success');
                 });
             },
             openInsertShapeMenu(anchorEl) {
@@ -6265,7 +6858,7 @@ Analyze this JEE question image (${q.subject} - ${q.chapter}).
                 state.pdfDoc = null;
                 state.importRawImg = null;
                 document.getElementById('selectedFileLabel').textContent = 'Tap to Select Any 1-Column / 2-Column JEE PDF or Photo (or press Ctrl+V)';
-                document.getElementById('selectedFileTypeBadge').textContent = 'Automatically detects multi-column sheets, integer/single-choice tags & diagrams';
+                document.getElementById('selectedFileTypeBadge').textContent = 'Computes local 2D candidate borders & verifies them with Gemini 3.8 Flash';
                 document.getElementById('unifiedFileIcon').className = 'ph-duotone ph-cloud-arrow-up text-2xl';
                 document.getElementById('pdfSetupSubView').classList.add('hidden');
                 document.getElementById('pdfSetupSubView').classList.remove('grid');
@@ -6474,7 +7067,7 @@ Analyze this JEE question image (${q.subject} - ${q.chapter}).
                         KEYS: 'API Keys & Cloud Credentials',
                         THEME: 'Appearance & Material You Theme',
                         BACKUP: 'Cloud Sync, Export & Vault Tools',
-                        SCANNER: 'AI Answer Key, Hints & Scanner'
+                        SCANNER: 'Gemini 3.8 Flash Solver & Scanner'
                     };
                     titleEl.textContent = titles[pageKey] || 'Settings';
                 }
@@ -6495,11 +7088,7 @@ Analyze this JEE question image (${q.subject} - ${q.chapter}).
                 const autoSolveChk = document.getElementById('autoSolveHintsCheckbox');
                 if (autoSolveChk) autoSolveChk.checked = isAutoSolveHintsEnabled();
 
-                const infoEl = document.getElementById('settingsSolverStatusInfo');
-                if (infoEl && !state.isRunningBackgroundSolver) {
-                    const withHints = state.questions.filter(q => q.hint && q.answerKey).length;
-                    infoEl.textContent = `Solved: ${withHints} / ${state.questions.length} questions • Today: ${state.rateLimit.dailyCount}/${MAX_DAILY_REQ_IST} req (IST).`;
-                }
+                updateQuotaBadgesEverywhere();
 
                 document.getElementById('apiKeyMissingAlert').classList.toggle('hidden', !showMissingAlert);
                 updateCloudStatusUI(state.isSyncingCloud ? 'syncing' : 'idle');
@@ -6970,21 +7559,26 @@ Analyze this JEE question image (${q.subject} - ${q.chapter}).
                     return toast('Please save your Gemini API Key first!', 'warn');
                 }
                 const btnLbl = document.getElementById('padSolveNowBtnLabel');
-                if (btnLbl) btnLbl.textContent = 'Solving with Gemini...';
+                if (btnLbl) btnLbl.textContent = `Solving with ${getSelectedModel()}...`;
                 try {
-                    const res = await fetchSingleQuestionAnswerAndHint(q);
-                    if (res) {
-                        q.answerKey = res.answerKey || 'N/A';
+                    const res = await fetchSingleQuestionAnswerAndHint(
+                        q,
+                        null,
+                        (m, t) => appendSolverLog(m, t)
+                    );
+                    if (res && res.answerKey) {
+                        q.answerKey = res.answerKey;
                         q.hint = res.hint || 'Use core conservation laws.';
                         state.padShowHint = true;
+                        state.padShowAns = true;
                         refreshScratchpadTopBarAndHints();
                         scheduleCloudAutoSync(true);
-                        toast(`Generated Answer Key & 1-Line Hint for Q.${q.questionNumber}!`, 'success');
+                        toast(`Solved Q.${q.questionNumber}: Ans = ${q.answerKey}`, 'success');
                     }
                 } catch (err) {
                     toast(`Failed to generate hint: ${err.message}`, 'warn');
                 } finally {
-                    if (btnLbl) btnLbl.textContent = 'Generate with Gemini';
+                    if (btnLbl) btnLbl.textContent = 'Generate with Gemini 3.8';
                 }
             },
             exportWhiteboardPng() {
@@ -7315,6 +7909,7 @@ Analyze this JEE question image (${q.subject} - ${q.chapter}).
                 window.app.closeClearConfirmModal();
                 window.app.closeMockTestSetupModal();
                 window.app.closeMockTestSummaryModal();
+                window.app.closeSolverModal();
                 window.app.toggleFormulaDrawer(false);
                 window.app.closeImagePopup();
                 window.app.closeSettingsModal();
