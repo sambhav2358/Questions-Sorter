@@ -605,10 +605,15 @@
         .modal-anim-in {
             animation: m3BackdropIn 0.24s var(--m3-smooth) forwards;
         }
-        .modal-anim-in > .m3-dialog,
-        .modal-anim-in .popup-carousel-card {
-            animation: m3DialogSpringIn 0.34s var(--m3-spring) forwards;
+        @keyframes m3DialogSpringIn {
+            0% { opacity: 0; transform: scale(0.92) translateY(16px); }
+            100% { opacity: 1; transform: scale(1) translateY(0); }
         }
+        .modal-anim-in > .m3-dialog,
+        .modal-anim-in #popupSlideCurr > .popup-carousel-card {
+            animation: m3DialogSpringIn 0.24s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        }
+
         .modal-anim-out {
             animation: m3BackdropOut 0.2s var(--m3-smooth) forwards !important;
             pointer-events: none !important;
@@ -5829,9 +5834,138 @@ Analyze this JEE question image (${q.subject} - ${q.chapter}).
             }
             return [p1, p2];
         }
+        // ===================================================================
+        // UPGRADED SHAPE DETECTOR (ShortStraw Corner Finder + PaleoSketch Geometry)
+        // Supports: Snapped Lines, Arrows, Circles, Ellipses, Rectangles, Squares,
+        // Right/Equilateral/General Triangles, Parallelograms & L-Axes
+        // ===================================================================
+        function resamplePointsByArcLength(pts, numTarget = 64) {
+            if (!pts || pts.length < 2) return pts || [];
+            let totalLen = 0;
+            for (let i = 1; i < pts.length; i++) {
+                totalLen += Math.hypot(pts[i].x - pts[i - 1].x, pts[i].y - pts[i - 1].y);
+            }
+            if (totalLen < 1e-3) return [pts[0]];
+
+            const step = totalLen / (numTarget - 1);
+            const resampled = [{ x: pts[0].x, y: pts[0].y }];
+            let accDist = 0;
+            let prev = { x: pts[0].x, y: pts[0].y };
+
+            for (let i = 1; i < pts.length; i++) {
+                const curr = pts[i];
+                let segLen = Math.hypot(curr.x - prev.x, curr.y - prev.y);
+                while (accDist + segLen >= step && resampled.length < numTarget) {
+                    const remain = step - accDist;
+                    const t = segLen > 0 ? remain / segLen : 0;
+                    const nx = prev.x + t * (curr.x - prev.x);
+                    const ny = prev.y + t * (curr.y - prev.y);
+                    resampled.push({ x: nx, y: ny });
+                    prev = { x: nx, y: ny };
+                    segLen = Math.hypot(curr.x - prev.x, curr.y - prev.y);
+                    accDist = 0;
+                }
+                accDist += segLen;
+                prev = curr;
+            }
+            if (resampled.length < numTarget) {
+                resampled.push({ x: pts[pts.length - 1].x, y: pts[pts.length - 1].y });
+            }
+            return resampled;
+        }
+
+        function shortStrawFindCorners(resampled, isClosedShape = false) {
+            const n = resampled.length;
+            if (n < 7) return [0, n - 1];
+            const W = 3;
+            const straws = new Float32Array(n);
+
+            for (let i = 0; i < n; i++) {
+                if (!isClosedShape && (i < W || i >= n - W)) {
+                    straws[i] = 1e6;
+                } else {
+                    const idxA = (i - W + n) % n;
+                    const idxB = (i + W) % n;
+                    straws[i] = Math.hypot(
+                        resampled[idxB].x - resampled[idxA].x,
+                        resampled[idxB].y - resampled[idxA].y
+                    );
+                }
+            }
+
+            const validStraws = Array.from(straws).filter(v => v < 1e5).sort((a, b) => a - b);
+            const medianStraw = validStraws[Math.floor(validStraws.length / 2)] || 1;
+            const threshold = medianStraw * 0.93;
+
+            const cornerIndices = isClosedShape ? [] : [0];
+            const startIdx = isClosedShape ? 0 : W;
+            const endIdx = isClosedShape ? n - 1 : n - W - 1;
+
+            for (let i = startIdx; i <= endIdx; i++) {
+                if (straws[i] < threshold) {
+                    let localMin = straws[i];
+                    let localMinIdx = i;
+                    while (i < endIdx && straws[i + 1] < threshold) {
+                        i++;
+                        if (straws[i] < localMin) {
+                            localMin = straws[i];
+                            localMinIdx = i;
+                        }
+                    }
+                    cornerIndices.push(localMinIdx);
+                }
+            }
+            if (!isClosedShape) cornerIndices.push(n - 1);
+
+            // Post-process: remove false corners where segments between c[i-1] and c[i+1] are nearly straight
+            const isLineBetween = (idx1, idx2) => {
+                const pA = resampled[idx1], pB = resampled[idx2];
+                const directDist = Math.hypot(pB.x - pA.x, pB.y - pA.y);
+                let pathDist = 0;
+                let k = idx1;
+                while (k !== idx2) {
+                    const nextK = (k + 1) % n;
+                    pathDist += Math.hypot(resampled[nextK].x - resampled[k].x, resampled[nextK].y - resampled[k].y);
+                    k = nextK;
+                    if (!isClosedShape && k >= idx2) break;
+                }
+                return pathDist > 0 && (directDist / pathDist) > 0.955;
+            };
+
+            let changed = true;
+            while (changed && cornerIndices.length > (isClosedShape ? 3 : 2)) {
+                changed = false;
+                for (let i = 1; i < cornerIndices.length - 1; i++) {
+                    if (isLineBetween(cornerIndices[i - 1], cornerIndices[i + 1])) {
+                        cornerIndices.splice(i, 1);
+                        changed = true;
+                        break;
+                    }
+                }
+            }
+            return cornerIndices;
+        }
+
+        function snapSegmentEndpointAngle(p1, p2, snapTolDeg = 5.5) {
+            const dx = p2.x - p1.x, dy = p2.y - p1.y;
+            const len = Math.hypot(dx, dy);
+            if (len < 1e-3) return { x: p2.x, y: p2.y };
+            const deg = Math.atan2(dy, dx) * (180 / Math.PI);
+            const snapTargets = [-180, -150, -135, -120, -90, -60, -45, -30, 0, 30, 45, 60, 90, 120, 135, 150, 180];
+            for (const target of snapTargets) {
+                if (Math.abs(deg - target) <= snapTolDeg) {
+                    const rad = (target * Math.PI) / 180;
+                    return {
+                        x: p1.x + len * Math.cos(rad),
+                        y: p1.y + len * Math.sin(rad)
+                    };
+                }
+            }
+            return { x: p2.x, y: p2.y };
+        }
 
         function recognizeAndConvertStrokeToShape(rawPts) {
-            if (!state.wbAutoShape || !rawPts || rawPts.length < 8) return null;
+            if (!state.wbAutoShape || !rawPts || rawPts.length < 6) return null;
 
             let pathLen = 0;
             let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
@@ -5846,81 +5980,125 @@ Analyze this JEE question image (${q.subject} - ${q.chapter}).
 
             const w = maxX - minX, h = maxY - minY;
             const diag = Math.hypot(w, h);
-            const minSize = 22 / state.wbScale;
-            if (diag < minSize) return null;
+            const minSize = 20 / state.wbScale;
+            if (diag < minSize || pathLen < minSize) return null;
 
             const startPt = rawPts[0];
             const endPt = rawPts[rawPts.length - 1];
             const endDist = Math.hypot(endPt.x - startPt.x, endPt.y - startPt.y);
 
-            if (endDist > minSize && (pathLen / endDist) < 1.09) {
-                let x2 = endPt.x, y2 = endPt.y;
-                const deg = Math.abs(Math.atan2(y2 - startPt.y, x2 - startPt.x) * (180 / Math.PI));
-                if (deg < 4.5 || deg > 175.5) y2 = startPt.y;
-                else if (Math.abs(deg - 90) < 4.5) x2 = startPt.x;
-                return [{ x: startPt.x, y: startPt.y }, { x: x2, y: y2 }];
+            // 1. STRAIGHT LINE DETECTION (Path-to-Chord Ratio + Max Perpendicular Deviation)
+            if (endDist > minSize && (pathLen / endDist) < 1.085) {
+                const vx = (endPt.x - startPt.x) / endDist;
+                const vy = (endPt.y - startPt.y) / endDist;
+                let maxPerpDev = 0;
+                for (const p of rawPts) {
+                    const perp = Math.abs((p.x - startPt.x) * (-vy) + (p.y - startPt.y) * vx);
+                    if (perp > maxPerpDev) maxPerpDev = perp;
+                }
+                if (maxPerpDev < Math.max(12 / state.wbScale, endDist * 0.065)) {
+                    const snappedEnd = snapSegmentEndpointAngle(startPt, endPt, 5.5);
+                    return [{ x: startPt.x, y: startPt.y }, snappedEnd];
+                }
             }
 
-            const isClosed = endDist < Math.max(46 / state.wbScale, pathLen * 0.28) && w > minSize * 0.38 && h > minSize * 0.38;
-            if (!isClosed) return null;
-
-            let trimmedPts = rawPts;
-            if (rawPts.length > 20) {
-                let bestCloseIdx = rawPts.length - 1;
-                let minD = endDist;
-                const startSearch = Math.floor(rawPts.length * 0.72);
+            // Trim tail overshoot if the user closed a loop and slightly overlapped the start point
+            let workingPts = rawPts;
+            let minCloseDist = endDist;
+            if (rawPts.length > 16) {
+                const startSearch = Math.floor(rawPts.length * 0.68);
+                let bestIdx = rawPts.length - 1;
                 for (let i = startSearch; i < rawPts.length; i++) {
                     const d = Math.hypot(rawPts[i].x - startPt.x, rawPts[i].y - startPt.y);
-                    if (d < minD) { minD = d; bestCloseIdx = i; }
+                    if (d < minCloseDist) {
+                        minCloseDist = d;
+                        bestIdx = i;
+                    }
                 }
-                trimmedPts = rawPts.slice(0, bestCloseIdx + 1);
+                if (minCloseDist < Math.max(42 / state.wbScale, pathLen * 0.22)) {
+                    workingPts = rawPts.slice(0, bestIdx + 1);
+                }
             }
 
-            const closedPts = [...trimmedPts, trimmedPts[0]];
-            const simplified = rdpSimplify(closedPts, diag * 0.068);
+            const isClosed = minCloseDist < Math.max(44 / state.wbScale, pathLen * 0.24) &&
+                             w > minSize * 0.32 && h > minSize * 0.32;
 
-            const corners = [simplified[0]];
-            for (let i = 1; i < simplified.length - 1; i++) {
-                const prev = corners[corners.length - 1];
-                const curr = simplified[i];
-                const next = simplified[i + 1];
-                if (Math.hypot(curr.x - prev.x, curr.y - prev.y) < diag * 0.11) continue;
-                const a1 = Math.atan2(curr.y - prev.y, curr.x - prev.x);
-                const a2 = Math.atan2(next.y - curr.y, next.x - curr.x);
-                let diff = Math.abs(a2 - a1) * (180 / Math.PI);
-                if (diff > 180) diff = 360 - diff;
-                if (diff > 28) corners.push(curr);
-            }
-            if (corners.length > 2 && Math.hypot(corners[corners.length - 1].x - corners[0].x, corners[corners.length - 1].y - corners[0].y) < diag * 0.12) {
-                corners.pop();
+            const resampled = resamplePointsByArcLength(workingPts, 64);
+
+            // 2. OPEN POLYLINE / L-AXES / OPEN TRIANGLE DETECTION (2 or 3 straight segments)
+            if (!isClosed) {
+                const openCorners = shortStrawFindCorners(resampled, false);
+                if (openCorners.length === 3) {
+                    // 2-segment L-axis or V-angle: check if both legs are straight
+                    const p0 = resampled[openCorners[0]];
+                    const p1 = resampled[openCorners[1]];
+                    const p2 = resampled[openCorners[2]];
+                    const seg1 = Math.hypot(p1.x - p0.x, p1.y - p0.y);
+                    const seg2 = Math.hypot(p2.x - p1.x, p2.y - p1.y);
+                    if (seg1 > minSize * 0.5 && seg2 > minSize * 0.5 && (seg1 + seg2) / pathLen > 0.91) {
+                        const s0 = snapSegmentEndpointAngle(p1, p0, 6);
+                        const s2 = snapSegmentEndpointAngle(p1, p2, 6);
+                        return [s0, { x: p1.x, y: p1.y }, s2];
+                    }
+                }
+                return null;
             }
 
-            const cx = (minX + maxX) / 2, cy = (minY + maxY) / 2;
-            let rx = w / 2, ry = h / 2;
-            let radialErrSum = 0;
-            for (const p of trimmedPts) {
-                const normDist = Math.hypot((p.x - cx) / rx, (p.y - cy) / ry);
-                radialErrSum += Math.abs(normDist - 1);
-            }
-            const meanRadialErr = radialErrSum / trimmedPts.length;
-
-            let area2 = 0;
-            for (let i = 0; i < closedPts.length - 1; i++) {
-                area2 += (closedPts[i].x * closedPts[i + 1].y - closedPts[i + 1].x * closedPts[i].y);
+            // 3. CLOSED SHAPE CLASSIFICATION (PaleoSketch Circularity + ShortStraw Corners)
+            const closedSample = [...resampled, resampled[0]];
+            let area2 = 0, perim = 0;
+            for (let i = 0; i < closedSample.length - 1; i++) {
+                area2 += (closedSample[i].x * closedSample[i + 1].y - closedSample[i + 1].x * closedSample[i].y);
+                perim += Math.hypot(
+                    closedSample[i + 1].x - closedSample[i].x,
+                    closedSample[i + 1].y - closedSample[i].y
+                );
             }
             const polyArea = Math.abs(area2) / 2;
             const bboxArea = Math.max(1, w * h);
             const areaFillRatio = polyArea / bboxArea;
+            // Isoperimetric Quotient: 1.0 for ideal circle, ~0.785 for square, ~0.60 for equilateral triangle
+            const circularity = (4 * Math.PI * polyArea) / Math.max(1, perim * perim);
 
-            if (corners.length === 3 || (corners.length === 4 && areaFillRatio < 0.62 && meanRadialErr > 0.13)) {
-                const tri = corners.slice(0, 3);
+            const cx = (minX + maxX) / 2, cy = (minY + maxY) / 2;
+            let rx = w / 2, ry = h / 2;
+            let radialErrSum = 0;
+            for (const p of resampled) {
+                const normDist = Math.hypot((p.x - cx) / Math.max(1, rx), (p.y - cy) / Math.max(1, ry));
+                radialErrSum += Math.abs(normDist - 1);
+            }
+            const meanRadialErr = radialErrSum / resampled.length;
+
+            const rdpCorners = rdpSimplify(closedSample, diag * 0.062);
+            const filteredVerts = [rdpCorners[0]];
+            for (let i = 1; i < rdpCorners.length - 1; i++) {
+                const prev = filteredVerts[filteredVerts.length - 1];
+                const curr = rdpCorners[i];
+                const next = rdpCorners[i + 1];
+                if (Math.hypot(curr.x - prev.x, curr.y - prev.y) < diag * 0.12) continue;
+                const a1 = Math.atan2(curr.y - prev.y, curr.x - prev.x);
+                const a2 = Math.atan2(next.y - curr.y, next.x - curr.x);
+                let diff = Math.abs(a2 - a1) * (180 / Math.PI);
+                if (diff > 180) diff = 360 - diff;
+                if (diff > 26) filteredVerts.push({ x: curr.x, y: curr.y });
+            }
+            if (filteredVerts.length > 2 &&
+                Math.hypot(filteredVerts[filteredVerts.length - 1].x - filteredVerts[0].x,
+                           filteredVerts[filteredVerts.length - 1].y - filteredVerts[0].y) < diag * 0.14) {
+                filteredVerts.pop();
+            }
+
+            // A. TRIANGLE (3 distinct corners or triangular area fill ~0.42..0.64)
+            if (filteredVerts.length === 3 || (filteredVerts.length === 4 && areaFillRatio < 0.61 && meanRadialErr > 0.125)) {
+                const tri = filteredVerts.slice(0, 3).map(v => ({ x: v.x, y: v.y }));
+                // Snap nearly horizontal/vertical triangle edges (e.g., right-angled triangle on incline/axes)
                 for (let i = 0; i < 3; i++) {
                     const pA = tri[i], pB = tri[(i + 1) % 3];
                     const deg = Math.abs(Math.atan2(pB.y - pA.y, pB.x - pA.x) * (180 / Math.PI));
-                    if (deg < 5 || deg > 175) {
+                    if (deg < 5.5 || deg > 174.5) {
                         const avgY = (pA.y + pB.y) / 2;
                         pA.y = avgY; pB.y = avgY;
-                    } else if (Math.abs(deg - 90) < 5) {
+                    } else if (Math.abs(deg - 90) < 5.5) {
                         const avgX = (pA.x + pB.x) / 2;
                         pA.x = avgX; pB.x = avgX;
                     }
@@ -5928,7 +6106,8 @@ Analyze this JEE question image (${q.subject} - ${q.chapter}).
                 return [{ ...tri[0] }, { ...tri[1] }, { ...tri[2] }, { ...tri[0] }];
             }
 
-            if (meanRadialErr < 0.125 && (corners.length >= 5 || (areaFillRatio > 0.69 && areaFillRatio < 0.85))) {
+            // B. CIRCLE / ELLIPSE (Low radial error & high circularity, no sharp 90° box corners)
+            if (meanRadialErr < 0.118 && circularity > 0.79 && filteredVerts.length !== 4) {
                 if (Math.abs(rx - ry) / Math.max(rx, ry) < 0.22) {
                     rx = ry = (rx + ry) / 2;
                 }
@@ -5941,9 +6120,29 @@ Analyze this JEE question image (${q.subject} - ${q.chapter}).
                 return circlePts;
             }
 
-            if (corners.length === 4 || (areaFillRatio >= 0.78 && meanRadialErr >= 0.115)) {
+            // C. RECTANGLE / SQUARE / PARALLELOGRAM (4 corners or high bounding-box fill)
+            if (filteredVerts.length === 4 || (areaFillRatio >= 0.76 && meanRadialErr >= 0.11)) {
+                // Check if the 4 vertices form a tilted parallelogram vs axis-aligned rectangle
+                if (filteredVerts.length === 4) {
+                    const v = filteredVerts;
+                    const edgeAngles = [0, 1, 2, 3].map(i => {
+                        const next = v[(i + 1) % 4];
+                        return Math.atan2(next.y - v[i].y, next.x - v[i].x) * (180 / Math.PI);
+                    });
+                    const isAxisAligned = edgeAngles.every(ang => {
+                        const a = Math.abs(ang);
+                        return a < 12 || a > 168 || Math.abs(a - 90) < 12;
+                    });
+                    if (!isAxisAligned) {
+                        // Rectify into a clean parallelogram by making v[3] = v[0] + (v[2] - v[1])
+                        const p0 = v[0], p1 = v[1], p2 = v[2];
+                        const p3 = { x: p0.x + (p2.x - p1.x), y: p0.y + (p2.y - p1.y) };
+                        return [{ ...p0 }, { ...p1 }, { ...p2 }, p3, { ...p0 }];
+                    }
+                }
+
                 let halfW = w / 2, halfH = h / 2;
-                if (Math.abs(w - h) / Math.max(w, h) < 0.18) {
+                if (Math.abs(w - h) / Math.max(w, h) < 0.17) {
                     halfW = halfH = (halfW + halfH) / 2;
                 }
                 return [
@@ -5955,8 +6154,20 @@ Analyze this JEE question image (${q.subject} - ${q.chapter}).
                 ];
             }
 
+            // Fallback: if circularity is still high, snap to circle/ellipse
+            if (meanRadialErr < 0.132 && circularity > 0.75) {
+                if (Math.abs(rx - ry) / Math.max(rx, ry) < 0.22) rx = ry = (rx + ry) / 2;
+                const circlePts = [];
+                for (let i = 0; i <= 64; i++) {
+                    const a = (i / 64) * Math.PI * 2;
+                    circlePts.push({ x: cx + rx * Math.cos(a), y: cy + ry * Math.sin(a) });
+                }
+                return circlePts;
+            }
+
             return null;
         }
+
 
         function createPresetShapePoints(shapeType, cx, cy) {
             const r = 85 / state.wbScale;
@@ -6712,10 +6923,19 @@ Analyze this JEE question image (${q.subject} - ${q.chapter}).
                 clearTimeout(el._closeTimer);
                 el._closeTimer = null;
             }
+            if (el._openTimer) {
+                clearTimeout(el._openTimer);
+                el._openTimer = null;
+            }
             el.classList.remove('hidden', 'modal-anim-out');
             el.classList.add('modal-anim-in');
+            el._openTimer = setTimeout(() => {
+                el.classList.remove('modal-anim-in');
+                el._openTimer = null;
+            }, 250);
             requestAnimationFrame(() => updateAllSegmentedGliders());
         }
+
 
         function animateModalClose(modalId, onAfterClose = null) {
             const el = document.getElementById(modalId);
