@@ -659,16 +659,14 @@
             animation: m3WbSlidePrevIn 0.22s cubic-bezier(0.22, 1, 0.36, 1) forwards;
         }
         
-        /* Single-Cell Grid Overlay + Smooth Simultaneous Height Morphing */
+        /* Single-Cell Grid Overlay + Absolute Detachment for Outgoing Page */
         .settings-pages-stage {
             display: grid;
             grid-template-columns: 100%;
             align-items: start;
             position: relative;
-            transition: height 0.24s cubic-bezier(0.22, 1, 0.36, 1);
-            will-change: height;
+            min-height: 0;
         }
-
         .settings-pages-stage > #apiKeyMissingAlert {
             margin-bottom: 12px;
         }
@@ -683,6 +681,14 @@
             margin-top: 0 !important;
             will-change: transform, opacity;
             backface-visibility: hidden;
+        }
+        .tg-outgoing-abs {
+            position: absolute !important;
+            top: 16px !important;
+            left: 16px !important;
+            right: 16px !important;
+            width: calc(100% - 32px) !important;
+            pointer-events: none !important;
         }
 
         /* Telegram-Style Horizontal Push/Pop (Overlaid in the exact same grid cell) */
@@ -2413,7 +2419,7 @@
                 history.replaceState(null, '', window.location.pathname + window.location.search);
             }
         }
-
+        
         function checkAndOpenQuestionFromUrlHash() {
             const rawHash = window.location.hash || '';
             if (!rawHash.startsWith('#/')) return;
@@ -2423,18 +2429,25 @@
             const targetQ = state.questions.find(q => q.uid === uid);
             if (!targetQ) return;
 
+            // Prevent redundant reload if this exact question is already open
+            const isWbOpen = !document.getElementById('scratchpadModal')?.classList.contains('hidden');
+            const isPopupOpen = !document.getElementById('imagePopupModal')?.classList.contains('hidden');
+            if ((isWbOpen && state.activePadId === targetQ.id) || (isPopupOpen && state.activePopupId === targetQ.id)) {
+                return;
+            }
+
             state.isHandlingHash = true;
             try {
                 if (isVerticalScreen()) {
                     window.app.openImagePopup(targetQ.id, false);
                 } else {
-                    const isWbOpen = !document.getElementById('scratchpadModal')?.classList.contains('hidden');
                     window.app.openScratchpad(targetQ.id, isWbOpen);
                 }
             } finally {
                 state.isHandlingHash = false;
             }
         }
+
 
         const getApiKey = () => (localStorage.getItem('jee_gemini_api_key') || '').trim();
         const getSelectedModel = () => {
@@ -2537,7 +2550,10 @@
             localStorage.setItem('jee_rate_limit_cache', JSON.stringify(state.rateLimit));
             updateQuotaBadgesEverywhere();
             const token = getGithubToken();
-            if (!token) return;
+            if (!token || state.isSyncingCloud) {
+                if (state.isSyncingCloud) state.hasPendingCloudPush = true;
+                return;
+            }
 
             try {
                 const gistId = getGithubGistId();
@@ -6425,6 +6441,8 @@ Analyze this JEE question image (${q.subject} - ${q.chapter}).
             if (!wrap || !canvas) return;
 
             renderWhiteboardCanvas();
+            if (canvas._listenersBound) return;
+            canvas._listenersBound = true;
 
             const activePointers = new Map();
             let currentStroke = null;
@@ -7264,72 +7282,24 @@ Analyze this JEE question image (${q.subject} - ${q.chapter}).
                 state.activeSettingsPage = pageKey;
                 const allKeys = ['HOME', 'KEYS', 'THEME', 'BACKUP', 'SCANNER'];
 
+                const modalEl = document.getElementById('settingsModal');
+                const dialogEl = modalEl?.querySelector('.m3-dialog');
+                const stageEl = modalEl?.querySelector('.settings-pages-stage');
+
                 if (this._settingsAnimTimer) {
                     clearTimeout(this._settingsAnimTimer);
                     this._settingsAnimTimer = null;
                 }
-
-                const stageEl = document.querySelector('.settings-pages-stage');
+                if (this._dialogHeightAnim) {
+                    this._dialogHeightAnim.cancel();
+                    this._dialogHeightAnim = null;
+                }
                 if (stageEl) stageEl.scrollTop = 0;
 
-                if (skipAnim || prevKey === pageKey) {
-                    if (stageEl) stageEl.style.height = '';
-                    allKeys.forEach(p => {
-                        const el = document.getElementById(`settingsPage_${p}`);
-                        if (!el) return;
-                        el.classList.remove('tg-page-push-in', 'tg-page-push-out', 'tg-page-pop-in', 'tg-page-pop-out');
-                        el.classList.toggle('hidden', p !== pageKey);
-                    });
-                } else {
-                    const isPushingSubpage = prevKey === 'HOME' && pageKey !== 'HOME';
-                    const outEl = document.getElementById(`settingsPage_${prevKey}`);
-                    const inEl = document.getElementById(`settingsPage_${pageKey}`);
-
-                    allKeys.forEach(p => {
-                        if (p !== prevKey && p !== pageKey) {
-                            const other = document.getElementById(`settingsPage_${p}`);
-                            if (other) {
-                                other.classList.add('hidden');
-                                other.classList.remove('tg-page-push-in', 'tg-page-push-out', 'tg-page-pop-in', 'tg-page-pop-out');
-                            }
-                        }
-                    });
-
-                    if (outEl && inEl && stageEl) {
-                        // 1. Measure current total stage height before showing incoming page
-                        const startH = stageEl.offsetHeight;
-
-                        // 2. Temporarily swap visibility to measure exact target height of the incoming page
-                        outEl.classList.add('hidden');
-                        inEl.classList.remove('hidden', 'tg-page-push-in', 'tg-page-push-out', 'tg-page-pop-in', 'tg-page-pop-out');
-                        stageEl.style.height = 'auto';
-                        const endH = stageEl.offsetHeight;
-
-                        // 3. Unhide both pages in the same grid cell and lock starting height
-                        outEl.classList.remove('hidden', 'tg-page-push-in', 'tg-page-push-out', 'tg-page-pop-in', 'tg-page-pop-out');
-                        stageEl.style.height = `${startH}px`;
-                        void stageEl.offsetHeight; // Force reflow so the browser registers startH
-
-                        // 4. Trigger horizontal slide AND smooth height transition at the exact same frame
-                        stageEl.style.height = `${endH}px`;
-                        outEl.classList.add(isPushingSubpage ? 'tg-page-push-out' : 'tg-page-pop-out');
-                        inEl.classList.add(isPushingSubpage ? 'tg-page-push-in' : 'tg-page-pop-in');
-
-                        this._settingsAnimTimer = setTimeout(() => {
-                            outEl.classList.add('hidden');
-                            outEl.classList.remove('tg-page-push-out', 'tg-page-pop-out');
-                            inEl.classList.remove('tg-page-push-in', 'tg-page-pop-in');
-                            stageEl.style.height = '';
-                            this._settingsAnimTimer = null;
-                            updateAllSegmentedGliders();
-                        }, 245);
-                    }
-                }
-
+                // Update header first so its height is consistent
                 const backBtn = document.getElementById('settingsBackBtn');
                 const headerIcon = document.getElementById('settingsHeaderIcon');
                 const titleEl = document.getElementById('settingsHeaderTitle');
-
                 if (pageKey === 'HOME') {
                     backBtn.classList.add('hidden'); backBtn.classList.remove('flex');
                     headerIcon.classList.remove('hidden');
@@ -7345,9 +7315,78 @@ Analyze this JEE question image (${q.subject} - ${q.chapter}).
                     };
                     titleEl.textContent = titles[pageKey] || 'Settings';
                 }
-                requestAnimationFrame(() => updateAllSegmentedGliders());
-            },
 
+                if (skipAnim || prevKey === pageKey || !dialogEl || !stageEl) {
+                    if (dialogEl) dialogEl.style.height = '';
+                    allKeys.forEach(p => {
+                        const el = document.getElementById(`settingsPage_${p}`);
+                        if (!el) return;
+                        el.classList.remove('tg-page-push-in', 'tg-page-push-out', 'tg-page-pop-in', 'tg-page-pop-out', 'tg-outgoing-abs');
+                        el.classList.toggle('hidden', p !== pageKey);
+                    });
+                    requestAnimationFrame(() => updateAllSegmentedGliders());
+                    return;
+                }
+
+                const isPushingSubpage = prevKey === 'HOME' && pageKey !== 'HOME';
+                const outEl = document.getElementById(`settingsPage_${prevKey}`);
+                const inEl = document.getElementById(`settingsPage_${pageKey}`);
+
+                allKeys.forEach(p => {
+                    if (p !== prevKey && p !== pageKey) {
+                        const other = document.getElementById(`settingsPage_${p}`);
+                        if (other) {
+                            other.classList.add('hidden');
+                            other.classList.remove('tg-page-push-in', 'tg-page-push-out', 'tg-page-pop-in', 'tg-page-pop-out', 'tg-outgoing-abs');
+                        }
+                    }
+                });
+
+                if (outEl && inEl) {
+                    // 1. Measure current outer dialog height with outgoing page active
+                    dialogEl.style.height = '';
+                    outEl.classList.remove('hidden', 'tg-outgoing-abs', 'tg-page-push-in', 'tg-page-push-out', 'tg-page-pop-in', 'tg-page-pop-out');
+                    inEl.classList.add('hidden');
+                    const startDialogH = dialogEl.getBoundingClientRect().height;
+
+                    // 2. Detach outgoing page (position: absolute) and unhide incoming page to measure target outer dialog height
+                    outEl.classList.add('tg-outgoing-abs');
+                    inEl.classList.remove('hidden', 'tg-outgoing-abs', 'tg-page-push-in', 'tg-page-push-out', 'tg-page-pop-in', 'tg-page-pop-out');
+                    const endDialogH = dialogEl.getBoundingClientRect().height;
+
+                    // 3. Animate outer dialog height + horizontal page slide simultaneously on the GPU
+                    if (Math.abs(startDialogH - endDialogH) > 1) {
+                        this._dialogHeightAnim = dialogEl.animate(
+                            [
+                                { height: `${startDialogH}px` },
+                                { height: `${endDialogH}px` }
+                            ],
+                            {
+                                duration: 240,
+                                easing: 'cubic-bezier(0.22, 1, 0.36, 1)',
+                                fill: 'forwards'
+                            }
+                        );
+                    }
+
+                    outEl.classList.add(isPushingSubpage ? 'tg-page-push-out' : 'tg-page-pop-out');
+                    inEl.classList.add(isPushingSubpage ? 'tg-page-push-in' : 'tg-page-pop-in');
+                    requestAnimationFrame(() => updateAllSegmentedGliders());
+
+                    this._settingsAnimTimer = setTimeout(() => {
+                        outEl.classList.add('hidden');
+                        outEl.classList.remove('tg-page-push-out', 'tg-page-pop-out', 'tg-outgoing-abs');
+                        inEl.classList.remove('tg-page-push-in', 'tg-page-pop-in');
+                        if (this._dialogHeightAnim) {
+                            this._dialogHeightAnim.cancel();
+                            this._dialogHeightAnim = null;
+                        }
+                        dialogEl.style.height = '';
+                        this._settingsAnimTimer = null;
+                        updateAllSegmentedGliders();
+                    }, 245);
+                }
+            },
             getActivePadId: () => state.activePadId,
             openScratchpad(id, keepContext = false, slideDir = 0) {
                 closeCustomDropdown();
@@ -7510,7 +7549,30 @@ Analyze this JEE question image (${q.subject} - ${q.chapter}).
                     if (!document.getElementById('imagePopupModal')?.classList.contains('hidden')) {
                         renderPopupCarouselSlots();
                     }
-                    renderFeed();
+                    // Update the feed card badge in-place if it still matches the filter
+                    if (state.tagFilter === 'ALL' || state.tagFilter === q.noteTag) {
+                        const cardEl = document.querySelector(`article[data-card-id="${q.id}"]`);
+                        if (cardEl) {
+                            const existingBadge = cardEl.querySelector('.card-tag-badge');
+                            if (q.noteTag) {
+                                if (existingBadge) {
+                                    existingBadge.textContent = q.noteTag;
+                                } else {
+                                    const dropGroup = cardEl.querySelector('.m3-card-dropdown-group');
+                                    if (dropGroup) {
+                                        dropGroup.insertAdjacentHTML(
+                                            'afterend',
+                                            `<button type="button" onclick="window.app.openQuestionTagMenu(${q.id}, this)" class="card-tag-badge px-2 py-0.5 rounded-full m3-primary-pill text-[9px] font-extrabold shrink-0">${q.noteTag}</button>`
+                                        );
+                                    }
+                                }
+                            } else if (existingBadge) {
+                                existingBadge.remove();
+                            }
+                        }
+                    } else {
+                        renderFeed();
+                    }
                     scheduleCloudAutoSync(true);
                 });
             },
@@ -8312,12 +8374,22 @@ Analyze this JEE question image (${q.subject} - ${q.chapter}).
                     if (btnLbl) btnLbl.textContent = 'Generate with Gemini 3.8';
                 }
             },
-            exportWhiteboardPng() {
+                exportWhiteboardPng() {
                 const q = state.questions.find(i => i.id === Number(state.activePadId));
                 const canvas = document.getElementById('stylusCanvas');
                 if (!canvas || !q) return;
+
+                const outCanvas = document.createElement('canvas');
+                outCanvas.width = canvas.width;
+                outCanvas.height = canvas.height;
+                const oCtx = outCanvas.getContext('2d');
+                if (state.wbDarkCanvas) {
+                    oCtx.filter = 'invert(0.92) hue-rotate(180deg)';
+                }
+                oCtx.drawImage(canvas, 0, 0);
+
                 const a = document.createElement('a');
-                a.href = canvas.toDataURL('image/png');
+                a.href = outCanvas.toDataURL('image/png');
                 a.download = `Q${q.questionNumber}-${slugifyRoutePart(q.subject)}-solution.png`;
                 document.body.appendChild(a);
                 a.click();
@@ -8611,21 +8683,62 @@ Analyze this JEE question image (${q.subject} - ${q.chapter}).
                 renderWhiteboardCanvas();
             }
         };
-
-        // Global Clipboard Paste Listener (Ctrl+V opens unified import dialog in Image mode)
         window.addEventListener('paste', (e) => {
+            const tag = (e.target?.tagName || '').toUpperCase();
+            if (tag === 'INPUT' || tag === 'TEXTAREA' || e.target?.isContentEditable) return;
+
             const items = e.clipboardData?.items || [];
             for (const item of items) {
                 if (item.type && item.type.startsWith('image/')) {
                     const blob = item.getAsFile();
-                    if (blob) {
-                        e.preventDefault();
-                        window.app.openUploadModal(blob);
-                        break;
+                    if (!blob) continue;
+                    e.preventDefault();
+
+                    // If Whiteboard is open, paste image directly onto the active Whiteboard page!
+                    const isWbOpen = !document.getElementById('scratchpadModal')?.classList.contains('hidden');
+                    if (isWbOpen && !state.wbIsLoading) {
+                        const reader = new FileReader();
+                        reader.onload = () => {
+                            const dataUrl = reader.result;
+                            const img = new Image();
+                            img.onload = () => {
+                                pushBoardUndoState();
+                                const board = getActiveBoard();
+                                const w = Math.min(360, img.width);
+                                const h = Math.round(w * (img.height / (img.width || 1)));
+                                const newItem = {
+                                    id: generateUniqueId(),
+                                    type: 'IMAGE',
+                                    isOriginalQ: false,
+                                    groupId: null,
+                                    x: (180 - state.wbPanX) / state.wbScale,
+                                    y: (120 - state.wbPanY) / state.wbScale,
+                                    w,
+                                    h,
+                                    rotation: 0,
+                                    src: dataUrl,
+                                    imgEl: img
+                                };
+                                board.items.push(newItem);
+                                state.wbSelectedIds = [newItem.id];
+                                window.app.setWhiteboardTool('SELECT');
+                                renderWhiteboardCanvas();
+                                syncActiveBoardToQuestionGist();
+                                toast('Pasted image onto Whiteboard!', 'success');
+                            };
+                            img.src = dataUrl;
+                        };
+                        reader.readAsDataURL(blob);
+                        return;
                     }
+
+                    // Otherwise open the Image Import modal
+                    window.app.openUploadModal(blob);
+                    break;
                 }
             }
         });
+
 
         window.addEventListener('hashchange', () => {
             checkAndOpenQuestionFromUrlHash();
