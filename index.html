@@ -754,6 +754,79 @@
         .m3-segmented-group.has-glider .m3-seg-btn:hover:not(.active) {
             background-color: rgba(255, 255, 255, 0.05) !important;
         }
+                /* =================================================================== */
+        /* 1. GITHUB CLOUD SYNC IRIS PORTAL REVEAL (STAR EXPANSION UNVEIL)     */
+        /* =================================================================== */
+        @keyframes m3StarPortalBurst {
+            0% {
+                transform: scale(1) rotate(0deg);
+                opacity: 1;
+            }
+            35% {
+                transform: scale(0.82) rotate(-25deg);
+                opacity: 1;
+            }
+            100% {
+                transform: scale(42) rotate(95deg);
+                opacity: 0;
+            }
+        }
+
+        @keyframes m3WorkspacePortalUnveil {
+            0% {
+                clip-path: circle(28px at 50% 42%);
+                opacity: 0.25;
+                transform: scale(0.975);
+                filter: brightness(1.35);
+            }
+            100% {
+                clip-path: circle(145% at 50% 42%);
+                opacity: 1;
+                transform: scale(1);
+                filter: brightness(1);
+            }
+        }
+
+        .m3-portal-star-burst {
+            animation: m3StarPortalBurst 0.52s cubic-bezier(0.4, 0, 0.2, 1) forwards !important;
+            pointer-events: none;
+            z-index: 40;
+        }
+
+        .m3-feed-portal-reveal {
+            animation: m3WorkspacePortalUnveil 0.64s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+            will-change: clip-path, transform, opacity;
+        }
+
+        /* =================================================================== */
+        /* 2. UNIFIED WORKSPACE PLANE TRANSITIONS (STATUS & CHAPTER SWITCHES)  */
+        /* Animates the entire feed plane as one cohesive surface, never cards */
+        /* =================================================================== */
+        @keyframes m3PlaneGlideRight {
+            0% { opacity: 0.15; transform: translate3d(34px, 0, 0) scale(0.992); }
+            100% { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
+        }
+        @keyframes m3PlaneGlideLeft {
+            0% { opacity: 0.15; transform: translate3d(-34px, 0, 0) scale(0.992); }
+            100% { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
+        }
+        @keyframes m3PlaneChapterElevate {
+            0% { opacity: 0; transform: translate3d(0, 20px, 0) scale(0.986); }
+            100% { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
+        }
+
+        .m3-plane-glide-right {
+            animation: m3PlaneGlideRight 0.28s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+            will-change: transform, opacity;
+        }
+        .m3-plane-glide-left {
+            animation: m3PlaneGlideLeft 0.28s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+            will-change: transform, opacity;
+        }
+        .m3-plane-elevate {
+            animation: m3PlaneChapterElevate 0.32s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+            will-change: transform, opacity;
+        }
 
     </style>
 </head>
@@ -4295,10 +4368,21 @@ Analyze this JEE question image (${q.subject} - ${q.chapter}).
                         noteTag: r.noteTag || '',
                         eliminatedOptions: Array.isArray(r.eliminatedOptions) ? r.eliminatedOptions : []
                     };
-                });
+                });                
                 localStorage.setItem('jee_cloud_last_sync', new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }));
+                // Expand the loading star into a portal before unveiling the workspace plane
+                const loadingStarCard = document.querySelector('#mainFeedContainer .m3-cookie-12');
+                if (loadingStarCard && state.questions.length > 0) {
+                    loadingStarCard.classList.add('m3-portal-star-burst');
+                    await new Promise(r => setTimeout(r, 230));
+                }
+
                 state.isSyncingCloud = false;
                 sortAndRefreshQuestions();
+                if (state.questions.length > 0) {
+                    triggerWorkspacePlaneTransition('PORTAL');
+                }
+
                 if (manualNotify) toast(`Pulled ${state.questions.length} questions from GitHub Cloud!`, 'success');
                 if (anyMissingUid && token) scheduleCloudAutoSync(true);
                 checkAndOpenQuestionFromUrlHash();
@@ -7048,6 +7132,37 @@ Analyze this JEE question image (${q.subject} - ${q.chapter}).
             }, { passive: true });
         }
 
+                // ===================================================================
+        // UNIFIED WORKSPACE PLANE & GITHUB PORTAL REVEAL ORCHESTRATOR
+        // ===================================================================
+        const STATUS_ORDER_INDEX = { 'ALL': 0, 'UNSOLVED': 1, 'SOLVED': 2, 'STARRED': 3 };
+        let feedPlaneAnimTimer = null;
+
+        function triggerWorkspacePlaneTransition(mode = 'ELEVATE') {
+            const container = document.getElementById('mainFeedContainer');
+            const plane = container?.firstElementChild;
+            if (!container || !plane) return;
+
+            container.scrollTop = 0;
+            plane.classList.remove('m3-plane-glide-right', 'm3-plane-glide-left', 'm3-plane-elevate', 'm3-feed-portal-reveal');
+            void plane.offsetWidth; // Force clean reflow on the single wrapper plane
+
+            const cls = mode === 'RIGHT'
+                ? 'm3-plane-glide-right'
+                : mode === 'LEFT'
+                ? 'm3-plane-glide-left'
+                : mode === 'PORTAL'
+                ? 'm3-feed-portal-reveal'
+                : 'm3-plane-elevate';
+
+            plane.classList.add(cls);
+            clearTimeout(feedPlaneAnimTimer);
+            feedPlaneAnimTimer = setTimeout(() => {
+                plane.classList.remove(cls);
+            }, 660);
+        }
+
+        
         // ===================================================================
         // GLOBAL APP CONTROLLER
         // ===================================================================
@@ -7785,17 +7900,35 @@ Analyze this JEE question image (${q.subject} - ${q.chapter}).
                 b.classList.toggle('hidden', !open);
             },
             selectSubjectChapter(subj, chap) {
+                const changed = state.subject !== subj || state.chapter !== chap;
                 state.subject = subj;
                 state.chapter = chap;
                 this.toggleDrawer(false);
                 renderAll();
+                if (changed) triggerWorkspacePlaneTransition('ELEVATE');
             },
             setTagFilter(tag) {
-                state.tagFilter = tag || 'ALL';
+                const nextTag = tag || 'ALL';
+                const changed = state.tagFilter !== nextTag;
+                state.tagFilter = nextTag;
                 renderAll();
+                if (changed) triggerWorkspacePlaneTransition('ELEVATE');
             },
-            setStatus(st) { state.status = st; renderAll(); },
-            setPaper(p) { state.paper = p; renderAll(); },
+            setStatus(st) {
+                if (state.status === st) return;
+                const oldIdx = STATUS_ORDER_INDEX[state.status] ?? 0;
+                const newIdx = STATUS_ORDER_INDEX[st] ?? 0;
+                const dirMode = newIdx >= oldIdx ? 'RIGHT' : 'LEFT';
+                state.status = st;
+                renderAll();
+                triggerWorkspacePlaneTransition(dirMode);
+            },
+            setPaper(p) {
+                const changed = state.paper !== p;
+                state.paper = p;
+                renderAll();
+                if (changed) triggerWorkspacePlaneTransition('ELEVATE');
+            },
             setSearch(v) {
                 state.search = v || '';
                 document.getElementById('clearSearchBtn')?.classList.toggle('hidden', !state.search.trim());
