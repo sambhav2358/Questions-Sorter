@@ -4185,13 +4185,13 @@ Analyze this JEE question image (${q.subject} - ${q.chapter}).
                         plane.classList.contains('m3-plane-glide-left') ||
                         plane.classList.contains('m3-plane-elevate')
                     );
+                    img.src = q.imageDataUrl;
                     if (!state.isExtracting && !isAnimatingPlane) {
                         clearTimeout(aspectUpdateTimer);
                         aspectUpdateTimer = setTimeout(() => renderFeed(), 120);
                     }
                 }
             };
-            img.src = q.imageDataUrl;
         }
 
 
