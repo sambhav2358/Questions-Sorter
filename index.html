@@ -754,53 +754,71 @@
         .m3-segmented-group.has-glider .m3-seg-btn:hover:not(.active) {
             background-color: rgba(255, 255, 255, 0.05) !important;
         }
+
                 /* =================================================================== */
-        /* 1. GITHUB CLOUD SYNC IRIS PORTAL REVEAL (STAR EXPANSION UNVEIL)     */
+        /* 1. GITHUB CLOUD SYNC IRIS PORTAL REVEAL (SIMULTANEOUS OVERLAY)      */
+        /* Slowed down by 6.7% & fades out the loading card while questions    */
+        /* unveil directly underneath in real time                             */
         /* =================================================================== */
         @keyframes m3StarPortalBurst {
             0% {
                 transform: scale(1) rotate(0deg);
                 opacity: 1;
             }
-            35% {
-                transform: scale(0.82) rotate(-25deg);
-                opacity: 1;
+            28% {
+                transform: scale(0.84) rotate(-22deg);
+                opacity: 0.95;
             }
             100% {
-                transform: scale(42) rotate(95deg);
+                transform: scale(44) rotate(95deg);
                 opacity: 0;
+            }
+        }
+
+        @keyframes m3LoadingCardDissolve {
+            0% {
+                opacity: 1;
+                transform: scale(1);
+                filter: blur(0px);
+            }
+            100% {
+                opacity: 0;
+                transform: scale(1.06);
+                filter: blur(6px);
             }
         }
 
         @keyframes m3WorkspacePortalUnveil {
             0% {
-                clip-path: circle(28px at 50% 42%);
-                opacity: 0.25;
-                transform: scale(0.975);
-                filter: brightness(1.35);
+                clip-path: circle(24px at 50% 42vh);
+                opacity: 0.15;
+                transform: scale(0.978);
             }
             100% {
-                clip-path: circle(145% at 50% 42%);
+                clip-path: circle(150% at 50% 42vh);
                 opacity: 1;
                 transform: scale(1);
-                filter: brightness(1);
             }
         }
 
+        .m3-portal-card-dissolve {
+            animation: m3LoadingCardDissolve 0.515s cubic-bezier(0.22, 1, 0.36, 1) forwards !important;
+            pointer-events: none !important;
+        }
+
         .m3-portal-star-burst {
-            animation: m3StarPortalBurst 0.52s cubic-bezier(0.4, 0, 0.2, 1) forwards !important;
-            pointer-events: none;
+            animation: m3StarPortalBurst 0.555s cubic-bezier(0.32, 0, 0.2, 1) forwards !important;
+            pointer-events: none !important;
             z-index: 40;
         }
 
         .m3-feed-portal-reveal {
-            animation: m3WorkspacePortalUnveil 0.64s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+            animation: m3WorkspacePortalUnveil 0.683s cubic-bezier(0.22, 1, 0.36, 1) forwards;
             will-change: clip-path, transform, opacity;
         }
 
         /* =================================================================== */
-        /* 2. UNIFIED WORKSPACE PLANE TRANSITIONS (STATUS & CHAPTER SWITCHES)  */
-        /* Animates the entire feed plane as one cohesive surface, never cards */
+        /* 2. UNIFIED WORKSPACE PLANE TRANSITIONS (SLOWED DOWN BY 6.7%)        */
         /* =================================================================== */
         @keyframes m3PlaneGlideRight {
             0% { opacity: 0.15; transform: translate3d(34px, 0, 0) scale(0.992); }
@@ -816,18 +834,19 @@
         }
 
         .m3-plane-glide-right {
-            animation: m3PlaneGlideRight 0.28s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+            animation: m3PlaneGlideRight 0.30s cubic-bezier(0.22, 1, 0.36, 1) forwards;
             will-change: transform, opacity;
         }
         .m3-plane-glide-left {
-            animation: m3PlaneGlideLeft 0.28s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+            animation: m3PlaneGlideLeft 0.30s cubic-bezier(0.22, 1, 0.36, 1) forwards;
             will-change: transform, opacity;
         }
         .m3-plane-elevate {
-            animation: m3PlaneChapterElevate 0.32s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+            animation: m3PlaneChapterElevate 0.342s cubic-bezier(0.22, 1, 0.36, 1) forwards;
             will-change: transform, opacity;
         }
 
+        
     </style>
 </head>
 <body class="h-[100dvh] w-screen overflow-hidden flex flex-col select-none m3-surface">
@@ -4369,19 +4388,8 @@ Analyze this JEE question image (${q.subject} - ${q.chapter}).
                         eliminatedOptions: Array.isArray(r.eliminatedOptions) ? r.eliminatedOptions : []
                     };
                 });                
-                localStorage.setItem('jee_cloud_last_sync', new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }));
-                // Expand the loading star into a portal before unveiling the workspace plane
-                const loadingStarCard = document.querySelector('#mainFeedContainer .m3-cookie-12');
-                if (loadingStarCard && state.questions.length > 0) {
-                    loadingStarCard.classList.add('m3-portal-star-burst');
-                    await new Promise(r => setTimeout(r, 230));
-                }
-
-                state.isSyncingCloud = false;
-                sortAndRefreshQuestions();
-                if (state.questions.length > 0) {
-                    triggerWorkspacePlaneTransition('PORTAL');
-                }
+                                localStorage.setItem('jee_cloud_last_sync', new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }));
+                runSynchronizedCloudPortalReveal();
 
                 if (manualNotify) toast(`Pulled ${state.questions.length} questions from GitHub Cloud!`, 'success');
                 if (anyMissingUid && token) scheduleCloudAutoSync(true);
@@ -7137,7 +7145,6 @@ Analyze this JEE question image (${q.subject} - ${q.chapter}).
         // ===================================================================
         const STATUS_ORDER_INDEX = { 'ALL': 0, 'UNSOLVED': 1, 'SOLVED': 2, 'STARRED': 3 };
         let feedPlaneAnimTimer = null;
-
         function triggerWorkspacePlaneTransition(mode = 'ELEVATE') {
             const container = document.getElementById('mainFeedContainer');
             const plane = container?.firstElementChild;
@@ -7145,7 +7152,7 @@ Analyze this JEE question image (${q.subject} - ${q.chapter}).
 
             container.scrollTop = 0;
             plane.classList.remove('m3-plane-glide-right', 'm3-plane-glide-left', 'm3-plane-elevate', 'm3-feed-portal-reveal');
-            void plane.offsetWidth; // Force clean reflow on the single wrapper plane
+            void plane.offsetWidth;
 
             const cls = mode === 'RIGHT'
                 ? 'm3-plane-glide-right'
@@ -7159,7 +7166,58 @@ Analyze this JEE question image (${q.subject} - ${q.chapter}).
             clearTimeout(feedPlaneAnimTimer);
             feedPlaneAnimTimer = setTimeout(() => {
                 plane.classList.remove(cls);
-            }, 660);
+            }, 720);
+        }
+
+        // Clones the loading card as a fixed overlay, renders the real questions underneath first,
+        // and then fires the star burst + card fade-out + question unveil on the exact same frame!
+        function runSynchronizedCloudPortalReveal() {
+            const container = document.getElementById('mainFeedContainer');
+            const oldLoadingDialog = container?.querySelector('.m3-dialog');
+
+            let floatingOverlay = null;
+            if (oldLoadingDialog && state.questions.length > 0) {
+                const rect = oldLoadingDialog.getBoundingClientRect();
+                floatingOverlay = oldLoadingDialog.cloneNode(true);
+                floatingOverlay.style.position = 'fixed';
+                floatingOverlay.style.top = `${rect.top}px`;
+                floatingOverlay.style.left = `${rect.left}px`;
+                floatingOverlay.style.width = `${rect.width}px`;
+                floatingOverlay.style.height = `${rect.height}px`;
+                floatingOverlay.style.margin = '0';
+                floatingOverlay.style.zIndex = '45';
+                floatingOverlay.style.overflow = 'visible';
+                document.body.appendChild(floatingOverlay);
+            }
+
+            // 1. Render all questions into the DOM immediately (underneath the floating overlay)
+            state.isSyncingCloud = false;
+            sortAndRefreshQuestions();
+
+            if (!floatingOverlay) return;
+
+            const plane = container?.firstElementChild;
+            if (plane) {
+                plane.style.opacity = '0';
+            }
+
+            // 2. Wait 1 frame so the browser finishes painting the question images in the DOM,
+            // then fire the Star Burst + Card Fade-Out + Question Portal Unveil together!
+            requestAnimationFrame(() => {
+                requestAnimationFrame(() => {
+                    if (plane) {
+                        plane.style.opacity = '';
+                        triggerWorkspacePlaneTransition('PORTAL');
+                    }
+                    const starBox = floatingOverlay.querySelector('.m3-cookie-12');
+                    if (starBox) starBox.classList.add('m3-portal-star-burst');
+                    floatingOverlay.classList.add('m3-portal-card-dissolve');
+
+                    setTimeout(() => {
+                        floatingOverlay.remove();
+                    }, 580);
+                });
+            });
         }
 
         
