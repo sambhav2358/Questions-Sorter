@@ -4178,14 +4178,22 @@ Analyze this JEE question image (${q.subject} - ${q.chapter}).
             img.onload = () => {
                 if (img.width > 0) {
                     q.aspectRatio = img.height / img.width;
-                    if (!state.isExtracting) {
+                    const plane = document.getElementById('mainFeedContainer')?.firstElementChild;
+                    const isAnimatingPlane = plane && (
+                        plane.classList.contains('m3-feed-portal-reveal') ||
+                        plane.classList.contains('m3-plane-glide-right') ||
+                        plane.classList.contains('m3-plane-glide-left') ||
+                        plane.classList.contains('m3-plane-elevate')
+                    );
+                    if (!state.isExtracting && !isAnimatingPlane) {
                         clearTimeout(aspectUpdateTimer);
-                        aspectUpdateTimer = setTimeout(() => renderFeed(), 80);
+                        aspectUpdateTimer = setTimeout(() => renderFeed(), 120);
                     }
                 }
             };
             img.src = q.imageDataUrl;
         }
+
 
         function sortAndRefreshQuestions(skipRender = false) {
             state.questions.forEach(q => {
@@ -7169,8 +7177,6 @@ Analyze this JEE question image (${q.subject} - ${q.chapter}).
             }, 720);
         }
 
-        // Clones the loading card as a fixed overlay, renders the real questions underneath first,
-        // and then fires the star burst + card fade-out + question unveil on the exact same frame!
         function runSynchronizedCloudPortalReveal() {
             const container = document.getElementById('mainFeedContainer');
             const oldLoadingDialog = container?.querySelector('.m3-dialog');
@@ -7188,36 +7194,30 @@ Analyze this JEE question image (${q.subject} - ${q.chapter}).
                 floatingOverlay.style.zIndex = '45';
                 floatingOverlay.style.overflow = 'visible';
                 document.body.appendChild(floatingOverlay);
+
+                // 1. Start the Star Burst & Card Dissolve IMMEDIATELY on the GPU (0ms lag!)
+                void floatingOverlay.offsetWidth;
+                const starBox = floatingOverlay.querySelector('.m3-cookie-12');
+                if (starBox) starBox.classList.add('m3-portal-star-burst');
+                floatingOverlay.classList.add('m3-portal-card-dissolve');
             }
 
-            // 1. Render all questions into the DOM immediately (underneath the floating overlay)
-            state.isSyncingCloud = false;
-            sortAndRefreshQuestions();
+            // 2. Let the GPU run the first 75ms of the star expansion smoothly,
+            // then inject the questions underneath with the portal reveal class already attached!
+            setTimeout(() => {
+                state.isSyncingCloud = false;
+                sortAndRefreshQuestions(true); // Sort without double-rendering
+                clearTimeout(aspectUpdateTimer); // Prevent aspect-ratio callback from wiping the animation!
+                refreshCountsAndDrawerOnly();
+                renderFeed();
 
-            if (!floatingOverlay) return;
-
-            const plane = container?.firstElementChild;
-            if (plane) {
-                plane.style.opacity = '0';
-            }
-
-            // 2. Wait 1 frame so the browser finishes painting the question images in the DOM,
-            // then fire the Star Burst + Card Fade-Out + Question Portal Unveil together!
-            requestAnimationFrame(() => {
-                requestAnimationFrame(() => {
-                    if (plane) {
-                        plane.style.opacity = '';
-                        triggerWorkspacePlaneTransition('PORTAL');
-                    }
-                    const starBox = floatingOverlay.querySelector('.m3-cookie-12');
-                    if (starBox) starBox.classList.add('m3-portal-star-burst');
-                    floatingOverlay.classList.add('m3-portal-card-dissolve');
-
+                if (floatingOverlay) {
+                    triggerWorkspacePlaneTransition('PORTAL');
                     setTimeout(() => {
                         floatingOverlay.remove();
-                    }, 580);
-                });
-            });
+                    }, 520);
+                }
+            }, 75);
         }
 
         
