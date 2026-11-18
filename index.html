@@ -4185,14 +4185,15 @@ Analyze this JEE question image (${q.subject} - ${q.chapter}).
                         plane.classList.contains('m3-plane-glide-left') ||
                         plane.classList.contains('m3-plane-elevate')
                     );
-                    img.src = q.imageDataUrl;
                     if (!state.isExtracting && !isAnimatingPlane) {
                         clearTimeout(aspectUpdateTimer);
                         aspectUpdateTimer = setTimeout(() => renderFeed(), 120);
                     }
                 }
             };
+            img.src = q.imageDataUrl; // MUST be outside img.onload!
         }
+
 
 
         function sortAndRefreshQuestions(skipRender = false) {
@@ -4396,8 +4397,8 @@ Analyze this JEE question image (${q.subject} - ${q.chapter}).
                         eliminatedOptions: Array.isArray(r.eliminatedOptions) ? r.eliminatedOptions : []
                     };
                 });                
-                                localStorage.setItem('jee_cloud_last_sync', new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }));
-                runSynchronizedCloudPortalReveal();
+                localStorage.setItem('jee_cloud_last_sync', new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }));
+                await runSynchronizedCloudPortalReveal();
 
                 if (manualNotify) toast(`Pulled ${state.questions.length} questions from GitHub Cloud!`, 'success');
                 if (anyMissingUid && token) scheduleCloudAutoSync(true);
@@ -5015,7 +5016,7 @@ Analyze this JEE question image (${q.subject} - ${q.chapter}).
                 </div>
 
                 <div class="p-2.5 m3-card-img-segment flex items-center justify-center min-w-0">
-                    <img src="${q.imageDataUrl}" onclick="event.stopPropagation(); window.app.openImagePopup(${q.id})" alt="Q.${q.questionNumber}" class="question-slice-img rounded-xl w-full h-auto object-contain cursor-zoom-in" loading="lazy">
+                    <img src="${q.imageDataUrl}" onclick="event.stopPropagation(); window.app.openImagePopup(${q.id})" alt="Q.${q.questionNumber}" class="question-slice-img rounded-xl w-full h-auto object-contain cursor-zoom-in" decoding="async">
                 </div>
             </article>
             `;
@@ -7176,8 +7177,7 @@ Analyze this JEE question image (${q.subject} - ${q.chapter}).
                 plane.classList.remove(cls);
             }, 720);
         }
-
-        function runSynchronizedCloudPortalReveal() {
+        async function runSynchronizedCloudPortalReveal() {
             const container = document.getElementById('mainFeedContainer');
             const oldLoadingDialog = container?.querySelector('.m3-dialog');
 
@@ -7194,31 +7194,42 @@ Analyze this JEE question image (${q.subject} - ${q.chapter}).
                 floatingOverlay.style.zIndex = '45';
                 floatingOverlay.style.overflow = 'visible';
                 document.body.appendChild(floatingOverlay);
+            }
 
-                // 1. Start the Star Burst & Card Dissolve IMMEDIATELY on the GPU (0ms lag!)
-                void floatingOverlay.offsetWidth;
+            // 1. Build the question DOM underneath the still-visible loading overlay
+            state.isSyncingCloud = false;
+            sortAndRefreshQuestions(true);
+            clearTimeout(aspectUpdateTimer);
+            refreshCountsAndDrawerOnly();
+            renderFeed();
+
+            if (!floatingOverlay) return;
+
+            const plane = container?.firstElementChild;
+            if (plane) plane.style.opacity = '0';
+
+            // 2. Force-decode the top 8 visible question images into GPU textures BEFORE starting the animation
+            const visibleImgs = Array.from(container.querySelectorAll('img.question-slice-img')).slice(0, 8);
+            await Promise.allSettled(
+                visibleImgs.map(img => (typeof img.decode === 'function' ? img.decode() : Promise.resolve()))
+            );
+
+            // 3. Now that all visible question bitmaps are decoded in GPU memory, fire Star Burst + Portal Reveal on the exact same frame!
+            requestAnimationFrame(() => {
+                if (plane) {
+                    plane.style.opacity = '';
+                    triggerWorkspacePlaneTransition('PORTAL');
+                }
                 const starBox = floatingOverlay.querySelector('.m3-cookie-12');
                 if (starBox) starBox.classList.add('m3-portal-star-burst');
                 floatingOverlay.classList.add('m3-portal-card-dissolve');
-            }
 
-            // 2. Let the GPU run the first 75ms of the star expansion smoothly,
-            // then inject the questions underneath with the portal reveal class already attached!
-            setTimeout(() => {
-                state.isSyncingCloud = false;
-                sortAndRefreshQuestions(true); // Sort without double-rendering
-                clearTimeout(aspectUpdateTimer); // Prevent aspect-ratio callback from wiping the animation!
-                refreshCountsAndDrawerOnly();
-                renderFeed();
-
-                if (floatingOverlay) {
-                    triggerWorkspacePlaneTransition('PORTAL');
-                    setTimeout(() => {
-                        floatingOverlay.remove();
-                    }, 520);
-                }
-            }, 75);
+                setTimeout(() => {
+                    floatingOverlay.remove();
+                }, 580);
+            });
         }
+
 
         
         // ===================================================================
