@@ -4851,67 +4851,137 @@ Analyze this JEE question image (${q.subject} - ${q.chapter}).
                     let blocks = localCandidates;
 
                     // Stage 2: Send Local Candidate Borders to Gemini 3.8 Flash to Verify, Split, or Refine
-                    if (useGeminiVerifier && getApiKey()) {
-                        try {
-                            const base64Jpeg = canvas.toDataURL('image/jpeg', 0.84).split(',')[1];
-                            appendExtractLog(`Page ${pageNum}: Sending ${localCandidates.length} candidate borders to ${getSelectedModel()} for verification...`, 'info');
-                            const verified = await verifyAndRefineBordersWithGemini(
-                                base64Jpeg,
+                                        let blocks = localCandidates;
+                    let usedManualThisPage = false;
+
+                    // Stage 2: Manual Mode OR Gemini Verification (with automatic >2 fail fallback to Manual Cropper)
+                    let pageDone = false;
+                    while (!pageDone) {
+                        if (manualModeForRemaining) {
+                            appendExtractLog(`Page ${pageNum}: Opening Interactive Manual Cropper (pre-seeded with ${localCandidates.length} local lines)...`, 'info');
+                            const mcRes = await openManualPageCropper(
+                                canvas,
                                 pageNum,
+                                endP,
                                 localCandidates,
-                                state.extractionAbortController.signal,
-                                (m, t) => appendExtractLog(m, t)
+                                defaultSubj,
+                                paperName,
+                                Boolean(prevQuestion),
+                                extractedCount + 1,
+                                {
+                                    reasonText: 'Manual Crop Mode active: drag orange lines to refine boundaries, pick chapters, or stitch.',
+                                    allowRetryGemini: Boolean(getApiKey()),
+                                    manualAllChecked: true
+                                }
                             );
-                            if (Array.isArray(verified) && verified.length > 0) {
-                                blocks = verified.map(v => ({
-                                    ...v,
-                                    xmin: Number(v.xmin) ?? 12,
-                                    xmax: Number(v.xmax) ?? 988,
-                                    ymin: Number(v.ymin) ?? 0,
-                                    ymax: Number(v.ymax) ?? 1000,
-                                    ocrText: '',
-                                    colLines: []
-                                }));
-                                appendExtractLog(`Page ${pageNum}: ${getSelectedModel()} verified ${blocks.length} exact question boxes ✓`, 'success');
+                            if (mcRes.action === 'CANCEL') {
+                                cancelPdfExtraction();
+                                return;
                             }
-                        } catch (verErr) {
-                            if (verErr.name === 'AbortError' || state.cancelExtractionRequested) throw verErr;
-                            appendExtractLog(`Page ${pageNum}: Using local 2D borders (${verErr.message})`, 'stitch');
+                            if (mcRes.action === 'RETRY_GEMINI') {
+                                manualModeForRemaining = false;
+                                continue;
+                            }
+                            manualModeForRemaining = mcRes.switchToManualAll;
+                            blocks = mcRes.blocks;
+                            usedManualThisPage = true;
+                            pageDone = true;
+                        } else if (useGeminiVerifier && getApiKey()) {
+                            try {
+                                const base64Jpeg = canvas.toDataURL('image/jpeg', 0.84).split(',')[1];
+                                appendExtractLog(`Page ${pageNum}: Sending ${localCandidates.length} candidate borders to ${getSelectedModel()}...`, 'info');
+                                const verified = await verifyAndRefineBordersWithGemini(
+                                    base64Jpeg,
+                                    pageNum,
+                                    localCandidates,
+                                    state.extractionAbortController.signal,
+                                    (m, t) => appendExtractLog(m, t)
+                                );
+                                if (Array.isArray(verified) && verified.length > 0) {
+                                    blocks = verified.map(v => ({
+                                        ...v,
+                                        xmin: Number(v.xmin) ?? 12,
+                                        xmax: Number(v.xmax) ?? 988,
+                                        ymin: Number(v.ymin) ?? 0,
+                                        ymax: Number(v.ymax) ?? 1000,
+                                        ocrText: '',
+                                        colLines: []
+                                    }));
+                                    appendExtractLog(`Page ${pageNum}: ${getSelectedModel()} verified ${blocks.length} exact boxes ✓`, 'success');
+                                }
+                                pageDone = true;
+                            } catch (verErr) {
+                                if (verErr.name === 'AbortError' || state.cancelExtractionRequested) throw verErr;
+                                appendExtractLog(`Page ${pageNum}: Gemini failed after retries (${verErr.message}). Opening Manual Cropper...`, 'error');
+
+                                const mcRes = await openManualPageCropper(
+                                    canvas,
+                                    pageNum,
+                                    endP,
+                                    localCandidates,
+                                    defaultSubj,
+                                    paperName,
+                                    Boolean(prevQuestion),
+                                    extractedCount + 1,
+                                    {
+                                        reasonText: `Gemini failed (>2 tries): ${verErr.message.slice(0, 75)}. Adjust local lines manually or click Retry Gemini.`,
+                                        allowRetryGemini: true,
+                                        manualAllChecked: false
+                                    }
+                                );
+                                if (mcRes.action === 'CANCEL') {
+                                    cancelPdfExtraction();
+                                    return;
+                                }
+                                if (mcRes.action === 'RETRY_GEMINI') {
+                                    appendExtractLog(`Page ${pageNum}: Retrying Gemini as requested...`, 'info');
+                                    continue;
+                                }
+                                manualModeForRemaining = mcRes.switchToManualAll;
+                                blocks = mcRes.blocks;
+                                usedManualThisPage = true;
+                                pageDone = true;
+                            }
+                        } else {
+                            pageDone = true;
                         }
                     }
 
+
                     if (state.cancelExtractionRequested) return;
 
+                    if (!usedManualThisPage) {
                     // Snap each 2D block's ymin & ymax to clean whitespace valleys within its column [xmin..xmax]
-                    for (let i = 0; i < blocks.length; i++) {
-                        const b = blocks[i];
-                        const sameColPrev = i > 0 && Math.abs(blocks[i - 1].xmin - b.xmin) < 120 ? blocks[i - 1] : null;
-                        const sameColNext = i < blocks.length - 1 && Math.abs(blocks[i + 1].xmin - b.xmin) < 120 ? blocks[i + 1] : null;
-
-                        const minAllowed = sameColPrev ? Math.min(b.ymin, sameColPrev.ymax + 2) : 2;
-                        b.ymin = snap2DBoundaryToWhitespace(
-                            canvas,
-                            b.colLines,
-                            Number(b.ymin) || 0,
-                            minAllowed,
-                            985,
-                            b.xmin,
-                            b.xmax,
-                            'UP'
-                        );
-
-                        const maxAllowed = sameColNext ? Math.max(b.ymin + 25, sameColNext.ymin - 2) : 996;
-                        const rawYMax = Math.min(maxAllowed, Number(b.ymax) || maxAllowed);
-                        b.ymax = snap2DBoundaryToWhitespace(
-                            canvas,
-                            b.colLines,
-                            rawYMax,
-                            b.ymin + 25,
-                            maxAllowed,
-                            b.xmin,
-                            b.xmax,
-                            'DOWN'
-                        );
+                        for (let i = 0; i < blocks.length; i++) {
+                            const b = blocks[i];
+                            const sameColPrev = i > 0 && Math.abs(blocks[i - 1].xmin - b.xmin) < 120 ? blocks[i - 1] : null;
+                            const sameColNext = i < blocks.length - 1 && Math.abs(blocks[i + 1].xmin - b.xmin) < 120 ? blocks[i + 1] : null;
+    
+                            const minAllowed = sameColPrev ? Math.min(b.ymin, sameColPrev.ymax + 2) : 2;
+                            b.ymin = snap2DBoundaryToWhitespace(
+                                canvas,
+                                b.colLines,
+                                Number(b.ymin) || 0,
+                                minAllowed,
+                                985,
+                                b.xmin,
+                                b.xmax,
+                                'UP'
+                            );
+    
+                            const maxAllowed = sameColNext ? Math.max(b.ymin + 25, sameColNext.ymin - 2) : 996;
+                            const rawYMax = Math.min(maxAllowed, Number(b.ymax) || maxAllowed);
+                            b.ymax = snap2DBoundaryToWhitespace(
+                                canvas,
+                                b.colLines,
+                                rawYMax,
+                                b.ymin + 25,
+                                maxAllowed,
+                                b.xmin,
+                                b.xmax,
+                                'DOWN'
+                            );
+                        }
                     }
 
                     for (let i = 0; i < blocks.length; i++) {
