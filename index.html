@@ -857,12 +857,36 @@
             height: 100dvh !important;
             inset: 0 !important;
         }
-        .mc-stage-wrap {
+                .mc-stage-wrap {
             position: relative;
             display: inline-block;
             user-select: none;
-            touch-action: none;
+            touch-action: pan-y;
         }
+        .mc-pdf-scroller {
+            scrollbar-width: auto;
+            scrollbar-color: var(--md-primary) var(--md-surface-high);
+            -webkit-overflow-scrolling: touch;
+        }
+        .mc-pdf-scroller::-webkit-scrollbar {
+            width: 14px;
+            height: 14px;
+        }
+        .mc-pdf-scroller::-webkit-scrollbar-track {
+            background: var(--md-surface-high);
+            border-left: 1px solid var(--md-outline-variant);
+            border-radius: 9999px;
+        }
+        .mc-pdf-scroller::-webkit-scrollbar-thumb {
+            background-color: var(--md-primary);
+            border-radius: 9999px;
+            border: 3px solid var(--md-surface-high);
+            min-height: 44px;
+        }
+        .mc-pdf-scroller::-webkit-scrollbar-thumb:hover {
+            filter: brightness(1.12);
+        }
+
         .mc-sep-line {
             position: absolute;
             height: 18px;
@@ -1903,7 +1927,7 @@
             <!-- Body: Left = Interactive Draggable Page Canvas, Right = Per-Question Chapter & Stitch List -->
             <div class="flex-1 min-h-0 grid grid-cols-1 lg:grid-cols-12 overflow-hidden">
                 <!-- Left Canvas Area -->
-                <div class="lg:col-span-7 overflow-y-auto p-3 m3-surface-low flex justify-center items-start border-b lg:border-b-0 lg:border-r border-[var(--md-outline-variant)]">
+                <div class="lg:col-span-7 min-h-0 overflow-y-auto mc-pdf-scroller p-3 m3-surface-low flex justify-center items-start border-b lg:border-b-0 lg:border-r border-[var(--md-outline-variant)]">
                     <div id="mcStageWrap" class="mc-stage-wrap bg-white rounded-2xl shadow-xl overflow-hidden max-w-full">
                         <canvas id="mcPageCanvas" class="block max-w-full h-auto"></canvas>
                         <div id="mcOverlayLayer" class="absolute inset-0"></div>
