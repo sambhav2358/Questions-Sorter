@@ -3431,7 +3431,7 @@
         }
 
         // Stage 2: Sends Local Candidate Borders to Gemini 3.8 Flash so Gemini Verifies, Splits, or Corrects them!
-        async function verifyAndRefineBordersWithGemini(base64Jpeg, pageNum, localCandidates, abortSignal, onLog, 2) {
+        async function verifyAndRefineBordersWithGemini(base64Jpeg, pageNum, localCandidates, abortSignal, onLog, ) {
             const selectedModel = getSelectedModel();
             const candidateSummary = (localCandidates || []).map((c, idx) => ({
                 index: idx + 1,
@@ -3495,7 +3495,7 @@ YOUR TASK:
                 }
             };
 
-            const res = await executeRateLimitedGeminiFetch(selectedModel, payload, abortSignal, onLog);
+            const res = await executeRateLimitedGeminiFetch(selectedModel, payload, abortSignal, onLog,2);
             if (!res.ok) {
                 const errTxt = (await res.text()).slice(0, 140);
                 throw new Error(`HTTP ${res.status}: ${errTxt}`);
@@ -4851,7 +4851,6 @@ Analyze this JEE question image (${q.subject} - ${q.chapter}).
                     let blocks = localCandidates;
 
                     // Stage 2: Send Local Candidate Borders to Gemini 3.8 Flash to Verify, Split, or Refine
-                                        let blocks = localCandidates;
                     let usedManualThisPage = false;
 
                     // Stage 2: Manual Mode OR Gemini Verification (with automatic >2 fail fallback to Manual Cropper)
@@ -5022,9 +5021,12 @@ Analyze this JEE question image (${q.subject} - ${q.chapter}).
                         const rawQNum = String(b.questionNumber || '').replace(/[^0-9a-zA-Z]/g, '') || `${extractedCount + 1}`;
                         const isExplicitCont = rawQNum.toUpperCase() === 'CONT' || b.isContinuationFromPrevPage === true;
                         const startsWithNewNum = /^\s*(?:Q\.?\s*)?\d+/i.test(String(b.firstLineSnippet || '')) && !isExplicitCont;
+                        const isStitch = prevQuestion && (
+                            b.manualStitchWithPrev === true ||
+                            (i === 0 && prevQuestion.page === pageNum - 1 && !startsWithNewNum &&
+                                (isExplicitCont || prevQuestion.continuesToNextPage === true))
+                        );
 
-                        const isStitch = prevQuestion && i === 0 && prevQuestion.page === pageNum - 1 && !startsWithNewNum &&
-                            (isExplicitCont || prevQuestion.continuesToNextPage === true);
 
                         if (isStitch) {
                             appendExtractLog(`🔗 Stitched split Q.${prevQuestion.questionNumber} across Page ${prevQuestion.page} → ${pageNum}`, 'stitch');
