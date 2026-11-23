@@ -846,7 +846,109 @@
             will-change: transform, opacity;
         }
 
-        
+                /* =================================================================== */
+        /* INTERACTIVE MANUAL PDF SEPARATOR LINE & STITCH EDITOR               */
+        /* =================================================================== */
+        #manualCropModal:not(.hidden) {
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            width: 100vw !important;
+            height: 100dvh !important;
+            inset: 0 !important;
+        }
+        .mc-stage-wrap {
+            position: relative;
+            display: inline-block;
+            user-select: none;
+            touch-action: none;
+        }
+        .mc-sep-line {
+            position: absolute;
+            height: 18px;
+            margin-top: -9px;
+            cursor: ns-resize;
+            z-index: 20;
+            display: flex;
+            align-items: center;
+            touch-action: none;
+        }
+        .mc-sep-line::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            right: 0;
+            top: 50%;
+            height: 2.5px;
+            background: #f59e0b;
+            box-shadow: 0 0 6px rgba(245, 158, 11, 0.75);
+        }
+        .mc-sep-line.mc-top-edge::before {
+            background: #10b981;
+            box-shadow: 0 0 6px rgba(16, 185, 129, 0.75);
+        }
+        .mc-sep-pill {
+            position: relative;
+            z-index: 2;
+            font-size: 9.5px;
+            font-weight: 800;
+            padding: 1px 7px;
+            border-radius: 9999px;
+            background: #f59e0b;
+            color: #0f172a;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.35);
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            white-space: nowrap;
+        }
+        .mc-sep-line.mc-top-edge .mc-sep-pill {
+            background: #10b981;
+            color: #ffffff;
+        }
+        .mc-gutter-line {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 18px;
+            margin-left: -9px;
+            cursor: ew-resize;
+            z-index: 25;
+            touch-action: none;
+        }
+        .mc-gutter-line::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 50%;
+            width: 2.5px;
+            border-left: 2.5px dashed #38bdf8;
+        }
+        .mc-region-tint {
+            position: absolute;
+            pointer-events: none;
+            z-index: 5;
+            border: 1px solid rgba(99, 102, 241, 0.25);
+            transition: background-color 0.15s ease;
+        }
+        .mc-region-tint.excluded {
+            background: rgba(244, 63, 94, 0.22) !important;
+            border-color: rgba(244, 63, 94, 0.65);
+        }
+        .mc-region-badge {
+            position: absolute;
+            top: 4px;
+            right: 6px;
+            font-size: 10px;
+            font-weight: 800;
+            padding: 1px 7px;
+            border-radius: 9999px;
+            background: rgba(15, 23, 42, 0.84);
+            color: #ffffff;
+            pointer-events: none;
+        }
+
     </style>
 </head>
 <body class="h-[100dvh] w-screen overflow-hidden flex flex-col select-none m3-surface">
@@ -1532,13 +1634,18 @@
                                 <span class="m3-text-muted text-xs">to</span>
                                 <input id="endPageInput" type="number" min="1" value="10" class="w-full h-9 m3-input m3-surface-low px-2 text-xs text-center">
                             </div>
-                        </div>
-                        <div class="sm:col-span-3 pt-1 flex items-center justify-between border-t border-[var(--md-outline-variant)]">
+                        </div>                       
+                        <div class="sm:col-span-3 pt-2 flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-t border-[var(--md-outline-variant)]">
                             <label class="flex items-center gap-2 text-xs font-bold cursor-pointer">
                                 <input type="checkbox" id="pdfGeminiVerifyBordersChk" checked class="rounded">
-                                <span>Send local candidate borders to Gemini 3.8 Flash to verify & refine (Uses 1 req/page)</span>
+                                <span>Verify borders with Gemini 3.8 Flash (auto-retries on failure)</span>
+                            </label>
+                            <label class="flex items-center gap-2 text-xs font-extrabold cursor-pointer" style="color: var(--md-primary)">
+                                <input type="checkbox" id="pdfManualCropModeChk" class="rounded">
+                                <span>Manual Crop Mode (Interactive Separator Lines)</span>
                             </label>
                         </div>
+
                     </div>
 
                     <!-- Image Options -->
@@ -1755,6 +1862,94 @@
             </div>
         </div>
     </div>
+
+        <!-- =================================================================== -->
+    <!-- MODAL 3B: INTERACTIVE MANUAL PDF CROP, SEPARATOR LINES & STITCHER   -->
+    <!-- =================================================================== -->
+    <div id="manualCropModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[65] hidden flex items-center justify-center p-2 sm:p-4">
+        <div class="m3-dialog max-w-6xl w-full max-h-[94dvh] flex flex-col overflow-hidden">
+            <!-- Header -->
+            <div class="px-4 py-3 m3-surface-low border-b border-[var(--md-outline-variant)] flex items-center justify-between gap-2 shrink-0 flex-wrap">
+                <div class="flex items-center gap-2.5 min-w-0">
+                    <div class="w-9 h-9 m3-cookie-12 flex items-center justify-center shrink-0" style="background: var(--md-primary-container); color: var(--md-primary);">
+                        <i class="ph-bold ph-sliders-horizontal text-lg"></i>
+                    </div>
+                    <div class="min-w-0">
+                        <h3 id="mcModalTitle" class="font-extrabold text-sm sm:text-base truncate">Manual Separator Lines & Stitcher — Page 1/1</h3>
+                        <p id="mcReasonBanner" class="text-[11px] font-semibold text-amber-400 truncate">Drag orange lines to adjust boundaries. Local intelligence pre-placed initial lines.</p>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-1.5 shrink-0 flex-wrap">
+                    <button type="button" id="mcToggleColsBtn" onclick="window.app.mcToggleColumns()" class="h-8 px-3 m3-btn-tonal text-[11px] flex items-center gap-1">
+                        <i class="ph-bold ph-columns"></i>
+                        <span id="mcColsLabel">1-Column</span>
+                    </button>
+                    <button type="button" onclick="window.app.mcAddSeparatorLine(0)" class="h-8 px-3 m3-btn-tonal text-[11px] flex items-center gap-1">
+                        <i class="ph-bold ph-plus"></i>
+                        <span id="mcAddLineCol0Lbl">Add Line</span>
+                    </button>
+                    <button type="button" id="mcAddLineCol1Btn" onclick="window.app.mcAddSeparatorLine(1)" class="hidden h-8 px-3 m3-btn-tonal text-[11px] items-center gap-1">
+                        <i class="ph-bold ph-plus"></i>
+                        <span>Add Right-Col Line</span>
+                    </button>
+                    <button type="button" id="mcRetryGeminiBtn" onclick="window.app.mcResolve('RETRY_GEMINI')" class="hidden h-8 px-3 rounded-full bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 text-[11px] font-extrabold items-center gap-1 transition">
+                        <i class="ph-bold ph-arrows-clockwise"></i>
+                        <span>Retry Gemini</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Body: Left = Interactive Draggable Page Canvas, Right = Per-Question Chapter & Stitch List -->
+            <div class="flex-1 min-h-0 grid grid-cols-1 lg:grid-cols-12 overflow-hidden">
+                <!-- Left Canvas Area -->
+                <div class="lg:col-span-7 overflow-y-auto p-3 m3-surface-low flex justify-center items-start border-b lg:border-b-0 lg:border-r border-[var(--md-outline-variant)]">
+                    <div id="mcStageWrap" class="mc-stage-wrap bg-white rounded-2xl shadow-xl overflow-hidden max-w-full">
+                        <canvas id="mcPageCanvas" class="block max-w-full h-auto"></canvas>
+                        <div id="mcOverlayLayer" class="absolute inset-0"></div>
+                    </div>
+                </div>
+
+                <!-- Right Controls & Region List -->
+                <div class="lg:col-span-5 flex flex-col min-h-0 overflow-hidden">
+                    <!-- Bulk Subject & Chapter Selector for Entire Page -->
+                    <div class="p-3 m3-surface-high border-b border-[var(--md-outline-variant)] space-y-2 shrink-0">
+                        <div class="text-[10.5px] font-extrabold uppercase tracking-wider m3-text-muted">Set Subject & Chapter for All Questions on Page</div>
+                        <div class="grid grid-cols-2 gap-2">
+                            <select id="mcBulkSubjectSel" onchange="window.app.mcOnBulkSubjectChange()" class="h-8.5 m3-input m3-surface-low px-2.5 text-[11px] font-bold">
+                                <option value="Physics">Physics</option>
+                                <option value="Chemistry">Chemistry</option>
+                                <option value="Mathematics">Mathematics</option>
+                            </select>
+                            <select id="mcBulkChapterSel" onchange="window.app.mcApplyBulkChapterToAll()" class="h-8.5 m3-input m3-surface-low px-2.5 text-[11px] font-bold"></select>
+                        </div>
+                    </div>
+
+                    <!-- Individual Question Cards -->
+                    <div id="mcRegionsList" class="flex-1 overflow-y-auto p-3 space-y-2"></div>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="px-4 py-3 m3-surface-low border-t border-[var(--md-outline-variant)] flex items-center justify-between gap-2 shrink-0 flex-wrap">
+                <div class="flex items-center gap-3 flex-wrap">
+                    <button type="button" onclick="window.app.mcResolve('CANCEL')" class="h-9 px-4 rounded-full bg-rose-500/20 hover:bg-rose-600 text-rose-400 hover:text-white text-xs font-extrabold transition">
+                        Cancel Import
+                    </button>
+                    <label id="mcSwitchManualAllWrap" class="flex items-center gap-1.5 text-xs font-bold cursor-pointer">
+                        <input type="checkbox" id="mcSwitchManualAllChk" class="rounded">
+                        <span>Use Manual Mode for remaining pages</span>
+                    </label>
+                </div>
+
+                <button type="button" onclick="window.app.mcResolve('CONFIRM')" class="h-10 px-6 m3-btn-filled text-xs sm:text-sm flex items-center gap-1.5 shadow-lg ml-auto">
+                    <i class="ph-bold ph-scissors"></i>
+                    <span id="mcConfirmBtnLabel">Crop & Continue</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
 
     <!-- =================================================================== -->
     <!-- MODAL 4: WHITEBOARD (ZERO-OVERFLOW BAR + FEATURES #1,#2,#3,#4,#6,#7)-->
@@ -2725,11 +2920,14 @@
             return preferredModelName;
         }
 
-        async function executeRateLimitedGeminiFetch(preferredModel, payload, abortSignal = null, onLog = null) {
+                async function executeRateLimitedGeminiFetch(preferredModel, payload, abortSignal = null, onLog = null, maxRetries = 3) {
             const apiKey = getApiKey();
             if (!apiKey) throw new Error('Missing Gemini API Key in Settings.');
 
-            while (true) {
+            let attempt = 0;
+            let lastErrMsg = 'Unknown Gemini error';
+
+            while (attempt <= maxRetries) {
                 if (abortSignal?.aborted) throw new DOMException('Aborted', 'AbortError');
 
                 // 1. Verify latest rate limit counters from GitHub Gist before sending
@@ -2766,45 +2964,94 @@
                     continue;
                 }
 
-                // 4. First attempt exact preferred model (gemini-3.8-flash or gemini-3.8-flash-lite);
-                // if Google's router returns 404 for the string, resolve the active Flash endpoint on the user's key
+                // 4. Dispatch request to preferred model (with 404 endpoint auto-discovery)
                 let targetModel = state.resolvedBackendModelCache[preferredModel] || preferredModel;
                 let apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${targetModel}:generateContent?key=${apiKey}`;
 
-                let res = await fetch(apiUrl, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload),
-                    signal: abortSignal
-                });
+                try {
+                    let res = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload),
+                        signal: abortSignal
+                    });
 
-                if (res.status === 404) {
-                    const resolved = await resolveActiveBackendEndpointForModel(preferredModel, apiKey);
-                    if (resolved && resolved !== targetModel) {
-                        targetModel = resolved;
-                        apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${targetModel}:generateContent?key=${apiKey}`;
-                        res = await fetch(apiUrl, {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify(payload),
-                            signal: abortSignal
+                    if (res.status === 404) {
+                        const resolved = await resolveActiveBackendEndpointForModel(preferredModel, apiKey);
+                        if (resolved && resolved !== targetModel) {
+                            targetModel = resolved;
+                            apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${targetModel}:generateContent?key=${apiKey}`;
+                            res = await fetch(apiUrl, {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify(payload),
+                                signal: abortSignal
+                            });
+                        }
+                    }
+
+                    // 5. ONLY count quota when the request SUCCEEDS (res.ok === true)!
+                    if (res.ok) {
+                        state.rateLimit.dailyCount += 1;
+                        state.rateLimit.recentTimestamps.push(Date.now());
+                        await saveRateLimitToGist();
+                        if (onLog) {
+                            onLog(`📡 Request ${state.rateLimit.dailyCount}/${MAX_DAILY_REQ_IST} (IST) succeeded via ${preferredModel} [HTTP 200]`, 'info');
+                        }
+                        return res;
+                    }
+
+                    // Non-OK response (e.g. 503 High Demand, 429, 500) -> DO NOT increment quota!
+                    const errSnippet = (await res.text().catch(() => '')).slice(0, 130);
+                    lastErrMsg = `HTTP ${res.status}: ${errSnippet || res.statusText}`;
+
+                    const isRetryable = [429, 500, 502, 503, 504].includes(res.status);
+                    if (isRetryable && attempt < maxRetries) {
+                        attempt++;
+                        const backoffSec = Math.min(12, attempt * 3);
+                        if (onLog) {
+                            onLog(`⚠️ Gemini busy/failed (${res.status}) — Quota NOT charged. Retrying (${attempt}/${maxRetries}) in ${backoffSec}s...`, 'stitch');
+                        }
+                        await new Promise((resolve, reject) => {
+                            const t = setTimeout(resolve, backoffSec * 1000);
+                            if (abortSignal) {
+                                abortSignal.addEventListener('abort', () => {
+                                    clearTimeout(t);
+                                    reject(new DOMException('Aborted', 'AbortError'));
+                                }, { once: true });
+                            }
                         });
+                        continue;
                     }
-                }
 
-                // 5. Record request in Gist rate limiter once dispatched to a valid endpoint
-                if (res.status !== 404) {
-                    state.rateLimit.dailyCount += 1;
-                    state.rateLimit.recentTimestamps.push(Date.now());
-                    await saveRateLimitToGist();
-                    if (onLog) {
-                        onLog(`📡 Request ${state.rateLimit.dailyCount}/${MAX_DAILY_REQ_IST} (IST) sent via ${preferredModel} [HTTP ${res.status}]`, 'info');
+                    const failErr = new Error(lastErrMsg);
+                    failErr.code = 'GEMINI_FAILED';
+                    failErr.attempts = attempt + 1;
+                    throw failErr;
+                } catch (netErr) {
+                    if (netErr.name === 'AbortError' || netErr.code === 'GEMINI_FAILED') throw netErr;
+                    lastErrMsg = netErr.message || 'Network failure';
+                    if (attempt < maxRetries) {
+                        attempt++;
+                        const backoffSec = attempt * 3;
+                        if (onLog) {
+                            onLog(`⚠️ Network error (${lastErrMsg}) — Quota NOT charged. Retrying (${attempt}/${maxRetries}) in ${backoffSec}s...`, 'stitch');
+                        }
+                        await new Promise(r => setTimeout(r, backoffSec * 1000));
+                        continue;
                     }
+                    const failErr = new Error(lastErrMsg);
+                    failErr.code = 'GEMINI_FAILED';
+                    failErr.attempts = attempt + 1;
+                    throw failErr;
                 }
-
-                return res;
             }
+
+            const finalErr = new Error(lastErrMsg);
+            finalErr.code = 'GEMINI_FAILED';
+            throw finalErr;
         }
+
 
         // ===================================================================
         // 2-STAGE HYBRID PDF SLICER:
@@ -3184,7 +3431,7 @@
         }
 
         // Stage 2: Sends Local Candidate Borders to Gemini 3.8 Flash so Gemini Verifies, Splits, or Corrects them!
-        async function verifyAndRefineBordersWithGemini(base64Jpeg, pageNum, localCandidates, abortSignal, onLog) {
+        async function verifyAndRefineBordersWithGemini(base64Jpeg, pageNum, localCandidates, abortSignal, onLog, 2) {
             const selectedModel = getSelectedModel();
             const candidateSummary = (localCandidates || []).map((c, idx) => ({
                 index: idx + 1,
@@ -4554,6 +4801,7 @@ Analyze this JEE question image (${q.subject} - ${q.chapter}).
             const paperName = document.getElementById('paperTitleInput').value.trim() || 'Test Paper';
             const defaultSubj = document.getElementById('pdfDefaultSubjectSelect')?.value || 'AUTO';
             const useGeminiVerifier = document.getElementById('pdfGeminiVerifyBordersChk')?.checked ?? true;
+            let manualModeForRemaining = Boolean(document.getElementById('pdfManualCropModeChk')?.checked);
             const startP = Math.max(1, parseInt(document.getElementById('startPageInput').value, 10) || 1);
             const endP = Math.min(state.pdfDoc.numPages, parseInt(document.getElementById('endPageInput').value, 10) || state.pdfDoc.numPages);
             const { padTop, padBottom } = getVerticalPads();
@@ -7230,6 +7478,320 @@ Analyze this JEE question image (${q.subject} - ${q.chapter}).
             });
         }
 
+                // ===================================================================
+        // INTERACTIVE MANUAL CROP, SEPARATOR LINES & STITCHER ENGINE
+        // Pre-populated by Local Intelligence (1-Col & 2-Col + Chapter Picker)
+        // ===================================================================
+        const mcState = {
+            resolver: null,
+            sourceCanvas: null,
+            isTwoCol: false,
+            gutterNormX: 500,
+            // Each column holds sorted boundary Y values (0..1000): [top0, sep1, sep2, ..., bottom]
+            colBounds: [[40, 950], [40, 950]],
+            // Metadata keyed by `${colIdx}_${segIdx}`: { qNum, subject, chapter, stitchPrev, excluded }
+            regionMeta: {},
+            defaultSubj: 'Mathematics',
+            defaultChap: 'Straight Lines',
+            hasPrevQuestion: false,
+            baseQStartNum: 1
+        };
+
+        function mcInitFromLocalCandidates(canvas, localCandidates, defaultSubj, paperTitle, hasPrevQuestion, baseQStartNum) {
+            mcState.sourceCanvas = canvas;
+            mcState.hasPrevQuestion = hasPrevQuestion;
+            mcState.baseQStartNum = baseQStartNum;
+
+            const inferred = inferSubjectAndChapterFromText(paperTitle, defaultSubj);
+            mcState.defaultSubj = inferred.subject;
+            mcState.defaultChap = inferred.chapter;
+
+            const cands = Array.isArray(localCandidates) ? localCandidates : [];
+            const hasRightCol = cands.some(c => Number(c.xmin) >= 420);
+            mcState.isTwoCol = hasRightCol;
+            mcState.gutterNormX = 500;
+            mcState.regionMeta = {};
+
+            const buildColBounds = (colCands) => {
+                if (!colCands.length) return [50, 940];
+                const sorted = [...colCands].sort((a, b) => a.ymin - b.ymin);
+                const ys = [Math.max(10, Math.round(sorted[0].ymin))];
+                for (let i = 0; i < sorted.length - 1; i++) {
+                    const mid = Math.round((sorted[i].ymax + sorted[i + 1].ymin) / 2);
+                    ys.push(Math.max(ys[ys.length - 1] + 25, Math.min(975, mid)));
+                }
+                ys.push(Math.min(990, Math.max(ys[ys.length - 1] + 30, Math.round(sorted[sorted.length - 1].ymax))));
+                return ys;
+            };
+
+            if (mcState.isTwoCol) {
+                const leftC = cands.filter(c => Number(c.xmin) < 420);
+                const rightC = cands.filter(c => Number(c.xmin) >= 420);
+                mcState.colBounds = [buildColBounds(leftC), buildColBounds(rightC)];
+                leftC.forEach((c, idx) => {
+                    mcState.regionMeta[`0_${idx}`] = {
+                        qNum: String(c.questionNumber || (baseQStartNum + idx)),
+                        subject: c.subject || mcState.defaultSubj,
+                        chapter: c.chapter || mcState.defaultChap,
+                        stitchPrev: Boolean(c.isContinuationFromPrevPage),
+                        excluded: false
+                    };
+                });
+                rightC.forEach((c, idx) => {
+                    mcState.regionMeta[`1_${idx}`] = {
+                        qNum: String(c.questionNumber || (baseQStartNum + leftC.length + idx)),
+                        subject: c.subject || mcState.defaultSubj,
+                        chapter: c.chapter || mcState.defaultChap,
+                        stitchPrev: false,
+                        excluded: false
+                    };
+                });
+            } else {
+                mcState.colBounds = [buildColBounds(cands), [50, 940]];
+                cands.forEach((c, idx) => {
+                    mcState.regionMeta[`0_${idx}`] = {
+                        qNum: String(c.questionNumber || (baseQStartNum + idx)),
+                        subject: c.subject || mcState.defaultSubj,
+                        chapter: c.chapter || mcState.defaultChap,
+                        stitchPrev: Boolean(c.isContinuationFromPrevPage),
+                        excluded: false
+                    };
+                });
+            }
+
+            // Populate Bulk Subject & Chapter selectors
+            const bulkSubj = document.getElementById('mcBulkSubjectSel');
+            if (bulkSubj) bulkSubj.value = mcState.defaultSubj;
+            mcPopulateBulkChapters(mcState.defaultSubj, mcState.defaultChap);
+        }
+
+        function mcPopulateBulkChapters(subj, selectedChap = '') {
+            const chapSel = document.getElementById('mcBulkChapterSel');
+            if (!chapSel) return;
+            const list = JEE_CHAPTERS[subj] || JEE_CHAPTERS.Physics;
+            chapSel.innerHTML = list.map(c => `<option value="${c.replace(/"/g, '&quot;')}">${c}</option>`).join('');
+            chapSel.value = list.includes(selectedChap) ? selectedChap : list[0];
+        }
+
+        function mcGetAllRegions() {
+            const cols = mcState.isTwoCol ? [0, 1] : [0];
+            const regions = [];
+            let runningNum = mcState.baseQStartNum;
+
+            for (const colIdx of cols) {
+                const ys = mcState.colBounds[colIdx];
+                const xmin = mcState.isTwoCol ? (colIdx === 0 ? 10 : mcState.gutterNormX + 4) : 10;
+                const xmax = mcState.isTwoCol ? (colIdx === 0 ? mcState.gutterNormX - 4 : 990) : 990;
+
+                for (let segIdx = 0; segIdx < ys.length - 1; segIdx++) {
+                    const key = `${colIdx}_${segIdx}`;
+                    if (!mcState.regionMeta[key]) {
+                        mcState.regionMeta[key] = {
+                            qNum: String(runningNum),
+                            subject: mcState.defaultSubj,
+                            chapter: mcState.defaultChap,
+                            stitchPrev: false,
+                            excluded: false
+                        };
+                    }
+                    runningNum++;
+                    regions.push({
+                        key,
+                        colIdx,
+                        segIdx,
+                        xmin,
+                        xmax,
+                        ymin: ys[segIdx],
+                        ymax: ys[segIdx + 1],
+                        meta: mcState.regionMeta[key]
+                    });
+                }
+            }
+            return regions;
+        }
+
+        function mcRenderOverlayAndSidebar() {
+            const overlay = document.getElementById('mcOverlayLayer');
+            const listEl = document.getElementById('mcRegionsList');
+            const colsLbl = document.getElementById('mcColsLabel');
+            const addCol0Lbl = document.getElementById('mcAddLineCol0Lbl');
+            const addCol1Btn = document.getElementById('mcAddLineCol1Btn');
+            if (!overlay || !listEl) return;
+
+            if (colsLbl) colsLbl.textContent = mcState.isTwoCol ? '2-Columns' : '1-Column';
+            if (addCol0Lbl) addCol0Lbl.textContent = mcState.isTwoCol ? 'Add Left-Col Line' : 'Add Separator Line';
+            if (addCol1Btn) {
+                addCol1Btn.classList.toggle('hidden', !mcState.isTwoCol);
+                addCol1Btn.classList.toggle('inline-flex', mcState.isTwoCol);
+            }
+
+            const regions = mcGetAllRegions();
+            overlay.innerHTML = '';
+
+            // 1. Draw tinted region boxes
+            regions.forEach((reg, idx) => {
+                const box = document.createElement('div');
+                box.className = `mc-region-tint ${reg.meta.excluded ? 'excluded' : ''}`;
+                box.style.left = `${reg.xmin / 10}%`;
+                box.style.width = `${(reg.xmax - reg.xmin) / 10}%`;
+                box.style.top = `${reg.ymin / 10}%`;
+                box.style.height = `${Math.max(1, (reg.ymax - reg.ymin) / 10)}%`;
+                box.style.background = idx % 2 === 0 ? 'rgba(99, 102, 241, 0.08)' : 'rgba(16, 185, 129, 0.08)';
+                const badgeText = reg.meta.excluded ? 'SKIPPED' : (reg.meta.stitchPrev ? `🔗 Stitch ←` : `Q.${reg.meta.qNum}`);
+                box.innerHTML = `<span class="mc-region-badge">${badgeText}</span>`;
+                overlay.appendChild(box);
+            });
+
+            // 2. Draw draggable center gutter if 2-column
+            if (mcState.isTwoCol) {
+                const gutter = document.createElement('div');
+                gutter.className = 'mc-gutter-line';
+                gutter.style.left = `${mcState.gutterNormX / 10}%`;
+                gutter.title = 'Drag to adjust center column divider';
+                gutter.onpointerdown = (e) => {
+                    e.preventDefault();
+                    gutter.setPointerCapture(e.pointerId);
+                    const rect = overlay.getBoundingClientRect();
+                    const onMove = (ev) => {
+                        const pct = Math.max(25, Math.min(75, ((ev.clientX - rect.left) / rect.width) * 100));
+                        mcState.gutterNormX = Math.round(pct * 10);
+                        mcRenderOverlayAndSidebar();
+                    };
+                    const onUp = () => {
+                        window.removeEventListener('pointermove', onMove);
+                        window.removeEventListener('pointerup', onUp);
+                    };
+                    window.addEventListener('pointermove', onMove);
+                    window.addEventListener('pointerup', onUp);
+                };
+                overlay.appendChild(gutter);
+            }
+
+            // 3. Draw draggable horizontal separator lines per column
+            const cols = mcState.isTwoCol ? [0, 1] : [0];
+            cols.forEach(colIdx => {
+                const ys = mcState.colBounds[colIdx];
+                const leftPct = mcState.isTwoCol ? (colIdx === 0 ? 1 : (mcState.gutterNormX / 10) + 0.5) : 1;
+                const widthPct = mcState.isTwoCol ? (colIdx === 0 ? (mcState.gutterNormX / 10) - 1.5 : 98.5 - (mcState.gutterNormX / 10)) : 98;
+
+                ys.forEach((yVal, lineIdx) => {
+                    const isEdge = lineIdx === 0 || lineIdx === ys.length - 1;
+                    const lineEl = document.createElement('div');
+                    lineEl.className = `mc-sep-line ${isEdge ? 'mc-top-edge' : ''}`;
+                    lineEl.style.top = `${yVal / 10}%`;
+                    lineEl.style.left = `${leftPct}%`;
+                    lineEl.style.width = `${widthPct}%`;
+
+                    const labelText = lineIdx === 0 ? 'TOP' : (lineIdx === ys.length - 1 ? 'BOTTOM' : `CUT #${lineIdx}`);
+                    const delBtnHtml = !isEdge
+                        ? `<button type="button" data-del-col="${colIdx}" data-del-idx="${lineIdx}" class="ml-1 px-1 rounded-full bg-black/25 hover:bg-rose-600 hover:text-white text-[9px] leading-tight">✕</button>`
+                        : '';
+                    lineEl.innerHTML = `<span class="mc-sep-pill">☰ ${labelText}${delBtnHtml}</span>`;
+
+                    lineEl.onpointerdown = (e) => {
+                        const delBtn = e.target.closest('button[data-del-idx]');
+                        if (delBtn) {
+                            e.stopPropagation();
+                            const cI = Number(delBtn.getAttribute('data-del-col'));
+                            const lI = Number(delBtn.getAttribute('data-del-idx'));
+                            mcState.colBounds[cI].splice(lI, 1);
+                            mcRenderOverlayAndSidebar();
+                            return;
+                        }
+                        e.preventDefault();
+                        const rect = overlay.getBoundingClientRect();
+                        const minY = lineIdx === 0 ? 5 : ys[lineIdx - 1] + 22;
+                        const maxY = lineIdx === ys.length - 1 ? 995 : ys[lineIdx + 1] - 22;
+
+                        const onMove = (ev) => {
+                            const normY = Math.round(Math.max(minY, Math.min(maxY, ((ev.clientY - rect.top) / rect.height) * 1000)));
+                            mcState.colBounds[colIdx][lineIdx] = normY;
+                            mcRenderOverlayAndSidebar();
+                        };
+                        const onUp = () => {
+                            window.removeEventListener('pointermove', onMove);
+                            window.removeEventListener('pointerup', onUp);
+                        };
+                        window.addEventListener('pointermove', onMove);
+                        window.addEventListener('pointerup', onUp);
+                    };
+
+                    overlay.appendChild(lineEl);
+                });
+            });
+
+            // 4. Render right-hand sidebar controls for each question region
+            const activeCount = regions.filter(r => !r.meta.excluded).length;
+            const confirmLbl = document.getElementById('mcConfirmBtnLabel');
+            if (confirmLbl) confirmLbl.textContent = `Crop ${activeCount} Question${activeCount === 1 ? '' : 's'} & Continue`;
+
+            listEl.innerHTML = regions.map((reg, idx) => {
+                const m = reg.meta;
+                const chaps = JEE_CHAPTERS[m.subject] || JEE_CHAPTERS.Physics;
+                const canStitch = idx > 0 || mcState.hasPrevQuestion;
+                return `
+                <div class="p-2.5 rounded-2xl m3-surface-high border border-[var(--md-outline-variant)] space-y-2 ${m.excluded ? 'opacity-50' : ''}">
+                    <div class="flex items-center justify-between gap-2">
+                        <div class="flex items-center gap-1.5">
+                            <span class="text-[10px] font-extrabold px-2 py-0.5 rounded-full m3-primary-pill">${mcState.isTwoCol ? (reg.colIdx === 0 ? 'L' : 'R') : '#'}${reg.segIdx + 1}</span>
+                            <input type="text" value="${m.qNum}" onchange="window.app.mcUpdateRegion('${reg.key}', 'qNum', this.value)" class="w-16 h-7 m3-input m3-surface-low px-2 text-[11px] font-extrabold text-center" placeholder="Q.#">
+                        </div>
+                        <div class="flex items-center gap-2">
+                            ${canStitch ? `
+                            <label class="flex items-center gap-1 text-[10.5px] font-bold text-amber-400 cursor-pointer" title="Stitch this slice onto the bottom of the previous question">
+                                <input type="checkbox" ${m.stitchPrev ? 'checked' : ''} onchange="window.app.mcUpdateRegion('${reg.key}', 'stitchPrev', this.checked)" class="rounded">
+                                <span>Stitch ←</span>
+                            </label>` : ''}
+                            <label class="flex items-center gap-1 text-[10.5px] font-bold text-rose-400 cursor-pointer">
+                                <input type="checkbox" ${m.excluded ? 'checked' : ''} onchange="window.app.mcUpdateRegion('${reg.key}', 'excluded', this.checked)" class="rounded">
+                                <span>Skip</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    ${!m.excluded && !m.stitchPrev ? `
+                    <div class="grid grid-cols-2 gap-1.5">
+                        <select onchange="window.app.mcUpdateRegion('${reg.key}', 'subject', this.value)" class="h-7.5 m3-input m3-surface-low px-2 text-[10.5px] font-bold">
+                            <option value="Physics" ${m.subject === 'Physics' ? 'selected' : ''}>Physics</option>
+                            <option value="Chemistry" ${m.subject === 'Chemistry' ? 'selected' : ''}>Chemistry</option>
+                            <option value="Mathematics" ${m.subject === 'Mathematics' ? 'selected' : ''}>Mathematics</option>
+                        </select>
+                        <select onchange="window.app.mcUpdateRegion('${reg.key}', 'chapter', this.value)" class="h-7.5 m3-input m3-surface-low px-2 text-[10.5px] font-bold">
+                            ${chaps.map(c => `<option value="${c.replace(/"/g, '&quot;')}" ${m.chapter === c ? 'selected' : ''}>${c}</option>`).join('')}
+                        </select>
+                    </div>` : ''}
+                </div>
+                `;
+            }).join('');
+        }
+
+        function openManualPageCropper(sourceCanvas, pageNum, totalPages, localCandidates, defaultSubj, paperTitle, hasPrevQuestion, baseQStartNum, options = {}) {
+            return new Promise((resolve) => {
+                mcState.resolver = resolve;
+                mcInitFromLocalCandidates(sourceCanvas, localCandidates, defaultSubj, paperTitle, hasPrevQuestion, baseQStartNum);
+
+                const previewCanvas = document.getElementById('mcPageCanvas');
+                const scale = Math.min(1, 760 / Math.max(1, sourceCanvas.width));
+                previewCanvas.width = Math.round(sourceCanvas.width * scale);
+                previewCanvas.height = Math.round(sourceCanvas.height * scale);
+                previewCanvas.getContext('2d').drawImage(sourceCanvas, 0, 0, previewCanvas.width, previewCanvas.height);
+
+                document.getElementById('mcModalTitle').textContent = `Manual Separator Lines & Stitcher — Page ${pageNum}/${totalPages}`;
+                document.getElementById('mcReasonBanner').textContent = options.reasonText || 'Drag orange lines to adjust boundaries. Local intelligence pre-placed initial lines.';
+
+                const retryBtn = document.getElementById('mcRetryGeminiBtn');
+                if (retryBtn) {
+                    const showRetry = Boolean(options.allowRetryGemini);
+                    retryBtn.classList.toggle('hidden', !showRetry);
+                    retryBtn.classList.toggle('inline-flex', showRetry);
+                }
+                const switchAllChk = document.getElementById('mcSwitchManualAllChk');
+                if (switchAllChk) switchAllChk.checked = Boolean(options.manualAllChecked);
+
+                mcRenderOverlayAndSidebar();
+                animateModalOpen('manualCropModal');
+            });
+        }
 
         
         // ===================================================================
@@ -7238,6 +7800,80 @@ Analyze this JEE question image (${q.subject} - ${q.chapter}).
         window.app = {
             isExtracting: () => state.isExtracting,
             closeCustomDropdown,
+                        mcToggleColumns() {
+                mcState.isTwoCol = !mcState.isTwoCol;
+                mcRenderOverlayAndSidebar();
+            },
+            mcAddSeparatorLine(colIdx = 0) {
+                const ys = mcState.colBounds[colIdx];
+                // Split the tallest existing gap in this column
+                let bestIdx = 0, maxGap = -1;
+                for (let i = 0; i < ys.length - 1; i++) {
+                    const gap = ys[i + 1] - ys[i];
+                    if (gap > maxGap) { maxGap = gap; bestIdx = i; }
+                }
+                if (maxGap < 44) return toast('No room left to add another separator line.', 'warn');
+                const mid = Math.round((ys[bestIdx] + ys[bestIdx + 1]) / 2);
+                ys.splice(bestIdx + 1, 0, mid);
+                mcRenderOverlayAndSidebar();
+            },
+            mcOnBulkSubjectChange() {
+                const subj = document.getElementById('mcBulkSubjectSel')?.value || 'Mathematics';
+                mcState.defaultSubj = subj;
+                const firstChap = (JEE_CHAPTERS[subj] || JEE_CHAPTERS.Physics)[0];
+                mcState.defaultChap = firstChap;
+                mcPopulateBulkChapters(subj, firstChap);
+                this.mcApplyBulkChapterToAll();
+            },
+            mcApplyBulkChapterToAll() {
+                const subj = document.getElementById('mcBulkSubjectSel')?.value || mcState.defaultSubj;
+                const chap = document.getElementById('mcBulkChapterSel')?.value || mcState.defaultChap;
+                mcState.defaultSubj = subj;
+                mcState.defaultChap = chap;
+                Object.values(mcState.regionMeta).forEach(m => {
+                    m.subject = subj;
+                    m.chapter = chap;
+                });
+                mcRenderOverlayAndSidebar();
+            },
+            mcUpdateRegion(key, field, val) {
+                const m = mcState.regionMeta[key];
+                if (!m) return;
+                m[field] = val;
+                if (field === 'subject') {
+                    m.chapter = (JEE_CHAPTERS[val] || JEE_CHAPTERS.Physics)[0];
+                }
+                mcRenderOverlayAndSidebar();
+            },
+            mcResolve(action) {
+                const resolver = mcState.resolver;
+                mcState.resolver = null;
+                const switchToManualAll = Boolean(document.getElementById('mcSwitchManualAllChk')?.checked);
+                const blocks = action === 'CONFIRM'
+                    ? mcGetAllRegions()
+                        .filter(r => !r.meta.excluded)
+                        .map(r => ({
+                            questionNumber: r.meta.qNum,
+                            subject: r.meta.subject,
+                            chapter: r.meta.chapter,
+                            xmin: r.xmin,
+                            xmax: r.xmax,
+                            ymin: r.ymin,
+                            ymax: r.ymax,
+                            ocrText: '',
+                            firstLineSnippet: '',
+                            lastLineSnippet: '',
+                            isContinuationFromPrevPage: Boolean(r.meta.stitchPrev),
+                            manualStitchWithPrev: Boolean(r.meta.stitchPrev),
+                            continuesToNextPage: false,
+                            colLines: []
+                        }))
+                    : [];
+
+                animateModalClose('manualCropModal', () => {
+                    if (resolver) resolver({ action, switchToManualAll, blocks });
+                });
+            },
                         // --- Animated Solver Modal ---
             openSolverModal() {
                 closeCustomDropdown();
