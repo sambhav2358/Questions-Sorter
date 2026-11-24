@@ -850,6 +850,7 @@
                 /* =================================================================== */
         /* INTERACTIVE MANUAL PDF SEPARATOR LINE & STITCH EDITOR               */
         /* =================================================================== */
+        #batchReviewModal:not(.hidden),
         #manualCropModal:not(.hidden) {
             display: flex !important;
             align-items: center !important;
@@ -1659,18 +1660,37 @@
                                 <span class="m3-text-muted text-xs">to</span>
                                 <input id="endPageInput" type="number" min="1" value="10" class="w-full h-9 m3-input m3-surface-low px-2 text-xs text-center">
                             </div>
-                        </div>                       
-                        <div class="sm:col-span-3 pt-2 flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-t border-[var(--md-outline-variant)]">
-                            <label class="flex items-center gap-2 text-xs font-bold cursor-pointer">
-                                <input type="checkbox" id="pdfGeminiVerifyBordersChk" class="rounded">
-                                <span>Verify borders with Gemini 3.8 Flash (auto-retries on failure)</span>
-                            </label>
-                            <label class="flex items-center gap-2 text-xs font-extrabold cursor-pointer" style="color: var(--md-primary)">
-                                <input type="checkbox" id="pdfManualCropModeChk" class="rounded">
-                                <span>Manual Crop Mode (Interactive Separator Lines)</span>
-                            </label>
                         </div>
+                                                <div class="sm:col-span-3 pt-2 space-y-2.5 border-t border-[var(--md-outline-variant)]">
+                            <!-- On-Device WebGPU Vision AI Chapter Identifier -->
+                            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-2.5 rounded-2xl m3-surface-low border border-[var(--md-outline-variant)]">
+                                <label class="flex items-center gap-2 text-xs font-extrabold cursor-pointer" style="color: var(--md-primary)">
+                                    <input type="checkbox" id="pdfUseLocalVlmChk" checked class="rounded">
+                                    <span>On-Device Vision AI Chapters (WebGPU • Reads Diagrams • Zero API)</span>
+                                </label>
+                                <select id="pdfLocalVlmModelSel" class="h-8 m3-input m3-surface-high px-2.5 text-[11px] font-bold sm:w-56">
+                                    <option value="qwen3.5-2b">Qwen 3.5 2B Vision (Recommended)</option>
+                                    <option value="gemma-4-e2b">Gemma 4 E2B Multimodal</option>
+                                    <option value="qwen3.5-4b">Qwen 3.5 4B Vision (Max Accuracy)</option>
+                                    <option value="qwen3.5-0.8b">Qwen 3.5 0.8B Vision (Fastest)</option>
+                                </select>
+                            </div>
 
+                            <div class="flex flex-wrap items-center justify-between gap-2">
+                                <label class="flex items-center gap-2 text-xs font-extrabold cursor-pointer text-emerald-400">
+                                    <input type="checkbox" id="pdfReviewAfterExtractChk" checked class="rounded">
+                                    <span>Review Borders & Chapters Before Saving</span>
+                                </label>
+                                <label class="flex items-center gap-2 text-xs font-bold cursor-pointer">
+                                    <input type="checkbox" id="pdfManualCropModeChk" class="rounded">
+                                    <span>Manual Crop Per Page</span>
+                                </label>
+                                <label class="flex items-center gap-2 text-xs font-bold cursor-pointer m3-text-muted">
+                                    <input type="checkbox" id="pdfGeminiVerifyBordersChk" class="rounded">
+                                    <span>Gemini Border Check (Optional)</span>
+                                </label>
+                            </div>
+                        </div>
                     </div>
 
                     <!-- Image Options -->
@@ -1975,6 +1995,149 @@
         </div>
     </div>
 
+        <!-- =================================================================== -->
+    <!-- MODAL 3C: POST-EXTRACTION BORDER & CHAPTER REVIEW STUDIO            -->
+    <!-- =================================================================== -->
+    <div id="batchReviewModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[66] hidden flex items-center justify-center p-2 sm:p-4">
+        <div class="m3-dialog max-w-6xl w-full max-h-[94dvh] flex flex-col overflow-hidden">
+            <!-- Header -->
+            <div class="px-4 py-3 m3-surface-low border-b border-[var(--md-outline-variant)] flex items-center justify-between gap-2 shrink-0 flex-wrap">
+                <div class="flex items-center gap-2.5 min-w-0">
+                    <div class="w-9 h-9 m3-cookie-12 flex items-center justify-center shrink-0" style="background: var(--md-primary-container); color: var(--md-primary);">
+                        <i class="ph-bold ph-seal-check text-lg"></i>
+                    </div>
+                    <div class="min-w-0">
+                        <h3 id="brModalTitle" class="font-extrabold text-sm sm:text-base truncate">Review Extracted Questions — 1 / 1</h3>
+                        <p id="brSubBanner" class="text-[11px] m3-text-muted truncate">Verify crop borders & AI-assigned JEE chapters before saving to your vault.</p>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-2 shrink-0 flex-wrap">
+                    <div class="m3-segmented-group">
+                        <button type="button" id="brFilterAllBtn" onclick="window.app.brSetFilter('ALL')" class="m3-seg-btn active">All (<span id="brCountAll">0</span>)</button>
+                        <button type="button" id="brFilterFlagBtn" onclick="window.app.brSetFilter('FLAGGED')" class="m3-seg-btn">Needs Review (<span id="brCountFlagged">0</span>)</button>
+                    </div>
+
+                    <div class="m3-icon-group">
+                        <button type="button" id="brPrevBtn" onclick="window.app.brNavigate(-1)" class="m3-icon-group-btn" title="Previous Question">
+                            <i class="ph-bold ph-caret-left"></i>
+                        </button>
+                        <button type="button" id="brNextBtn" onclick="window.app.brNavigate(1)" class="m3-icon-group-btn" title="Next Question">
+                            <i class="ph-bold ph-caret-right"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Body: Left = Cropped Image + Live Border Fine-Tuner, Right = AI Chapter & Reasoning -->
+            <div class="flex-1 min-h-0 grid grid-cols-1 lg:grid-cols-12 overflow-hidden">
+                <!-- Left: Question Image & Live Border Adjustment -->
+                <div class="lg:col-span-7 min-h-0 flex flex-col border-b lg:border-b-0 lg:border-r border-[var(--md-outline-variant)] overflow-hidden">
+                    <!-- Direct Top/Bottom Border Expand & Trim Bar -->
+                    <div class="px-3 py-2 m3-surface-high border-b border-[var(--md-outline-variant)] flex flex-wrap items-center justify-between gap-2 shrink-0">
+                        <div class="flex items-center gap-2 text-[11px] font-bold">
+                            <span class="m3-text-muted">Top Border:</span>
+                            <button type="button" onclick="window.app.brNudgeBorder('top', -18)" class="h-6 px-2 rounded-full m3-surface-low hover:brightness-110 text-[10px] font-extrabold" title="Expand upward">▲ +Expand</button>
+                            <button type="button" onclick="window.app.brNudgeBorder('top', 14)" class="h-6 px-2 rounded-full m3-surface-low hover:brightness-110 text-[10px] font-extrabold" title="Trim downward">▼ Trim</button>
+                        </div>
+
+                        <div class="flex items-center gap-2 text-[11px] font-bold">
+                            <span class="m3-text-muted">Bottom Border:</span>
+                            <button type="button" onclick="window.app.brNudgeBorder('bottom', -14)" class="h-6 px-2 rounded-full m3-surface-low hover:brightness-110 text-[10px] font-extrabold" title="Trim upward">▲ Trim</button>
+                            <button type="button" onclick="window.app.brNudgeBorder('bottom', 18)" class="h-6 px-2 rounded-full m3-surface-low hover:brightness-110 text-[10px] font-extrabold" title="Expand downward">▼ +Expand</button>
+                        </div>
+
+                        <button type="button" onclick="window.app.brResetCurrentBorder()" class="h-6 px-2.5 rounded-full m3-btn-tonal text-[10px]" title="Reset to original detected border">
+                            Reset Crop
+                        </button>
+                    </div>
+
+                    <!-- High-Res Preview Pane -->
+                    <div class="flex-1 min-h-0 overflow-y-auto mc-pdf-scroller p-3 m3-surface-low flex items-start justify-center">
+                        <div class="bg-white rounded-2xl p-3 shadow-xl border border-[var(--md-outline-variant)] w-full max-w-3xl">
+                            <img id="brQuestionImg" src="" alt="Question Preview" class="w-full h-auto block rounded-xl">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right: Chapter Controls, AI Reasoning & Actions -->
+                <div class="lg:col-span-5 min-h-0 overflow-y-auto p-4 space-y-3">
+                    <!-- Confidence & Status Row -->
+                    <div class="flex items-center justify-between gap-2 flex-wrap">
+                        <div class="flex items-center gap-1.5 flex-wrap">
+                            <span id="brPagePill" class="px-2.5 py-0.5 rounded-full m3-surface-high text-[10.5px] font-extrabold">Page 1</span>
+                            <span id="brConfBadge" class="px-2.5 py-0.5 rounded-full text-[10.5px] font-extrabold bg-emerald-500/20 text-emerald-400">AI: 94%</span>
+                            <span id="brTieBreakerBadge" class="hidden px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-sky-500/20 text-sky-300">Tie-Breaker ✓</span>
+                        </div>
+                        <label class="flex items-center gap-1.5 text-xs font-extrabold text-rose-400 cursor-pointer">
+                            <input type="checkbox" id="brSkipChk" onchange="window.app.brToggleSkipCurrent(this.checked)" class="rounded accent-rose-500">
+                            <span>Skip / Delete</span>
+                        </label>
+                    </div>
+
+                    <!-- Q#, Subject & Chapter Editors -->
+                    <div class="m3-group-list">
+                        <div class="p-3 m3-group-item flex items-center justify-between gap-3">
+                            <label class="text-xs font-bold shrink-0">Question #</label>
+                            <input id="brQNumInput" type="text" oninput="window.app.brUpdateField('questionNumber', this.value)" class="w-24 h-8 m3-input m3-surface-low px-3 text-xs font-extrabold text-center">
+                        </div>
+                        <div class="p-3 m3-group-item flex items-center justify-between gap-3">
+                            <label class="text-xs font-bold shrink-0">Subject</label>
+                            <select id="brSubjectSel" onchange="window.app.brUpdateField('subject', this.value)" class="flex-1 max-w-[230px] h-8.5 m3-input m3-surface-low px-3 text-xs font-bold">
+                                <option value="Physics">Physics</option>
+                                <option value="Chemistry">Chemistry</option>
+                                <option value="Mathematics">Mathematics</option>
+                            </select>
+                        </div>
+                        <div class="p-3 m3-group-item space-y-1.5">
+                            <label class="block text-xs font-bold">Primary JEE Chapter</label>
+                            <select id="brChapterSel" onchange="window.app.brUpdateField('chapter', this.value)" class="w-full h-9 m3-input m3-surface-low px-3 text-xs font-bold"></select>
+                            <div id="brSecondaryWrap" class="hidden pt-1 flex items-center justify-between gap-2">
+                                <span class="text-[10.5px] m3-text-muted truncate">Runner-up: <strong id="brSecondaryName"></strong></span>
+                                <button type="button" onclick="window.app.brAcceptSecondaryChapter()" class="h-6 px-2.5 rounded-full m3-btn-tonal text-[10px] shrink-0">Use This</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Vision AI Explanation Card -->
+                    <div class="p-3.5 rounded-3xl m3-surface-high border border-[var(--md-outline-variant)] space-y-2 text-xs">
+                        <div class="flex items-center justify-between gap-2">
+                            <span class="font-extrabold uppercase tracking-wider text-[10px]" style="color: var(--md-primary)">On-Device Vision AI Analysis</span>
+                            <span id="brElapsedLabel" class="text-[10px] font-mono m3-text-muted"></span>
+                        </div>
+                        <div class="text-[11px] leading-relaxed">
+                            <span class="font-bold m3-text-muted">Diagram: </span>
+                            <span id="brDiagramText">—</span>
+                        </div>
+                        <div class="text-[11px] leading-relaxed">
+                            <span class="font-bold m3-text-muted">Reasoning: </span>
+                            <span id="brReasoningText">—</span>
+                        </div>
+                        <div class="pt-1 flex items-center gap-2 flex-wrap">
+                            <button type="button" id="brReRunVlmBtn" onclick="window.app.brReRunVisionAIOnCurrent()" class="h-8 px-3 m3-btn-tonal text-[11px] flex items-center gap-1.5">
+                                <i class="ph-bold ph-sparkle"></i>
+                                <span>Re-Run Vision AI on Updated Crop</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Question Palette Strip -->
+            <div id="brPaletteStrip" class="px-4 py-2 m3-surface-high border-t border-[var(--md-outline-variant)] flex items-center gap-1.5 overflow-x-auto no-scrollbar shrink-0"></div>
+
+            <!-- Footer -->
+            <div class="px-4 py-3 m3-surface-low border-t border-[var(--md-outline-variant)] flex items-center justify-between gap-2 shrink-0 flex-wrap">
+                <button type="button" onclick="window.app.brResolve('CANCEL')" class="h-9 px-4 rounded-full bg-rose-500/20 hover:bg-rose-600 text-rose-400 hover:text-white text-xs font-extrabold transition">
+                    Discard Import
+                </button>
+                <button type="button" onclick="window.app.brResolve('CONFIRM')" class="h-10 px-6 m3-btn-filled text-xs sm:text-sm flex items-center gap-1.5 shadow-lg ml-auto">
+                    <i class="ph-bold ph-check-circle"></i>
+                    <span id="brSaveBtnLabel">Save Questions to Vault & Sync</span>
+                </button>
+            </div>
+        </div>
+    </div>
 
     <!-- =================================================================== -->
     <!-- MODAL 4: WHITEBOARD (ZERO-OVERFLOW BAR + FEATURES #1,#2,#3,#4,#6,#7)-->
@@ -4833,6 +4996,10 @@ Analyze this JEE question image (${q.subject} - ${q.chapter}).
             const defaultSubj = document.getElementById('pdfDefaultSubjectSelect')?.value || 'AUTO';
             const useGeminiVerifier = Boolean(document.getElementById('pdfGeminiVerifyBordersChk')?.checked);
             let manualModeForRemaining = Boolean(document.getElementById('pdfManualCropModeChk')?.checked);
+            const useLocalVlm = Boolean(document.getElementById('pdfUseLocalVlmChk')?.checked);
+            const selectedVlmKey = document.getElementById('pdfLocalVlmModelSel')?.value || 'qwen3.5-2b';
+            const reviewBeforeSaving = Boolean(document.getElementById('pdfReviewAfterExtractChk')?.checked);
+            const pageCanvasMap = new Map();
             const startP = Math.max(1, parseInt(document.getElementById('startPageInput').value, 10) || 1);
             const endP = Math.min(state.pdfDoc.numPages, parseInt(document.getElementById('endPageInput').value, 10) || state.pdfDoc.numPages);
             const { padTop, padBottom } = getVerticalPads();
@@ -4909,6 +5076,7 @@ Analyze this JEE question image (${q.subject} - ${q.chapter}).
                     previewCanvas.width = canvas.width;
                     previewCanvas.height = canvas.height;
                     previewCtx.drawImage(canvas, 0, 0);
+                    pageCanvasMap.set(pageNum, canvas);
 
                     // Normalize engine blocks to be 100% compatible with Manual Cropper & Gemini Verifier
                     const localCandidates = (pageInfo.blocks || []).map(b => ({
@@ -5075,9 +5243,11 @@ Analyze this JEE question image (${q.subject} - ${q.chapter}).
                             const reClass = engine.classifyQuestion(combinedOcrText, {
                                 paperName,
                                 pageHeader: b.pageHeader || '',
+                                subjectOverride: b.subjectOverride || finalSubject || null,
                                 defaultSubject: defaultSubj,
                                 documentPrior: docAnalysis.detectedWorksheetPrior || null
                             });
+
                             finalSubject = reClass.subject;
                             finalChapter = reClass.chapter;
                         }
@@ -5110,6 +5280,8 @@ Analyze this JEE question image (${q.subject} - ${q.chapter}).
                             prevQuestion.isStitched = true;
                             prevQuestion.continuesToNextPage = Boolean(b.continuesToNextPage || b.continuesToNext);
                             prevQuestion.ocrText = cleanQuestionTextOnly(`${prevQuestion.ocrText || ''} ${combinedOcrText}`);
+                            if (!Array.isArray(prevQuestion._sourceSlices)) prevQuestion._sourceSlices = [];
+                            prevQuestion._sourceSlices.push({ pageNum, xmin, xmax, ymin, ymax, padTop, padBottom });
                             continue;
                         }
 
@@ -5138,7 +5310,19 @@ Analyze this JEE question image (${q.subject} - ${q.chapter}).
                             starred: false,
                             isStitched: false,
                             continuesToNextPage: Boolean(b.continuesToNextPage || b.continuesToNext),
-                            createdAt: Date.now() + i
+                            createdAt: Date.now() + i,
+                            _subjectOverride: b.subjectOverride || (defaultSubj !== 'AUTO' ? defaultSubj : null),
+                            _sourceSlices: [{ pageNum, xmin, xmax, ymin, ymax, padTop, padBottom }],
+                            _origSourceSlices: [{ pageNum, xmin, xmax, ymin, ymax, padTop, padBottom }],
+                            _vlmMeta: {
+                                confidence: typeof b.chapterConfidence === 'number' ? b.chapterConfidence : 0.72,
+                                needsReview: (b.chapterConfidence || 0.72) < 0.80,
+                                secondaryChapter: '',
+                                diagramSummary: '',
+                                reasoning: 'Initial local layout classification (Vision AI not run yet).',
+                                tieBreakerUsed: false,
+                                elapsedMs: 0
+                            }
                         };
 
                         batchQuestions.push(qObj);
@@ -5151,25 +5335,117 @@ Analyze this JEE question image (${q.subject} - ${q.chapter}).
                 }
 
                 if (state.cancelExtractionRequested) return;
+                // =============================================================
+                // STAGE 3: On-Device WebGPU Vision-Language AI Chapter Analysis
+                // (Inspects final cropped/stitched images directly on GPU!)
+                // =============================================================
+                if (useLocalVlm && batchQuestions.length > 0 && window.JEELocalVLMClassifier) {
+                    const vlm = window.JEELocalVLMClassifier;
+                    appendExtractLog(`🧠 Loading On-Device Vision AI (${selectedVlmKey}) on WebGPU...`, 'info');
+
+                    try {
+                        await vlm.loadModel(selectedVlmKey, {
+                            onProgress: (info) => {
+                                const dlPct = Math.max(5, Math.min(99, info.percent || 10));
+                                updateUploadProgressEverywhere(dlPct, `AI Model`, info.message || 'Loading Vision AI...');
+                            }
+                        });
+
+                        const activeInfo = vlm.getActiveModelInfo();
+                        appendExtractLog(`✓ Vision AI ready (${activeInfo.modelId} on ${(activeInfo.device || 'gpu').toUpperCase()})`, 'success');
+
+                        for (let qi = 0; qi < batchQuestions.length; qi++) {
+                            if (state.cancelExtractionRequested) return;
+                            const q = batchQuestions[qi];
+                            const pct = Math.round(((qi + 1) / batchQuestions.length) * 100);
+                            updateUploadProgressEverywhere(
+                                pct,
+                                `AI ${qi + 1}/${batchQuestions.length}`,
+                                `Vision AI analyzing Q.${q.questionNumber} diagram & concepts...`
+                            );
+
+                            try {
+                                const res = await vlm.classifyQuestionImage(q.imageDataUrl, {
+                                    modelKey: selectedVlmKey,
+                                    subjectHint: q._subjectOverride || (defaultSubj !== 'AUTO' ? defaultSubj : null),
+                                    paperName,
+                                    ocrTextHint: q.ocrText || '',
+                                    enableThinking: true,
+                                    enableTieBreaker: true
+                                });
+
+                                q.subject = res.subject;
+                                q.chapter = res.chapter;
+                                q._vlmMeta = {
+                                    confidence: res.confidence,
+                                    needsReview: res.needsReview,
+                                    secondaryChapter: res.secondaryChapter || '',
+                                    diagramSummary: res.diagramSummary || 'None',
+                                    reasoning: res.reasoning || '',
+                                    tieBreakerUsed: Boolean(res.tieBreakerUsed),
+                                    elapsedMs: res.elapsedMs || 0,
+                                    device: res.device || 'webgpu'
+                                };
+
+                                const sec = (res.elapsedMs / 1000).toFixed(1);
+                                const flagIcon = res.needsReview ? '⚠️' : '🧠';
+                                const tbTag = res.tieBreakerUsed ? ' [2-Pass]' : '';
+                                appendExtractLog(
+                                    `${flagIcon} Q.${q.questionNumber} → ${q.subject} • ${q.chapter} (${Math.round(res.confidence * 100)}%, ${sec}s${tbTag})`,
+                                    res.needsReview ? 'stitch' : 'success'
+                                );
+                            } catch (qVlmErr) {
+                                appendExtractLog(`⚠ Vision AI skipped Q.${q.questionNumber}: ${qVlmErr.message}`, 'error');
+                                q._vlmMeta.needsReview = true;
+                                q._vlmMeta.reasoning = `Vision AI error: ${qVlmErr.message}`;
+                            }
+                        }
+                    } catch (vlmInitErr) {
+                        appendExtractLog(`⚠ On-Device Vision AI unavailable (${vlmInitErr.message}). Keeping local engine chapters.`, 'error');
+                        toast(`Vision AI failed to load: ${vlmInitErr.message}`, 'warn');
+                    }
+                }
+
+                if (state.cancelExtractionRequested) return;
+
+                // =============================================================
+                // STAGE 4: Optional Interactive Border & Chapter Review Studio
+                // =============================================================
+                let finalBatchToSave = batchQuestions;
+                if (reviewBeforeSaving && batchQuestions.length > 0) {
+                    const reviewRes = await openBatchReviewModal(batchQuestions, pageCanvasMap, selectedVlmKey);
+                    if (reviewRes.action === 'CANCEL') {
+                        cancelPdfExtraction();
+                        return;
+                    }
+                    finalBatchToSave = reviewRes.questions;
+                }
+
+                // Strip transient review/crop helper fields before saving & pushing to GitHub Gist
+                const cleanBatch = finalBatchToSave.map(q => {
+                    const { _sourceSlices, _origSourceSlices, _subjectOverride, _vlmMeta, _skipInReview, _aiOrigChapter, ...cleanQ } = q;
+                    return cleanQ;
+                });
 
                 document.getElementById('minimizedUploadBar')?.classList.add('hidden');
                 document.getElementById('minimizedUploadBar')?.classList.remove('flex');
                 state.isUploadMinimized = false;
 
-                state.questions.push(...batchQuestions);
+                state.questions.push(...cleanBatch);
                 state.currentUploadBatchIds = [];
                 state.isExtracting = false;
                 setUploadButtonsLock(false);
-                updateUploadProgressEverywhere(100, `Done`, `Extracted ${extractedCount} questions locally!`);
+                updateUploadProgressEverywhere(100, `Done`, `Saved ${cleanBatch.length} questions!`);
                 sortAndRefreshQuestions(false);
 
-                toast(`Extracted ${extractedCount} questions locally! Syncing to Cloud...`, 'success');
+                toast(`Saved ${cleanBatch.length} questions! Syncing to Cloud...`, 'success');
                 window.app.closeUploadModal();
                 await pushToCloudGist(false);
 
                 if (isAutoSolveHintsEnabled() && getApiKey()) {
                     runBackgroundAnswerAndHintGenerator(false, false);
                 }
+
             } catch (err) {
                 if (err.name === 'AbortError' || state.cancelExtractionRequested) return;
                 state.isExtracting = false;
@@ -7947,6 +8223,165 @@ Analyze this JEE question image (${q.subject} - ${q.chapter}).
             });
         }
 
+                // ===================================================================
+        // POST-EXTRACTION BORDER & CHAPTER REVIEW STUDIO ENGINE
+        // ===================================================================
+        const brState = {
+            resolver: null,
+            questions: [],
+            pageCanvasMap: new Map(),
+            modelKey: 'qwen3.5-2b',
+            filter: 'ALL', // 'ALL' | 'FLAGGED'
+            currentIdx: 0,
+            isReRunningVlm: false
+        };
+
+        function brGetVisibleIndices() {
+            const out = [];
+            for (let i = 0; i < brState.questions.length; i++) {
+                const q = brState.questions[i];
+                if (brState.filter === 'FLAGGED' && !q._vlmMeta?.needsReview) continue;
+                out.push(i);
+            }
+            return out;
+        }
+
+        function openBatchReviewModal(batchQuestions, pageCanvasMap, modelKey = 'qwen3.5-2b') {
+            return new Promise((resolve) => {
+                brState.resolver = resolve;
+                brState.questions = batchQuestions.map(q => ({
+                    ...q,
+                    _skipInReview: false,
+                    _aiOrigChapter: q.chapter,
+                    _origSourceSlices: (q._sourceSlices || []).map(s => ({ ...s }))
+                }));
+                brState.pageCanvasMap = pageCanvasMap || new Map();
+                brState.modelKey = modelKey;
+                brState.filter = 'ALL';
+                brState.currentIdx = 0;
+                brState.isReRunningVlm = false;
+
+                brRenderCurrent();
+                animateModalOpen('batchReviewModal');
+            });
+        }
+
+        async function brRecropQuestionFromSlices(q) {
+            if (!q || !Array.isArray(q._sourceSlices) || q._sourceSlices.length === 0) return;
+            const croppedUrls = [];
+            let lastAspect = q.aspectRatio;
+
+            for (const sl of q._sourceSlices) {
+                const srcCanvas = brState.pageCanvasMap.get(sl.pageNum);
+                if (!srcCanvas) continue;
+                const res = crop2DSliceFromPage(
+                    srcCanvas,
+                    sl.xmin,
+                    sl.xmax,
+                    sl.ymin,
+                    sl.ymax,
+                    sl.padTop ?? 8,
+                    sl.padBottom ?? 8
+                );
+                croppedUrls.push(res.dataUrl);
+                lastAspect = res.aspectRatio;
+            }
+
+            if (croppedUrls.length === 1) {
+                q.imageDataUrl = croppedUrls[0];
+                q.aspectRatio = lastAspect;
+            } else if (croppedUrls.length > 1) {
+                let acc = croppedUrls[0];
+                let ratio = lastAspect;
+                for (let i = 1; i < croppedUrls.length; i++) {
+                    const st = await stitchCanvasesVertically(acc, croppedUrls[i]);
+                    acc = st.dataUrl;
+                    ratio = st.aspectRatio;
+                }
+                q.imageDataUrl = acc;
+                q.aspectRatio = ratio;
+            }
+        }
+
+        function brRenderCurrent() {
+            const allCount = brState.questions.length;
+            const flaggedCount = brState.questions.filter(q => q._vlmMeta?.needsReview && !q._skipInReview).length;
+            const keptCount = brState.questions.filter(q => !q._skipInReview).length;
+
+            document.getElementById('brCountAll').textContent = allCount;
+            document.getElementById('brCountFlagged').textContent = flaggedCount;
+            document.getElementById('brFilterAllBtn')?.classList.toggle('active', brState.filter === 'ALL');
+            document.getElementById('brFilterFlagBtn')?.classList.toggle('active', brState.filter === 'FLAGGED');
+            document.getElementById('brSaveBtnLabel').textContent = `Save ${keptCount} Question${keptCount === 1 ? '' : 's'} to Vault & Sync`;
+            requestAnimationFrame(() => updateAllSegmentedGliders());
+
+            let visible = brGetVisibleIndices();
+            if (visible.length === 0 && brState.filter === 'FLAGGED') {
+                brState.filter = 'ALL';
+                visible = brGetVisibleIndices();
+            }
+            if (visible.length === 0) return;
+
+            if (!visible.includes(brState.currentIdx)) {
+                brState.currentIdx = visible[0];
+            }
+            const posInVis = visible.indexOf(brState.currentIdx);
+            const q = brState.questions[brState.currentIdx];
+            const meta = q._vlmMeta || {};
+
+            document.getElementById('brModalTitle').textContent = `Review Question ${posInVis + 1} / ${visible.length} (Q.${q.questionNumber})`;
+            document.getElementById('brPrevBtn').disabled = posInVis <= 0;
+            document.getElementById('brNextBtn').disabled = posInVis >= visible.length - 1;
+
+            document.getElementById('brQuestionImg').src = q.imageDataUrl;
+            document.getElementById('brPagePill').textContent = q.isStitched ? `Page ${q.page} (Stitched)` : `Page ${q.page}`;
+
+            const confPct = Math.round((Number(meta.confidence) || 0.72) * 100);
+            const confBadge = document.getElementById('brConfBadge');
+            confBadge.textContent = meta.needsReview ? `Needs Review • ${confPct}%` : `AI Verified • ${confPct}%`;
+            confBadge.className = `px-2.5 py-0.5 rounded-full text-[10.5px] font-extrabold ${
+                meta.needsReview ? 'bg-amber-500/20 text-amber-300' : 'bg-emerald-500/20 text-emerald-400'
+            }`;
+
+            const tbBadge = document.getElementById('brTieBreakerBadge');
+            tbBadge.classList.toggle('hidden', !meta.tieBreakerUsed);
+
+            document.getElementById('brSkipChk').checked = Boolean(q._skipInReview);
+            document.getElementById('brQNumInput').value = q.questionNumber;
+            document.getElementById('brSubjectSel').value = q.subject;
+
+            const chapSel = document.getElementById('brChapterSel');
+            const chaps = JEE_CHAPTERS[q.subject] || JEE_CHAPTERS.Physics;
+            chapSel.innerHTML = chaps.map(c => `<option value="${c.replace(/"/g, '&quot;')}">${c}</option>`).join('');
+            chapSel.value = chaps.includes(q.chapter) ? q.chapter : chaps[0];
+
+            const secWrap = document.getElementById('brSecondaryWrap');
+            if (meta.secondaryChapter && meta.secondaryChapter !== q.chapter) {
+                secWrap.classList.remove('hidden');
+                document.getElementById('brSecondaryName').textContent = meta.secondaryChapter;
+            } else {
+                secWrap.classList.add('hidden');
+            }
+
+            document.getElementById('brDiagramText').textContent = meta.diagramSummary || 'None detected';
+            document.getElementById('brReasoningText').textContent = meta.reasoning || 'Classified locally.';
+            document.getElementById('brElapsedLabel').textContent = meta.elapsedMs
+                ? `${(meta.elapsedMs / 1000).toFixed(1)}s • ${(meta.device || 'GPU').toUpperCase()}`
+                : '';
+
+            // Palette strip
+            const palette = document.getElementById('brPaletteStrip');
+            palette.innerHTML = visible.map((origIdx, vIdx) => {
+                const item = brState.questions[origIdx];
+                const isCurr = origIdx === brState.currentIdx;
+                let cls = 'bg-emerald-600/80 text-white';
+                if (item._skipInReview) cls = 'bg-rose-600/70 text-white line-through opacity-60';
+                else if (item._vlmMeta?.needsReview) cls = 'bg-amber-500 text-slate-950';
+                const ring = isCurr ? 'ring-2 ring-[var(--md-primary)] scale-110' : '';
+                return `<button type="button" onclick="window.app.brJumpTo(${origIdx})" class="h-6 min-w-[28px] px-1.5 rounded-full text-[10px] font-extrabold shrink-0 transition ${cls} ${ring}">Q.${item.questionNumber}</button>`;
+            }).join('');
+        }
+
         
         // ===================================================================
         // GLOBAL APP CONTROLLER
@@ -8028,7 +8463,141 @@ Analyze this JEE question image (${q.subject} - ${q.chapter}).
                     if (resolver) resolver({ action, switchToManualAll, blocks });
                 });
             },
-                        // --- Animated Solver Modal ---
+            brSetFilter(mode) {
+                brState.filter = mode;
+                brRenderCurrent();
+            },
+            brJumpTo(origIdx) {
+                brState.currentIdx = origIdx;
+                brRenderCurrent();
+            },
+            brNavigate(dir) {
+                const visible = brGetVisibleIndices();
+                const pos = visible.indexOf(brState.currentIdx);
+                const nextPos = pos + dir;
+                if (nextPos >= 0 && nextPos < visible.length) {
+                    brState.currentIdx = visible[nextPos];
+                    brRenderCurrent();
+                }
+            },
+            brToggleSkipCurrent(checked) {
+                const q = brState.questions[brState.currentIdx];
+                if (!q) return;
+                q._skipInReview = Boolean(checked);
+                brRenderCurrent();
+            },
+            brUpdateField(field, val) {
+                const q = brState.questions[brState.currentIdx];
+                if (!q) return;
+                q[field] = val;
+                if (field === 'subject') {
+                    q.chapter = (JEE_CHAPTERS[val] || JEE_CHAPTERS.Physics)[0];
+                }
+                if (field === 'chapter' || field === 'subject') {
+                    if (q._vlmMeta) q._vlmMeta.needsReview = false;
+                }
+                brRenderCurrent();
+            },
+            brAcceptSecondaryChapter() {
+                const q = brState.questions[brState.currentIdx];
+                const sec = q?._vlmMeta?.secondaryChapter;
+                if (!q || !sec) return;
+                q.chapter = sec;
+                q._vlmMeta.needsReview = false;
+                brRenderCurrent();
+            },
+            async brNudgeBorder(edge, deltaNorm) {
+                const q = brState.questions[brState.currentIdx];
+                if (!q || !Array.isArray(q._sourceSlices) || q._sourceSlices.length === 0) return;
+                if (edge === 'top') {
+                    const firstSl = q._sourceSlices[0];
+                    firstSl.ymin = Math.max(0, Math.min(firstSl.ymax - 24, firstSl.ymin + deltaNorm));
+                } else {
+                    const lastSl = q._sourceSlices[q._sourceSlices.length - 1];
+                    lastSl.ymax = Math.min(1000, Math.max(lastSl.ymin + 24, lastSl.ymax + deltaNorm));
+                }
+                await brRecropQuestionFromSlices(q);
+                brRenderCurrent();
+            },
+            async brResetCurrentBorder() {
+                const q = brState.questions[brState.currentIdx];
+                if (!q || !Array.isArray(q._origSourceSlices)) return;
+                q._sourceSlices = q._origSourceSlices.map(s => ({ ...s }));
+                await brRecropQuestionFromSlices(q);
+                brRenderCurrent();
+                toast('Reset crop border to detected bounds', 'info');
+            },
+            async brReRunVisionAIOnCurrent() {
+                if (brState.isReRunningVlm) return;
+                const q = brState.questions[brState.currentIdx];
+                const vlm = window.JEELocalVLMClassifier;
+                if (!q || !vlm) return toast('local-vlm-classifier.js not loaded', 'warn');
+
+                const btn = document.getElementById('brReRunVlmBtn');
+                brState.isReRunningVlm = true;
+                if (btn) { btn.disabled = true; btn.innerHTML = '<i class="ph-bold ph-spinner animate-spin"></i><span>Analyzing on GPU...</span>'; }
+
+                try {
+                    const res = await vlm.classifyQuestionImage(q.imageDataUrl, {
+                        modelKey: brState.modelKey,
+                        subjectHint: q.subject,
+                        paperName: q.paperName,
+                        ocrTextHint: q.ocrText || '',
+                        enableThinking: true,
+                        enableTieBreaker: true
+                    });
+                    q.subject = res.subject;
+                    q.chapter = res.chapter;
+                    q._vlmMeta = {
+                        confidence: res.confidence,
+                        needsReview: res.needsReview,
+                        secondaryChapter: res.secondaryChapter || '',
+                        diagramSummary: res.diagramSummary || 'None',
+                        reasoning: res.reasoning || '',
+                        tieBreakerUsed: Boolean(res.tieBreakerUsed),
+                        elapsedMs: res.elapsedMs || 0,
+                        device: res.device || 'webgpu'
+                    };
+                    brRenderCurrent();
+                    toast(`Re-classified as ${res.subject} • ${res.chapter} (${Math.round(res.confidence * 100)}%)`, 'success');
+                } catch (err) {
+                    toast(`Vision AI error: ${err.message}`, 'warn');
+                } finally {
+                    brState.isReRunningVlm = false;
+                    if (btn) { btn.disabled = false; btn.innerHTML = '<i class="ph-bold ph-sparkle"></i><span>Re-Run Vision AI on Updated Crop</span>'; }
+                }
+            },
+            brResolve(action) {
+                const resolver = brState.resolver;
+                brState.resolver = null;
+                const kept = brState.questions.filter(q => !q._skipInReview);
+
+                if (action === 'CONFIRM') {
+                    // Teach both local classifiers from any manual chapter overrides you made during review
+                    for (const q of kept) {
+                        if (q._aiOrigChapter && q._aiOrigChapter !== q.chapter) {
+                            if (window.JEELocalVLMClassifier?.recordUserCorrection) {
+                                window.JEELocalVLMClassifier.recordUserCorrection({
+                                    diagramSummary: q._vlmMeta?.diagramSummary || '',
+                                    snippet: q.firstLineSnippet || q.ocrText || '',
+                                    wrongChapter: q._aiOrigChapter,
+                                    correctSubject: q.subject,
+                                    correctChapter: q.chapter
+                                });
+                            }
+                            if (window.JEELocalVisionEngine?.learnCorrection) {
+                                window.JEELocalVisionEngine.learnCorrection(`${q.ocrText || ''} ${q.firstLineSnippet || ''}`, q.subject, q.chapter);
+                            }
+                        }
+                    }
+                }
+
+                animateModalClose('batchReviewModal', () => {
+                    if (resolver) resolver({ action, questions: kept });
+                });
+            },
+            
+            // --- Animated Solver Modal ---
             openSolverModal() {
                 closeCustomDropdown();
                 state.isSolverMinimized = false;
@@ -9029,11 +9598,19 @@ Analyze this JEE question image (${q.subject} - ${q.chapter}).
                 if (!q) return;
                 q[field] = val;
                 if (field === 'subject') q.chapter = JEE_CHAPTERS[val]?.[0] || 'General';
-                if ((field === 'chapter' || field === 'subject') && window.JEELocalVisionEngine?.learnCorrection) {
-                    const sampleText = `${q.ocrText || ''} ${q.firstLineSnippet || ''} ${q.lastLineSnippet || ''}`.trim();
-                    if (sampleText) window.JEELocalVisionEngine.learnCorrection(sampleText, q.subject, q.chapter);
+                if (field === 'chapter' || field === 'subject') {
+                    const sampleText = `${q.ocrText || ''} ${q.firstLineSnippet || ''}`.trim();
+                    if (sampleText && window.JEELocalVisionEngine?.learnCorrection) {
+                        window.JEELocalVisionEngine.learnCorrection(sampleText, q.subject, q.chapter);
+                    }
+                    if (window.JEELocalVLMClassifier?.recordUserCorrection) {
+                        window.JEELocalVLMClassifier.recordUserCorrection({
+                            snippet: sampleText,
+                            correctSubject: q.subject,
+                            correctChapter: q.chapter
+                        });
+                    }
                 }
-
                 const stillMatches = getFiltered().some(item => item.id === q.id);
                 const cardEl = document.querySelector(`article[data-card-id="${q.id}"]`);
                 if (stillMatches && cardEl) {
