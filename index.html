@@ -4981,7 +4981,7 @@ Analyze this JEE question image (${q.subject} - ${q.chapter}).
             toast('Upload cancelled & all questions from that PDF were rolled back.', 'warn');
         }
 
-                // Full-Document Local Vision Engine Pipeline (Optional Manual Cropper & Optional Gemini Verifier)
+        // Full-Document Local Vision Engine Pipeline (Optional Manual Cropper & Optional Gemini Verifier)
         async function startPdfExtraction() {
             if (!state.pdfDoc || state.isExtracting) return;
 
@@ -5400,11 +5400,25 @@ Analyze this JEE question image (${q.subject} - ${q.chapter}).
                                 q._vlmMeta.reasoning = `Vision AI error: ${qVlmErr.message}`;
                             }
                         }
-                    } catch (vlmInitErr) {
-                        appendExtractLog(`⚠ On-Device Vision AI unavailable (${vlmInitErr.message}). Keeping local engine chapters.`, 'error');
-                        toast(`Vision AI failed to load: ${vlmInitErr.message}`, 'warn');
+                    }catch (vlmInitErr) {
+                        const errMsg = vlmInitErr?.message || String(vlmInitErr);
+                        appendExtractLog(`⚠ On-Device Vision AI unavailable (${errMsg}). Keeping local engine chapters.`, 'error');
+                        toast(`Vision AI failed to load: ${errMsg}`, 'warn');
+                        for (const q of batchQuestions) {
+                            if (q._vlmMeta) {
+                                q._vlmMeta.reasoning = `Vision AI failed to start: ${errMsg}`;
+                            }
+                        }
+                    }
+                } else if (useLocalVlm && !window.JEELocalVLMClassifier) {
+                    const msg = 'local-vlm-classifier.js did not load (check exact filename in GitHub repo & hard-refresh).';
+                    appendExtractLog(`⚠ ${msg}`, 'error');
+                    toast(msg, 'warn');
+                    for (const q of batchQuestions) {
+                        if (q._vlmMeta) q._vlmMeta.reasoning = msg;
                     }
                 }
+
 
                 if (state.cancelExtractionRequested) return;
 
