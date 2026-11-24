@@ -4901,15 +4901,15 @@ Analyze this JEE question image (${q.subject} - ${q.chapter}).
                     const pageNum = pageInfo.pageNum;
                     const canvas = pageInfo.canvas;
 
+                    if (pageInfo.isAnswerKeyPage || !canvas) {
+                        appendExtractLog(`Page ${pageNum}: Skipped Answer Key / Solutions page (answers extracted locally ✓)`, 'stitch');
+                        continue;
+                    }
+                    
                     // Update live preview canvas in upload modal
                     previewCanvas.width = canvas.width;
                     previewCanvas.height = canvas.height;
                     previewCtx.drawImage(canvas, 0, 0);
-
-                    if (pageInfo.isAnswerKeyPage) {
-                        appendExtractLog(`Page ${pageNum}: Skipped Answer Key / Solutions page (answers extracted locally ✓)`, 'stitch');
-                        continue;
-                    }
 
                     // Normalize engine blocks to be 100% compatible with Manual Cropper & Gemini Verifier
                     const localCandidates = (pageInfo.blocks || []).map(b => ({
@@ -5128,7 +5128,7 @@ Analyze this JEE question image (${q.subject} - ${q.chapter}).
                             ocrText: combinedOcrText,
                             firstLineSnippet: b.firstLineSnippet || '',
                             lastLineSnippet: b.lastLineSnippet || '',
-                            hint: '',
+                            hint: b.hint || '',
                             answerKey: b.answerKey || '',
                             whiteboardData: null,
                             timeSpent: 0,
