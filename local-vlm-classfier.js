@@ -32,8 +32,13 @@
 (function (globalScope) {
     'use strict';
 
-    const ENGINE_VERSION = '1.0.0';
-    const TRANSFORMERS_CDN = 'https://cdn.jsdelivr.net/npm/@huggingface/transformers@4.3.2';
+    const ENGINE_VERSION = '1.0.0';    
+    const TRANSFORMERS_CDN_CANDIDATES = [
+        'https://cdn.jsdelivr.net/npm/@huggingface/transformers@4.3.2/dist/transformers.min.js',
+        'https://cdn.jsdelivr.net/npm/@huggingface/transformers@4.3.2/+esm',
+        'https://cdn.jsdelivr.net/npm/@huggingface/transformers@4/dist/transformers.min.js'
+    ];
+
     const USER_CORRECTIONS_KEY = 'jee_vlm_fewshot_memory_v1';
 
     // ========================================================================
@@ -406,12 +411,14 @@
         const hasWebGPU = typeof navigator !== 'undefined' && Boolean(navigator.gpu);
         let gpuAdapterInfo = null;
         let webgpuAvailable = false;
+        let supportsFp16 = false;
 
         if (hasWebGPU) {
             try {
                 const adapter = await navigator.gpu.requestAdapter({ powerPreference: 'high-performance' });
                 if (adapter) {
                     webgpuAvailable = true;
+                    supportsFp16 = Boolean(adapter.features && adapter.features.has('shader-f16'));
                     gpuAdapterInfo = adapter.info || (typeof adapter.requestAdapterInfo === 'function' ? await adapter.requestAdapterInfo().catch(() => null) : null);
                 }
             } catch (_) {
@@ -424,6 +431,7 @@
 
         return {
             webgpuAvailable,
+            supportsFp16,
             isSecureContext,
             deviceMemoryGB,
             gpuVendor: gpuAdapterInfo?.vendor || 'Unknown',
@@ -784,13 +792,25 @@ Re-inspect the question image closely and pick the single TRUE primary chapter f
     // ========================================================================
     async function ensureTransformersLoaded() {
         if (runtime.tf) return runtime.tf;
-        runtime.tf = await import(TRANSFORMERS_CDN);
-        if (runtime.tf?.env) {
-            runtime.tf.env.allowLocalModels = false;
-            runtime.tf.env.useBrowserCache = true;
+        let lastErr = null;
+        for (const url of TRANSFORMERS_CDN_CANDIDATES) {
+            try {
+                const mod = await import(url);
+                if (mod && (mod.AutoProcessor || mod.AutoModelForImageTextToText)) {
+                    runtime.tf = mod;
+                    if (runtime.tf.env) {
+                        runtime.tf.env.allowLocalModels = false;
+                        runtime.tf.env.useBrowserCache = true;
+                    }
+                    return runtime.tf;
+                }
+            } catch (e) {
+                lastErr = e;
+            }
         }
-        return runtime.tf;
+        throw new Error(`Could not load Transformers.js v4 browser bundle (${lastErr?.message || 'network/module error'})`);
     }
+
 
     async function loadModel(modelKey = 'qwen3.5-2b', options = {}) {
         const spec = MODEL_CATALOG[modelKey] || MODEL_CATALOG['qwen3.5-2b'];
@@ -865,8 +885,13 @@ Re-inspect the question image closely and pick the single TRUE primary chapter f
                 } else if (spec.family === 'qwen3_5' && tf.Qwen3_5ForConditionalGeneration) {
                     ModelClass = tf.Qwen3_5ForConditionalGeneration;
                 }
+                let dtype = options.dtype || (device === 'wasm' ? 'q4' : spec.defaultDtype);
+                if (device === 'webgpu' && !caps.supportsFp16) {
+                    dtype = spec.family === 'qwen3_5'
+                        ? { embed_tokens: 'q4', vision_encoder: 'q4', decoder_model_merged: 'q4' }
+                        : 'q4';
+                }
 
-                const dtype = options.dtype || (device === 'wasm' ? 'q4' : spec.defaultDtype);
                 const model = await ModelClass.from_pretrained(spec.id, {
                     dtype,
                     device,
