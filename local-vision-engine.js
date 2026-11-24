@@ -899,36 +899,101 @@
         SECTION_BANNER_RX: /^(?:PART|SECTION|SUB[\-\s]?SECTION|EXERCISE|LEVEL|DPP|WORKSHEET|SHEET|MODULE|STAGE|TYPE|CATEGORY)[\s\-\:\.]*(?:[IVX\dA-Z]+)?(?:\s*[\:\-\(\[]|\s+(?:PHYSICS|CHEMISTRY|MATHEMATICS|MATHS|SINGLE|MULTIPLE|INTEGER|NUMERICAL|MATRIX|MATCH|COMPREHENSION|PARAGRAPH|SUBJECTIVE|ASSERTION))/i,
         SUBJECT_ONLY_RX: /^(?:PART[\s\-]*[IVX1-3A-C][\s\:\-]*)?(PHYSICS|CHEMISTRY|MATHEMATICS|MATHS)\s*(?:\(.*?\))?$/i,
         PASSAGE_START_RX: /^(?:PASSAGE|COMPREHENSION|PARAGRAPH|LINKED\s*COMPREHENSION|DIRECTION[S]?\s*FOR)\b.*?(?:Q\.?\s*(\d+)\s*(?:to|\-|&|and)\s*Q?\.?\s*(\d+))?/i,
-        ANSWER_KEY_HEADER_RX: /^(?:ANSWER\s*KEY[S]?|ANSWERS?\s*(?:&|AND)?\s*HINTS?|HINTS?\s*(?:&|AND)?\s*SOLUTIONS?|DETAILED\s*SOLUTIONS?|SOLUTIONS?)\b/i,
+                ANSWER_KEY_HEADER_RX: /(?:^|\b)(?:ANSWER\s*KEY[S]?|ANSWERS?\s*(?:&|AND)?\s*HINTS?|HINTS?\s*(?:&|AND)?\s*SOLUTIONS?|DETAILED\s*SOLUTIONS?|SOLUTIONS?)\b/i,
+        SOLUTION_BODY_RX: /\b(?:Explain\s*Question|Question\s*Explanation|Final\s*Answer)\s*:/i,
         MATRIX_TABLE_RX: /\b(?:COLUMN\s*[\-\s]*[I1]|LIST\s*[\-\s]*[I1]|MATCH\s*THE\s*(?:FOLLOWING|COLUMN|LIST))\b/i,
 
         /**
-         * Detects if a page is an Answer Key / Solutions page so it is never imported as questions,
-         * AND attempts to parse { qNum -> answerKey } locally!
+         * Detects Answer Key & Solutions pages (including sticky continuation pages with no header),
+         * parses inline pairs, Allen horizontal Q./A. tables, and Solution "Final Answer:" + "Concept:" lines.
          */
-        detectAnswerKeyPage(lines, fullText) {
-            const topText = lines.slice(0, 6).map(l => l.text).join(' ');
-            const hasKeyHeader = this.ANSWER_KEY_HEADER_RX.test(topText);
+        detectAnswerKeyPage(lines, fullText, alreadyInPostSection = false) {
+            const topLines = (lines || []).slice(0, 7);
+            const hasHeaderLine = topLines.some(l => {
+                const t = l.text.trim();
+                return t.length <= 60 && this.ANSWER_KEY_HEADER_RX.test(t);
+            });
 
-            // Count compact answer pairs like "1. (A)  2. (B)  3. (C)" or "Q.1 (A)"
+            // Detect Solution body markers ("Explain Question:", "Question Explanation:", "Final Answer:")
+            const solMarkers = (fullText.match(/\b(?:Explain\s*Question|Question\s*Explanation|Final\s*Answer|Concept)\s*:/gi) || []).length;
+            const isSolutionBody = solMarkers >= 2;
+
+            // Detect inline key pairs like "1. (A)  2. (B)"
             const pairMatches = fullText.match(/(?:^|\s)(?:Q\.?\s*)?(\d{1,3})\s*[\.\)\:\-]\s*(?:\(?[A-D](?:\s*,\s*[A-D])*\)?|\d+(?:\.\d+)?)(?=\s|$)/gi) || [];
             const isDenseKeyGrid = pairMatches.length >= 12 && fullText.length / Math.max(1, pairMatches.length) < 35;
 
-            if (!hasKeyHeader && !isDenseKeyGrid) {
-                return { isAnswerKey: false, parsedAnswers: {} };
+            // Detect Allen horizontal key rows: "Q.  1  2  3 ..." followed by "A.  12.50  5.00 ..."
+            const hasHorizontalKeyTable = lines.some(l => /^Q\.?\s+\d+/.test(l.text)) &&
+                lines.some(l => /^(?:A\.?|Ans\.?)\s+(?:\d|[A-D]\b)/i.test(l.text));
+
+            const isPostQuestionPage = Boolean(alreadyInPostSection || hasHeaderLine || isSolutionBody || isDenseKeyGrid || hasHorizontalKeyTable);
+            if (!isPostQuestionPage) {
+                return { isAnswerKey: false, isSolutionPage: false, parsedAnswers: {}, parsedHints: {} };
             }
 
             const parsedAnswers = {};
-            const pairRx = /(?:^|\s)(?:Q\.?\s*)?(\d{1,3})\s*[\.\)\:\-]\s*(\(?[A-D](?:\s*,\s*[A-D])*\)?|-?\d+(?:\.\d+)?)(?=\s|$)/gi;
-            let m;
-            while ((m = pairRx.exec(fullText)) !== null) {
-                const qn = String(parseInt(m[1], 10));
-                const ans = m[2].trim();
-                if (!parsedAnswers[qn]) parsedAnswers[qn] = ans;
-            }
-            return { isAnswerKey: true, parsedAnswers };
-        },
+            const parsedHints = {};
 
+            // 1. Parse Allen horizontal tabular Answer Keys (row of Q numbers paired with next row of answers)
+            for (let i = 0; i < lines.length - 1; i++) {
+                const qLine = lines[i].text.trim();
+                if (/^Q\.?\s+\d+/i.test(qLine)) {
+                    const qNums = qLine.replace(/^Q\.?\s*/i, '').match(/\d{1,3}/g) || [];
+                    // Look at next 1-2 lines for the matching answer row
+                    for (let k = i + 1; k <= Math.min(lines.length - 1, i + 2); k++) {
+                        const aLine = lines[k].text.trim();
+                        if (/^(?:PART|SECTION|Q\.)/i.test(aLine)) break;
+                        const cleanedA = aLine.replace(/^(?:A\.?|Ans\.?)\s*/i, '').trim();
+                        const ansTokens = cleanedA.match(/(?:[A-D](?:\s*,\s*[A-D])+|[A-D]\b|-?\d+(?:\.\d+)?)/g) || [];
+                        if (ansTokens.length >= Math.max(2, Math.floor(qNums.length * 0.7))) {
+                            const count = Math.min(qNums.length, ansTokens.length);
+                            for (let c = 0; c < count; c++) {
+                                const qKey = String(parseInt(qNums[c], 10));
+                                if (!parsedAnswers[qKey]) parsedAnswers[qKey] = ansTokens[c].replace(/\s+/g, '');
+                            }
+                            break;
+                        }
+                    }
+                }
+            }
+
+            // 2. Parse classic inline pairs ("1. (A)", "Q.2 - 12.5")
+            if (!isSolutionBody) {
+                const pairRx = /(?:^|\s)(?:Q\.?\s*)?(\d{1,3})\s*[\.\)\:\-]\s*(\(?[A-D](?:\s*,\s*[A-D])*\)?|-?\d+(?:\.\d+)?)(?=\s|$)/gi;
+                let m;
+                while ((m = pairRx.exec(fullText)) !== null) {
+                    const qn = String(parseInt(m[1], 10));
+                    if (!parsedAnswers[qn]) parsedAnswers[qn] = m[2].trim();
+                }
+            }
+
+            // 3. Parse Solution-page "Concept:" (as 1-line hint) and "Final Answer:" fallback
+            let activeSolQ = null;
+            for (const ln of lines) {
+                const t = ln.text.trim();
+                const startM = t.match(/^(\d{1,3})\s*[\.\)]\s*(?:Explain\s*Question|Question\s*Explanation|Concept|Solution)/i);
+                if (startM) {
+                    activeSolQ = String(parseInt(startM[1], 10));
+                }
+                if (activeSolQ) {
+                    const conceptM = t.match(/Concept\s*:\s*(.+)$/i);
+                    if (conceptM && !parsedHints[activeSolQ]) {
+                        parsedHints[activeSolQ] = conceptM[1].trim();
+                    }
+                    const finalAnsM = t.match(/Final\s*Answer\s*:\s*\(?([^)\n]+)\)?/i);
+                    if (finalAnsM && !parsedAnswers[activeSolQ]) {
+                        parsedAnswers[activeSolQ] = finalAnsM[1].trim();
+                    }
+                }
+            }
+
+            return {
+                isAnswerKey: true,
+                isSolutionPage: isSolutionBody || /SOLUTIONS?/i.test(topLines.map(l => l.text).join(' ')),
+                parsedAnswers,
+                parsedHints
+            };
+        },
         /**
          * Determines whether a vertical zone [ymin..ymax] is 1-Column or 2-Column using:
          *  (a) Explicit central vertical ruling line (from PixelVision)
@@ -1050,10 +1115,11 @@
             for (const ln of allLines) {
                 const width = ln.xmax - ln.xmin;
                 const center = (ln.xmin + ln.xmax) / 2;
-                const isCentered = Math.abs(center - 500) < 110;
+                const isCentered = Math.abs(center - 500) < 140;
                 const crossesMiddle = ln.xmin < 420 && ln.xmax > 580;
+                const isShortHeader = ln.text.length <= 45;
 
-                const isSectionBanner = (crossesMiddle || isCentered) &&
+                const isSectionBanner = (crossesMiddle || isCentered || isShortHeader) &&
                     (this.SECTION_BANNER_RX.test(ln.text) || this.SUBJECT_ONLY_RX.test(ln.text));
 
                 if (isSectionBanner && width < 920) {
@@ -1072,9 +1138,10 @@
             }
 
             // Build vertical horizontal slices between section banners
-            const ySlices = [];
+                        const ySlices = [];
             let curY = headerCutY;
             let activeSubjectOverride = null;
+            let hasBannerAbove = false;
 
             for (const b of splitBands) {
                 if (b.ymin - curY >= 30) {
@@ -1082,10 +1149,11 @@
                         ymin: curY,
                         ymax: b.ymin,
                         subjectOverride: activeSubjectOverride,
-                        bannerText: ''
+                        startsAfterSectionBanner: hasBannerAbove
                     });
                 }
                 if (b.subjectOverride) activeSubjectOverride = b.subjectOverride;
+                hasBannerAbove = true;
                 curY = b.ymax;
             }
             if (footerCutY - curY >= 30) {
@@ -1093,14 +1161,13 @@
                     ymin: curY,
                     ymax: footerCutY,
                     subjectOverride: activeSubjectOverride,
-                    bannerText: splitBands.length ? splitBands[splitBands.length - 1].text : ''
+                    startsAfterSectionBanner: hasBannerAbove
                 });
             }
             if (ySlices.length === 0) {
-                ySlices.push({ ymin: headerCutY, ymax: footerCutY, subjectOverride: null, bannerText: '' });
+                ySlices.push({ ymin: headerCutY, ymax: footerCutY, subjectOverride: null, startsAfterSectionBanner: false });
             }
 
-            // Now split each horizontal slice into 1 or 2 columns in strict reading order (Left -> Right)
             const orderedZones = [];
             for (const sl of ySlices) {
                 const sliceTokens = bodyTokens.filter(t => t.yMid >= sl.ymin && t.yMid <= sl.ymax);
@@ -1108,34 +1175,28 @@
 
                 if (colInfo.isTwoColumn) {
                     orderedZones.push({
-                        colIdx: 0,
-                        isTwoColumn: true,
-                        xmin: 8,
-                        xmax: Math.max(430, colInfo.gutterX - 4),
-                        ymin: sl.ymin,
-                        ymax: sl.ymax,
+                        colIdx: 0, isTwoColumn: true,
+                        xmin: 8, xmax: Math.max(430, colInfo.gutterX - 4),
+                        ymin: sl.ymin, ymax: sl.ymax,
                         subjectOverride: sl.subjectOverride,
+                        startsAfterSectionBanner: sl.startsAfterSectionBanner,
                         gutterX: colInfo.gutterX
                     });
                     orderedZones.push({
-                        colIdx: 1,
-                        isTwoColumn: true,
-                        xmin: Math.min(570, colInfo.gutterX + 4),
-                        xmax: 992,
-                        ymin: sl.ymin,
-                        ymax: sl.ymax,
+                        colIdx: 1, isTwoColumn: true,
+                        xmin: Math.min(570, colInfo.gutterX + 4), xmax: 992,
+                        ymin: sl.ymin, ymax: sl.ymax,
                         subjectOverride: sl.subjectOverride,
+                        startsAfterSectionBanner: false,
                         gutterX: colInfo.gutterX
                     });
                 } else {
                     orderedZones.push({
-                        colIdx: 0,
-                        isTwoColumn: false,
-                        xmin: 8,
-                        xmax: 992,
-                        ymin: sl.ymin,
-                        ymax: sl.ymax,
+                        colIdx: 0, isTwoColumn: false,
+                        xmin: 8, xmax: 992,
+                        ymin: sl.ymin, ymax: sl.ymax,
                         subjectOverride: sl.subjectOverride,
+                        startsAfterSectionBanner: sl.startsAfterSectionBanner,
                         gutterX: 500
                     });
                 }
@@ -2587,11 +2648,53 @@
             const totalPages = Math.max(1, endPage - startPage + 1);
             const pageDataList = [];
 
+                        const parsedAnswerKeys = {};
+            const parsedSolutionHints = {};
+            let inPostQuestionSection = false;
+
             // ----------------------------------------------------------------
-            // PHASE 1: Render Pages, Extract Vector Tokens, Deskew & Clean Mask
+            // PHASE 1: Extract Tokens First -> Skip Heavy Rendering on Answer
+            // Key / Solutions Pages (Sticky Cutoff) -> Render Question Pages
             // ----------------------------------------------------------------
             for (let p = startPage; p <= endPage; p++) {
                 if (abortSignal?.aborted) throw new DOMException('Aborted', 'AbortError');
+                const page = await pdfDoc.getPage(p);
+                const rawTokens = await PDFVectorExtractor.extractPageTokens(page);
+
+                if (cfg.enableAnswerKeyParser) {
+                    const quickLines = PDFVectorExtractor.groupTokensIntoLines(rawTokens);
+                    const quickText = quickLines.map(l => l.text).join(' ');
+                    const akCheck = LayoutPartitioner.detectAnswerKeyPage(quickLines, quickText, inPostQuestionSection);
+
+                    if (akCheck.isAnswerKey) {
+                        inPostQuestionSection = true;
+                        Object.assign(parsedAnswerKeys, akCheck.parsedAnswers);
+                        Object.assign(parsedSolutionHints, akCheck.parsedHints);
+                        if (onProgress) {
+                            onProgress({
+                                phase: 'RENDER_AND_EXTRACT',
+                                pageNum: p,
+                                totalPages,
+                                percent: Math.round(((p - startPage) / totalPages) * 45),
+                                message: `Page ${p}/${endPage}: Skipped ${akCheck.isSolutionPage ? 'Solutions' : 'Answer Key'} page (parsed ${Object.keys(parsedAnswerKeys).length} keys)`
+                            });
+                        }
+                        pageDataList.push({
+                            pageNum: p,
+                            pageIdx: p - startPage,
+                            canvas: null,
+                            rawTokens,
+                            maskObj: null,
+                            rulingLines: { hLines: [], vLines: [] },
+                            components: [],
+                            onnxRegions: null,
+                            skewAngle: 0,
+                            isAnswerKeyPage: true
+                        });
+                        continue;
+                    }
+                }
+
                 if (onProgress) {
                     onProgress({
                         phase: 'RENDER_AND_EXTRACT',
@@ -2602,7 +2705,6 @@
                     });
                 }
 
-                const page = await pdfDoc.getPage(p);
                 const vp = page.getViewport({ scale: cfg.renderScale });
                 const canvas = Utils.createCanvas(vp.width, vp.height);
                 const ctx = canvas.getContext('2d', { willReadFrequently: true });
@@ -2610,10 +2712,7 @@
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
                 await page.render({ canvasContext: ctx, viewport: vp }).promise;
 
-                const rawTokens = await PDFVectorExtractor.extractPageTokens(page);
                 let maskObj = PixelVision.buildCleanForegroundMask(canvas, cfg);
-
-                // Auto-deskew ONLY if scanned (low vector token count) and noticeably tilted
                 let finalCanvas = canvas;
                 let skewAngle = 0;
                 if (rawTokens.length < cfg.minTextTokensForDigital) {
@@ -2627,14 +2726,9 @@
                 const rulingLines = PixelVision.detectRulingLinesFromMask(maskObj);
                 const components = PixelVision.extractConnectedComponents(maskObj.mask, maskObj.gw, maskObj.gh, 4);
 
-                // Optional local ONNX DocLayout-YOLO detections (if user registered a model)
                 let onnxRegions = null;
                 if (OnnxDocLayoutAdapter.isReady()) {
-                    try {
-                        onnxRegions = await OnnxDocLayoutAdapter.detectLayoutRegions(finalCanvas);
-                    } catch (_) {
-                        onnxRegions = null;
-                    }
+                    try { onnxRegions = await OnnxDocLayoutAdapter.detectLayoutRegions(finalCanvas); } catch (_) {}
                 }
 
                 pageDataList.push({
@@ -2646,19 +2740,22 @@
                     rulingLines,
                     components,
                     onnxRegions,
-                    skewAngle
+                    skewAngle,
+                    isAnswerKeyPage: false
                 });
             }
 
             // ----------------------------------------------------------------
             // PHASE 2: Cross-Page Header/Footer Masking + XY-Cut Partitioning
             // ----------------------------------------------------------------
-            const hfInfoList = PDFVectorExtractor.detectDocumentHeaderFooterBands(
-                pageDataList.map(d => d.rawTokens),
+            const questionPagesOnly = pageDataList.filter(d => !d.isAnswerKeyPage);
+            const hfInfoByPageNum = new Map();
+            const hfList = PDFVectorExtractor.detectDocumentHeaderFooterBands(
+                questionPagesOnly.map(d => d.rawTokens),
                 cfg
             );
+            questionPagesOnly.forEach((pd, idx) => hfInfoByPageNum.set(pd.pageNum, hfList[idx]));
 
-            const parsedAnswerKeys = {};
             const allCandidateAnchors = [];
             const pageZonesMap = new Map();
             let globalAnchorOrder = 0;
@@ -2666,7 +2763,11 @@
 
             for (let i = 0; i < pageDataList.length; i++) {
                 const pd = pageDataList[i];
-                const hf = hfInfoList[i];
+                if (pd.isAnswerKeyPage) {
+                    pageZonesMap.set(pd.pageNum, []);
+                    continue;
+                }
+                const hf = hfInfoByPageNum.get(pd.pageNum);
                 pd.headerCutY = hf.headerCutY;
                 pd.footerCutY = hf.footerCutY;
                 pd.headerText = hf.headerText;
@@ -2731,7 +2832,7 @@
                                 zoneIdx: zIdx,
                                 lineIdx: lIdx,
                                 line: ln,
-                                afterSectionBanner: Boolean(zone.subjectOverride && lIdx <= 2),
+                                afterSectionBanner: Boolean((zone.startsAfterSectionBanner || zone.subjectOverride) && lIdx <= 3),
                                 ...evalRes
                             };
                             zoneCandidates.push(cand);
