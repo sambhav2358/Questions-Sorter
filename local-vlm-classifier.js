@@ -2,7 +2,7 @@
  * ============================================================================
  * JEE ON-DEVICE VISION-LANGUAGE MODEL (VLM) CHAPTER CLASSIFIER
  * File Name for GitHub: local-vlm-classifier.js
- * Version: 1.0.0
+ * Version: 1.2.0 (Adreno 750 WebGPU Subgroups Crash Fix + Auto-Recovery)
  * ============================================================================
  * Runs a REAL multimodal Vision-Language AI Model (Qwen 3.5 VL / Gemma 4 E2B)
  * 100% locally on your tablet's GPU via WebGPU (Snapdragon 8 Gen 3 Adreno 750)
@@ -32,7 +32,7 @@
 (function (globalScope) {
     'use strict';
 
-    const ENGINE_VERSION = '1.1.0';
+    const ENGINE_VERSION = '1.2.0';
     const TRANSFORMERS_CDN_CANDIDATES = [
         'https://cdn.jsdelivr.net/npm/@huggingface/transformers@4.3.2/dist/transformers.min.js',
         'https://cdn.jsdelivr.net/npm/@huggingface/transformers@4.3.2/+esm',
@@ -48,10 +48,10 @@
             id: 'onnx-community/Qwen3.5-2B-ONNX',
             family: 'qwen3_5',
             label: 'Qwen 3.5 2B Vision (Recommended • Best Speed/Accuracy for 8 Gen 3)',
-            approxDownloadMB: 1750,
+            approxDownloadMB: 1550,
             defaultDtype: {
                 embed_tokens: 'q4',
-                vision_encoder: 'fp16',
+                vision_encoder: 'q4',
                 decoder_model_merged: 'q4'
             },
             supportsThinking: true,
@@ -73,7 +73,7 @@
             approxDownloadMB: 3150,
             defaultDtype: {
                 embed_tokens: 'q4',
-                vision_encoder: 'fp16',
+                vision_encoder: 'q4',
                 decoder_model_merged: 'q4'
             },
             supportsThinking: true,
@@ -86,7 +86,7 @@
             approxDownloadMB: 810,
             defaultDtype: {
                 embed_tokens: 'q4',
-                vision_encoder: 'fp16',
+                vision_encoder: 'q4',
                 decoder_model_merged: 'q4'
             },
             supportsThinking: true,
@@ -400,8 +400,48 @@
         deviceUsed: null,
         isLoading: false,
         isBusy: false,
+        webgpuFailed: false,
         loadPromise: null
     };
+
+    // ========================================================================
+    // ADRENO 7xx (SNAPDRAGON 8 GEN 3) WEBGPU SUBGROUPS CRASH PATCH
+    // ========================================================================
+    // On Snapdragon 8 Gen 3 (Adreno 750), ONNX Runtime Web's 4-bit MatMulNBits
+    // kernel emits `subgroupShuffle(...)` when the WebGPU device has `subgroups`
+    // enabled, triggering a SIGSEGV in Qualcomm's shader compiler (libllvm-qgl.so)
+    // that kills Chrome's GPU process with:
+    //   "Failed to create a WebGPU compute pipeline: A valid external Instance
+    //    reference no longer exists."
+    // Stripping `subgroups` from GPUAdapter.prototype.requestDevice forces ORT
+    // Web onto its stable shared-memory WebGPU compute shader path!
+    let adrenoSubgroupsPatchInstalled = false;
+    function installAdrenoWebGpuSubgroupsPatch() {
+        if (adrenoSubgroupsPatchInstalled) return;
+        if (typeof globalScope === 'undefined' || !globalScope.GPUAdapter || !globalScope.GPUAdapter.prototype) return;
+
+        const isAndroid = typeof navigator !== 'undefined' && /Android/i.test(navigator.userAgent || '');
+        const origRequestDevice = globalScope.GPUAdapter.prototype.requestDevice;
+        if (typeof origRequestDevice !== 'function') return;
+
+        globalScope.GPUAdapter.prototype.requestDevice = function patchedRequestDevice(descriptor) {
+            const vendor = String(this.info?.vendor || '').toLowerCase();
+            const arch = String(this.info?.architecture || '').toLowerCase();
+            const isAdreno = isAndroid || vendor.includes('qualcomm') || arch.includes('adreno');
+
+            if (isAdreno && descriptor && descriptor.requiredFeatures) {
+                const filtered = Array.from(descriptor.requiredFeatures).filter(
+                    f => f !== 'subgroups' && f !== 'subgroups-f16'
+                );
+                const patchedDesc = { ...descriptor, requiredFeatures: filtered };
+                return origRequestDevice.call(this, patchedDesc);
+            }
+            return origRequestDevice.call(this, descriptor);
+        };
+        adrenoSubgroupsPatchInstalled = true;
+    }
+    // Install immediately before Transformers.js / ONNX Runtime Web touches WebGPU
+    installAdrenoWebGpuSubgroupsPatch();
 
     // ========================================================================
     // HARDWARE CAPABILITY & WEBGPU CHECK
@@ -814,7 +854,9 @@ Re-inspect the question image closely and pick the single TRUE primary chapter f
         const spec = MODEL_CATALOG[modelKey] || MODEL_CATALOG['qwen3.5-2b'];
         const onProgress = typeof options.onProgress === 'function' ? options.onProgress : null;
 
-        if (runtime.model && runtime.processor && runtime.activeModelKey === modelKey) {
+        installAdrenoWebGpuSubgroupsPatch();
+        const wantWasm = Boolean(options.forceWasm || runtime.webgpuFailed);
+        if (runtime.model && runtime.processor && runtime.activeModelKey === modelKey && (!wantWasm || runtime.deviceUsed === 'wasm')) {
             return {
                 modelKey,
                 modelId: spec.id,
@@ -834,7 +876,7 @@ Re-inspect the question image closely and pick the single TRUE primary chapter f
 
                 if (onProgress) onProgress({ stage: 'INIT', percent: 2, message: 'Checking Snapdragon WebGPU support...' });
                 const caps = await inspectDeviceCapabilities();
-                const device = (options.forceWasm || !caps.webgpuAvailable) ? 'wasm' : 'webgpu';
+                const device = (options.forceWasm || runtime.webgpuFailed || !caps.webgpuAvailable) ? 'wasm' : 'webgpu';
 
                 if (onProgress) {
                     onProgress({
@@ -884,8 +926,9 @@ Re-inspect the question image closely and pick the single TRUE primary chapter f
                     ModelClass = tf.Qwen3_5ForConditionalGeneration;
                 }
 
+                const isAndroidDevice = typeof navigator !== 'undefined' && /Android/i.test(navigator.userAgent || '');
                 let dtype = options.dtype || (device === 'wasm' ? 'q4' : spec.defaultDtype);
-                if (device === 'webgpu' && !caps.supportsFp16) {
+                if (device === 'webgpu' && (!caps.supportsFp16 || isAndroidDevice)) {
                     dtype = spec.family === 'qwen3_5'
                         ? { embed_tokens: 'q4', vision_encoder: 'q4', decoder_model_merged: 'q4' }
                         : 'q4';
@@ -1033,17 +1076,34 @@ Re-inspect the question image closely and pick the single TRUE primary chapter f
         }
 
         const spec = runtime.activeModelSpec;
-        const cleanImageDataUrl = await prepareCleanQuestionImageForVLM(imageSource, spec.maxImageEdge || 896);
+        const isAndroidDevice = typeof navigator !== 'undefined' && /Android/i.test(navigator.userAgent || '');
+        const safeEdge = isAndroidDevice ? Math.min(672, spec.maxImageEdge || 672) : (spec.maxImageEdge || 896);
+        const cleanImageDataUrl = await prepareCleanQuestionImageForVLM(imageSource, safeEdge);
 
         // --------------------------------------------------------------------
-        // PASS 1: Full Multimodal Diagram + Concept Analysis
+        // PASS 1: Full Multimodal Diagram + Concept Analysis (with GPU-Lost Auto-Recovery)
         // --------------------------------------------------------------------
         const { systemPrompt, userPrompt } = buildPass1Prompts(options);
-        const rawPass1 = await runSingleVLMCall(cleanImageDataUrl, systemPrompt, userPrompt, {
-            enableThinking,
-            maxNewTokens: enableThinking ? 460 : 240,
-            onToken: options.onToken
-        });
+        let rawPass1;
+        try {
+            rawPass1 = await runSingleVLMCall(cleanImageDataUrl, systemPrompt, userPrompt, {
+                enableThinking,
+                maxNewTokens: enableThinking ? 460 : 240,
+                onToken: options.onToken
+            });
+        } catch (gpuErr) {
+            const msg = String(gpuErr?.message || gpuErr || '');
+            const isWebGpuFatal = runtime.deviceUsed === 'webgpu' && (
+                /external Instance reference no longer exists|WebGPU|GPUBuffer|device lost|OrtRun/i.test(msg)
+            );
+            if (isWebGpuFatal && !options._alreadyRetriedWasm) {
+                console.warn('[LocalVLM] WebGPU pipeline crashed on device; auto-switching to CPU WASM backend:', msg);
+                runtime.webgpuFailed = true;
+                await loadModel(modelKey, { forceWasm: true, onProgress: options.onProgress });
+                return classifyQuestionImage(imageSource, { ...options, _alreadyRetriedWasm: true });
+            }
+            throw gpuErr;
+        }
 
         const { parsed: p1, thinkingTrace: think1 } = extractJsonFromModelOutput(rawPass1);
         const rawSubj = options.subjectHint && ['Physics', 'Chemistry', 'Mathematics'].includes(options.subjectHint)
@@ -1208,6 +1268,8 @@ Re-inspect the question image closely and pick the single TRUE primary chapter f
         PRIMARY_PROMPT_CHAPTERS,
         DISAMBIGUATION_RULES,
         inspectDeviceCapabilities,
+        installAdrenoWebGpuSubgroupsPatch,
+        resetWebGpuFallback: () => { runtime.webgpuFailed = false; },
         loadModel,
         unloadModel,
         isModelReady: () => Boolean(runtime.model && runtime.processor),
