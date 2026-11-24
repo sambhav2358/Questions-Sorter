@@ -2773,20 +2773,6 @@
                 pd.headerText = hf.headerText;
                 pd.cleanTokens = hf.tokens;
 
-                const pageLinesAll = PDFVectorExtractor.groupTokensIntoLines(pd.cleanTokens);
-                const fullPageText = pageLinesAll.map(l => l.text).join(' ');
-
-                // Check for Answer Key / Solutions Page
-                if (cfg.enableAnswerKeyParser) {
-                    const akCheck = LayoutPartitioner.detectAnswerKeyPage(pageLinesAll, fullPageText);
-                    if (akCheck.isAnswerKey) {
-                        pd.isAnswerKeyPage = true;
-                        Object.assign(parsedAnswerKeys, akCheck.parsedAnswers);
-                        pageZonesMap.set(pd.pageNum, []);
-                        continue;
-                    }
-                }
-
                 // Partition page into ordered reading zones (Section Banners + 1-Col / 2-Col XY-Cut)
                 const { orderedZones } = LayoutPartitioner.partitionPageIntoReadingZones(
                     pd.cleanTokens,
@@ -3074,13 +3060,29 @@
                 }
             }
 
-            // Attach locally parsed answer keys (if PDF had an Answer Key page at the end)
-            for (const b of allOrderedBlocks) {
+            // Attach locally parsed Answer Keys & Concept hints
+            // If sections restart numbering at 1), match sequentially (1..54); otherwise match by Q.#
+            const rootQuestions = allOrderedBlocks.filter(b => !b.isContinuationFromPrev);
+            const seenQNums = new Set();
+            let hasSectionResets = false;
+            for (const b of rootQuestions) {
                 const qn = String(Utils.parseNumericQ(b.questionNumber));
-                if (parsedAnswerKeys[qn] && !b.answerKey) {
-                    b.answerKey = parsedAnswerKeys[qn];
-                }
+                if (seenQNums.has(qn)) { hasSectionResets = true; break; }
+                seenQNums.add(qn);
             }
+
+            rootQuestions.forEach((b, seqIdx) => {
+                const lookupKey = hasSectionResets
+                    ? String(seqIdx + 1)
+                    : String(Utils.parseNumericQ(b.questionNumber));
+                if (parsedAnswerKeys[lookupKey] && !b.answerKey) {
+                    b.answerKey = parsedAnswerKeys[lookupKey];
+                }
+                if (parsedSolutionHints[lookupKey] && !b.hint) {
+                    b.hint = `Concept: ${parsedSolutionHints[lookupKey]}`;
+                }
+            });
+
 
             // ----------------------------------------------------------------
             // PHASE 6: Multi-Layer Offline JEE Chapter Classification
