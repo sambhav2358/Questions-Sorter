@@ -32,13 +32,12 @@
 (function (globalScope) {
     'use strict';
 
-    const ENGINE_VERSION = '1.0.0';    
+    const ENGINE_VERSION = '1.1.0';
     const TRANSFORMERS_CDN_CANDIDATES = [
         'https://cdn.jsdelivr.net/npm/@huggingface/transformers@4.3.2/dist/transformers.min.js',
         'https://cdn.jsdelivr.net/npm/@huggingface/transformers@4.3.2/+esm',
         'https://cdn.jsdelivr.net/npm/@huggingface/transformers@4/dist/transformers.min.js'
     ];
-
     const USER_CORRECTIONS_KEY = 'jee_vlm_fewshot_memory_v1';
 
     // ========================================================================
@@ -811,7 +810,6 @@ Re-inspect the question image closely and pick the single TRUE primary chapter f
         throw new Error(`Could not load Transformers.js v4 browser bundle (${lastErr?.message || 'network/module error'})`);
     }
 
-
     async function loadModel(modelKey = 'qwen3.5-2b', options = {}) {
         const spec = MODEL_CATALOG[modelKey] || MODEL_CATALOG['qwen3.5-2b'];
         const onProgress = typeof options.onProgress === 'function' ? options.onProgress : null;
@@ -885,13 +883,13 @@ Re-inspect the question image closely and pick the single TRUE primary chapter f
                 } else if (spec.family === 'qwen3_5' && tf.Qwen3_5ForConditionalGeneration) {
                     ModelClass = tf.Qwen3_5ForConditionalGeneration;
                 }
+
                 let dtype = options.dtype || (device === 'wasm' ? 'q4' : spec.defaultDtype);
                 if (device === 'webgpu' && !caps.supportsFp16) {
                     dtype = spec.family === 'qwen3_5'
                         ? { embed_tokens: 'q4', vision_encoder: 'q4', decoder_model_merged: 'q4' }
                         : 'q4';
                 }
-
                 const model = await ModelClass.from_pretrained(spec.id, {
                     dtype,
                     device,
