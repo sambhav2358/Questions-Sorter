@@ -14,6 +14,8 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
     <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+    <script src="./local-vision-engine.js"></script>
+    <style>
     <style>
         :root {
             --md-primary: hsl(252, 95%, 78%);
@@ -1661,7 +1663,7 @@
                         </div>                       
                         <div class="sm:col-span-3 pt-2 flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-t border-[var(--md-outline-variant)]">
                             <label class="flex items-center gap-2 text-xs font-bold cursor-pointer">
-                                <input type="checkbox" id="pdfGeminiVerifyBordersChk" checked class="rounded">
+                                <input type="checkbox" id="pdfGeminiVerifyBordersChk" class="rounded">
                                 <span>Verify borders with Gemini 3.8 Flash (auto-retries on failure)</span>
                             </label>
                             <label class="flex items-center gap-2 text-xs font-extrabold cursor-pointer" style="color: var(--md-primary)">
@@ -3083,6 +3085,12 @@
         // Stage 2: Sends Local Candidate Borders to Gemini 3.8 Flash to Verify & Refine
         // ===================================================================
         function inferSubjectAndChapterFromText(text, fallbackSubject = 'AUTO') {
+            if (window.JEELocalVisionEngine?.classifyQuestion) {
+                const res = window.JEELocalVisionEngine.classifyQuestion(text, {
+                    defaultSubject: fallbackSubject
+                });
+                return { subject: res.subject, chapter: res.chapter };
+            }
             const hay = String(text || '').toLowerCase();
 
             const keywordRules = [
@@ -4811,7 +4819,7 @@ Analyze this JEE question image (${q.subject} - ${q.chapter}).
             toast('Upload cancelled & all questions from that PDF were rolled back.', 'warn');
         }
 
-        // 2-Stage Hybrid PDF Extractor: Local Candidate Borders -> Gemini 3.8 Flash Border Verification
+                // Full-Document Local Vision Engine Pipeline (Optional Manual Cropper & Optional Gemini Verifier)
         async function startPdfExtraction() {
             if (!state.pdfDoc || state.isExtracting) return;
 
@@ -4824,7 +4832,7 @@ Analyze this JEE question image (${q.subject} - ${q.chapter}).
 
             const paperName = document.getElementById('paperTitleInput').value.trim() || 'Test Paper';
             const defaultSubj = document.getElementById('pdfDefaultSubjectSelect')?.value || 'AUTO';
-            const useGeminiVerifier = document.getElementById('pdfGeminiVerifyBordersChk')?.checked ?? true;
+            const useGeminiVerifier = Boolean(document.getElementById('pdfGeminiVerifyBordersChk')?.checked);
             let manualModeForRemaining = Boolean(document.getElementById('pdfManualCropModeChk')?.checked);
             const startP = Math.max(1, parseInt(document.getElementById('startPageInput').value, 10) || 1);
             const endP = Math.min(state.pdfDoc.numPages, parseInt(document.getElementById('endPageInput').value, 10) || state.pdfDoc.numPages);
@@ -4833,10 +4841,10 @@ Analyze this JEE question image (${q.subject} - ${q.chapter}).
             document.getElementById('uploadSetupView').classList.add('hidden');
             document.getElementById('uploadProgressView').classList.remove('hidden');
             document.getElementById('extractLiveLog').innerHTML = '';
-            updateUploadProgressEverywhere(6, `Page ${startP}/${endP}`, `Scanning Page ${startP} (0 found)...`);
+            updateUploadProgressEverywhere(6, `Page ${startP}/${endP}`, `Initializing Local Vision Engine...`);
 
-            const canvas = document.getElementById('pdfWorkCanvas');
-            const ctx = canvas.getContext('2d');
+            const previewCanvas = document.getElementById('pdfWorkCanvas');
+            const previewCtx = previewCanvas.getContext('2d');
 
             const batchQuestions = [];
             let prevQuestion = null;
@@ -4844,44 +4852,84 @@ Analyze this JEE question image (${q.subject} - ${q.chapter}).
 
             try {
                 const countPages = Math.max(1, endP - startP + 1);
-                for (let pageNum = startP; pageNum <= endP; pageNum++) {
+                const engine = window.JEELocalVisionEngine;
+
+                if (!engine || typeof engine.analyzeDocument !== 'function') {
+                    throw new Error('local-vision-engine.js failed to load. Check that local-vision-engine.js is in the same folder as index.html.');
+                }
+
+                // =============================================================
+                // STAGE 1: Whole-Document Offline Analysis (Borders, Stitching,
+                // Headers/Footers, Answer Key Detection & JEE Chapter Prior)
+                // =============================================================
+                appendExtractLog(`Running Local Vision Engine v${engine.version} across Pages ${startP}–${endP}...`, 'info');
+                const docAnalysis = await engine.analyzeDocument(state.pdfDoc, {
+                    paperName,
+                    defaultSubject: defaultSubj,
+                    startPage: startP,
+                    endPage: endP,
+                    renderScale: 2.2,
+                    abortSignal: state.extractionAbortController.signal,
+                    onProgress: (info) => {
+                        const mappedPct = Math.max(6, Math.min(55, Math.round((info.percent || 0) * 0.55)));
+                        updateUploadProgressEverywhere(
+                            mappedPct,
+                            `Page ${info.pageNum || startP}/${endP}`,
+                            info.message || 'Analyzing layout locally...'
+                        );
+                    }
+                });
+
+                if (state.cancelExtractionRequested) return;
+
+                if (docAnalysis.detectedWorksheetPrior) {
+                    const wp = docAnalysis.detectedWorksheetPrior;
+                    appendExtractLog(`📘 Detected single-chapter worksheet prior: ${wp.subject} • ${wp.chapter}`, 'success');
+                }
+                const keyCount = Object.keys(docAnalysis.parsedAnswerKeys || {}).length;
+                if (keyCount > 0) {
+                    appendExtractLog(`🔑 Locally parsed ${keyCount} answer keys from Answer Key page(s)!`, 'success');
+                }
+
+                // =============================================================
+                // STAGE 2: Per-Page Review (Optional Manual / Optional Gemini) +
+                // High-Res Cropping & Cross-Column / Cross-Page Stitching
+                // =============================================================
+                for (let pIdx = 0; pIdx < docAnalysis.pages.length; pIdx++) {
                     if (state.cancelExtractionRequested) return;
+                    const pageInfo = docAnalysis.pages[pIdx];
+                    const pageNum = pageInfo.pageNum;
+                    const canvas = pageInfo.canvas;
 
-                    const basePagePct = Math.round(((pageNum - startP) / countPages) * 100);
-                    updateUploadProgressEverywhere(
-                        Math.max(8, basePagePct),
-                        `Page ${pageNum}/${endP}`,
-                        `Scanning Page ${pageNum} (${extractedCount} found)...`
-                    );
+                    // Update live preview canvas in upload modal
+                    previewCanvas.width = canvas.width;
+                    previewCanvas.height = canvas.height;
+                    previewCtx.drawImage(canvas, 0, 0);
 
-                    const page = await state.pdfDoc.getPage(pageNum);
-                    if (state.cancelExtractionRequested) return;
+                    if (pageInfo.isAnswerKeyPage) {
+                        appendExtractLog(`Page ${pageNum}: Skipped Answer Key / Solutions page (answers extracted locally ✓)`, 'stitch');
+                        continue;
+                    }
 
-                    const vp = page.getViewport({ scale: 2.2 });
-                    canvas.width = vp.width; canvas.height = vp.height;
-                    ctx.fillStyle = '#FFFFFF';
-                    ctx.fillRect(0, 0, canvas.width, canvas.height);
-                    await page.render({ canvasContext: ctx, viewport: vp }).promise;
-                    if (state.cancelExtractionRequested) return;
+                    // Normalize engine blocks to be 100% compatible with Manual Cropper & Gemini Verifier
+                    const localCandidates = (pageInfo.blocks || []).map(b => ({
+                        ...b,
+                        isContinuationFromPrevPage: Boolean(b.isContinuationFromPrev || b.stitchWithPrev),
+                        continuesToNextPage: Boolean(b.continuesToNext)
+                    }));
 
-                    // Stage 1: Compute Local 2D Candidate Borders (Vector Anchors + Pixel Table/Row Bands)
-                    const pageTokens = await extractPage2DTextTokens(page);
-                    if (state.cancelExtractionRequested) return;
-
-                    const localCandidates = generateLocal2DCandidateBlocks(pageTokens, canvas, paperName, defaultSubj) || [];
                     const isTwoCol = localCandidates.some(b => b.xmin > 400);
-                    appendExtractLog(`Page ${pageNum}: Local algorithm proposed ${localCandidates.length} ${isTwoCol ? '2-Col' : '1-Col'} borders`, 'info');
+                    const skewNote = pageInfo.skewAngle ? ` (auto-deskewed ${pageInfo.skewAngle}°)` : '';
+                    appendExtractLog(`Page ${pageNum}: Local Engine found ${localCandidates.length} ${isTwoCol ? '2-Col' : '1-Col'} regions${skewNote}`, 'info');
 
                     let blocks = localCandidates;
-
-                    // Stage 2: Send Local Candidate Borders to Gemini 3.8 Flash to Verify, Split, or Refine
                     let usedManualThisPage = false;
+                    let usedGeminiThisPage = false;
 
-                    // Stage 2: Manual Mode OR Gemini Verification (with automatic >2 fail fallback to Manual Cropper)
                     let pageDone = false;
                     while (!pageDone) {
                         if (manualModeForRemaining) {
-                            appendExtractLog(`Page ${pageNum}: Opening Interactive Manual Cropper (pre-seeded with ${localCandidates.length} local lines)...`, 'info');
+                            appendExtractLog(`Page ${pageNum}: Opening Manual Cropper (pre-seeded with ${localCandidates.length} Local Engine lines)...`, 'info');
                             const mcRes = await openManualPageCropper(
                                 canvas,
                                 pageNum,
@@ -4892,7 +4940,7 @@ Analyze this JEE question image (${q.subject} - ${q.chapter}).
                                 Boolean(prevQuestion),
                                 extractedCount + 1,
                                 {
-                                    reasonText: 'Manual Crop Mode active: drag orange lines to refine boundaries, pick chapters, or stitch.',
+                                    reasonText: 'Manual Crop Mode: Local Engine pre-placed lines, chapters & stitch flags. Adjust anything needed.',
                                     allowRetryGemini: Boolean(getApiKey()),
                                     manualAllChecked: true
                                 }
@@ -4912,7 +4960,7 @@ Analyze this JEE question image (${q.subject} - ${q.chapter}).
                         } else if (useGeminiVerifier && getApiKey()) {
                             try {
                                 const base64Jpeg = canvas.toDataURL('image/jpeg', 0.84).split(',')[1];
-                                appendExtractLog(`Page ${pageNum}: Sending ${localCandidates.length} candidate borders to ${getSelectedModel()}...`, 'info');
+                                appendExtractLog(`Page ${pageNum}: Verifying ${localCandidates.length} borders with ${getSelectedModel()}...`, 'info');
                                 const verified = await verifyAndRefineBordersWithGemini(
                                     base64Jpeg,
                                     pageNum,
@@ -4930,12 +4978,13 @@ Analyze this JEE question image (${q.subject} - ${q.chapter}).
                                         ocrText: '',
                                         colLines: []
                                     }));
-                                    appendExtractLog(`Page ${pageNum}: ${getSelectedModel()} verified ${blocks.length} exact boxes ✓`, 'success');
+                                    usedGeminiThisPage = true;
+                                    appendExtractLog(`Page ${pageNum}: ${getSelectedModel()} verified ${blocks.length} boxes ✓`, 'success');
                                 }
                                 pageDone = true;
                             } catch (verErr) {
                                 if (verErr.name === 'AbortError' || state.cancelExtractionRequested) throw verErr;
-                                appendExtractLog(`Page ${pageNum}: Gemini failed after retries (${verErr.message}). Opening Manual Cropper...`, 'error');
+                                appendExtractLog(`Page ${pageNum}: Gemini failed (${verErr.message}). Opening Manual Cropper with Local Engine lines...`, 'error');
 
                                 const mcRes = await openManualPageCropper(
                                     canvas,
@@ -4947,7 +4996,7 @@ Analyze this JEE question image (${q.subject} - ${q.chapter}).
                                     Boolean(prevQuestion),
                                     extractedCount + 1,
                                     {
-                                        reasonText: `Gemini failed (>2 tries): ${verErr.message.slice(0, 75)}. Adjust local lines manually or click Retry Gemini.`,
+                                        reasonText: `Gemini failed: ${verErr.message.slice(0, 75)}. Local Engine lines are ready—confirm or adjust.`,
                                         allowRetryGemini: true,
                                         manualAllChecked: false
                                     }
@@ -4957,7 +5006,6 @@ Analyze this JEE question image (${q.subject} - ${q.chapter}).
                                     return;
                                 }
                                 if (mcRes.action === 'RETRY_GEMINI') {
-                                    appendExtractLog(`Page ${pageNum}: Retrying Gemini as requested...`, 'info');
                                     continue;
                                 }
                                 manualModeForRemaining = mcRes.switchToManualAll;
@@ -4970,47 +5018,28 @@ Analyze this JEE question image (${q.subject} - ${q.chapter}).
                         }
                     }
 
-
                     if (state.cancelExtractionRequested) return;
 
-                    if (!usedManualThisPage) {
-                    // Snap each 2D block's ymin & ymax to clean whitespace valleys within its column [xmin..xmax]
+                    // Only re-snap whitespace if Gemini overrode the local engine's already-refined boxes
+                    if (usedGeminiThisPage && !usedManualThisPage) {
                         for (let i = 0; i < blocks.length; i++) {
                             const b = blocks[i];
                             const sameColPrev = i > 0 && Math.abs(blocks[i - 1].xmin - b.xmin) < 120 ? blocks[i - 1] : null;
                             const sameColNext = i < blocks.length - 1 && Math.abs(blocks[i + 1].xmin - b.xmin) < 120 ? blocks[i + 1] : null;
-    
+
                             const minAllowed = sameColPrev ? Math.min(b.ymin, sameColPrev.ymax + 2) : 2;
-                            b.ymin = snap2DBoundaryToWhitespace(
-                                canvas,
-                                b.colLines,
-                                Number(b.ymin) || 0,
-                                minAllowed,
-                                985,
-                                b.xmin,
-                                b.xmax,
-                                'UP'
-                            );
-    
+                            b.ymin = snap2DBoundaryToWhitespace(canvas, b.colLines, Number(b.ymin) || 0, minAllowed, 985, b.xmin, b.xmax, 'UP');
+
                             const maxAllowed = sameColNext ? Math.max(b.ymin + 25, sameColNext.ymin - 2) : 996;
                             const rawYMax = Math.min(maxAllowed, Number(b.ymax) || maxAllowed);
-                            b.ymax = snap2DBoundaryToWhitespace(
-                                canvas,
-                                b.colLines,
-                                rawYMax,
-                                b.ymin + 25,
-                                maxAllowed,
-                                b.xmin,
-                                b.xmax,
-                                'DOWN'
-                            );
+                            b.ymax = snap2DBoundaryToWhitespace(canvas, b.colLines, rawYMax, b.ymin + 25, maxAllowed, b.xmin, b.xmax, 'DOWN');
                         }
                     }
 
                     for (let i = 0; i < blocks.length; i++) {
                         if (state.cancelExtractionRequested) return;
                         const b = blocks[i];
-                        const slicePct = Math.round(((pageNum - startP + (i + 1) / blocks.length) / countPages) * 100);
+                        const slicePct = 55 + Math.round(((pIdx + (i + 1) / Math.max(1, blocks.length)) / countPages) * 43);
 
                         const xmin = Math.max(0, Math.min(950, Number(b.xmin) ?? 12));
                         const xmax = Math.max(xmin + 80, Math.min(1000, Number(b.xmax) ?? 988));
@@ -5037,28 +5066,50 @@ Analyze this JEE question image (${q.subject} - ${q.chapter}).
                         }
                         if (state.cancelExtractionRequested) return;
 
-                        const combinedOcrText = cleanQuestionTextOnly(`${fullQuestionText} ${b.firstLineSnippet || ''} ${b.lastLineSnippet || ''}`);
-                        const inferred = inferSubjectAndChapterFromText(`${paperName} ${combinedOcrText}`, defaultSubj);
-                        const finalSubject = ['Physics', 'Chemistry', 'Mathematics'].includes(b.subject) ? b.subject : inferred.subject;
-                        const finalChapter = b.chapter || inferred.chapter;
+                        const passagePrefix = b.sharedPassage?.text ? `${b.sharedPassage.text} ` : '';
+                        const combinedOcrText = cleanQuestionTextOnly(`${passagePrefix}${fullQuestionText} ${b.firstLineSnippet || ''} ${b.lastLineSnippet || ''}`);
+
+                        // If OCR recovered new text on a scanned PDF, re-run local chapter classifier with the new text
+                        let finalSubject = ['Physics', 'Chemistry', 'Mathematics'].includes(b.subject) ? b.subject : null;
+                        let finalChapter = b.chapter || null;
+                        if (!usedManualThisPage && (!finalSubject || !finalChapter || (b.chapterConfidence && b.chapterConfidence < 0.55 && fullQuestionText.length >= 25))) {
+                            const reClass = engine.classifyQuestion(combinedOcrText, {
+                                paperName,
+                                pageHeader: b.pageHeader || '',
+                                defaultSubject: defaultSubj,
+                                documentPrior: docAnalysis.detectedWorksheetPrior || null
+                            });
+                            finalSubject = reClass.subject;
+                            finalChapter = reClass.chapter;
+                        }
+                        if (!finalSubject || !finalChapter) {
+                            const inferred = inferSubjectAndChapterFromText(`${paperName} ${combinedOcrText}`, defaultSubj);
+                            finalSubject = finalSubject || inferred.subject;
+                            finalChapter = finalChapter || inferred.chapter;
+                        }
 
                         const rawQNum = String(b.questionNumber || '').replace(/[^0-9a-zA-Z]/g, '') || `${extractedCount + 1}`;
+                        const isEngineStitch = Boolean(b.stitchWithPrev || b.isContinuationFromPrev);
                         const isExplicitCont = rawQNum.toUpperCase() === 'CONT' || b.isContinuationFromPrevPage === true;
-                        const startsWithNewNum = /^\s*(?:Q\.?\s*)?\d+/i.test(String(b.firstLineSnippet || '')) && !isExplicitCont;
+                        const startsWithNewNum = /^\s*(?:Q\.?\s*)?\d+/i.test(String(b.firstLineSnippet || '')) && !isExplicitCont && !isEngineStitch;
+
                         const isStitch = prevQuestion && (
                             b.manualStitchWithPrev === true ||
+                            isEngineStitch ||
                             (i === 0 && prevQuestion.page === pageNum - 1 && !startsWithNewNum &&
                                 (isExplicitCont || prevQuestion.continuesToNextPage === true))
                         );
 
-
                         if (isStitch) {
-                            appendExtractLog(`🔗 Stitched split Q.${prevQuestion.questionNumber} across Page ${prevQuestion.page} → ${pageNum}`, 'stitch');
+                            const reasonTag = Array.isArray(b.stitchReasons) && b.stitchReasons.length
+                                ? ` [${b.stitchReasons[0]}]`
+                                : '';
+                            appendExtractLog(`🔗 Stitched Q.${prevQuestion.questionNumber} (Page ${prevQuestion.page} → Page ${pageNum})${reasonTag}`, 'stitch');
                             const stitchRes = await stitchCanvasesVertically(prevQuestion.imageDataUrl, cropRes.dataUrl);
                             prevQuestion.imageDataUrl = stitchRes.dataUrl;
                             prevQuestion.aspectRatio = stitchRes.aspectRatio;
                             prevQuestion.isStitched = true;
-                            prevQuestion.continuesToNextPage = Boolean(b.continuesToNextPage);
+                            prevQuestion.continuesToNextPage = Boolean(b.continuesToNextPage || b.continuesToNext);
                             prevQuestion.ocrText = cleanQuestionTextOnly(`${prevQuestion.ocrText || ''} ${combinedOcrText}`);
                             continue;
                         }
@@ -5078,7 +5129,7 @@ Analyze this JEE question image (${q.subject} - ${q.chapter}).
                             firstLineSnippet: b.firstLineSnippet || '',
                             lastLineSnippet: b.lastLineSnippet || '',
                             hint: '',
-                            answerKey: '',
+                            answerKey: b.answerKey || '',
                             whiteboardData: null,
                             timeSpent: 0,
                             reattemptTime: 0,
@@ -5087,7 +5138,7 @@ Analyze this JEE question image (${q.subject} - ${q.chapter}).
                             solved: false,
                             starred: false,
                             isStitched: false,
-                            continuesToNextPage: Boolean(b.continuesToNextPage),
+                            continuesToNextPage: Boolean(b.continuesToNextPage || b.continuesToNext),
                             createdAt: Date.now() + i
                         };
 
@@ -5095,7 +5146,8 @@ Analyze this JEE question image (${q.subject} - ${q.chapter}).
                         state.currentUploadBatchIds.push(qObj.id);
                         extractedCount++;
                         prevQuestion = qObj;
-                        appendExtractLog(`✓ Q.${qObj.questionNumber} (${qObj.subject} • ${qObj.chapter})`, 'success');
+                        const ansNote = qObj.answerKey ? ` • Key: ${qObj.answerKey}` : '';
+                        appendExtractLog(`✓ Q.${qObj.questionNumber} (${qObj.subject} • ${qObj.chapter}${ansNote})`, 'success');
                     }
                 }
 
@@ -5109,10 +5161,10 @@ Analyze this JEE question image (${q.subject} - ${q.chapter}).
                 state.currentUploadBatchIds = [];
                 state.isExtracting = false;
                 setUploadButtonsLock(false);
-                updateUploadProgressEverywhere(100, `Done`, `Extracted ${extractedCount} questions!`);
+                updateUploadProgressEverywhere(100, `Done`, `Extracted ${extractedCount} questions locally!`);
                 sortAndRefreshQuestions(false);
 
-                toast(`Extracted ${extractedCount} questions! Syncing to Cloud...`, 'success');
+                toast(`Extracted ${extractedCount} questions locally! Syncing to Cloud...`, 'success');
                 window.app.closeUploadModal();
                 await pushToCloudGist(false);
 
@@ -5131,6 +5183,7 @@ Analyze this JEE question image (${q.subject} - ${q.chapter}).
             }
         }
 
+    
         const normalizeForSearch = (str) => String(str || '').toLowerCase().replace(/[^\w\s.]/g, ' ').replace(/\s+/g, ' ').trim();
 
         function getFiltered() {
@@ -7620,16 +7673,21 @@ Analyze this JEE question image (${q.subject} - ${q.chapter}).
                 return ys;
             };
 
-            if (mcState.isTwoCol) {
+                    if (mcState.isTwoCol) {
                 const leftC = cands.filter(c => Number(c.xmin) < 420);
                 const rightC = cands.filter(c => Number(c.xmin) >= 420);
+                if (leftC.length && rightC.length) {
+                    const maxL = Math.max(...leftC.map(c => Number(c.xmax) || 496));
+                    const minR = Math.min(...rightC.map(c => Number(c.xmin) || 504));
+                    mcState.gutterNormX = Math.max(300, Math.min(700, Math.round((maxL + minR) / 2)));
+                }
                 mcState.colBounds = [buildColBounds(leftC), buildColBounds(rightC)];
                 leftC.forEach((c, idx) => {
                     mcState.regionMeta[`0_${idx}`] = {
                         qNum: String(c.questionNumber || (baseQStartNum + idx)),
                         subject: c.subject || mcState.defaultSubj,
                         chapter: c.chapter || mcState.defaultChap,
-                        stitchPrev: Boolean(c.isContinuationFromPrevPage),
+                        stitchPrev: Boolean(c.isContinuationFromPrevPage || c.isContinuationFromPrev || c.stitchWithPrev),
                         excluded: false
                     };
                 });
@@ -7638,7 +7696,7 @@ Analyze this JEE question image (${q.subject} - ${q.chapter}).
                         qNum: String(c.questionNumber || (baseQStartNum + leftC.length + idx)),
                         subject: c.subject || mcState.defaultSubj,
                         chapter: c.chapter || mcState.defaultChap,
-                        stitchPrev: false,
+                        stitchPrev: Boolean(c.isContinuationFromPrevPage || c.isContinuationFromPrev || c.stitchWithPrev),
                         excluded: false
                     };
                 });
@@ -7649,11 +7707,12 @@ Analyze this JEE question image (${q.subject} - ${q.chapter}).
                         qNum: String(c.questionNumber || (baseQStartNum + idx)),
                         subject: c.subject || mcState.defaultSubj,
                         chapter: c.chapter || mcState.defaultChap,
-                        stitchPrev: Boolean(c.isContinuationFromPrevPage),
+                        stitchPrev: Boolean(c.isContinuationFromPrevPage || c.isContinuationFromPrev || c.stitchWithPrev),
                         excluded: false
                     };
                 });
             }
+
 
             // Populate Bulk Subject & Chapter selectors
             const bulkSubj = document.getElementById('mcBulkSubjectSel');
@@ -8971,6 +9030,10 @@ Analyze this JEE question image (${q.subject} - ${q.chapter}).
                 if (!q) return;
                 q[field] = val;
                 if (field === 'subject') q.chapter = JEE_CHAPTERS[val]?.[0] || 'General';
+                if ((field === 'chapter' || field === 'subject') && window.JEELocalVisionEngine?.learnCorrection) {
+                    const sampleText = `${q.ocrText || ''} ${q.firstLineSnippet || ''} ${q.lastLineSnippet || ''}`.trim();
+                    if (sampleText) window.JEELocalVisionEngine.learnCorrection(sampleText, q.subject, q.chapter);
+                }
 
                 const stillMatches = getFiltered().some(item => item.id === q.id);
                 const cardEl = document.querySelector(`article[data-card-id="${q.id}"]`);
