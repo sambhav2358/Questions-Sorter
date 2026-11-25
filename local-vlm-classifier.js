@@ -2,7 +2,7 @@
  * ============================================================================
  * JEE ON-DEVICE VISION-LANGUAGE MODEL (VLM) CHAPTER CLASSIFIER
  * File Name for GitHub: local-vlm-classifier.js
- * Version: 1.2.0 (Adreno 750 WebGPU Subgroups Crash Fix + Auto-Recovery)
+ * Version: 1.3.0 (Full Adreno 750 Subgroups Hide + Plain WASM GatherBlockQuantized Fix + OOM Circuit-Breaker)
  * ============================================================================
  * Runs a REAL multimodal Vision-Language AI Model (Qwen 3.5 VL / Gemma 4 E2B)
  * 100% locally on your tablet's GPU via WebGPU (Snapdragon 8 Gen 3 Adreno 750)
@@ -32,13 +32,14 @@
 (function (globalScope) {
     'use strict';
 
-    const ENGINE_VERSION = '1.2.0';
+    const ENGINE_VERSION = '1.3.0';
     const TRANSFORMERS_CDN_CANDIDATES = [
         'https://cdn.jsdelivr.net/npm/@huggingface/transformers@4.3.2/dist/transformers.min.js',
         'https://cdn.jsdelivr.net/npm/@huggingface/transformers@4.3.2/+esm',
         'https://cdn.jsdelivr.net/npm/@huggingface/transformers@4/dist/transformers.min.js'
     ];
     const USER_CORRECTIONS_KEY = 'jee_vlm_fewshot_memory_v1';
+    const FORCE_WASM_STORAGE_KEY = 'jee_vlm_force_wasm_v1';
 
     // ========================================================================
     // VERIFIED ON-DEVICE MULTIMODAL MODELS (Transformers.js v4 + WebGPU)
@@ -398,9 +399,11 @@
         processor: null,
         model: null,
         deviceUsed: null,
+        ortWasmFlavor: null, // 'asyncify' (WebGPU) | 'plain' (CPU WASM w/ GatherBlockQuantized)
         isLoading: false,
         isBusy: false,
-        webgpuFailed: false,
+        webgpuFailed: (typeof localStorage !== 'undefined' && localStorage.getItem(FORCE_WASM_STORAGE_KEY) === '1'),
+        fatalLoadError: null,
         loadPromise: null
     };
 
@@ -416,28 +419,79 @@
     // Stripping `subgroups` from GPUAdapter.prototype.requestDevice forces ORT
     // Web onto its stable shared-memory WebGPU compute shader path!
     let adrenoSubgroupsPatchInstalled = false;
+    function isAdrenoOrAndroidAdapter(adapterObj) {
+        const isAndroid = typeof navigator !== 'undefined' && /Android/i.test(navigator.userAgent || '');
+        const vendor = String(adapterObj?.info?.vendor || '').toLowerCase();
+        const arch = String(adapterObj?.info?.architecture || '').toLowerCase();
+        return isAndroid || vendor.includes('qualcomm') || arch.includes('adreno');
+    }
+
+    function filterSubgroupFeaturesSet(origFeatures) {
+        const clean = new Set();
+        try {
+            for (const f of origFeatures) {
+                if (f !== 'subgroups' && f !== 'subgroups-f16') clean.add(f);
+            }
+        } catch (_) {}
+        return clean;
+    }
+
     function installAdrenoWebGpuSubgroupsPatch() {
         if (adrenoSubgroupsPatchInstalled) return;
         if (typeof globalScope === 'undefined' || !globalScope.GPUAdapter || !globalScope.GPUAdapter.prototype) return;
 
-        const isAndroid = typeof navigator !== 'undefined' && /Android/i.test(navigator.userAgent || '');
-        const origRequestDevice = globalScope.GPUAdapter.prototype.requestDevice;
-        if (typeof origRequestDevice !== 'function') return;
-
-        globalScope.GPUAdapter.prototype.requestDevice = function patchedRequestDevice(descriptor) {
-            const vendor = String(this.info?.vendor || '').toLowerCase();
-            const arch = String(this.info?.architecture || '').toLowerCase();
-            const isAdreno = isAndroid || vendor.includes('qualcomm') || arch.includes('adreno');
-
-            if (isAdreno && descriptor && descriptor.requiredFeatures) {
-                const filtered = Array.from(descriptor.requiredFeatures).filter(
-                    f => f !== 'subgroups' && f !== 'subgroups-f16'
-                );
-                const patchedDesc = { ...descriptor, requiredFeatures: filtered };
-                return origRequestDevice.call(this, patchedDesc);
+        // 1. Hide `subgroups` from GPUAdapter.prototype.features so ONNX Runtime Web never requests or compiles subgroupShuffle
+        try {
+            const featDesc = Object.getOwnPropertyDescriptor(globalScope.GPUAdapter.prototype, 'features');
+            if (featDesc && typeof featDesc.get === 'function' && featDesc.configurable) {
+                const origFeaturesGetter = featDesc.get;
+                Object.defineProperty(globalScope.GPUAdapter.prototype, 'features', {
+                    configurable: true,
+                    enumerable: featDesc.enumerable,
+                    get() {
+                        const raw = origFeaturesGetter.call(this);
+                        if (isAdrenoOrAndroidAdapter(this)) {
+                            return filterSubgroupFeaturesSet(raw);
+                        }
+                        return raw;
+                    }
+                });
             }
-            return origRequestDevice.call(this, descriptor);
-        };
+        } catch (_) {}
+
+        // 2. Also hide `subgroups` from GPUDevice.prototype.features as belt-and-suspenders
+        try {
+            if (globalScope.GPUDevice && globalScope.GPUDevice.prototype) {
+                const devFeatDesc = Object.getOwnPropertyDescriptor(globalScope.GPUDevice.prototype, 'features');
+                if (devFeatDesc && typeof devFeatDesc.get === 'function' && devFeatDesc.configurable) {
+                    const origDevFeatGetter = devFeatDesc.get;
+                    const isAndroid = typeof navigator !== 'undefined' && /Android/i.test(navigator.userAgent || '');
+                    Object.defineProperty(globalScope.GPUDevice.prototype, 'features', {
+                        configurable: true,
+                        enumerable: devFeatDesc.enumerable,
+                        get() {
+                            const raw = origDevFeatGetter.call(this);
+                            return isAndroid ? filterSubgroupFeaturesSet(raw) : raw;
+                        }
+                    });
+                }
+            }
+        } catch (_) {}
+
+        // 3. Strip `subgroups` from GPUAdapter.prototype.requestDevice requiredFeatures
+        const origRequestDevice = globalScope.GPUAdapter.prototype.requestDevice;
+        if (typeof origRequestDevice === 'function') {
+            globalScope.GPUAdapter.prototype.requestDevice = function patchedRequestDevice(descriptor) {
+                if (isAdrenoOrAndroidAdapter(this) && descriptor && descriptor.requiredFeatures) {
+                    const filtered = Array.from(descriptor.requiredFeatures).filter(
+                        f => f !== 'subgroups' && f !== 'subgroups-f16'
+                    );
+                    return origRequestDevice.call(this, { ...descriptor, requiredFeatures: filtered });
+                }
+                return origRequestDevice.call(this, descriptor);
+            };
+        }
+
         adrenoSubgroupsPatchInstalled = true;
     }
     // Install immediately before Transformers.js / ONNX Runtime Web touches WebGPU
@@ -475,7 +529,7 @@
             deviceMemoryGB,
             gpuVendor: gpuAdapterInfo?.vendor || 'Unknown',
             gpuArchitecture: gpuAdapterInfo?.architecture || 'Unknown',
-            recommendedModel: (deviceMemoryGB && deviceMemoryGB < 6) ? 'qwen3.5-0.8b' : 'qwen3.5-2b'
+            recommendedModel: ((deviceMemoryGB && deviceMemoryGB < 6) || runtime.webgpuFailed) ? 'qwen3.5-0.8b' : 'qwen3.5-2b'
         };
     }
 
@@ -869,6 +923,7 @@ Re-inspect the question image closely and pick the single TRUE primary chapter f
             return runtime.loadPromise;
         }
 
+        runtime.fatalLoadError = null;
         runtime.isLoading = true;
         runtime.loadPromise = (async () => {
             try {
@@ -886,6 +941,32 @@ Re-inspect the question image closely and pick the single TRUE primary chapter f
                     });
                 }
                 const tf = await ensureTransformersLoaded();
+
+                // CRITICAL: Configure ONNX Runtime WebAssembly binary BEFORE first session creation!
+                // Transformers.js 4.3.x defaults to `ort-wasm-simd-threaded.asyncify.wasm` (for WebGPU),
+                // which OMITS the CPU kernel for `GatherBlockQuantized(1)`.
+                // When running on CPU WASM, we MUST point wasmPaths to the plain `ort-wasm-simd-threaded.{mjs,wasm}` build!
+                if (device === 'wasm') {
+                    if (runtime.ortWasmFlavor === 'asyncify') {
+                        throw new Error(
+                            'WebGPU crashed on Adreno GPU. Saved Stable CPU WASM mode for this tablet — please refresh the page once and re-run!'
+                        );
+                    }
+                    const ortBackend = tf.env?.backends?.onnx;
+                    const ortVer = ortBackend?.versions?.web;
+                    if (ortBackend && ortBackend.wasm && ortVer) {
+                        const dist = `https://cdn.jsdelivr.net/npm/onnxruntime-web@${ortVer}/dist/`;
+                        ortBackend.wasm.wasmPaths = {
+                            mjs: `${dist}ort-wasm-simd-threaded.mjs`,
+                            wasm: `${dist}ort-wasm-simd-threaded.wasm`
+                        };
+                    }
+                    runtime.ortWasmFlavor = 'plain';
+                } else {
+                    if (runtime.ortWasmFlavor === null) {
+                        runtime.ortWasmFlavor = 'asyncify';
+                    }
+                }
 
                 const fileProgressMap = new Map();
                 const emitDownloadProgress = (info) => {
@@ -953,7 +1034,15 @@ Re-inspect the question image closely and pick the single TRUE primary chapter f
                     });
                 }
 
+                runtime.fatalLoadError = null;
                 return { modelKey, modelId: spec.id, device, cached: false };
+            } catch (loadErr) {
+                const rawMsg = String(loadErr?.message || loadErr || 'Model load failed');
+                const friendlyMsg = /Array buffer allocation failed|out of memory|OOM/i.test(rawMsg)
+                    ? `Out of browser memory loading ${spec.id.split('/')[1]} (${rawMsg}). Switch model dropdown to "Qwen 3.5 0.8B Vision" or refresh the tab to free RAM.`
+                    : rawMsg;
+                runtime.fatalLoadError = friendlyMsg;
+                throw new Error(friendlyMsg);
             } finally {
                 runtime.isLoading = false;
                 runtime.loadPromise = null;
@@ -1071,6 +1160,12 @@ Re-inspect the question image closely and pick the single TRUE primary chapter f
         const enableTieBreaker = options.enableTieBreaker ?? true;
         const reviewConfidenceThreshold = Number(options.reviewConfidenceThreshold ?? 0.80);
 
+        // Circuit-breaker: if model loading already hit a fatal OOM or GPU-lost error in this batch,
+        // do NOT re-allocate 1.5GB ArrayBuffers on Q.4, Q.5, Q.6...
+        if (!runtime.model && runtime.fatalLoadError && !options.retryAfterFatal) {
+            throw new Error(runtime.fatalLoadError);
+        }
+
         if (!runtime.model || runtime.activeModelKey !== modelKey) {
             await loadModel(modelKey, { onProgress: options.onProgress });
         }
@@ -1096,11 +1191,14 @@ Re-inspect the question image closely and pick the single TRUE primary chapter f
             const isWebGpuFatal = runtime.deviceUsed === 'webgpu' && (
                 /external Instance reference no longer exists|WebGPU|GPUBuffer|device lost|OrtRun/i.test(msg)
             );
-            if (isWebGpuFatal && !options._alreadyRetriedWasm) {
-                console.warn('[LocalVLM] WebGPU pipeline crashed on device; auto-switching to CPU WASM backend:', msg);
+            if (isWebGpuFatal) {
+                console.warn('[LocalVLM] WebGPU pipeline crashed on device; latching Stable CPU WASM mode:', msg);
                 runtime.webgpuFailed = true;
-                await loadModel(modelKey, { forceWasm: true, onProgress: options.onProgress });
-                return classifyQuestionImage(imageSource, { ...options, _alreadyRetriedWasm: true });
+                try { localStorage.setItem(FORCE_WASM_STORAGE_KEY, '1'); } catch (_) {}
+                await unloadModel();
+                const hint = 'Adreno WebGPU crashed — switched this tablet to Stable CPU WASM mode automatically. Please reload the page once (so Chrome boots the CPU GatherBlockQuantized runtime) and run again!';
+                runtime.fatalLoadError = hint;
+                throw new Error(hint);
             }
             throw gpuErr;
         }
@@ -1269,7 +1367,20 @@ Re-inspect the question image closely and pick the single TRUE primary chapter f
         DISAMBIGUATION_RULES,
         inspectDeviceCapabilities,
         installAdrenoWebGpuSubgroupsPatch,
-        resetWebGpuFallback: () => { runtime.webgpuFailed = false; },
+        setBackendMode: (mode) => {
+            const useWasm = String(mode || '').toLowerCase() === 'wasm';
+            runtime.webgpuFailed = useWasm;
+            runtime.fatalLoadError = null;
+            try {
+                if (useWasm) localStorage.setItem(FORCE_WASM_STORAGE_KEY, '1');
+                else localStorage.removeItem(FORCE_WASM_STORAGE_KEY);
+            } catch (_) {}
+        },
+        resetWebGpuFallback: () => {
+            runtime.webgpuFailed = false;
+            runtime.fatalLoadError = null;
+            try { localStorage.removeItem(FORCE_WASM_STORAGE_KEY); } catch (_) {}
+        },
         loadModel,
         unloadModel,
         isModelReady: () => Boolean(runtime.model && runtime.processor),
