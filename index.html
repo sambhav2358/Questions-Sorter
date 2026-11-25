@@ -15,7 +15,7 @@
     <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
     <script src="./local-vision-engine.js?v=3.0"></script>
-    <script src="./local-vlm-classifier.js?v=1.3"></script>
+    <script src="./local-vlm-classifier.js?v=1.4"></script>
     <style>
     <style>
         :root {
@@ -5366,15 +5366,17 @@ Analyze this JEE question image (${q.subject} - ${q.chapter}).
                                 `Vision AI analyzing Q.${q.questionNumber} diagram & concepts...`
                             );
 
-                            try {
+                            try {                               
                                 const res = await vlm.classifyQuestionImage(q.imageDataUrl, {
                                     modelKey: selectedVlmKey,
                                     subjectHint: q._subjectOverride || (defaultSubj !== 'AUTO' ? defaultSubj : null),
                                     paperName,
                                     ocrTextHint: q.ocrText || '',
                                     enableThinking: true,
-                                    enableTieBreaker: true
+                                    enableTieBreaker: true,
+                                    abortSignal: state.extractionAbortController.signal
                                 });
+
 
                                 q.subject = res.subject;
                                 q.chapter = res.chapter;
