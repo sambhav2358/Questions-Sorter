@@ -1,0 +1,1457 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Material 3 Expressive Question Vault</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+    <link rel="stylesheet" href="./styles.css?v=3.0">
+    <script src="./local-vision-engine.js?v=3.0"></script>
+    <script src="./local-ai-borders.js?v=3.0"></script>
+</head>
+<body class="h-[100dvh] w-screen overflow-hidden flex flex-col select-none m3-surface">
+
+    <!-- HIDDEN SVG DEFINITIONS -->
+    <svg width="0" height="0" class="absolute pointer-events-none">
+        <defs>
+            <clipPath id="m3Cookie12Clip" clipPathUnits="objectBoundingBox">
+                <path id="m3Cookie12Path" d=""></path>
+            </clipPath>
+            <clipPath id="m3Clover8Clip" clipPathUnits="objectBoundingBox">
+                <path id="m3Clover8Path" d=""></path>
+            </clipPath>
+        </defs>
+    </svg>
+
+    <!-- =================================================================== -->
+    <!-- MAIN TOP BAR (Compact Zero-Overflow Layout, No Branding)            -->
+    <!-- =================================================================== -->
+    <header class="h-12 m3-surface-low border-b border-[var(--md-outline-variant)] px-2 sm:px-3 py-1 flex items-center justify-between gap-1.5 shrink-0 z-30 w-full overflow-hidden">
+        <!-- Left Cluster: Chapters + Swipeable Status Pill -->
+        <div class="flex items-center gap-1.5 min-w-0 shrink-0">
+            <button onclick="window.app.toggleDrawer()" class="h-8.5 px-2.5 py-1.5 m3-btn-tonal text-[11px] flex items-center gap-1.5 shrink-0">
+                <i class="ph-bold ph-tree-structure text-sm" style="color: var(--md-primary)"></i>
+                <span class="hidden md:inline">Chapters</span>
+                <span id="activeChapterIndicator" class="px-1.5 py-0.5 text-[10px] rounded-full font-extrabold max-w-[70px] truncate" style="background: var(--md-primary); color: var(--md-on-primary);">All</span>
+            </button>
+
+            <div id="statusSegmentedBar" class="m3-segmented-group shrink-0" role="group" aria-label="Swipeable Question Status Filter">
+                <button onclick="window.app.setStatus('ALL')" data-status="ALL" class="status-btn m3-seg-btn active" title="All Questions">
+                    <i class="ph-fill ph-squares-four text-xs"></i>
+                    <span>All</span>
+                </button>
+                <button onclick="window.app.setStatus('UNSOLVED')" data-status="UNSOLVED" class="status-btn m3-seg-btn" title="Unsolved">
+                    <i class="ph-bold ph-circle text-xs"></i>
+                    <span class="status-label-text">Unsolved</span>
+                    <span id="status-count-UNSOLVED" class="text-[10px] font-extrabold opacity-85">0</span>
+                </button>
+                <button onclick="window.app.setStatus('SOLVED')" data-status="SOLVED" class="status-btn m3-seg-btn" title="Solved">
+                    <i class="ph-fill ph-check-circle text-xs"></i>
+                    <span class="status-label-text">Solved</span>
+                    <span id="status-count-SOLVED" class="text-[10px] font-extrabold opacity-85">0</span>
+                </button>
+                <button onclick="window.app.setStatus('STARRED')" data-status="STARRED" class="status-btn m3-seg-btn" title="Starred">
+                    <i class="ph-fill ph-star text-xs"></i>
+                    <span class="status-label-text">Starred</span>
+                    <span id="status-count-STARRED" class="text-[10px] font-extrabold opacity-85">0</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Center Status Badges + Search -->
+        <div class="flex items-center gap-1.5 flex-1 min-w-[90px] max-w-xs mx-auto">
+            <div id="ocrStatusBadge" class="hidden h-7 items-center gap-1 px-2 rounded-full text-[10px] font-extrabold m3-primary-pill shrink-0">
+                <i class="ph-bold ph-text-T animate-bounce text-xs"></i>
+                <span id="ocrStatusText">OCR</span>
+            </div>
+            <!-- Clicking this now opens the dedicated Live AI Solver Console with Logs! -->
+            <div id="solverStatusBadge" onclick="window.app.openSolverModal()" class="hidden h-7 items-center gap-1 px-2.5 rounded-full text-[10px] font-extrabold m3-primary-pill cursor-pointer shrink-0" title="Click to open Live AI Answer Key & Hint Logs">
+                <i class="ph-bold ph-lightbulb animate-pulse text-xs"></i>
+                <span id="solverStatusText">Hints</span>
+            </div>
+
+            <div class="relative flex items-center flex-1 min-w-0">
+                <i class="ph-bold ph-magnifying-glass absolute left-2.5 top-1/2 -translate-y-1/2 m3-text-muted text-xs pointer-events-none"></i>
+                <input id="searchBox" oninput="window.app.setSearch(this.value)" type="text" placeholder="Search questions..." class="h-8.5 py-1.5 w-full m3-input pl-7 pr-6 text-[11px] placeholder-slate-400">
+                <button id="clearSearchBtn" onclick="window.app.clearSearch()" class="hidden absolute right-2 top-1/2 -translate-y-1/2 m3-text-muted hover:opacity-100 p-0.5" title="Clear search">
+                    <i class="ph-bold ph-x text-xs"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Right Cluster: Paper Filter, Sort, AI Solver Console, Mock Test, Random, Fullscreen, Sync, Settings -->
+        <div class="flex items-center gap-1 shrink-0">
+            <button type="button" id="paperDropdownBtn" onclick="window.app.openPaperMenu(this)" class="h-8.5 px-2.5 py-1.5 m3-dropdown-trigger text-[11px] max-w-[108px] shrink-0" title="Filter by Paper">
+                <span id="paperDropdownLabel" class="truncate">All Papers</span>
+                <i class="ph-bold ph-caret-down text-[9px] m3-text-muted shrink-0"></i>
+            </button>
+
+            <button type="button" id="sortDropdownBtn" onclick="window.app.openSortMenu(this)" class="h-8.5 px-2 py-1.5 m3-dropdown-trigger text-[11px] shrink-0" title="Sort Questions">
+                <i class="ph-bold ph-sort-ascending text-xs" style="color: var(--md-primary)"></i>
+                <span id="sortDropdownLabel" class="hidden xl:inline text-[10px]">Q.#</span>
+            </button>
+
+            <div class="m3-icon-group shrink-0">
+                <button onclick="window.app.openSolverModal()" class="m3-icon-group-btn gap-1" title="Open Live AI Answer Key & Hint Solver Console">
+                    <i class="ph-bold ph-lightbulb text-xs text-amber-400"></i>
+                    <span class="hidden 2xl:inline text-[10px]">AI Keys</span>
+                </button>
+                <button onclick="window.app.openMockTestSetupModal()" class="m3-icon-group-btn gap-1" title="Start Timed Mock Test Set">
+                    <i class="ph-bold ph-exam text-xs" style="color: var(--md-primary)"></i>
+                    <span class="hidden 2xl:inline text-[10px]">Mock</span>
+                </button>
+                <button onclick="window.app.pickRandomQuestion()" class="m3-icon-group-btn" title="Pick a Random Question">
+                    <i class="ph-bold ph-shuffle text-xs"></i>
+                </button>
+                <button onclick="window.app.toggleFullscreen()" class="m3-icon-group-btn" title="Toggle Fullscreen">
+                    <i id="fullscreenIcon" class="ph-bold ph-corners-out text-xs"></i>
+                </button>
+                <button id="syncHeaderBtn" onclick="window.app.handleCloudBadgeClick()" class="m3-icon-group-btn gap-1" title="Click to Sync with GitHub Cloud">
+                    <i id="cloudStatusIcon" class="ph-bold ph-cloud-arrow-up text-xs"></i>
+                    <svg id="syncMorphSvg" class="hidden w-4 h-4 shrink-0" viewBox="0 0 24 24">
+                        <path class="m3-morph-loader-path" fill="currentColor" d=""></path>
+                    </svg>
+                    <span id="cloudStatusText" class="text-[10px] font-extrabold hidden 2xl:inline">Sync</span>
+                </button>
+                <button onclick="window.app.openSettingsModal()" id="apiSettingsBtn" class="m3-icon-group-btn relative" title="Open Settings Menu">
+                    <i class="ph-bold ph-gear text-xs"></i>
+                    <span id="apiKeyDot" class="w-2 h-2 rounded-full bg-amber-400 absolute top-1 right-1"></span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- =================================================================== -->
+    <!-- ACTIVE TIMED MOCK TEST BAR (#5 Timed Test / Mock Set Runner)        -->
+    <!-- =================================================================== -->
+    <div id="mockTestActiveBar" class="hidden h-10 m3-surface-high border-b border-[var(--md-outline-variant)] px-3 items-center justify-between gap-2 shrink-0 z-25">
+        <div class="flex items-center gap-2 min-w-0">
+            <span class="px-2.5 py-0.5 rounded-full m3-primary-pill text-[10px] font-extrabold uppercase tracking-wider shrink-0">Mock Test</span>
+            <span id="mockTestCountdownText" class="font-mono font-extrabold text-xs text-amber-400 shrink-0">30:00</span>
+        </div>
+
+        <div id="mockTestPaletteStrip" class="flex items-center gap-1 overflow-x-auto no-scrollbar py-0.5"></div>
+
+        <div class="flex items-center gap-1.5 shrink-0">
+            <button type="button" onclick="window.app.finishMockTest(false)" class="h-7 px-3 rounded-full bg-emerald-600 hover:bg-emerald-500 text-white text-[11px] font-extrabold transition">
+                Submit Test
+            </button>
+        </div>
+    </div>
+
+    <!-- =================================================================== -->
+    <!-- MINIMIZED PDF UPLOAD PROGRESS BAR                                   -->
+    <!-- =================================================================== -->
+    <div id="minimizedUploadBar" onclick="window.app.restoreUploadModal()" class="hidden m3-surface-high border-b border-[var(--md-outline-variant)] px-4 py-1.5 items-center justify-between gap-3 cursor-pointer hover:brightness-105 transition shrink-0 z-20" title="Click to reopen PDF Extraction Dialog">
+        <div class="flex items-center gap-2 shrink-0">
+            <svg class="w-6 h-6 shrink-0" style="color: var(--md-primary);" viewBox="0 0 24 24">
+                <path class="m3-morph-loader-path" fill="currentColor" d=""></path>
+            </svg>
+            <span id="minBarStatusText" class="w-56 sm:w-64 text-[11px] font-bold font-mono truncate shrink-0">Scanning Page 1...</span>
+            <span id="minBarPageBadge" class="w-20 text-center py-0.5 rounded-full text-[10px] font-extrabold m3-primary-pill shrink-0">Page 1/1</span>
+        </div>
+
+        <div id="minBarWaveWrap" class="flex-1 max-w-md min-w-[120px]"></div>
+
+        <div class="flex items-center gap-2 shrink-0">
+            <span class="text-[11px] font-bold m3-text-muted hidden md:inline">Tap to expand logs</span>
+            <button type="button" onclick="event.stopPropagation(); window.app.restoreUploadModal()" class="w-7 h-7 rounded-full m3-btn-tonal flex items-center justify-center" title="Expand Dialog">
+                <i class="ph-bold ph-arrows-out-simple text-xs"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- =================================================================== -->
+    <!-- NEW: MINIMIZED AI ANSWER KEY & HINT SOLVER PROGRESS BAR             -->
+    <!-- =================================================================== -->
+    <div id="minimizedSolverBar" onclick="window.app.openSolverModal()" class="hidden m3-surface-high border-b border-[var(--md-outline-variant)] px-4 py-1.5 items-center justify-between gap-3 cursor-pointer hover:brightness-105 transition shrink-0 z-20" title="Click to expand Live AI Answer Key & Hint Solver Logs">
+        <div class="flex items-center gap-2 shrink-0">
+            <svg class="w-6 h-6 shrink-0 text-amber-400" viewBox="0 0 24 24">
+                <path class="m3-morph-loader-path" fill="currentColor" d=""></path>
+            </svg>
+            <span id="minSolverStatusText" class="w-56 sm:w-64 text-[11px] font-bold font-mono truncate shrink-0">Solving Q.1 with gemini-3.8-flash...</span>
+            <span id="minSolverCountBadge" class="w-24 text-center py-0.5 rounded-full text-[10px] font-extrabold m3-primary-pill shrink-0">Solved 0/0</span>
+        </div>
+
+        <div id="minSolverWaveWrap" class="flex-1 max-w-md min-w-[120px]"></div>
+
+        <div class="flex items-center gap-2 shrink-0">
+            <span class="text-[11px] font-bold m3-text-muted hidden md:inline">Tap to view live logs</span>
+            <button type="button" onclick="event.stopPropagation(); window.app.openSolverModal()" class="w-7 h-7 rounded-full m3-btn-tonal flex items-center justify-center" title="Expand Solver Logs">
+                <i class="ph-bold ph-arrows-out-simple text-xs"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- =================================================================== -->
+    <!-- TIMED MOCK SET GENERATOR MODAL (#5)                                 -->
+    <!-- =================================================================== -->
+    <div id="mockTestSetupModal" onclick="if(event.target === this) window.app.closeMockTestSetupModal()" class="fixed inset-0 bg-black/75 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+        <div class="m3-dialog max-w-md w-full p-6 space-y-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="w-11 h-11 m3-cookie-12 flex items-center justify-center shrink-0" style="background: var(--md-primary-container); color: var(--md-primary);">
+                        <i class="ph-bold ph-exam text-xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-extrabold text-base">Start Timed Mock Set</h3>
+                        <p class="text-xs m3-text-muted">Locks a randomized practice set from your current filter</p>
+                    </div>
+                </div>
+                <button type="button" onclick="window.app.closeMockTestSetupModal()" class="h-8 w-8 m3-btn-tonal flex items-center justify-center">
+                    <i class="ph-bold ph-x text-xs"></i>
+                </button>
+            </div>
+
+            <div class="m3-group-list">
+                <div class="p-3.5 m3-group-item flex items-center justify-between">
+                    <span class="text-xs font-bold">Number of Questions</span>
+                    <input id="mockQCountInput" type="number" min="1" max="60" value="10" class="w-20 h-8 m3-input m3-surface-low text-center text-xs font-extrabold">
+                </div>
+                <div class="p-3.5 m3-group-item flex items-center justify-between">
+                    <span class="text-xs font-bold">Time Limit (Minutes)</span>
+                    <input id="mockTimeMinsInput" type="number" min="5" max="180" value="30" class="w-20 h-8 m3-input m3-surface-low text-center text-xs font-extrabold">
+                </div>
+                <label class="p-3.5 m3-group-item flex items-center justify-between cursor-pointer">
+                    <span class="text-xs font-bold">Unsolved Questions Only</span>
+                    <input id="mockUnsolvedOnlyChk" type="checkbox" checked class="w-4 h-4 rounded">
+                </label>
+                <label class="p-3.5 m3-group-item flex items-center justify-between cursor-pointer">
+                    <span class="text-xs font-bold">Enable Blind Mode During Test</span>
+                    <input id="mockBlindModeChk" type="checkbox" checked class="w-4 h-4 rounded">
+                </label>
+            </div>
+
+            <div class="flex items-center justify-end gap-2 pt-1">
+                <button type="button" onclick="window.app.closeMockTestSetupModal()" class="h-9 px-4 m3-btn-tonal text-xs">Cancel</button>
+                <button type="button" onclick="window.app.startMockTestSession()" class="h-9 px-5 m3-btn-filled text-xs flex items-center gap-1.5 shadow">
+                    <i class="ph-bold ph-play"></i>
+                    <span>Launch Mock Test</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- =================================================================== -->
+    <!-- TIMED MOCK SET SUMMARY MODAL (#5)                                   -->
+    <!-- =================================================================== -->
+    <div id="mockTestSummaryModal" onclick="if(event.target === this) window.app.closeMockTestSummaryModal()" class="fixed inset-0 bg-black/75 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+        <div class="m3-dialog max-w-md w-full p-6 space-y-4">
+            <div class="flex items-center gap-3">
+                <div class="w-12 h-12 m3-cookie-12 flex items-center justify-center shrink-0" style="background: var(--md-primary-container); color: var(--md-primary);">
+                    <i class="ph-bold ph-trophy text-2xl"></i>
+                </div>
+                <div>
+                    <h3 class="font-extrabold text-base">Mock Set Complete!</h3>
+                    <p id="mockSummarySubtext" class="text-xs m3-text-muted">Session performance breakdown</p>
+                </div>
+            </div>
+
+            <div id="mockSummaryStatsGrid" class="grid grid-cols-3 gap-2.5 text-center"></div>
+
+            <div class="flex items-center justify-end gap-2 pt-1">
+                <button type="button" onclick="window.app.closeMockTestSummaryModal()" class="h-9 px-5 m3-btn-filled text-xs">Done</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- =================================================================== -->
+    <!-- DOUBLE CONFIRMATION DIALOG FOR CLEAR ALL QUESTIONS                  -->
+    <!-- =================================================================== -->
+    <div id="clearConfirmModal" onclick="if(event.target === this) window.app.closeClearConfirmModal()" class="fixed inset-0 bg-black/75 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+        <div class="m3-dialog max-w-md w-full p-6 space-y-4">
+            <div class="flex items-center gap-3">
+                <div class="w-12 h-12 m3-cookie-12 bg-rose-500/20 text-rose-400 flex items-center justify-center shrink-0">
+                    <i class="ph-bold ph-warning-octagon text-2xl"></i>
+                </div>
+                <div>
+                    <h3 class="font-extrabold text-base">Delete All Questions?</h3>
+                    <p class="text-xs m3-text-muted">This will wipe your entire question bank and sync to Cloud.</p>
+                </div>
+            </div>
+
+            <label class="p-3.5 rounded-2xl m3-surface-high flex items-center gap-3 cursor-pointer select-none">
+                <input type="checkbox" id="clearVaultDoubleCheck" onchange="document.getElementById('finalClearVaultBtn').disabled = !this.checked" class="w-4 h-4 rounded accent-rose-500">
+                <span class="text-xs font-bold">Yes, I am 100% sure I want to permanently delete all <span id="clearConfirmCount">0</span> questions.</span>
+            </label>
+
+            <div class="flex items-center justify-end gap-2 pt-1">
+                <button type="button" onclick="window.app.closeClearConfirmModal()" class="h-9 px-4 m3-btn-tonal text-xs">Cancel</button>
+                <button type="button" id="finalClearVaultBtn" disabled onclick="window.app.executeClearVault()" class="h-9 px-5 rounded-full bg-rose-600 hover:bg-rose-500 disabled:opacity-35 disabled:pointer-events-none text-white text-xs font-extrabold transition">
+                    Permanently Delete All
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- =================================================================== -->
+    <!-- MATERIAL 3 EXPRESSIVE NAVIGATION DRAWER                             -->
+    <!-- =================================================================== -->
+    <div id="drawerBackdrop" onclick="window.app.toggleDrawer(false)" class="fixed inset-0 bg-black/55 backdrop-blur-xs z-40 hidden"></div>
+    <aside id="chaptersDrawer" class="fixed inset-y-0 left-0 w-80 m3-surface-container border-r border-[var(--md-outline-variant)] rounded-r-[32px] z-50 -translate-x-full transition-transform duration-300 ease-out flex flex-col shadow-2xl overflow-hidden">
+        <div class="p-4 flex items-center justify-between">
+            <div class="flex items-center gap-2.5">
+                <div class="w-9 h-9 m3-cookie-12 flex items-center justify-center" style="background: var(--md-primary-container); color: var(--md-primary);">
+                    <i class="ph-bold ph-folders text-base"></i>
+                </div>
+                <h2 class="font-extrabold text-xs uppercase tracking-wider">Subjects & Chapters</h2>
+            </div>
+            <button onclick="window.app.toggleDrawer(false)" class="h-8 w-8 m3-btn-tonal flex items-center justify-center" title="Close Drawer">
+                <i class="ph-bold ph-x text-xs"></i>
+            </button>
+        </div>
+
+        <div class="px-3 pb-2 flex items-center gap-1.5 overflow-x-auto no-scrollbar">
+            <button type="button" onclick="window.app.setTagFilter('ALL')" data-tag-chip="ALL" class="drawer-tag-chip h-7 px-2.5 rounded-full text-[10px] font-extrabold shrink-0 m3-btn-filled">All Tags</button>
+            <button type="button" onclick="window.app.setTagFilter('Concept')" data-tag-chip="Concept" class="drawer-tag-chip h-7 px-2.5 rounded-full text-[10px] font-bold shrink-0 m3-surface-high">Concept</button>
+            <button type="button" onclick="window.app.setTagFilter('Formula')" data-tag-chip="Formula" class="drawer-tag-chip h-7 px-2.5 rounded-full text-[10px] font-bold shrink-0 m3-surface-high">Formula</button>
+            <button type="button" onclick="window.app.setTagFilter('Calc')" data-tag-chip="Calc" class="drawer-tag-chip h-7 px-2.5 rounded-full text-[10px] font-bold shrink-0 m3-surface-high">Calc</button>
+            <button type="button" onclick="window.app.setTagFilter('Trap')" data-tag-chip="Trap" class="drawer-tag-chip h-7 px-2.5 rounded-full text-[10px] font-bold shrink-0 m3-surface-high">Trap</button>
+            <button type="button" onclick="window.app.setTagFilter('Redo')" data-tag-chip="Redo" class="drawer-tag-chip h-7 px-2.5 rounded-full text-[10px] font-bold shrink-0 m3-surface-high">Redo</button>
+        </div>
+
+        <div class="px-3 pb-2">
+            <input id="drawerChapterSearch" oninput="window.app.renderDrawerChapters()" type="text" placeholder="Filter chapters..." class="w-full h-9 m3-input px-3.5 text-xs placeholder-slate-400">
+        </div>
+
+        <div id="drawerChapterList" class="flex-1 overflow-y-auto p-3 space-y-3"></div>
+
+        <div class="p-3.5 m3-surface-low border-t border-[var(--md-outline-variant)] flex items-center justify-between text-xs">
+            <span id="drawerProgressText" class="px-3 py-1 rounded-full m3-primary-pill font-extrabold text-[11px]">Solved: 0 / 0</span>
+            <button onclick="window.app.confirmClearVault()" class="px-3 py-1 rounded-full bg-rose-500/15 text-rose-500 hover:bg-rose-500/25 font-bold flex items-center gap-1 transition">
+                <i class="ph-bold ph-trash"></i> Clear All
+            </button>
+        </div>
+    </aside>
+
+    <!-- =================================================================== -->
+    <!-- MAIN QUESTION FEED WORKSPACE                                        -->
+    <!-- =================================================================== -->
+    <main id="mainFeedContainer" onscroll="window.app.handleFeedScroll(this)" class="flex-1 min-h-0 overflow-y-auto px-3 sm:px-5 pt-4 pb-36 flex flex-col"></main>
+
+    <!-- =================================================================== -->
+    <!-- SCROLL-REACTIVE MATERIAL 3 EXTENDED FAB (Fixed 56px Height!)        -->
+    <!-- =================================================================== -->
+    <button id="extendedAddPdfFab" onclick="window.app.openUploadModal()" class="fixed bottom-6 right-6 z-30 m3-extended-fab flex items-center gap-2.5 font-extrabold text-sm">
+        <i class="ph-bold ph-plus text-lg"></i>
+        <span>Add Questions</span>
+    </button>
+
+    <!-- =================================================================== -->
+    <!-- FULL-CARD 3-PANEL CAROUSEL IMAGE POPUP LIGHTBOX                     -->
+    <!-- =================================================================== -->
+    <div id="imagePopupModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden overflow-hidden">
+        <div id="popupCarouselViewport" class="w-screen h-[100dvh] overflow-hidden relative flex items-center">
+            <div id="popupCarouselTrack" class="flex items-center h-full will-change-transform" style="width: 300vw; transform: translate3d(-100vw, 0, 0);">
+                <div id="popupSlidePrev" onclick="if(event.target === this) window.app.closeImagePopup()" class="w-screen h-full flex items-center justify-center p-3 sm:p-5 shrink-0"></div>
+                <div id="popupSlideCurr" onclick="if(event.target === this) window.app.closeImagePopup()" class="w-screen h-full flex items-center justify-center p-3 sm:p-5 shrink-0"></div>
+                <div id="popupSlideNext" onclick="if(event.target === this) window.app.closeImagePopup()" class="w-screen h-full flex items-center justify-center p-3 sm:p-5 shrink-0"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- =================================================================== -->
+    <!-- MODAL 1: PHONE-STYLE M3 EXPRESSIVE SETTINGS                         -->
+    <!-- =================================================================== -->
+    <div id="settingsModal" onclick="if(event.target === this) window.app.closeSettingsModal()" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-3 sm:p-5">
+        <div class="m3-dialog max-w-lg w-full max-h-[90vh] flex flex-col overflow-hidden">
+            <div class="px-5 py-3.5 m3-surface-low border-b border-[var(--md-outline-variant)] flex items-center justify-between gap-2 shrink-0">
+                <div class="flex items-center gap-2.5 min-w-0">
+                    <button type="button" id="settingsBackBtn" onclick="window.app.openSettingsPage('HOME')" class="hidden h-9 w-9 rounded-2xl m3-surface-high hover:brightness-105 items-center justify-center transition shrink-0" title="Back">
+                        <i class="ph-bold ph-arrow-left text-base"></i>
+                    </button>
+                    <div id="settingsHeaderIcon" class="w-9 h-9 m3-cookie-12 flex items-center justify-center shrink-0" style="background: var(--md-primary-container); color: var(--md-primary);">
+                        <i class="ph-bold ph-gear text-base"></i>
+                    </div>
+                    <h3 id="settingsHeaderTitle" class="font-extrabold text-base truncate">Settings</h3>
+                </div>
+
+                <button type="button" onclick="window.app.closeSettingsModal()" class="h-9 w-9 m3-btn-tonal flex items-center justify-center shrink-0" title="Close Settings">
+                    <i class="ph-bold ph-x text-sm"></i>
+                </button>
+            </div>
+
+            <div class="p-4 overflow-y-auto overflow-x-hidden flex-1 settings-pages-stage">
+                <div id="apiKeyMissingAlert" class="hidden p-3.5 rounded-3xl m3-primary-pill text-xs leading-relaxed">
+                    <strong class="font-extrabold block mb-0.5">API Key Required for Gemini 3.8 Flash:</strong>
+                    Please enter your Google AI Studio API Key below to verify PDF borders and generate Answer Keys & Hints.
+                </div>
+
+                <!-- PAGE 0: SEGMENTED GROUPED LIST HUB -->
+                <div id="settingsPage_HOME" class="m3-group-list">
+                    <button type="button" onclick="window.app.openSettingsPage('KEYS')" class="w-full p-4 m3-group-item flex items-center justify-between gap-3.5 text-left">
+                        <div class="flex items-center gap-3.5 min-w-0">
+                            <div class="w-11 h-11 rounded-full flex items-center justify-center shrink-0" style="background: var(--md-primary-container); color: var(--md-primary);">
+                                <i class="ph-bold ph-key text-lg"></i>
+                            </div>
+                            <div class="min-w-0">
+                                <div class="font-extrabold text-sm">API Keys & Cloud Credentials</div>
+                                <div class="text-xs m3-text-muted truncate">Gemini API Key & GitHub PAT</div>
+                            </div>
+                        </div>
+                        <i class="ph-bold ph-caret-right m3-text-muted text-base shrink-0"></i>
+                    </button>
+
+                    <button type="button" onclick="window.app.openSettingsPage('THEME')" class="w-full p-4 m3-group-item flex items-center justify-between gap-3.5 text-left">
+                        <div class="flex items-center gap-3.5 min-w-0">
+                            <div class="w-11 h-11 m3-cookie-12 flex items-center justify-center shrink-0" style="background: var(--md-secondary-container); color: var(--md-on-secondary-container);">
+                                <i class="ph-bold ph-palette text-lg"></i>
+                            </div>
+                            <div class="min-w-0">
+                                <div class="font-extrabold text-sm">Appearance & Material You Theme</div>
+                                <div class="text-xs m3-text-muted truncate">Dark/Light mode & Material 3 Expressive color seeds</div>
+                            </div>
+                        </div>
+                        <i class="ph-bold ph-caret-right m3-text-muted text-base shrink-0"></i>
+                    </button>
+
+                    <button type="button" onclick="window.app.openSettingsPage('BACKUP')" class="w-full p-4 m3-group-item flex items-center justify-between gap-3.5 text-left">
+                        <div class="flex items-center gap-3.5 min-w-0">
+                            <div class="w-11 h-11 m3-clover-8 flex items-center justify-center shrink-0" style="background: var(--md-tertiary-container); color: var(--md-on-tertiary-container);">
+                                <i class="ph-bold ph-cloud-arrow-up text-lg"></i>
+                            </div>
+                            <div class="min-w-0">
+                                <div class="font-extrabold text-sm">Cloud Sync, Export & Vault Tools</div>
+                                <div class="text-xs m3-text-muted truncate">Push/Pull Cloud, JSON Export/Import, Deduplicate & OCR</div>
+                            </div>
+                        </div>
+                        <i class="ph-bold ph-caret-right m3-text-muted text-base shrink-0"></i>
+                    </button>
+
+                    <button type="button" onclick="window.app.openSettingsPage('SCANNER')" class="w-full p-4 m3-group-item flex items-center justify-between gap-3.5 text-left">
+                        <div class="flex items-center gap-3.5 min-w-0">
+                            <div class="w-11 h-11 m3-leaf-shape flex items-center justify-center shrink-0" style="background: var(--md-primary-container); color: var(--md-primary);">
+                                <i class="ph-bold ph-lightbulb text-lg"></i>
+                            </div>
+                            <div class="min-w-0">
+                                <div class="font-extrabold text-sm">Gemini 3.8 Flash Solver & Scanner</div>
+                                <div class="text-xs m3-text-muted truncate">Model Selector (3.8 Flash / 3.8 Flash Lite), Live Solver Console & Margins</div>
+                            </div>
+                        </div>
+                        <i class="ph-bold ph-caret-right m3-text-muted text-base shrink-0"></i>
+                    </button>
+                </div>
+
+                <!-- PAGE 1: API KEYS -->
+                <div id="settingsPage_KEYS" class="hidden space-y-3">
+                    <div class="m3-group-list">
+                        <div class="p-4 m3-group-item space-y-1.5">
+                            <label class="block text-xs font-bold">Google AI Studio API Key (Gemini 3.8 Flash)</label>
+                            <div class="relative">
+                                <input id="apiKeyInput" type="password" placeholder="AIzaSy..." class="w-full h-10 m3-input m3-surface-low pl-3.5 pr-10 text-xs font-mono">
+                                <button type="button" onclick="window.app.toggleVisibility('apiKeyInput', 'apiKeyEyeIcon')" class="absolute right-3 top-1/2 -translate-y-1/2 m3-text-muted">
+                                    <i id="apiKeyEyeIcon" class="ph-bold ph-eye text-base"></i>
+                                </button>
+                            </div>
+                            <p class="text-[11px] m3-text-muted">Saved locally on this device. Get a free key from <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer" class="underline" style="color: var(--md-primary)">Google AI Studio</a>.</p>
+                        </div>
+
+                        <div class="p-4 m3-group-item space-y-1.5">
+                            <label class="block text-xs font-bold">GitHub Personal Access Token (`gist` scope only)</label>
+                            <div class="relative">
+                                <input id="githubTokenInput" type="password" placeholder="ghp_..." class="w-full h-10 m3-input m3-surface-low pl-3.5 pr-10 text-xs font-mono">
+                                <button type="button" onclick="window.app.toggleVisibility('githubTokenInput', 'githubTokenEyeIcon')" class="absolute right-3 top-1/2 -translate-y-1/2 m3-text-muted">
+                                    <i id="githubTokenEyeIcon" class="ph-bold ph-eye text-base"></i>
+                                </button>
+                            </div>
+                            <p class="text-[11px] m3-text-muted font-mono">Linked Cloud Gist: 9259f71c65f635b809f348a7216b6e53</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PAGE 2: APPEARANCE -->
+                <div id="settingsPage_THEME" class="hidden space-y-3">
+                    <div class="m3-group-list">
+                        <div class="p-4 m3-group-item flex items-center justify-between gap-3">
+                            <div>
+                                <div class="text-xs font-extrabold uppercase tracking-wider">Color Mode</div>
+                                <div class="text-[11px] m3-text-muted">Refined Light & Deep Dark Material 3 palettes</div>
+                            </div>
+                            <div class="m3-segmented-group">
+                                <button type="button" id="themeModeDarkBtn" onclick="window.app.setThemeMode('dark')" class="m3-seg-btn active">
+                                    <i class="ph-bold ph-moon"></i>
+                                    <span>Dark</span>
+                                </button>
+                                <button type="button" id="themeModeLightBtn" onclick="window.app.setThemeMode('light')" class="m3-seg-btn">
+                                    <i class="ph-bold ph-sun"></i>
+                                    <span>Light</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="p-4 m3-group-item space-y-3">
+                            <div>
+                                <h4 class="text-xs font-extrabold uppercase tracking-wider mb-1">Material 3 Expressive Color Seeds</h4>
+                                <p class="text-[11px] m3-text-muted">Tap a scalloped cookie swatch to re-tint all surfaces, squiggle bars, and containers.</p>
+                            </div>
+
+                            <div class="grid grid-cols-3 sm:grid-cols-6 gap-2.5 pt-1">
+                                <button type="button" onclick="window.app.setMaterialTheme('#7c3aed')" class="p-2.5 rounded-2xl m3-surface-low hover:scale-105 transition flex flex-col items-center gap-1.5">
+                                    <span class="w-8 h-8 m3-cookie-12 bg-[#7c3aed] block"></span>
+                                    <span class="text-[10px] font-bold">Violet</span>
+                                </button>
+                                <button type="button" onclick="window.app.setMaterialTheme('#0284c7')" class="p-2.5 rounded-2xl m3-surface-low hover:scale-105 transition flex flex-col items-center gap-1.5">
+                                    <span class="w-8 h-8 m3-cookie-12 bg-[#0284c7] block"></span>
+                                    <span class="text-[10px] font-bold">Ocean</span>
+                                </button>
+                                <button type="button" onclick="window.app.setMaterialTheme('#059669')" class="p-2.5 rounded-2xl m3-surface-low hover:scale-105 transition flex flex-col items-center gap-1.5">
+                                    <span class="w-8 h-8 m3-cookie-12 bg-[#059669] block"></span>
+                                    <span class="text-[10px] font-bold">Emerald</span>
+                                </button>
+                                <button type="button" onclick="window.app.setMaterialTheme('#e11d48')" class="p-2.5 rounded-2xl m3-surface-low hover:scale-105 transition flex flex-col items-center gap-1.5">
+                                    <span class="w-8 h-8 m3-cookie-12 bg-[#e11d48] block"></span>
+                                    <span class="text-[10px] font-bold">Sakura</span>
+                                </button>
+                                <button type="button" onclick="window.app.setMaterialTheme('#d97706')" class="p-2.5 rounded-2xl m3-surface-low hover:scale-105 transition flex flex-col items-center gap-1.5">
+                                    <span class="w-8 h-8 m3-cookie-12 bg-[#d97706] block"></span>
+                                    <span class="text-[10px] font-bold">Amber</span>
+                                </button>
+                                <button type="button" onclick="window.app.setMaterialTheme('#0d9488')" class="p-2.5 rounded-2xl m3-surface-low hover:scale-105 transition flex flex-col items-center gap-1.5">
+                                    <span class="w-8 h-8 m3-cookie-12 bg-[#0d9488] block"></span>
+                                    <span class="text-[10px] font-bold">Mint</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="p-4 m3-group-item flex items-center justify-between gap-3">
+                            <div>
+                                <div class="text-xs font-bold">Custom Primary Seed Color</div>
+                                <div class="text-[11px] m3-text-muted">Generate a bold Material 3 Expressive palette from any hex color</div>
+                            </div>
+                            <input id="customThemeColorPicker" type="color" value="#7c3aed" oninput="window.app.setMaterialTheme(this.value)" class="w-12 h-10 rounded-xl cursor-pointer bg-transparent border-0">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PAGE 3: CLOUD SYNC, EXPORT & VAULT TOOLS -->
+                <div id="settingsPage_BACKUP" class="hidden space-y-3">
+                    <div class="m3-group-list">
+                        <div class="p-4 m3-group-item space-y-3">
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs font-extrabold uppercase tracking-wider" style="color: var(--md-primary)">GitHub Cloud Synchronization</span>
+                                <label class="flex items-center gap-2 text-xs font-bold cursor-pointer">
+                                    <input id="cloudAutoSyncCheckbox" type="checkbox" checked onchange="window.app.saveSettings(false)" class="rounded focus:ring-0">
+                                    <span>Auto-Sync</span>
+                                </label>
+                            </div>
+                            <div class="grid grid-cols-2 gap-2.5">
+                                <button type="button" onclick="window.app.pushToCloudGist(true)" class="h-10 px-4 m3-btn-filled text-xs flex items-center justify-center gap-1.5 shadow">
+                                    <i class="ph-bold ph-cloud-arrow-up text-sm"></i>
+                                    <span>Push to Cloud</span>
+                                </button>
+                                <button type="button" onclick="window.app.pullFromCloudGist(true)" class="h-10 px-4 m3-btn-tonal text-xs flex items-center justify-center gap-1.5">
+                                    <i class="ph-bold ph-cloud-arrow-down text-sm"></i>
+                                    <span>Pull from Cloud</span>
+                                </button>
+                            </div>
+                            <div id="settingsCloudWavyBar" class="hidden pt-1"></div>
+                            <p id="cloudLastSyncInfo" class="text-[11px] m3-text-muted font-mono">Questions & multi-page rough work are stored 100% in your Cloud Gist.</p>
+                        </div>
+
+                        <div class="p-4 m3-group-item space-y-3">
+                            <span class="block text-xs font-extrabold uppercase tracking-wider m3-text-muted">JSON File Export, Import & Deduplication</span>
+                            <div class="grid grid-cols-3 gap-2">
+                                <button type="button" onclick="window.app.runDeduplication(true)" class="h-10 px-2 m3-btn-tonal text-xs flex items-center justify-center gap-1.5">
+                                    <i class="ph-bold ph-stack"></i>
+                                    <span>Deduplicate</span>
+                                </button>
+                                <button type="button" onclick="window.app.exportBackupJson()" class="h-10 px-2 m3-btn-filled text-xs flex items-center justify-center gap-1.5">
+                                    <i class="ph-bold ph-download-simple"></i>
+                                    <span>Export JSON</span>
+                                </button>
+                                <label class="h-10 px-2 m3-btn-tonal text-xs flex items-center justify-center gap-1.5 cursor-pointer">
+                                    <i class="ph-bold ph-upload-simple"></i>
+                                    <span>Import JSON</span>
+                                    <input type="file" accept=".json,application/json" class="hidden" onchange="window.app.importBackupJson(event)">
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="p-4 m3-group-item space-y-2">
+                            <button type="button" onclick="window.app.runBackgroundLocalOcrForExistingQuestions(true)" class="w-full h-10 m3-btn-tonal text-xs flex items-center justify-center gap-2">
+                                <i class="ph-bold ph-text-T text-sm"></i>
+                                <span id="settingsOcrBtnLabel">Re-Index Clean Question Text OCR</span>
+                            </button>
+                            <div id="settingsOcrWavyBar" class="hidden pt-1"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PAGE 4: GEMINI 3.8 FLASH SOLVER & SCANNER -->
+                <div id="settingsPage_SCANNER" class="hidden space-y-3">
+                    <div class="m3-group-list">
+                        <div class="p-4 m3-group-item space-y-3">
+                            <div class="flex items-center justify-between gap-2">
+                                <span class="text-xs font-extrabold uppercase tracking-wider" style="color: var(--md-primary)">AI Answer Key & 1-Line Hint Console</span>
+                                <label class="flex items-center gap-1.5 text-[11px] font-bold cursor-pointer shrink-0">
+                                    <input id="autoSolveHintsCheckbox" type="checkbox" checked onchange="window.app.saveSettings(false)" class="rounded focus:ring-0">
+                                    <span>Auto after import</span>
+                                </label>
+                            </div>
+
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                <button type="button" onclick="window.app.closeSettingsModal(); window.app.openSolverModal(); window.app.runBackgroundAnswerAndHintGenerator(true, false);" class="h-10 px-3 m3-btn-filled text-xs flex items-center justify-center gap-1.5 shadow">
+                                    <i class="ph-bold ph-lightbulb text-sm"></i>
+                                    <span>Open Solver & Solve Missing</span>
+                                </button>
+                                <button type="button" onclick="window.app.closeSettingsModal(); window.app.openSolverModal(); window.app.runBackgroundAnswerAndHintGenerator(true, true);" class="h-10 px-3 m3-btn-tonal text-xs flex items-center justify-center gap-1.5">
+                                    <i class="ph-bold ph-arrows-clockwise text-sm"></i>
+                                    <span>Re-Solve All Questions</span>
+                                </button>
+                            </div>
+
+                            <p id="settingsSolverStatusInfo" class="text-[11px] m3-text-muted font-mono">Protected: Max 19 req/day (IST) & Max 4 req/min synced in Gist.</p>
+                        </div>
+
+                        <div class="p-4 m3-group-item space-y-1.5">
+                            <label class="block text-xs font-bold">Gemini Model (Strictly 3.8 Flash / 3.8 Flash Lite)</label>
+                            <button type="button" id="geminiModelDropdownBtn" onclick="window.app.openGeminiModelMenu(this)" class="w-full h-10 px-4 m3-surface-low rounded-full flex items-center justify-between text-xs font-bold">
+                                <span id="geminiModelDropdownLabel" class="truncate">gemini-3.8-flash (Default • High Precision)</span>
+                                <i class="ph-bold ph-caret-down text-xs m3-text-muted"></i>
+                            </button>
+                        </div>
+
+                        <div class="p-4 m3-group-item grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-[11px] font-bold m3-text-muted mb-1">Top Safe Margin (0-40)</label>
+                                <input id="padTopInput" type="number" min="0" max="40" value="10" class="w-full h-10 m3-input m3-surface-low px-3.5 text-xs">
+                            </div>
+                            <div>
+                                <label class="block text-[11px] font-bold m3-text-muted mb-1">Bottom Safe Margin (0-40)</label>
+                                <input id="padBottomInput" type="number" min="0" max="40" value="10" class="w-full h-10 m3-input m3-surface-low px-3.5 text-xs">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="px-5 py-3 m3-surface-low border-t border-[var(--md-outline-variant)] flex items-center justify-end shrink-0">
+                <button type="button" onclick="window.app.saveSettings()" class="h-10 px-6 m3-btn-filled text-xs flex items-center gap-1.5 shadow">
+                    <i class="ph-bold ph-check text-sm"></i>
+                    <span>Save & Done</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- =================================================================== -->
+    <!-- MODAL 2: UNIFIED IMPORT DIALOG (LOCAL + GEMINI BORDER VERIFICATION) -->
+    <!-- =================================================================== -->
+    <div id="uploadModal" onclick="if(event.target === this && !window.app.isExtracting()) window.app.closeUploadModal()" class="fixed inset-0 bg-black/75 backdrop-blur-sm z-50 hidden flex items-center justify-center p-3 sm:p-6">
+        <div class="m3-dialog max-w-2xl w-full max-h-[92vh] flex flex-col overflow-hidden">
+            <div class="px-5 py-3.5 m3-surface-low border-b border-[var(--md-outline-variant)] flex items-center justify-between gap-2 shrink-0">
+                <div class="flex items-center gap-2.5 min-w-0">
+                    <div class="w-10 h-10 m3-cookie-12 flex items-center justify-center shrink-0" style="background: var(--md-primary-container); color: var(--md-primary);">
+                        <i class="ph-bold ph-file-plus text-xl"></i>
+                    </div>
+                    <div class="min-w-0">
+                        <h3 id="unifiedModalTitle" class="font-extrabold text-sm sm:text-base truncate">Add Test Paper PDF or Question Photo</h3>
+                        <p class="text-[11px] m3-text-muted truncate">2-Stage Local Slicer + Gemini 3.8 Flash Border Verification • Auto Deskew</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-1.5 shrink-0">
+                    <button type="button" id="minimizeUploadBtn" onclick="window.app.minimizeUploadModal()" class="hidden h-9 w-9 m3-btn-tonal items-center justify-center" title="Minimize">
+                        <i class="ph-bold ph-minus text-base"></i>
+                    </button>
+                    <button type="button" id="uploadTopCloseBtn" onclick="window.app.closeUploadModal()" class="h-9 w-9 m3-btn-tonal disabled:opacity-35 disabled:pointer-events-none flex items-center justify-center" title="Close">
+                        <i class="ph-bold ph-x text-sm"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="p-4 sm:p-5 overflow-y-auto space-y-4 flex-1">
+                <div id="uploadSetupView" class="space-y-3">
+                    <label for="unifiedFileInput" class="block m3-surface-high rounded-3xl p-5 text-center cursor-pointer hover:brightness-105 transition">
+                        <input type="file" id="unifiedFileInput" accept="application/pdf,image/*,.pdf" class="hidden" onchange="window.app.onUnifiedFileSelected(event)">
+                        <div class="w-13 h-13 m3-cookie-12 flex items-center justify-center mx-auto mb-2" style="background: var(--md-primary-container); color: var(--md-primary);">
+                            <i id="unifiedFileIcon" class="ph-duotone ph-cloud-arrow-up text-2xl"></i>
+                        </div>
+                        <p id="selectedFileLabel" class="text-xs sm:text-sm font-extrabold">Tap to Select Any 1-Column / 2-Column JEE PDF or Photo (or press Ctrl+V)</p>
+                        <p id="selectedFileTypeBadge" class="text-[11px] m3-text-muted mt-0.5">Computes local 2D candidate borders & verifies them with Gemini 3.8 Flash</p>
+                    </label>
+
+                    <!-- PDF Options -->
+                    <div id="pdfSetupSubView" class="hidden grid-cols-1 sm:grid-cols-3 gap-3 m3-surface-high p-4 rounded-3xl">
+                        <div>
+                            <label class="block text-[11px] font-bold m3-text-muted mb-1">Test Paper Name</label>
+                            <input id="paperTitleInput" type="text" placeholder="e.g. Straight Line Sheet" class="w-full h-9 m3-input m3-surface-low px-3.5 text-xs">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-bold m3-text-muted mb-1">Default Subject</label>
+                            <select id="pdfDefaultSubjectSelect" class="w-full h-9 m3-input m3-surface-low px-3 text-xs font-bold">
+                                <option value="AUTO">Auto-Detect Subject</option>
+                                <option value="Mathematics">Mathematics</option>
+                                <option value="Physics">Physics</option>
+                                <option value="Chemistry">Chemistry</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-bold m3-text-muted mb-1">Pages Range</label>
+                            <div class="flex items-center gap-1.5">
+                                <input id="startPageInput" type="number" min="1" value="1" class="w-full h-9 m3-input m3-surface-low px-2 text-xs text-center">
+                                <span class="m3-text-muted text-xs">to</span>
+                                <input id="endPageInput" type="number" min="1" value="10" class="w-full h-9 m3-input m3-surface-low px-2 text-xs text-center">
+                            </div>
+                        </div>                       
+                        <div class="sm:col-span-3 pt-2 space-y-2.5 border-t border-[var(--md-outline-variant)]">
+                            <div class="p-2.5 rounded-2xl m3-surface-low border border-[var(--md-outline-variant)] space-y-1">
+                                <label class="flex items-center gap-2 text-xs font-extrabold cursor-pointer" style="color: var(--md-primary)">
+                                    <input type="checkbox" id="pdfUseLocalAiBordersChk" checked class="rounded">
+                                    <span>Verify Borders &amp; Stitches with Local Native AI (Termux llama-server)</span>
+                                </label>
+                                <p class="text-[10.5px] m3-text-muted pl-6">AI checks borders &amp; cross-page stitching only • Local engine classifies chapters • Gemini handles Answer Keys.</p>
+                            </div>
+
+                            <div class="flex flex-wrap items-center justify-between gap-2">
+                                <label class="flex items-center gap-2 text-xs font-extrabold cursor-pointer text-emerald-400">
+                                    <input type="checkbox" id="pdfReviewAfterExtractChk" checked class="rounded">
+                                    <span>Review Borders &amp; Chapters Before Saving</span>
+                                </label>
+                                <label class="flex items-center gap-2 text-xs font-bold cursor-pointer">
+                                    <input type="checkbox" id="pdfManualCropModeChk" class="rounded">
+                                    <span>Manual Crop Per Page</span>
+                                </label>
+                                <label class="flex items-center gap-2 text-xs font-bold cursor-pointer m3-text-muted">
+                                    <input type="checkbox" id="pdfGeminiVerifyBordersChk" class="rounded">
+                                    <span>Gemini Border Check (Optional)</span>
+                                </label>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- Image Options -->
+                    <div id="imageSetupSubView" class="hidden space-y-3">
+                        <div class="flex flex-wrap items-center justify-between gap-2 m3-surface-high p-3 rounded-3xl text-xs">
+                            <div class="flex items-center gap-2">
+                                <span class="font-bold">Angle:</span>
+                                <input id="imageDeskewSlider" type="range" min="-15" max="15" step="0.2" value="0" oninput="window.app.updateImageDeskewPreview(this.value)" class="split-slider w-36">
+                                <span id="imageDeskewVal" class="font-mono font-bold w-12">0.0°</span>
+                                <button type="button" onclick="window.app.autoDetectImageAngle()" class="h-7 px-2.5 m3-btn-tonal text-[11px]">Auto-Angle</button>
+                            </div>
+                            <label class="flex items-center gap-1.5 font-bold cursor-pointer">
+                                <input type="checkbox" id="imageCleanContrastChk" checked onchange="window.app.updateImageDeskewPreview()" class="rounded">
+                                <span>Clean Shadows</span>
+                            </label>
+                        </div>
+
+                        <div class="bg-white rounded-3xl p-3 flex items-center justify-center max-h-56 overflow-hidden border border-[var(--md-outline-variant)]">
+                            <canvas id="imageImportCanvas" class="max-h-48 max-w-full object-contain"></canvas>
+                        </div>
+
+                        <div class="grid grid-cols-2 sm:grid-cols-3 gap-2.5 m3-surface-high p-3.5 rounded-3xl">
+                            <div>
+                                <label class="block text-[10px] font-bold m3-text-muted mb-1">Paper / Source Name</label>
+                                <input id="imgImportPaperInput" type="text" placeholder="Custom Practice" class="w-full h-9 m3-input m3-surface-low px-3 text-xs">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold m3-text-muted mb-1">Question #</label>
+                                <input id="imgImportQNumInput" type="text" placeholder="Auto" class="w-full h-9 m3-input m3-surface-low px-3 text-xs">
+                            </div>
+                            <div class="col-span-2 sm:col-span-1 flex items-end">
+                                <label class="flex items-center gap-2 text-xs font-bold cursor-pointer h-9 px-2">
+                                    <input type="checkbox" id="imgImportAiClassifyChk" checked class="rounded">
+                                    <span>Auto-Classify & Solve</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PDF Extraction Progress -->
+                <div id="uploadProgressView" class="hidden space-y-3">
+                    <div class="m3-surface-high rounded-3xl p-4 space-y-3">
+                        <div class="flex items-center justify-between gap-2 text-xs">
+                            <span id="extractStepTitle" class="font-extrabold flex items-center gap-2 truncate">
+                                <svg class="w-5 h-5 shrink-0" style="color: var(--md-primary)" viewBox="0 0 24 24">
+                                    <path class="m3-morph-loader-path" fill="currentColor" d=""></path>
+                                </svg>
+                                <span>Extracting Questions & Verifying Borders...</span>
+                            </span>
+                            <span id="extractPageBadge" class="w-24 text-center py-0.5 rounded-full font-extrabold shrink-0" style="background: var(--md-primary-container); color: var(--md-on-primary-container);">Page 1/1</span>
+                        </div>
+
+                        <div id="extractWavyBarWrap"></div>
+
+                        <p id="extractSubText" class="w-full truncate text-[11px] font-semibold font-mono" style="color: var(--md-primary)">Preparing 2.2x high-resolution renderer...</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div class="m3-surface-low rounded-3xl p-2 flex flex-col items-center justify-center h-44 overflow-hidden">
+                            <canvas id="pdfWorkCanvas" class="max-h-full max-w-full object-contain"></canvas>
+                        </div>
+                        <div id="extractLiveLog" class="m3-surface-low rounded-3xl p-3 h-44 overflow-y-auto font-mono text-[11px] space-y-1.5"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="px-5 py-3 m3-surface-low border-t border-[var(--md-outline-variant)] flex items-center justify-between shrink-0">
+                <div>
+                    <button type="button" id="cancelExtractBtn" onclick="window.app.cancelPdfExtraction()" class="hidden h-9 px-4 rounded-full bg-rose-500/20 hover:bg-rose-600 text-rose-500 hover:text-white text-xs font-extrabold items-center gap-1.5 transition">
+                        <i class="ph-bold ph-stop-circle"></i>
+                        <span>Cancel & Rollback</span>
+                    </button>
+                </div>
+
+                <button type="button" id="startExtractBtn" onclick="window.app.startUnifiedImportAction()" disabled class="h-10 px-6 m3-btn-filled disabled:opacity-40 text-xs sm:text-sm flex items-center gap-1.5 shadow-lg ml-auto">
+                    <i class="ph-bold ph-magic-wand"></i>
+                    <span id="startExtractBtnLbl">Extract Questions</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- =================================================================== -->
+    <!-- NEW MODAL 2B: LIVE AI ANSWER KEY & HINT SOLVER CONSOLE WITH LOGS    -->
+    <!-- =================================================================== -->
+    <div id="solverModal" onclick="if(event.target === this) window.app.minimizeSolverModal()" class="fixed inset-0 bg-black/75 backdrop-blur-sm z-50 hidden flex items-center justify-center p-3 sm:p-6">
+        <div class="m3-dialog max-w-2xl w-full max-h-[92vh] flex flex-col overflow-hidden">
+            <div class="px-5 py-3.5 m3-surface-low border-b border-[var(--md-outline-variant)] flex items-center justify-between gap-2 shrink-0">
+                <div class="flex items-center gap-2.5 min-w-0">
+                    <div class="w-10 h-10 m3-cookie-12 flex items-center justify-center shrink-0" style="background: var(--md-primary-container); color: var(--md-primary);">
+                        <i class="ph-bold ph-lightbulb text-xl text-amber-400"></i>
+                    </div>
+                    <div class="min-w-0">
+                        <h3 class="font-extrabold text-sm sm:text-base truncate">Live AI Answer Key & 1-Line Hint Solver</h3>
+                        <p id="solverModalSubHeader" class="text-[11px] m3-text-muted truncate">Model: gemini-3.8-flash • Rate Limit Guard: Max 19/day (IST), Max 4/min</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-1.5 shrink-0">
+                    <button type="button" onclick="window.app.minimizeSolverModal()" class="h-9 w-9 m3-btn-tonal flex items-center justify-center" title="Minimize to Top Bar">
+                        <i class="ph-bold ph-minus text-base"></i>
+                    </button>
+                    <button type="button" onclick="window.app.closeSolverModal()" class="h-9 w-9 m3-btn-tonal flex items-center justify-center" title="Close Dialog">
+                        <i class="ph-bold ph-x text-sm"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="p-4 sm:p-5 overflow-y-auto space-y-4 flex-1">
+                <div class="m3-surface-high rounded-3xl p-4 space-y-3">
+                    <div class="flex items-center justify-between gap-2 text-xs">
+                        <span id="solverStepTitle" class="font-extrabold flex items-center gap-2 truncate">
+                            <svg id="solverModalSpinner" class="hidden w-5 h-5 shrink-0 text-amber-400" viewBox="0 0 24 24">
+                                <path class="m3-morph-loader-path" fill="currentColor" d=""></path>
+                            </svg>
+                            <span id="solverStepTitleText">AI Solver Ready</span>
+                        </span>
+                        <span id="solverModalCountBadge" class="w-28 text-center py-0.5 rounded-full font-extrabold shrink-0" style="background: var(--md-primary-container); color: var(--md-on-primary-container);">Solved 0/0</span>
+                    </div>
+
+                    <div id="solverModalWavyBarWrap"></div>
+
+                    <div class="flex items-center justify-between gap-2 text-[11px] font-mono">
+                        <p id="solverModalSubText" class="truncate font-semibold" style="color: var(--md-primary)">Click "Solve Missing" below to start generating Answer Keys & Hints.</p>
+                        <span id="solverQuotaBadge" class="px-2 py-0.5 rounded-full m3-surface-low font-extrabold shrink-0">Quota: 0/19 IST</span>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div class="m3-surface-low rounded-3xl p-3 flex flex-col items-center justify-center h-48 overflow-hidden bg-white border border-[var(--md-outline-variant)]">
+                        <img id="solverPreviewImg" src="" alt="Current Question" class="hidden max-h-full max-w-full object-contain rounded-lg">
+                        <span id="solverPreviewPlaceholder" class="text-xs font-bold text-slate-400">Question preview appears here while solving</span>
+                    </div>
+                    <div id="solverLiveLog" class="m3-surface-low rounded-3xl p-3 h-48 overflow-y-auto font-mono text-[11px] space-y-1.5">
+                        <div class="m3-text-muted">• Live Gemini API request & answer key logs appear here...</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="px-5 py-3 m3-surface-low border-t border-[var(--md-outline-variant)] flex items-center justify-between gap-2 shrink-0 flex-wrap">
+                <div>
+                    <button type="button" id="stopSolverBtn" onclick="window.app.stopBackgroundSolver()" class="hidden h-9 px-4 rounded-full bg-rose-500/20 hover:bg-rose-600 text-rose-500 hover:text-white text-xs font-extrabold items-center gap-1.5 transition">
+                        <i class="ph-bold ph-stop-circle"></i>
+                        <span>Stop Solver</span>
+                    </button>
+                </div>
+
+                <div class="flex items-center gap-2 ml-auto">
+                    <button type="button" id="startSolverForceAllBtn" onclick="window.app.runBackgroundAnswerAndHintGenerator(true, true)" class="h-9 px-4 m3-btn-tonal text-xs flex items-center gap-1.5">
+                        <i class="ph-bold ph-arrows-clockwise"></i>
+                        <span>Re-Solve All</span>
+                    </button>
+                    <button type="button" id="startSolverMissingBtn" onclick="window.app.runBackgroundAnswerAndHintGenerator(true, false)" class="h-10 px-5 m3-btn-filled text-xs flex items-center gap-1.5 shadow-lg">
+                        <i class="ph-bold ph-sparkle"></i>
+                        <span id="startSolverMissingBtnLbl">Solve Missing Questions</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- =================================================================== -->
+    <!-- MODAL 3: SPLIT / TRIM                                               -->
+    <!-- =================================================================== -->
+    <div id="splitModal" onclick="if(event.target === this) window.app.closeSplitModal()" class="fixed inset-0 bg-black/75 backdrop-blur-sm z-50 hidden flex items-center justify-center p-3 sm:p-6">
+        <div class="m3-dialog max-w-4xl w-full max-h-[92vh] flex flex-col overflow-hidden">
+            <div class="px-5 py-3.5 m3-surface-low border-b border-[var(--md-outline-variant)] flex items-center justify-between gap-2">
+                <div>
+                    <h3 class="font-extrabold text-sm sm:text-base flex items-center gap-2">
+                        <i class="ph-bold ph-scissors" style="color: var(--md-primary)"></i>
+                        <span>Split Clubbed Questions or Trim Vertical Height</span>
+                    </h3>
+                    <p class="text-[11px] m3-text-muted">Horizontal width is locked to 100% full slice width so alignment never breaks.</p>
+                </div>
+                <button type="button" onclick="window.app.closeSplitModal()" class="h-9 w-9 m3-btn-tonal flex items-center justify-center shrink-0" title="Close">
+                    <i class="ph-bold ph-x text-sm"></i>
+                </button>
+            </div>
+
+            <div class="p-4 overflow-y-auto flex-1 space-y-3">
+                <div class="flex flex-wrap items-center justify-between gap-2 m3-surface-high p-3 rounded-3xl">
+                    <div class="m3-segmented-group">
+                        <button type="button" id="modeSplitBtn" onclick="window.app.setSplitMode('SPLIT')" class="m3-seg-btn active">Split into 2 Questions (Q#a & Q#b)</button>
+                        <button type="button" id="modeTrimBtn" onclick="window.app.setSplitMode('TRIM')" class="m3-seg-btn">Vertical Trim</button>
+                    </div>
+
+                    <div id="splitRangeWrap" class="flex items-center gap-2.5">
+                        <span class="text-xs font-bold" style="color: var(--md-primary)">Cut Line:</span>
+                        <input id="splitCutSlider" type="range" min="10" max="90" value="50" oninput="window.app.updateSplitPreview()" class="split-slider w-44">
+                        <span id="splitCutVal" class="text-xs font-mono font-bold w-9">50%</span>
+                    </div>
+
+                    <div id="trimRangeWrap" class="hidden items-center gap-3">
+                        <label class="text-xs font-bold flex items-center gap-1.5">Top <input id="trimTopSlider" type="range" min="0" max="45" value="0" oninput="window.app.updateSplitPreview()" class="split-slider w-24"></label>
+                        <label class="text-xs font-bold flex items-center gap-1.5">Bottom <input id="trimBotSlider" type="range" min="55" max="100" value="100" oninput="window.app.updateSplitPreview()" class="split-slider w-24"></label>
+                    </div>
+                </div>
+
+                <div class="relative bg-white rounded-3xl overflow-hidden mx-auto max-w-3xl border border-[var(--md-outline-variant)]">
+                    <img id="splitPreviewImg" src="" alt="Preview" class="w-full h-auto block">
+                    <div id="splitDividerLine" class="absolute left-0 right-0 border-t-4 border-dashed border-amber-500 pointer-events-none flex items-center justify-between px-3" style="top: 50%;">
+                        <span class="-mt-6 bg-amber-500 text-slate-950 font-extrabold text-[10px] px-2.5 py-0.5 rounded-full">▲ Card 1 (Top Half)</span>
+                        <span class="mt-6 bg-indigo-600 text-white font-extrabold text-[10px] px-2.5 py-0.5 rounded-full">▼ Card 2 (Bottom Half)</span>
+                    </div>
+                    <div id="trimTopMask" class="hidden absolute top-0 left-0 right-0 bg-rose-900/50 border-b-2 border-rose-500 pointer-events-none" style="height:0%"></div>
+                    <div id="trimBotMask" class="hidden absolute bottom-0 left-0 right-0 bg-rose-900/50 border-t-2 border-rose-500 pointer-events-none" style="height:0%"></div>
+                </div>
+            </div>
+
+            <div class="px-5 py-3 m3-surface-low border-t border-[var(--md-outline-variant)] flex items-center justify-end">
+                <button type="button" onclick="window.app.confirmSplitOrTrim()" class="h-10 px-6 m3-btn-filled text-xs sm:text-sm flex items-center gap-1.5 shadow-lg">
+                    <i class="ph-bold ph-check"></i>
+                    <span id="splitConfirmLabel">Split into 2 Questions Now</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+        <!-- =================================================================== -->
+    <!-- MODAL 3B: INTERACTIVE MANUAL PDF CROP, SEPARATOR LINES & STITCHER   -->
+    <!-- =================================================================== -->
+    <div id="manualCropModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[65] hidden flex items-center justify-center p-2 sm:p-4">
+        <div class="m3-dialog max-w-6xl w-full max-h-[94dvh] flex flex-col overflow-hidden">
+            <!-- Header -->
+            <div class="px-4 py-3 m3-surface-low border-b border-[var(--md-outline-variant)] flex items-center justify-between gap-2 shrink-0 flex-wrap">
+                <div class="flex items-center gap-2.5 min-w-0">
+                    <div class="w-9 h-9 m3-cookie-12 flex items-center justify-center shrink-0" style="background: var(--md-primary-container); color: var(--md-primary);">
+                        <i class="ph-bold ph-sliders-horizontal text-lg"></i>
+                    </div>
+                    <div class="min-w-0">
+                        <h3 id="mcModalTitle" class="font-extrabold text-sm sm:text-base truncate">Manual Separator Lines & Stitcher — Page 1/1</h3>
+                        <p id="mcReasonBanner" class="text-[11px] font-semibold text-amber-400 truncate">Drag orange lines to adjust boundaries. Local intelligence pre-placed initial lines.</p>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-1.5 shrink-0 flex-wrap">
+                    <button type="button" id="mcToggleColsBtn" onclick="window.app.mcToggleColumns()" class="h-8 px-3 m3-btn-tonal text-[11px] flex items-center gap-1">
+                        <i class="ph-bold ph-columns"></i>
+                        <span id="mcColsLabel">1-Column</span>
+                    </button>
+                    <button type="button" onclick="window.app.mcAddSeparatorLine(0)" class="h-8 px-3 m3-btn-tonal text-[11px] flex items-center gap-1">
+                        <i class="ph-bold ph-plus"></i>
+                        <span id="mcAddLineCol0Lbl">Add Line</span>
+                    </button>
+                    <button type="button" id="mcAddLineCol1Btn" onclick="window.app.mcAddSeparatorLine(1)" class="hidden h-8 px-3 m3-btn-tonal text-[11px] items-center gap-1">
+                        <i class="ph-bold ph-plus"></i>
+                        <span>Add Right-Col Line</span>
+                    </button>
+                    <button type="button" id="mcRetryGeminiBtn" onclick="window.app.mcResolve('RETRY_GEMINI')" class="hidden h-8 px-3 rounded-full bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 text-[11px] font-extrabold items-center gap-1 transition">
+                        <i class="ph-bold ph-arrows-clockwise"></i>
+                        <span>Retry Gemini</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Body: Left = Interactive Draggable Page Canvas, Right = Per-Question Chapter & Stitch List -->
+            <div class="flex-1 min-h-0 grid grid-cols-1 lg:grid-cols-12 overflow-hidden">
+                <!-- Left Canvas Area -->
+                <div class="lg:col-span-7 min-h-0 overflow-y-auto mc-pdf-scroller p-3 m3-surface-low flex justify-center items-start border-b lg:border-b-0 lg:border-r border-[var(--md-outline-variant)]">
+                    <div id="mcStageWrap" class="mc-stage-wrap bg-white rounded-2xl shadow-xl overflow-hidden max-w-full">
+                        <canvas id="mcPageCanvas" class="block max-w-full h-auto"></canvas>
+                        <div id="mcOverlayLayer" class="absolute inset-0"></div>
+                    </div>
+                </div>
+
+                <!-- Right Controls & Region List -->
+                <div class="lg:col-span-5 flex flex-col min-h-0 overflow-hidden">
+                    <!-- Bulk Subject & Chapter Selector for Entire Page -->
+                    <div class="p-3 m3-surface-high border-b border-[var(--md-outline-variant)] space-y-2 shrink-0">
+                        <div class="text-[10.5px] font-extrabold uppercase tracking-wider m3-text-muted">Set Subject & Chapter for All Questions on Page</div>
+                        <div class="grid grid-cols-2 gap-2">
+                            <select id="mcBulkSubjectSel" onchange="window.app.mcOnBulkSubjectChange()" class="h-8.5 m3-input m3-surface-low px-2.5 text-[11px] font-bold">
+                                <option value="Physics">Physics</option>
+                                <option value="Chemistry">Chemistry</option>
+                                <option value="Mathematics">Mathematics</option>
+                            </select>
+                            <select id="mcBulkChapterSel" onchange="window.app.mcApplyBulkChapterToAll()" class="h-8.5 m3-input m3-surface-low px-2.5 text-[11px] font-bold"></select>
+                        </div>
+                    </div>
+
+                    <!-- Individual Question Cards -->
+                    <div id="mcRegionsList" class="flex-1 overflow-y-auto p-3 space-y-2"></div>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="px-4 py-3 m3-surface-low border-t border-[var(--md-outline-variant)] flex items-center justify-between gap-2 shrink-0 flex-wrap">
+                <div class="flex items-center gap-3 flex-wrap">
+                    <button type="button" onclick="window.app.mcResolve('CANCEL')" class="h-9 px-4 rounded-full bg-rose-500/20 hover:bg-rose-600 text-rose-400 hover:text-white text-xs font-extrabold transition">
+                        Cancel Import
+                    </button>
+                    <label id="mcSwitchManualAllWrap" class="flex items-center gap-1.5 text-xs font-bold cursor-pointer">
+                        <input type="checkbox" id="mcSwitchManualAllChk" class="rounded">
+                        <span>Use Manual Mode for remaining pages</span>
+                    </label>
+                </div>
+
+                <button type="button" onclick="window.app.mcResolve('CONFIRM')" class="h-10 px-6 m3-btn-filled text-xs sm:text-sm flex items-center gap-1.5 shadow-lg ml-auto">
+                    <i class="ph-bold ph-scissors"></i>
+                    <span id="mcConfirmBtnLabel">Crop & Continue</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+
+
+    <!-- =================================================================== -->
+    <!-- MODAL 3C: POST-EXTRACTION BORDER & CHAPTER REVIEW STUDIO            -->
+    <!-- =================================================================== -->
+    <div id="batchReviewModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[66] hidden flex items-center justify-center p-2 sm:p-4">
+        <div class="m3-dialog max-w-6xl w-full max-h-[94dvh] flex flex-col overflow-hidden">
+            <!-- Header -->
+            <div class="px-4 py-3 m3-surface-low border-b border-[var(--md-outline-variant)] flex items-center justify-between gap-2 shrink-0 flex-wrap">
+                <div class="flex items-center gap-2.5 min-w-0">
+                    <div class="w-9 h-9 m3-cookie-12 flex items-center justify-center shrink-0" style="background: var(--md-primary-container); color: var(--md-primary);">
+                        <i class="ph-bold ph-seal-check text-lg"></i>
+                    </div>
+                    <div class="min-w-0">
+                        <h3 id="brModalTitle" class="font-extrabold text-sm sm:text-base truncate">Review Question 1 / 1</h3>
+                        <p id="brSubBanner" class="text-[11px] m3-text-muted truncate">Fine-tune borders &amp; verify local JEE chapters before saving to your vault.</p>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-2 shrink-0 flex-wrap">
+                    <div class="m3-segmented-group">
+                        <button type="button" id="brFilterAllBtn" onclick="window.app.brSetFilter('ALL')" class="m3-seg-btn active">All (<span id="brCountAll">0</span>)</button>
+                        <button type="button" id="brFilterFlagBtn" onclick="window.app.brSetFilter('FLAGGED')" class="m3-seg-btn">Needs Review (<span id="brCountFlagged">0</span>)</button>
+                    </div>
+
+                    <div class="m3-icon-group">
+                        <button type="button" id="brPrevBtn" onclick="window.app.brNavigate(-1)" class="m3-icon-group-btn" title="Previous Question">
+                            <i class="ph-bold ph-caret-left"></i>
+                        </button>
+                        <button type="button" id="brNextBtn" onclick="window.app.brNavigate(1)" class="m3-icon-group-btn" title="Next Question">
+                            <i class="ph-bold ph-caret-right"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Body: Left = Cropped Image + Live Border Fine-Tuner, Right = Chapter & Border Info -->
+            <div class="flex-1 min-h-0 grid grid-cols-1 lg:grid-cols-12 overflow-hidden">
+                <!-- Left: Question Image & Live Border Adjustment -->
+                <div class="lg:col-span-7 min-h-0 flex flex-col border-b lg:border-b-0 lg:border-r border-[var(--md-outline-variant)] overflow-hidden">
+                    <div class="px-3 py-2 m3-surface-high border-b border-[var(--md-outline-variant)] flex flex-wrap items-center justify-between gap-2 shrink-0">
+                        <div class="flex items-center gap-2 text-[11px] font-bold">
+                            <span class="m3-text-muted">Top Border:</span>
+                            <button type="button" onclick="window.app.brNudgeBorder('top', -18)" class="h-6 px-2 rounded-full m3-surface-low hover:brightness-110 text-[10px] font-extrabold" title="Expand upward">▲ +Expand</button>
+                            <button type="button" onclick="window.app.brNudgeBorder('top', 14)" class="h-6 px-2 rounded-full m3-surface-low hover:brightness-110 text-[10px] font-extrabold" title="Trim downward">▼ Trim</button>
+                        </div>
+
+                        <div class="flex items-center gap-2 text-[11px] font-bold">
+                            <span class="m3-text-muted">Bottom Border:</span>
+                            <button type="button" onclick="window.app.brNudgeBorder('bottom', -14)" class="h-6 px-2 rounded-full m3-surface-low hover:brightness-110 text-[10px] font-extrabold" title="Trim upward">▲ Trim</button>
+                            <button type="button" onclick="window.app.brNudgeBorder('bottom', 18)" class="h-6 px-2 rounded-full m3-surface-low hover:brightness-110 text-[10px] font-extrabold" title="Expand downward">▼ +Expand</button>
+                        </div>
+
+                        <button type="button" onclick="window.app.brResetCurrentBorder()" class="h-6 px-2.5 rounded-full m3-btn-tonal text-[10px]" title="Reset to original detected border">
+                            Reset Crop
+                        </button>
+                    </div>
+
+                    <div class="flex-1 min-h-0 overflow-y-auto mc-pdf-scroller p-3 m3-surface-low flex items-start justify-center">
+                        <div class="bg-white rounded-2xl p-3 shadow-xl border border-[var(--md-outline-variant)] w-full max-w-3xl">
+                            <img id="brQuestionImg" src="" alt="Question Preview" class="w-full h-auto block rounded-xl">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right: Chapter Controls & Border Status -->
+                <div class="lg:col-span-5 min-h-0 overflow-y-auto p-4 space-y-3">
+                    <div class="flex items-center justify-between gap-2 flex-wrap">
+                        <div class="flex items-center gap-1.5 flex-wrap">
+                            <span id="brPagePill" class="px-2.5 py-0.5 rounded-full m3-surface-high text-[10.5px] font-extrabold">Page 1</span>
+                            <span id="brConfBadge" class="px-2.5 py-0.5 rounded-full text-[10.5px] font-extrabold bg-emerald-500/20 text-emerald-400">Local: 90%</span>
+                            <span id="brBorderAiBadge" class="hidden px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-sky-500/20 text-sky-300">AI Border Checked ✓</span>
+                        </div>
+                        <label class="flex items-center gap-1.5 text-xs font-extrabold text-rose-400 cursor-pointer">
+                            <input type="checkbox" id="brSkipChk" onchange="window.app.brToggleSkipCurrent(this.checked)" class="rounded accent-rose-500">
+                            <span>Skip / Delete</span>
+                        </label>
+                    </div>
+
+                    <div class="m3-group-list">
+                        <div class="p-3 m3-group-item flex items-center justify-between gap-3">
+                            <label class="text-xs font-bold shrink-0">Question #</label>
+                            <input id="brQNumInput" type="text" oninput="window.app.brUpdateField('questionNumber', this.value)" class="w-24 h-8 m3-input m3-surface-low px-3 text-xs font-extrabold text-center">
+                        </div>
+                        <div class="p-3 m3-group-item flex items-center justify-between gap-3">
+                            <label class="text-xs font-bold shrink-0">Subject</label>
+                            <select id="brSubjectSel" onchange="window.app.brUpdateField('subject', this.value)" class="flex-1 max-w-[230px] h-8.5 m3-input m3-surface-low px-3 text-xs font-bold">
+                                <option value="Physics">Physics</option>
+                                <option value="Chemistry">Chemistry</option>
+                                <option value="Mathematics">Mathematics</option>
+                            </select>
+                        </div>
+                        <div class="p-3 m3-group-item space-y-1.5">
+                            <label class="block text-xs font-bold">Primary JEE Chapter (Local Engine)</label>
+                            <select id="brChapterSel" onchange="window.app.brUpdateField('chapter', this.value)" class="w-full h-9 m3-input m3-surface-low px-3 text-xs font-bold"></select>
+                        </div>
+                    </div>
+
+                    <div class="p-3.5 rounded-3xl m3-surface-high border border-[var(--md-outline-variant)] space-y-2 text-xs">
+                        <div class="flex items-center justify-between gap-2">
+                            <span class="font-extrabold uppercase tracking-wider text-[10px]" style="color: var(--md-primary)">Border &amp; Classification Status</span>
+                            <span id="brElapsedLabel" class="text-[10px] font-mono m3-text-muted"></span>
+                        </div>
+                        <div class="text-[11px] leading-relaxed">
+                            <span class="font-bold m3-text-muted">Border / Stitch: </span>
+                            <span id="brBorderNoteText">Local v3.0 geometry &amp; stitch engine</span>
+                        </div>
+                        <div class="text-[11px] leading-relaxed">
+                            <span class="font-bold m3-text-muted">Chapter Engine: </span>
+                            <span id="brChapterNoteText">Classified locally (manual edits train local Naive Bayes memory).</span>
+                        </div>
+                        <div class="pt-1 flex items-center gap-2 flex-wrap">
+                            <button type="button" id="brReClassifyLocalBtn" onclick="window.app.brReClassifyLocalCurrent()" class="h-8 px-3 m3-btn-tonal text-[11px] flex items-center gap-1.5">
+                                <i class="ph-bold ph-arrows-clockwise"></i>
+                                <span>Re-Run Local Chapter Match on Crop</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Question Palette Strip -->
+            <div id="brPaletteStrip" class="px-4 py-2 m3-surface-high border-t border-[var(--md-outline-variant)] flex items-center gap-1.5 overflow-x-auto no-scrollbar shrink-0"></div>
+
+            <!-- Footer -->
+            <div class="px-4 py-3 m3-surface-low border-t border-[var(--md-outline-variant)] flex items-center justify-between gap-2 shrink-0 flex-wrap">
+                <button type="button" onclick="window.app.brResolve('CANCEL')" class="h-9 px-4 rounded-full bg-rose-500/20 hover:bg-rose-600 text-rose-400 hover:text-white text-xs font-extrabold transition">
+                    Discard Import
+                </button>
+                <button type="button" onclick="window.app.brResolve('CONFIRM')" class="h-10 px-6 m3-btn-filled text-xs sm:text-sm flex items-center gap-1.5 shadow-lg ml-auto">
+                    <i class="ph-bold ph-check-circle"></i>
+                    <span id="brSaveBtnLabel">Save Questions to Vault &amp; Sync</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- =================================================================== -->
+    <!-- MODAL 4: WHITEBOARD (ZERO-OVERFLOW BAR + FEATURES #1,#2,#3,#4,#6,#7)-->
+    <!-- =================================================================== -->
+    <div id="scratchpadModal" class="fixed inset-0 m3-surface z-50 hidden flex flex-col">
+        <!-- Portrait Orientation Lock Overlay -->
+        <div id="wbPortraitBlockOverlay" class="hidden fixed inset-0 z-[60] m3-surface flex-col items-center justify-center p-6 text-center space-y-4">
+            <div class="w-14 h-14 m3-cookie-12 flex items-center justify-center mx-auto" style="background: var(--md-primary-container); color: var(--md-primary);">
+                <i class="ph-bold ph-device-rotate text-2xl"></i>
+            </div>
+            <h3 class="text-base font-extrabold">Horizontal Orientation Required</h3>
+            <p class="text-xs m3-text-muted max-w-xs">Whiteboard is only allowed on horizontal screens. Rotate your device to landscape mode.</p>
+            <button type="button" onclick="window.app.closeScratchpad()" class="h-9 px-5 m3-btn-filled text-xs">Close Whiteboard</button>
+        </div>
+
+        <!-- Zero-Overflow Single-Row Whiteboard Status Bar -->
+        <div class="h-11 m3-surface-low border-b border-[var(--md-outline-variant)] px-2 py-1 flex items-center justify-between gap-1 shrink-0 w-full overflow-hidden">
+            <!-- Left Cluster -->
+            <div class="flex items-center gap-1 min-w-0 shrink-0">
+                <button type="button" onclick="window.app.closeScratchpad()" class="h-8 px-2 m3-btn-tonal text-[11px] font-extrabold flex items-center justify-center shrink-0" title="Close Whiteboard (Esc)">
+                    <i class="ph-bold ph-arrow-left text-xs"></i>
+                </button>
+
+                <div class="m3-icon-group m3-icon-group-wb shrink-0">
+                    <button type="button" id="padPrevBtn" onclick="window.app.navigatePadQuestion(-1)" class="m3-icon-group-btn" title="Previous Question (Left Arrow)">
+                        <i class="ph-bold ph-caret-left"></i>
+                    </button>
+                    <span id="padQTitle" class="px-1.5 text-[10.5px] font-extrabold truncate max-w-[92px] xl:max-w-[130px]">Q.1</span>
+                    <button type="button" id="padNextBtn" onclick="window.app.navigatePadQuestion(1)" class="m3-icon-group-btn" title="Next Question (Right Arrow)">
+                        <i class="ph-bold ph-caret-right"></i>
+                    </button>
+                </div>
+
+                <div class="m3-icon-group m3-icon-group-wb shrink-0">
+                    <button type="button" id="padStarBtn" onclick="window.app.togglePadQuestionBool('starred')" class="m3-icon-group-btn" title="Star (F)">
+                        <i id="padStarIcon" class="ph-bold ph-star"></i>
+                    </button>
+                    <button type="button" id="padSolvedBtn" onclick="window.app.togglePadQuestionBool('solved')" class="m3-icon-group-btn" title="Solved (S)">
+                        <i id="padSolvedIcon" class="ph-bold ph-circle"></i>
+                    </button>
+                    <button type="button" id="padTagBtn" onclick="window.app.openQuestionTagMenu(window.app.getActivePadId(), this)" class="m3-icon-group-btn" title="Tag Question">
+                        <i class="ph-bold ph-tag"></i>
+                    </button>
+                </div>
+
+                <!-- #4 Interactive Option Eliminator (A B C D) -->
+                <div class="m3-icon-group m3-icon-group-wb shrink-0 px-1 gap-1" title="Cross out ruled-out options">
+                    <button type="button" onclick="window.app.toggleEliminateOption('A')" data-opt-btn="A" class="wb-opt-elim opt-elim-btn">A</button>
+                    <button type="button" onclick="window.app.toggleEliminateOption('B')" data-opt-btn="B" class="wb-opt-elim opt-elim-btn">B</button>
+                    <button type="button" onclick="window.app.toggleEliminateOption('C')" data-opt-btn="C" class="wb-opt-elim opt-elim-btn">C</button>
+                    <button type="button" onclick="window.app.toggleEliminateOption('D')" data-opt-btn="D" class="wb-opt-elim opt-elim-btn">D</button>
+                </div>
+
+                <!-- Manual Timer (Starts ONLY when clicked) -->
+                <button type="button" id="padTimerBtn" onclick="window.app.toggleQuestionTimer()" ondblclick="window.app.resetQuestionTimer()" class="h-8 px-2 rounded-full m3-surface-high border border-[var(--md-outline-variant)] text-[10.5px] font-mono font-extrabold flex items-center gap-1 shrink-0" title="Click: Start/Pause (T) • Double-Click: Reset">
+                    <i id="padTimerIcon" class="ph-fill ph-play text-emerald-500 text-[10px]"></i>
+                    <span id="padTimerText">00:00</span>
+                </button>
+
+                <!-- Hint, Answer & #7 Blind Re-Attempt Mode -->
+                <div class="m3-icon-group m3-icon-group-wb shrink-0">
+                    <button type="button" id="padHintToggleBtn" onclick="window.app.togglePadHint()" class="m3-icon-group-btn" title="1-Line Hint (H)">
+                        <i class="ph-bold ph-lightbulb text-amber-500"></i>
+                    </button>
+                    <button type="button" id="padAnsToggleBtn" onclick="window.app.togglePadAnswer()" class="m3-icon-group-btn" title="Answer Key (A)">
+                        <i class="ph-bold ph-key text-emerald-500"></i>
+                    </button>
+                    <button type="button" id="padBlindModeBtn" onclick="window.app.toggleBlindReattemptMode()" class="m3-icon-group-btn" title="Blind Re-Attempt Mode">
+                        <i class="ph-bold ph-eye-slash"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Right Cluster -->
+            <div class="flex items-center gap-1 shrink-0 ml-auto">
+                <!-- #2 Multi-Page Whiteboard Switcher -->
+                <div class="m3-icon-group m3-icon-group-wb shrink-0" title="Multi-Page Whiteboard">
+                    <button type="button" id="wbPrevPageBtn" onclick="window.app.switchWhiteboardPage(-1)" class="wb-mod-btn m3-icon-group-btn" title="Previous Page">
+                        <i class="ph-bold ph-caret-left text-[10px]"></i>
+                    </button>
+                    <span id="wbPageIndicator" class="px-1.5 text-[10px] font-mono font-extrabold">P.1/1</span>
+                    <button type="button" id="wbNextOrAddPageBtn" onclick="window.app.nextOrAddWhiteboardPage()" class="wb-mod-btn m3-icon-group-btn" title="Next Page / Add New Page">
+                        <i id="wbNextOrAddPageIcon" class="ph-bold ph-plus text-[10px]"></i>
+                    </button>
+                </div>
+
+                <!-- Core Drawing Tools + #1 Stylus-Only Palm Rejection -->
+                <div class="m3-icon-group m3-icon-group-wb shrink-0">
+                    <button type="button" id="wbToolSelectBtn" onclick="window.app.setWhiteboardTool('SELECT')" class="wb-mod-btn m3-icon-group-btn" title="Select / Move / Resize / Rotate">
+                        <i class="ph-bold ph-cursor"></i>
+                    </button>
+                    <button type="button" id="wbToolCropDupBtn" onclick="window.app.setWhiteboardTool('CROP_DUP')" class="wb-mod-btn m3-icon-group-btn" title="Crop & Duplicate Region">
+                        <i class="ph-bold ph-crop"></i>
+                    </button>
+                    <button type="button" id="wbToolPenBtn" onclick="window.app.setWhiteboardTool('PEN')" class="wb-mod-btn m3-icon-group-btn active-state" title="Pen Tool">
+                        <i class="ph-bold ph-pencil-simple"></i>
+                    </button>
+                    <button type="button" id="wbToolLaserBtn" onclick="window.app.setWhiteboardTool('LASER')" class="wb-mod-btn m3-icon-group-btn" title="Laser Pointer">
+                        <i class="ph-bold ph-sparkle text-rose-500"></i>
+                    </button>
+                    <button type="button" id="wbToolPanBtn" onclick="window.app.setWhiteboardTool('PAN')" class="m3-icon-group-btn" title="Pan Board">
+                        <i class="ph-bold ph-hand-grabbing"></i>
+                    </button>
+                    <button type="button" id="eraserBtn" onclick="window.app.setWhiteboardTool('ERASER')" class="wb-mod-btn m3-icon-group-btn" title="Eraser">
+                        <i class="ph-bold ph-eraser"></i>
+                    </button>
+                    <button type="button" id="wbStylusOnlyBtn" onclick="window.app.toggleStylusOnlyMode()" class="m3-icon-group-btn" title="Stylus-Only Mode / Palm Rejection">
+                        <i class="ph-bold ph-pen-nib"></i>
+                    </button>
+                    <button type="button" id="wbAutoShapeBtn" onclick="window.app.toggleAutoShape()" class="wb-mod-btn m3-icon-group-btn active-state" title="Auto-Shape Recognition">
+                        <i class="ph-bold ph-magic-wand"></i>
+                    </button>
+                </div>
+
+                <!-- Ink & Shape Popover Triggers -->
+                <button type="button" id="insertShapeMenuBtn" onclick="window.app.openInsertShapeMenu(this)" class="wb-mod-btn h-8 px-2 m3-dropdown-trigger text-[11px] shrink-0" title="Insert Geometric Shape">
+                    <i class="ph-bold ph-shapes text-xs" style="color: var(--md-primary)"></i>
+                </button>
+
+                <button type="button" id="inkStyleMenuBtn" onclick="window.app.openInkStyleMenu(this)" class="wb-mod-btn h-8 px-2 m3-dropdown-trigger text-[11px] shrink-0" title="Ink Color & Thickness">
+                    <span id="activeInkColorDot" class="w-3 h-3 rounded-full border border-black/30 shrink-0" style="background: #0f172a;"></span>
+                    <i class="ph-bold ph-caret-down text-[9px] m3-text-muted"></i>
+                </button>
+
+                <!-- Undo/Redo + #6 Formula Sheet + #3 Dark Canvas + Board Menu + Fullscreen -->
+                <div class="m3-icon-group m3-icon-group-wb shrink-0">
+                    <button type="button" onclick="window.app.whiteboardUndo()" class="wb-mod-btn m3-icon-group-btn" title="Undo (Ctrl+Z)">
+                        <i class="ph-bold ph-arrow-u-up-left"></i>
+                    </button>
+                    <button type="button" onclick="window.app.whiteboardRedo()" class="wb-mod-btn m3-icon-group-btn" title="Redo (Ctrl+Y)">
+                        <i class="ph-bold ph-arrow-u-up-right"></i>
+                    </button>
+                    <button type="button" id="wbDarkCanvasBtn" onclick="window.app.toggleWhiteboardDarkCanvas()" class="m3-icon-group-btn" title="Toggle Whiteboard Night Mode">
+                        <i class="ph-bold ph-moon-stars"></i>
+                    </button>
+                    <button type="button" id="wbFormulaDrawerBtn" onclick="window.app.toggleFormulaDrawer()" class="m3-icon-group-btn" title="Quick Formula & Constants Sheet">
+                        <i class="ph-bold ph-function" style="color: var(--md-primary)"></i>
+                    </button>
+                    <button type="button" onclick="window.app.openWhiteboardMoreMenu(this)" class="m3-icon-group-btn" title="Grid, Export PNG & Clear">
+                        <i class="ph-bold ph-dots-three-vertical"></i>
+                    </button>
+                    <button type="button" onclick="window.app.toggleFullscreen()" class="m3-icon-group-btn" title="Toggle Fullscreen">
+                        <i id="wbFullscreenIcon" class="ph-bold ph-corners-out"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Collapsible Hint, Answer Key & Blind Mode Banner -->
+        <div id="padHintAnswerDrawer" class="hidden m3-surface-high border-b border-[var(--md-outline-variant)] px-4 py-1.5 items-center justify-between gap-3 shrink-0">
+            <div class="flex flex-wrap items-center gap-3 min-w-0 flex-1 text-xs">
+                <div id="padBlindBanner" class="hidden items-center gap-2 px-3 py-1 rounded-2xl bg-amber-500/20 text-amber-300 font-bold">
+                    <i class="ph-bold ph-eye-slash"></i>
+                    <span>Blind Re-Attempt Active (Previous work hidden)</span>
+                    <button type="button" onclick="window.app.commitBlindWorkToMainBoard()" class="underline ml-2 font-extrabold">Save as New Work</button>
+                </div>
+                <div id="padHintBox" class="hidden items-center gap-2 px-3 py-1 rounded-2xl m3-surface-low">
+                    <i class="ph-fill ph-lightbulb text-amber-500 text-sm shrink-0"></i>
+                    <span class="font-bold shrink-0">1-Line Hint:</span>
+                    <span id="padHintText" class="font-medium">Not generated yet.</span>
+                </div>
+                <div id="padAnsBox" class="hidden items-center gap-2 px-3 py-1 rounded-2xl m3-primary-pill">
+                    <i class="ph-fill ph-key text-sm shrink-0"></i>
+                    <span class="font-bold shrink-0">Answer Key:</span>
+                    <span id="padAnsText" class="font-extrabold font-mono">Not generated yet.</span>
+                </div>
+            </div>
+            <button type="button" id="padSolveNowBtn" onclick="window.app.solveActivePadQuestionNow()" class="h-7 px-3 m3-btn-filled text-[11px] flex items-center gap-1 shrink-0">
+                <i class="ph-bold ph-sparkle"></i>
+                <span id="padSolveNowBtnLabel">Generate with Gemini 3.8</span>
+            </button>
+        </div>
+
+        <!-- 100% FULLSCREEN WHITEBOARD CANVAS + #6 FORMULA DRAWER -->
+        <div id="padCanvasWrap" class="flex-1 w-full bg-white relative overflow-hidden select-none min-h-0">
+            <div id="wbLoadingBadge" class="hidden absolute top-3 left-3.5 z-20 px-3.5 py-1.5 rounded-full m3-primary-pill shadow-xl items-center gap-2 text-xs font-extrabold pointer-events-none">
+                <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24">
+                    <path class="m3-morph-loader-path" fill="currentColor" d=""></path>
+                </svg>
+                <span>Loading saved rough work (Zoom/Pan active, editing locked)...</span>
+            </div>
+
+            <!-- #6 Quick Formula & Physical Constants Slide-Over Drawer -->
+            <aside id="wbFormulaDrawer" class="hidden absolute top-2 right-2 bottom-2 w-80 max-w-[90vw] z-30 m3-dialog p-4 flex-col overflow-hidden shadow-2xl">
+                <div class="flex items-center justify-between pb-2.5 border-b border-[var(--md-outline-variant)] shrink-0">
+                    <div class="flex items-center gap-2">
+                        <i class="ph-bold ph-function text-base" style="color: var(--md-primary)"></i>
+                        <h4 class="font-extrabold text-xs uppercase tracking-wider">Constants & Formulae</h4>
+                    </div>
+                    <button type="button" onclick="window.app.toggleFormulaDrawer(false)" class="h-7 w-7 m3-btn-tonal flex items-center justify-center">
+                        <i class="ph-bold ph-x text-xs"></i>
+                    </button>
+                </div>
+                <div class="flex-1 overflow-y-auto pt-3 space-y-2.5 text-[11px] font-mono leading-relaxed">
+                    <div class="p-3 rounded-2xl m3-surface-high space-y-1">
+                        <div class="font-sans font-extrabold text-[10px] uppercase tracking-wider" style="color: var(--md-primary)">Universal Constants</div>
+                        <div>c = 3.00 × 10⁸ m/s</div>
+                        <div>h = 6.626 × 10⁻³⁴ J·s</div>
+                        <div>hc ≈ 1240 eV·nm</div>
+                        <div>e = 1.602 × 10⁻¹⁹ C</div>
+                        <div>mₑ = 9.11 × 10⁻³¹ kg</div>
+                        <div>mₚ = 1.673 × 10⁻²⁷ kg</div>
+                        <div>ε₀ = 8.854 × 10⁻¹² C²/(N·m²)</div>
+                        <div>1/(4πε₀) = 9.0 × 10⁹ N·m²/C²</div>
+                        <div>μ₀ = 4π × 10⁻⁷ T·m/A</div>
+                        <div>G = 6.674 × 10⁻¹¹ N·m²/kg²</div>
+                    </div>
+                    <div class="p-3 rounded-2xl m3-surface-high space-y-1">
+                        <div class="font-sans font-extrabold text-[10px] uppercase tracking-wider" style="color: var(--md-primary)">Thermo & Atomic</div>
+                        <div>R = 8.314 J/(mol·K) ≈ 2 cal/(mol·K)</div>
+                        <div>R = 0.0821 L·atm/(mol·K)</div>
+                        <div>Nₐ = 6.022 × 10²³ mol⁻¹</div>
+                        <div>k_B = 1.38 × 10⁻²³ J/K</div>
+                        <div>F = 96485 C/mol</div>
+                        <div>(2.303 RT)/F ≈ 0.0591 V (at 298 K)</div>
+                        <div>a₀ = 0.529 Å, E₁ = -13.6 eV</div>
+                    </div>
+                    <div class="p-3 rounded-2xl m3-surface-high space-y-1">
+                        <div class="font-sans font-extrabold text-[10px] uppercase tracking-wider" style="color: var(--md-primary)">Moments of Inertia & Math</div>
+                        <div>Ring: MR² | Disc: ½MR²</div>
+                        <div>Solid Sphere: ⅖MR² | Hollow: ⅔MR²</div>
+                        <div>Rod (center): ML²/12 | (end): ML²/3</div>
+                        <div>sin(3θ) = 3sinθ - 4sin³θ</div>
+                        <div>cos(3θ) = 4cos³θ - 3cosθ</div>
+                        <div>∫ sec(x)dx = ln|sec(x) + tan(x)|</div>
+                        <div>a × (b × c) = (a·c)b - (a·b)c</div>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Floating Selected Object / Group Action Bar (Rotate & Reset Rotation) -->
+            <div id="wbSelectionHud" class="hidden absolute top-3 right-4 z-10 m3-icon-group shadow-xl">
+                <button type="button" onclick="window.app.rotateSelectedWhiteboardItems(-15)" class="wb-mod-btn m3-icon-group-btn gap-1 text-[11px] font-bold" title="Rotate -15°">
+                    <i class="ph-bold ph-arrow-counter-clockwise"></i>
+                    <span class="hidden sm:inline">-15°</span>
+                </button>
+                <button type="button" onclick="window.app.rotateSelectedWhiteboardItems(15)" class="wb-mod-btn m3-icon-group-btn gap-1 text-[11px] font-bold" title="Rotate +15°">
+                    <i class="ph-bold ph-arrow-clockwise"></i>
+                    <span class="hidden sm:inline">+15°</span>
+                </button>
+                <button type="button" onclick="window.app.resetSelectedWhiteboardRotation()" class="wb-mod-btn m3-icon-group-btn gap-1 text-[11px] font-bold" title="Reset Rotation to 0°">
+                    <i class="ph-bold ph-arrows-clockwise"></i>
+                    <span>0°</span>
+                </button>
+                <button type="button" id="wbGroupBtn" onclick="window.app.groupSelectedWhiteboardItems()" class="wb-mod-btn hidden m3-icon-group-btn gap-1 text-[11px] font-bold">
+                    <i class="ph-bold ph-link"></i>
+                    <span>Group</span>
+                </button>
+                <button type="button" id="wbUngroupBtn" onclick="window.app.ungroupSelectedWhiteboardItems()" class="wb-mod-btn hidden m3-icon-group-btn gap-1 text-[11px] font-bold">
+                    <i class="ph-bold ph-link-break"></i>
+                    <span>Ungroup</span>
+                </button>
+                <button type="button" onclick="window.app.duplicateSelectedWhiteboardItem()" class="wb-mod-btn m3-icon-group-btn gap-1 text-[11px] font-bold">
+                    <i class="ph-bold ph-copy"></i>
+                    <span class="hidden md:inline">Duplicate</span>
+                </button>
+                <button type="button" onclick="window.app.deleteSelectedWhiteboardItem()" class="wb-mod-btn m3-icon-group-btn hover:!bg-rose-600 hover:!text-white gap-1 text-[11px] font-bold">
+                    <i class="ph-bold ph-trash"></i>
+                    <span class="hidden md:inline">Delete</span>
+                </button>
+            </div>
+
+            <div class="absolute bottom-4 right-4 z-10 m3-icon-group shadow-xl">
+                <button type="button" onclick="window.app.zoomWhiteboard(-0.2)" class="m3-icon-group-btn" title="Zoom Out">
+                    <i class="ph-bold ph-minus"></i>
+                </button>
+                <button type="button" onclick="window.app.resetWhiteboardView()" class="m3-icon-group-btn !px-3 font-mono text-[11px] font-extrabold" title="Reset Zoom">
+                    <span id="wbZoomBadge">100%</span>
+                </button>
+                <button type="button" onclick="window.app.zoomWhiteboard(0.2)" class="m3-icon-group-btn" title="Zoom In">
+                    <i class="ph-bold ph-plus"></i>
+                </button>
+            </div>
+
+            <canvas id="stylusCanvas" class="w-full h-full cursor-crosshair block transition-all duration-200"></canvas>
+        </div>
+    </div>
+
+    <!-- GLOBAL CUSTOM DROPDOWN AT VERY END OF BODY WITH Z-[100] -->
+    <div id="customDropdownBackdrop" onclick="window.app.closeCustomDropdown()" class="fixed inset-0 z-[95] hidden"></div>
+    <div id="customDropdownMenu" class="fixed z-[100] hidden m3-custom-menu max-h-80 overflow-y-auto min-w-[175px] max-w-[300px]"></div>
+
+    <!-- TOAST NOTIFICATIONS -->
+    <div id="toastBox" class="fixed bottom-24 right-6 z-[110] flex flex-col gap-2 pointer-events-none"></div>
+
+
+    <script src="./app.js?v=3.0"></script>
+</body>
+</html>
