@@ -960,3 +960,199 @@ input[type=range].split-slider::-webkit-slider-thumb:active {
     color: #ffffff;
     pointer-events: none;
 }
+
+/* =================================================================== */
+/* MATERIAL 3 EXPRESSIVE THEMED SWITCHES, CHECKBOXES & STATUS PILLS    */
+/* =================================================================== */
+input[type="checkbox"].m3-switch {
+    -webkit-appearance: none;
+    appearance: none;
+    position: relative;
+    width: 42px;
+    height: 24px;
+    border-radius: 9999px;
+    background-color: var(--md-surface-highest);
+    border: 1.5px solid var(--md-outline);
+    cursor: pointer;
+    flex-shrink: 0;
+    outline: none;
+    transition: background-color 0.22s var(--m3-smooth), border-color 0.22s var(--m3-smooth), transform 0.14s var(--m3-smooth);
+}
+
+input[type="checkbox"].m3-switch::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 3px;
+    width: 14px;
+    height: 14px;
+    border-radius: 9999px;
+    background-color: var(--md-on-surface-variant);
+    transform: translate3d(0, -50%, 0);
+    transition: transform 0.24s var(--m3-spring), width 0.2s var(--m3-smooth), height 0.2s var(--m3-smooth), background-color 0.2s var(--m3-smooth);
+}
+
+input[type="checkbox"].m3-switch:checked {
+    background-color: var(--md-primary);
+    border-color: var(--md-primary);
+}
+
+input[type="checkbox"].m3-switch:checked::after {
+    width: 17px;
+    height: 17px;
+    background-color: var(--md-on-primary);
+    transform: translate3d(17px, -50%, 0);
+}
+
+input[type="checkbox"].m3-switch:active {
+    transform: scale(0.95);
+}
+
+input[type="checkbox"].m3-switch.m3-switch-sm {
+    width: 34px;
+    height: 20px;
+}
+
+input[type="checkbox"].m3-switch.m3-switch-sm::after {
+    width: 11px;
+    height: 11px;
+    left: 3px;
+}
+
+input[type="checkbox"].m3-switch.m3-switch-sm:checked::after {
+    width: 14px;
+    height: 14px;
+    transform: translate3d(13px, -50%, 0);
+}
+
+input[type="checkbox"].m3-switch.m3-switch-danger:checked {
+    background-color: #f43f5e;
+    border-color: #f43f5e;
+}
+
+input[type="checkbox"].m3-switch.m3-switch-danger:checked::after {
+    background-color: #ffffff;
+}
+
+input[type="checkbox"].m3-switch.m3-switch-warn:checked {
+    background-color: #f59e0b;
+    border-color: #f59e0b;
+}
+
+input[type="checkbox"].m3-switch.m3-switch-warn:checked::after {
+    background-color: #0f172a;
+}
+
+/* Material 3 Expressive Rounded Checkbox */
+input[type="checkbox"].m3-checkbox {
+    -webkit-appearance: none;
+    appearance: none;
+    position: relative;
+    width: 19px;
+    height: 19px;
+    border-radius: 6px;
+    background-color: var(--md-surface-low);
+    border: 2px solid var(--md-outline);
+    cursor: pointer;
+    flex-shrink: 0;
+    outline: none;
+    display: inline-grid;
+    place-items: center;
+    transition: background-color 0.2s var(--m3-smooth), border-color 0.2s var(--m3-smooth), transform 0.16s var(--m3-spring);
+}
+
+input[type="checkbox"].m3-checkbox::after {
+    content: '';
+    width: 5px;
+    height: 9px;
+    border: solid var(--md-on-primary);
+    border-width: 0 2.2px 2.2px 0;
+    transform: rotate(42deg) scale(0);
+    margin-top: -1px;
+    transition: transform 0.18s var(--m3-spring);
+}
+
+input[type="checkbox"].m3-checkbox:checked {
+    background-color: var(--md-primary);
+    border-color: var(--md-primary);
+}
+
+input[type="checkbox"].m3-checkbox:checked::after {
+    transform: rotate(42deg) scale(1);
+}
+
+input[type="checkbox"].m3-checkbox.m3-checkbox-danger:checked {
+    background-color: #f43f5e;
+    border-color: #f43f5e;
+}
+
+input[type="checkbox"].m3-checkbox.m3-checkbox-danger:checked::after {
+    border-color: #ffffff;
+}
+
+input[type="checkbox"].m3-checkbox:active {
+    transform: scale(0.9);
+}
+
+/* Consistent Full-Width Form Dropdown Trigger */
+.m3-dropdown-field {
+    background-color: var(--md-surface-low);
+    color: var(--md-on-surface);
+    border: 1px solid var(--md-outline-variant);
+    border-radius: 9999px;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px;
+    padding: 0 12px;
+    transition: background-color 0.2s ease, border-color 0.2s ease, border-radius 0.2s var(--m3-smooth), transform 0.14s var(--m3-smooth);
+    cursor: pointer;
+    user-select: none;
+    min-width: 0;
+}
+
+.m3-dropdown-field:hover {
+    background-color: var(--md-surface-highest);
+    border-color: var(--md-primary);
+}
+
+.m3-dropdown-field:active {
+    transform: scale(0.98);
+}
+
+/* Local AI Server Live Status Pill */
+.m3-ai-status-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 3px 10px;
+    border-radius: 9999px;
+    font-size: 10.5px;
+    font-weight: 800;
+    border: 1px solid var(--md-outline-variant);
+    background-color: var(--md-surface-high);
+    color: var(--md-on-surface-variant);
+}
+
+.m3-ai-status-pill.is-online {
+    background-color: rgba(16, 185, 129, 0.16);
+    border-color: rgba(16, 185, 129, 0.4);
+    color: #34d399;
+}
+
+.m3-ai-status-pill.is-offline {
+    background-color: rgba(244, 63, 94, 0.16);
+    border-color: rgba(244, 63, 94, 0.38);
+    color: #fb7185;
+}
+
+.m3-ai-status-pill.is-checking {
+    background-color: rgba(245, 158, 11, 0.16);
+    border-color: rgba(245, 158, 11, 0.38);
+    color: #fbbf24;
+}
+
+#customDropdownMenu {
+    overscroll-behavior: contain;
+}
