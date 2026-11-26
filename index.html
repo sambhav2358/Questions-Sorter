@@ -683,7 +683,7 @@
                 <div id="uploadSetupView" class="space-y-3">
                     <label for="unifiedFileInput" class="block m3-surface-high rounded-3xl p-5 text-center cursor-pointer hover:brightness-105 transition">
                         <input type="file" id="unifiedFileInput" accept="application/pdf,image/*,.pdf" class="hidden" onchange="window.app.onUnifiedFileSelected(event)">
-                        <div class="w-13 h-13 m3-cookie-12 flex items-center justify-center mx-auto mb-2" style="background: var(--md-primary-container); color: var(--md-primary);">
+                        <div class="w-12 h-12 m3-cookie-12 flex items-center justify-center mx-auto mb-2" style="background: var(--md-primary-container); color: var(--md-primary);">
                             <i id="unifiedFileIcon" class="ph-duotone ph-cloud-arrow-up text-2xl"></i>
                         </div>
                         <p id="selectedFileLabel" class="text-xs sm:text-sm font-extrabold">Tap to Select Any 1-Column / 2-Column JEE PDF or Photo (or press Ctrl+V)</p>
@@ -718,13 +718,13 @@
                                         <div class="text-xs font-extrabold" style="color: var(--md-primary)">Verify Borders &amp; Stitches with Local Native AI</div>
                                         <p class="text-[10.5px] m3-text-muted">Checks borders &amp; page-break stitches only • Local v3.0 detects chapters • Gemini handles Answer Keys.</p>
                                     </div>
-                                    <input type="checkbox" id="pdfUseLocalAiBordersChk" checked class="m3-switch">
+                                    <input type="checkbox" id="pdfUseLocalAiBordersChk" onchange="window.app.onToggleLocalAiBorderChk(this.checked)" class="m3-switch">
                                 </div>
 
                                 <div class="flex items-center justify-between gap-2 pt-1.5 border-t border-[var(--md-outline-variant)] flex-wrap">
-                                    <span id="localAiBorderStatusPill" class="m3-ai-status-pill is-checking">
-                                        <span id="localAiBorderStatusDot" class="w-2 h-2 rounded-full bg-amber-400"></span>
-                                        <span id="localAiBorderStatusText">Checking Termux AI server...</span>
+                                    <span id="localAiBorderStatusPill" class="m3-ai-status-pill">
+                                        <span id="localAiBorderStatusDot" class="w-2 h-2 rounded-full bg-slate-400"></span>
+                                        <span id="localAiBorderStatusText">Off (Using Local v3.0 Engine)</span>
                                     </span>
                                     <button type="button" onclick="window.app.refreshLocalAiBorderStatus(true)" class="h-7 px-3 m3-btn-tonal text-[10.5px] flex items-center gap-1 shrink-0">
                                         <i class="ph-bold ph-arrows-clockwise text-xs"></i>
@@ -1093,29 +1093,103 @@
 
             <!-- Body: Left = Cropped Image + Live Border Fine-Tuner, Right = Chapter & Border Info -->
             <div class="flex-1 min-h-0 grid grid-cols-1 lg:grid-cols-12 overflow-hidden">
-                <!-- Left: Question Image & Live Border Adjustment -->
+                <!-- Left: Question Image & Full Interactive Editor (4-Side Bounds, Split into 2, Vertical Trim & Merge) -->
                 <div class="lg:col-span-7 min-h-0 flex flex-col border-b lg:border-b-0 lg:border-r border-[var(--md-outline-variant)] overflow-hidden">
+                    <!-- Row 1: Mode Switcher + Merge & Reset Actions -->
                     <div class="px-3 py-2 m3-surface-high border-b border-[var(--md-outline-variant)] flex flex-wrap items-center justify-between gap-2 shrink-0">
-                        <div class="flex items-center gap-2 text-[11px] font-bold">
-                            <span class="m3-text-muted">Top Border:</span>
-                            <button type="button" onclick="window.app.brNudgeBorder('top', -18)" class="h-6 px-2 rounded-full m3-surface-low hover:brightness-110 text-[10px] font-extrabold" title="Expand upward">▲ +Expand</button>
-                            <button type="button" onclick="window.app.brNudgeBorder('top', 14)" class="h-6 px-2 rounded-full m3-surface-low hover:brightness-110 text-[10px] font-extrabold" title="Trim downward">▼ Trim</button>
+                        <div class="m3-segmented-group">
+                            <button type="button" id="brModeBoundsBtn" onclick="window.app.brSetEditMode('BOUNDS')" class="m3-seg-btn active" title="Adjust all 4 borders on the original PDF page">
+                                <i class="ph-bold ph-bounding-box text-xs"></i>
+                                <span>Borders</span>
+                            </button>
+                            <button type="button" id="brModeSplitBtn" onclick="window.app.brSetEditMode('SPLIT')" class="m3-seg-btn" title="Split clubbed questions into 2 separate cards">
+                                <i class="ph-bold ph-scissors text-xs"></i>
+                                <span>Split into 2</span>
+                            </button>
+                            <button type="button" id="brModeTrimBtn" onclick="window.app.brSetEditMode('TRIM')" class="m3-seg-btn" title="Precision vertical trim with top & bottom sliders">
+                                <i class="ph-bold ph-crop text-xs"></i>
+                                <span>Trim</span>
+                            </button>
                         </div>
 
-                        <div class="flex items-center gap-2 text-[11px] font-bold">
-                            <span class="m3-text-muted">Bottom Border:</span>
-                            <button type="button" onclick="window.app.brNudgeBorder('bottom', -14)" class="h-6 px-2 rounded-full m3-surface-low hover:brightness-110 text-[10px] font-extrabold" title="Trim upward">▲ Trim</button>
-                            <button type="button" onclick="window.app.brNudgeBorder('bottom', 18)" class="h-6 px-2 rounded-full m3-surface-low hover:brightness-110 text-[10px] font-extrabold" title="Expand downward">▼ +Expand</button>
+                        <div class="flex items-center gap-1.5 flex-wrap">
+                            <button type="button" id="brMergePrevBtn" onclick="window.app.brMergeWithNeighbor(-1)" class="h-7 px-2.5 rounded-full m3-btn-tonal text-[10.5px] flex items-center gap-1" title="Stitch this question onto the bottom of the previous question">
+                                <i class="ph-bold ph-link text-xs"></i>
+                                <span>Merge ← Prev</span>
+                            </button>
+                            <button type="button" id="brMergeNextBtn" onclick="window.app.brMergeWithNeighbor(1)" class="h-7 px-2.5 rounded-full m3-btn-tonal text-[10.5px] flex items-center gap-1" title="Stitch the next question onto the bottom of this question">
+                                <i class="ph-bold ph-link text-xs"></i>
+                                <span>Merge → Next</span>
+                            </button>
+                            <button type="button" onclick="window.app.brResetCurrentBorder()" class="h-7 px-2.5 rounded-full m3-surface-low border border-[var(--md-outline-variant)] hover:brightness-110 text-[10.5px] font-bold" title="Reset crop to original detected bounds">
+                                Reset
+                            </button>
                         </div>
+                    </div>
 
-                        <button type="button" onclick="window.app.brResetCurrentBorder()" class="h-6 px-2.5 rounded-full m3-btn-tonal text-[10px]" title="Reset to original detected border">
-                            Reset Crop
+                    <!-- Row 2A: 4-Side PDF Page Border Nudges (BOUNDS Mode) -->
+                    <div id="brBoundsToolbar" class="px-3 py-1.5 m3-surface-low border-b border-[var(--md-outline-variant)] flex flex-wrap items-center justify-between gap-2 shrink-0 text-[10.5px] font-bold">
+                        <div class="flex items-center gap-1">
+                            <span class="m3-text-muted">Top:</span>
+                            <button type="button" onclick="window.app.brNudgeBorder('top', -18)" class="h-6 px-2 rounded-full m3-surface-high hover:brightness-110 text-[10px] font-extrabold" title="Expand top border upward">▲ +Exp</button>
+                            <button type="button" onclick="window.app.brNudgeBorder('top', 14)" class="h-6 px-2 rounded-full m3-surface-high hover:brightness-110 text-[10px] font-extrabold" title="Trim top border downward">▼ Trim</button>
+                        </div>
+                        <div class="flex items-center gap-1">
+                            <span class="m3-text-muted">Bot:</span>
+                            <button type="button" onclick="window.app.brNudgeBorder('bottom', -14)" class="h-6 px-2 rounded-full m3-surface-high hover:brightness-110 text-[10px] font-extrabold" title="Trim bottom border upward">▲ Trim</button>
+                            <button type="button" onclick="window.app.brNudgeBorder('bottom', 18)" class="h-6 px-2 rounded-full m3-surface-high hover:brightness-110 text-[10px] font-extrabold" title="Expand bottom border downward">▼ +Exp</button>
+                        </div>
+                        <div class="flex items-center gap-1">
+                            <span class="m3-text-muted">L/R:</span>
+                            <button type="button" onclick="window.app.brNudgeBorder('left', -20)" class="h-6 px-1.5 rounded-full m3-surface-high hover:brightness-110 text-[10px] font-extrabold" title="Expand left border">◀L+</button>
+                            <button type="button" onclick="window.app.brNudgeBorder('left', 16)" class="h-6 px-1.5 rounded-full m3-surface-high hover:brightness-110 text-[10px] font-extrabold" title="Trim left border">L▶</button>
+                            <button type="button" onclick="window.app.brNudgeBorder('right', -16)" class="h-6 px-1.5 rounded-full m3-surface-high hover:brightness-110 text-[10px] font-extrabold" title="Trim right border">◀R</button>
+                            <button type="button" onclick="window.app.brNudgeBorder('right', 20)" class="h-6 px-1.5 rounded-full m3-surface-high hover:brightness-110 text-[10px] font-extrabold" title="Expand right border">R+▶</button>
+                        </div>
+                    </div>
+
+                    <!-- Row 2B: Split into 2 Controls (SPLIT Mode) -->
+                    <div id="brSplitToolbar" class="hidden px-3 py-1.5 m3-surface-low border-b border-[var(--md-outline-variant)] flex-wrap items-center justify-between gap-2 shrink-0 text-[11px] font-bold">
+                        <div class="flex items-center gap-2 flex-1 min-w-[180px]">
+                            <span style="color: var(--md-primary)">Cut Line:</span>
+                            <input id="brSplitCutSlider" type="range" min="10" max="90" value="50" oninput="window.app.brUpdateSplitTrimPreview()" class="split-slider flex-1 max-w-[200px]">
+                            <span id="brSplitCutVal" class="font-mono w-9 text-center">50%</span>
+                        </div>
+                        <button type="button" onclick="window.app.brConfirmSplitCurrent()" class="h-7 px-3.5 m3-btn-filled text-[11px] flex items-center gap-1 shadow">
+                            <i class="ph-bold ph-scissors text-xs"></i>
+                            <span>Split Now (Q.#a &amp; Q.#b)</span>
                         </button>
                     </div>
 
+                    <!-- Row 2C: Precision Vertical Trim Controls (TRIM Mode) -->
+                    <div id="brTrimToolbar" class="hidden px-3 py-1.5 m3-surface-low border-b border-[var(--md-outline-variant)] flex-wrap items-center justify-between gap-2 shrink-0 text-[11px] font-bold">
+                        <div class="flex items-center gap-3 flex-wrap">
+                            <label class="flex items-center gap-1.5">Top <input id="brTrimTopSlider" type="range" min="0" max="45" value="0" oninput="window.app.brUpdateSplitTrimPreview()" class="split-slider w-24"><span id="brTrimTopVal" class="font-mono text-[10px] w-7">0%</span></label>
+                            <label class="flex items-center gap-1.5">Bot <input id="brTrimBotSlider" type="range" min="55" max="100" value="100" oninput="window.app.brUpdateSplitTrimPreview()" class="split-slider w-24"><span id="brTrimBotVal" class="font-mono text-[10px] w-8">100%</span></label>
+                        </div>
+                        <button type="button" onclick="window.app.brConfirmTrimCurrent()" class="h-7 px-3.5 m3-btn-filled text-[11px] flex items-center gap-1 shadow">
+                            <i class="ph-bold ph-check text-xs"></i>
+                            <span>Apply Trim</span>
+                        </button>
+                    </div>
+
+                    <!-- Interactive Image Preview Stage -->
                     <div class="flex-1 min-h-0 overflow-y-auto mc-pdf-scroller p-3 m3-surface-low flex items-start justify-center">
                         <div class="bg-white rounded-2xl p-3 shadow-xl border border-[var(--md-outline-variant)] w-full max-w-3xl">
-                            <img id="brQuestionImg" src="" alt="Question Preview" class="w-full h-auto block rounded-xl">
+                            <div id="brImgStage" class="relative w-full overflow-hidden rounded-xl select-none">
+                                <img id="brQuestionImg" src="" alt="Question Preview" class="w-full h-auto block rounded-xl pointer-events-none">
+
+                                <!-- Draggable Split Cut Line Overlay -->
+                                <div id="brSplitDividerLine" class="hidden absolute left-0 right-0 h-7 -mt-3.5 cursor-ns-resize flex items-center justify-between px-3 z-20" style="top: 50%; touch-action: none;">
+                                    <div class="absolute left-0 right-0 top-1/2 -translate-y-1/2 border-t-4 border-dashed border-amber-500 pointer-events-none"></div>
+                                    <span class="relative -mt-6 bg-amber-500 text-slate-950 font-extrabold text-[10px] px-2.5 py-0.5 rounded-full shadow pointer-events-none">▲ Card 1 (Top • Drag Line)</span>
+                                    <span class="relative mt-6 bg-indigo-600 text-white font-extrabold text-[10px] px-2.5 py-0.5 rounded-full shadow pointer-events-none">▼ Card 2 (Bottom)</span>
+                                </div>
+
+                                <!-- Vertical Trim Masks -->
+                                <div id="brTrimTopMask" class="hidden absolute top-0 left-0 right-0 bg-rose-900/50 border-b-2 border-rose-500 pointer-events-none z-10" style="height: 0%;"></div>
+                                <div id="brTrimBotMask" class="hidden absolute bottom-0 left-0 right-0 bg-rose-900/50 border-t-2 border-rose-500 pointer-events-none z-10" style="height: 0%;"></div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -1483,6 +1557,6 @@
     <div id="toastBox" class="fixed bottom-24 right-6 z-[110] flex flex-col gap-2 pointer-events-none"></div>
 
 
-    <script src="./app.js?v=3.1"></script>
+    <script src="./app.js?v=3.3"></script>
 </body>
 </html>
