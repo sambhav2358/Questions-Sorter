@@ -373,6 +373,7 @@ const state = {
         recentTimestamps: []
     },
     importMode: null,
+    pdfDefaultSubject: 'AUTO',
     pdfDoc: null,
     isExtracting: false,
     isUploadMinimized: false,
@@ -1724,6 +1725,10 @@ function openCustomDropdown(anchorEl, options, currentVal, onSelectCallback) {
     }
     menu.style.left = `${left}px`;
     menu.style.top = `${top}px`;
+    const selItem = menu.querySelector('.m3-custom-menu-item.selected');
+    if (selItem) {
+        requestAnimationFrame(() => selItem.scrollIntoView({ block: 'nearest' }));
+    }
 }
 
 function closeCustomDropdown() {
@@ -2007,6 +2012,7 @@ async function onUnifiedFileSelected(e) {
             document.getElementById('startExtractBtn').disabled = false;
             document.getElementById('startExtractBtnLbl').textContent = 'Extract Questions';
             toast(`Loaded PDF (${state.pdfDoc.numPages} pages)`, 'success');
+            window.app.refreshLocalAiBorderStatus(false);
         } catch (_) {
             toast('Could not read PDF file', 'warn');
         }
@@ -2580,7 +2586,7 @@ async function startPdfExtraction() {
     setUploadButtonsLock(true);
 
     const paperName = document.getElementById('paperTitleInput').value.trim() || 'Test Paper';
-    const defaultSubj = document.getElementById('pdfDefaultSubjectSelect')?.value || 'AUTO';
+    const defaultSubj = state.pdfDefaultSubject || 'AUTO';
     const useLocalAiBorders = Boolean(document.getElementById('pdfUseLocalAiBordersChk')?.checked);
     const reviewBeforeSaving = Boolean(document.getElementById('pdfReviewAfterExtractChk')?.checked);
     const useGeminiVerifier = Boolean(document.getElementById('pdfGeminiVerifyBordersChk')?.checked);
@@ -2646,20 +2652,37 @@ async function startPdfExtraction() {
         // Stitching ONLY (Fails fast in ~2.5s if Termux isn't running)
         // =============================================================
         let localAiBordersReady = false;
+        const aiBatchSummary = {
+            requested: Boolean(useLocalAiBorders && !manualModeForRemaining),
+            connected: false,
+            backend: '',
+            modelName: '',
+            pagesChecked: 0,
+            pagesRefined: 0,
+            pagesFailed: 0,
+            totalMs: 0,
+            offlineReason: ''
+        };
         const aiBorders = window.JEELocalAIBorders;
         if (useLocalAiBorders && aiBorders && !manualModeForRemaining) {
             try {
                 const conn = await aiBorders.connect({
+                    waitForBootMs: 9000,
                     abortSignal: state.extractionAbortController.signal,
                     onProgress: (info) => {
                         updateUploadProgressEverywhere(50, 'Local AI', info.message || 'Connecting to Termux AI...');
                     }
                 });
                 localAiBordersReady = Boolean(conn && conn.ok);
-                appendExtractLog(`🤖 Local AI Border & Stitch Verifier connected (${conn.kind}: ${conn.modelName}) ✓`, 'success');
+                aiBatchSummary.connected = localAiBordersReady;
+                aiBatchSummary.backend = conn.kind || 'llama_cpp';
+                aiBatchSummary.modelName = conn.modelName || 'local-ai';
+                appendExtractLog(`🤖 Local AI connected (${conn.kind}: ${conn.modelName} @ ${conn.url}) ✓`, 'success');
             } catch (aiConnErr) {
                 if (aiConnErr.name === 'AbortError' || state.cancelExtractionRequested) throw aiConnErr;
-                appendExtractLog(`ℹ Local AI server offline (${aiConnErr.message}). Using Local v3.0 borders cleanly.`, 'stitch');
+                aiBatchSummary.offlineReason = aiConnErr.message;
+                appendExtractLog(`⚠ LOCAL AI OFFLINE: ${aiConnErr.message}`, 'error');
+                toast('Local AI server is OFFLINE — fell back to Local v3.0 borders!', 'warn');
             }
         }
 
@@ -2729,8 +2752,8 @@ async function startPdfExtraction() {
                         const verifyPct = 52 + Math.round((pIdx / countPages) * 44);
                         updateUploadProgressEverywhere(
                             verifyPct,
-                            `Page ${pageNum}/${endP}`,
-                            `Local AI verifying Page ${pageNum} borders & stitches...`
+                            `AI P.${pageNum}/${endP}`,
+                            `Local AI (${aiBatchSummary.modelName}) inspecting Page ${pageNum} borders...`
                         );
                         const vRes = await aiBorders.verifyPageBorders(
                             canvas,
@@ -2740,14 +2763,23 @@ async function startPdfExtraction() {
                         );
                         blocks = vRes.blocks;
                         usedAiBorderAdjustment = Boolean(vRes.changed);
+                        aiBatchSummary.totalMs += Number(vRes.elapsedMs) || 0;
+                        if (vRes.verified) {
+                            aiBatchSummary.pagesChecked++;
+                            if (vRes.changed) aiBatchSummary.pagesRefined++;
+                        } else {
+                            aiBatchSummary.pagesFailed++;
+                        }
                         pageBorderNote = `${vRes.note} (${(vRes.elapsedMs / 1000).toFixed(1)}s)`;
                         appendExtractLog(
-                            `Page ${pageNum}: ${vRes.changed ? '✂️ AI refined borders' : '✓ AI verified borders'} (${(vRes.elapsedMs / 1000).toFixed(1)}s)`,
-                            vRes.changed ? 'stitch' : 'success'
+                            `Page ${pageNum}: ${vRes.verified ? (vRes.changed ? '✂️ AI refined borders' : '✓ AI verified borders') : '⚠ AI unverified'} — ${vRes.note} (${(vRes.elapsedMs / 1000).toFixed(1)}s)`,
+                            vRes.verified ? (vRes.changed ? 'stitch' : 'success') : 'error'
                         );
                     } catch (aiPageErr) {
                         if (aiPageErr.name === 'AbortError' || state.cancelExtractionRequested) throw aiPageErr;
-                        appendExtractLog(`Page ${pageNum}: Local AI border check skipped (${aiPageErr.message}) — keeping local v3.0 borders.`, 'stitch');
+                        aiBatchSummary.pagesFailed++;
+                        pageBorderNote = `Local AI error: ${aiPageErr.message.slice(0, 70)} — kept v3.0 borders`;
+                        appendExtractLog(`Page ${pageNum}: ⚠ Local AI failed (${aiPageErr.message}) — keeping local v3.0 borders.`, 'error');
                     }
                     pageDone = true;
                 } else if (useGeminiVerifier && getApiKey()) {
@@ -2977,8 +3009,8 @@ async function startPdfExtraction() {
                     _reviewMeta: {
                         confidence: chapterConfidence,
                         needsReview: chapterConfidence < 0.75,
-                        aiBorderVerified: Boolean(b.aiBorderVerified || localAiBordersReady),
-                        borderNote: b.aiBorderNote || pageBorderNote,
+                        aiBorderVerified: Boolean(b.aiBorderVerified),
+                        borderNote: b.aiBorderNote || (aiBatchSummary.offlineReason ? `Local v3.0 (AI offline: ${aiBatchSummary.offlineReason.slice(0, 65)})` : pageBorderNote),
                         subjectPrior
                     }
                 };
@@ -2998,7 +3030,7 @@ async function startPdfExtraction() {
         // =============================================================
         let finalBatchToSave = batchQuestions;
         if (reviewBeforeSaving && batchQuestions.length > 0) {
-            const reviewRes = await openBatchReviewModal(batchQuestions, pageCanvasMap);
+            const reviewRes = await openBatchReviewModal(batchQuestions, pageCanvasMap, aiBatchSummary);
             if (reviewRes.action === 'CANCEL') {
                 cancelPdfExtraction();
                 return;
@@ -5572,18 +5604,15 @@ function mcInitFromLocalCandidates(canvas, localCandidates, defaultSubj, paperTi
     }
 
 
-    // Populate Bulk Subject & Chapter selectors
-    const bulkSubj = document.getElementById('mcBulkSubjectSel');
-    if (bulkSubj) bulkSubj.value = mcState.defaultSubj;
-    mcPopulateBulkChapters(mcState.defaultSubj, mcState.defaultChap);
+    // Update themed Bulk Subject & Chapter dropdown labels
+    mcSyncBulkDropdownLabels();
 }
 
-function mcPopulateBulkChapters(subj, selectedChap = '') {
-    const chapSel = document.getElementById('mcBulkChapterSel');
-    if (!chapSel) return;
-    const list = JEE_CHAPTERS[subj] || JEE_CHAPTERS.Physics;
-    chapSel.innerHTML = list.map(c => `<option value="${c.replace(/"/g, '&quot;')}">${c}</option>`).join('');
-    chapSel.value = list.includes(selectedChap) ? selectedChap : list[0];
+function mcSyncBulkDropdownLabels() {
+    const subjLbl = document.getElementById('mcBulkSubjectLabel');
+    const chapLbl = document.getElementById('mcBulkChapterLabel');
+    if (subjLbl) subjLbl.textContent = mcState.defaultSubj;
+    if (chapLbl) chapLbl.textContent = mcState.defaultChap;
 }
 
 function mcGetAllRegions() {
@@ -5751,12 +5780,12 @@ function mcRenderOverlayAndSidebar() {
                 </div>
                 <div class="flex items-center gap-2">
                     ${canStitch ? `
-                    <label class="flex items-center gap-1 text-[10.5px] font-bold text-amber-400 cursor-pointer" title="Stitch this slice onto the bottom of the previous question">
-                        <input type="checkbox" ${m.stitchPrev ? 'checked' : ''} onchange="window.app.mcUpdateRegion('${reg.key}', 'stitchPrev', this.checked)" class="rounded">
-                        <span>Stitch ←</span>
+                    <label class="flex items-center gap-1.5 text-[10.5px] font-bold text-amber-400 cursor-pointer" title="Stitch this slice onto the bottom of the previous question">
+                        <input type="checkbox" ${m.stitchPrev ? 'checked' : ''} onchange="window.app.mcUpdateRegion('${reg.key}', 'stitchPrev', this.checked)" class="m3-switch m3-switch-sm m3-switch-warn">
+                        <span>Stitch</span>
                     </label>` : ''}
-                    <label class="flex items-center gap-1 text-[10.5px] font-bold text-rose-400 cursor-pointer">
-                        <input type="checkbox" ${m.excluded ? 'checked' : ''} onchange="window.app.mcUpdateRegion('${reg.key}', 'excluded', this.checked)" class="rounded">
+                    <label class="flex items-center gap-1.5 text-[10.5px] font-bold text-rose-400 cursor-pointer">
+                        <input type="checkbox" ${m.excluded ? 'checked' : ''} onchange="window.app.mcUpdateRegion('${reg.key}', 'excluded', this.checked)" class="m3-switch m3-switch-sm m3-switch-danger">
                         <span>Skip</span>
                     </label>
                 </div>
@@ -5764,14 +5793,14 @@ function mcRenderOverlayAndSidebar() {
 
             ${!m.excluded && !m.stitchPrev ? `
             <div class="grid grid-cols-2 gap-1.5">
-                <select onchange="window.app.mcUpdateRegion('${reg.key}', 'subject', this.value)" class="h-7.5 m3-input m3-surface-low px-2 text-[10.5px] font-bold">
-                    <option value="Physics" ${m.subject === 'Physics' ? 'selected' : ''}>Physics</option>
-                    <option value="Chemistry" ${m.subject === 'Chemistry' ? 'selected' : ''}>Chemistry</option>
-                    <option value="Mathematics" ${m.subject === 'Mathematics' ? 'selected' : ''}>Mathematics</option>
-                </select>
-                <select onchange="window.app.mcUpdateRegion('${reg.key}', 'chapter', this.value)" class="h-7.5 m3-input m3-surface-low px-2 text-[10.5px] font-bold">
-                    ${chaps.map(c => `<option value="${c.replace(/"/g, '&quot;')}" ${m.chapter === c ? 'selected' : ''}>${c}</option>`).join('')}
-                </select>
+                <button type="button" onclick="window.app.openMcRegionSubjMenu('${reg.key}', this)" class="h-8 m3-dropdown-field text-[10.5px] !px-2.5">
+                    <span class="truncate">${m.subject === 'Mathematics' ? 'Maths' : m.subject}</span>
+                    <i class="ph-bold ph-caret-down text-[9px] m3-text-muted shrink-0"></i>
+                </button>
+                <button type="button" onclick="window.app.openMcRegionChapMenu('${reg.key}', this)" class="h-8 m3-dropdown-field text-[10.5px] !px-2.5">
+                    <span class="truncate">${m.chapter}</span>
+                    <i class="ph-bold ph-caret-down text-[9px] m3-text-muted shrink-0"></i>
+                </button>
             </div>` : ''}
         </div>
         `;
@@ -5817,9 +5846,11 @@ const brState = {
     resolver: null,
     questions: [],
     pageCanvasMap: new Map(),
+    aiSummary: null,
     filter: 'ALL',
     currentIdx: 0,
-    isReClassifying: false
+    isReClassifying: false,
+    isReCheckingBorders: false
 };
 
 function brGetVisibleIndices() {
@@ -5832,7 +5863,7 @@ function brGetVisibleIndices() {
     return out;
 }
 
-function openBatchReviewModal(batchQuestions, pageCanvasMap) {
+function openBatchReviewModal(batchQuestions, pageCanvasMap, aiSummary = null) {
     return new Promise((resolve) => {
         brState.resolver = resolve;
         brState.questions = batchQuestions.map(q => ({
@@ -5842,9 +5873,28 @@ function openBatchReviewModal(batchQuestions, pageCanvasMap) {
             _origSourceSlices: (q._sourceSlices || []).map(s => ({ ...s }))
         }));
         brState.pageCanvasMap = pageCanvasMap || new Map();
+        brState.aiSummary = aiSummary;
         brState.filter = 'ALL';
         brState.currentIdx = 0;
         brState.isReClassifying = false;
+        brState.isReCheckingBorders = false;
+
+        const subBanner = document.getElementById('brSubBanner');
+        if (subBanner && aiSummary) {
+            if (aiSummary.connected && aiSummary.pagesChecked > 0) {
+                subBanner.className = 'text-[11px] font-bold text-emerald-400 truncate';
+                subBanner.textContent = `Local AI (${aiSummary.backend}: ${aiSummary.modelName}): verified ${aiSummary.pagesChecked} pages (${aiSummary.pagesRefined} refined • ${(aiSummary.totalMs / 1000).toFixed(1)}s)`;
+            } else if (aiSummary.requested && aiSummary.offlineReason) {
+                subBanner.className = 'text-[11px] font-bold text-rose-400 truncate';
+                subBanner.textContent = `⚠ Local AI was OFFLINE — used Local v3.0 borders only (${aiSummary.offlineReason.slice(0, 75)})`;
+            } else if (aiSummary.connected && aiSummary.pagesChecked === 0) {
+                subBanner.className = 'text-[11px] font-bold text-amber-400 truncate';
+                subBanner.textContent = `⚠ Local AI connected (${aiSummary.modelName}) but failed to verify ${aiSummary.pagesFailed} pages — kept Local v3.0 borders`;
+            } else {
+                subBanner.className = 'text-[11px] m3-text-muted truncate';
+                subBanner.textContent = 'Extracted with Local v3.0 geometry & chapters. Fine-tune any border or chapter before saving.';
+            }
+        }
 
         brRenderCurrent();
         animateModalOpen('batchReviewModal');
@@ -5933,12 +5983,10 @@ function brRenderCurrent() {
 
     document.getElementById('brSkipChk').checked = Boolean(q._skipInReview);
     document.getElementById('brQNumInput').value = q.questionNumber;
-    document.getElementById('brSubjectSel').value = q.subject;
-
-    const chapSel = document.getElementById('brChapterSel');
-    const chaps = JEE_CHAPTERS[q.subject] || JEE_CHAPTERS.Physics;
-    chapSel.innerHTML = chaps.map(c => `<option value="${c.replace(/"/g, '&quot;')}">${c}</option>`).join('');
-    chapSel.value = chaps.includes(q.chapter) ? q.chapter : chaps[0];
+    const brSubjLbl = document.getElementById('brSubjectLabel');
+    const brChapLbl = document.getElementById('brChapterLabel');
+    if (brSubjLbl) brSubjLbl.textContent = q.subject;
+    if (brChapLbl) brChapLbl.textContent = q.chapter;
 
     document.getElementById('brBorderNoteText').textContent = meta.borderNote || 'Local v3.0 geometry & stitch engine';
     document.getElementById('brChapterNoteText').textContent = `Local 78-chapter classifier (${confPct}% confidence). Manual chapter edits automatically train local memory.`;
@@ -6082,19 +6130,154 @@ window.app = {
         ys.splice(bestIdx + 1, 0, mid);
         mcRenderOverlayAndSidebar();
     },
-    mcOnBulkSubjectChange() {
-        const subj = document.getElementById('mcBulkSubjectSel')?.value || 'Mathematics';
-        mcState.defaultSubj = subj;
-        const firstChap = (JEE_CHAPTERS[subj] || JEE_CHAPTERS.Physics)[0];
-        mcState.defaultChap = firstChap;
-        mcPopulateBulkChapters(subj, firstChap);
-        this.mcApplyBulkChapterToAll();
+    openPdfDefaultSubjectMenu(anchorEl) {
+        const opts = [
+            { value: 'AUTO', label: 'Auto-Detect Subject' },
+            { value: 'Mathematics', label: 'Mathematics' },
+            { value: 'Physics', label: 'Physics' },
+            { value: 'Chemistry', label: 'Chemistry' }
+        ];
+        openCustomDropdown(anchorEl, opts, state.pdfDefaultSubject || 'AUTO', (val, lbl) => {
+            state.pdfDefaultSubject = val;
+            const el = document.getElementById('pdfDefaultSubjectLabel');
+            if (el) el.textContent = lbl;
+        });
+    },
+    async refreshLocalAiBorderStatus(notify = false) {
+        const pill = document.getElementById('localAiBorderStatusPill');
+        const dot = document.getElementById('localAiBorderStatusDot');
+        const txt = document.getElementById('localAiBorderStatusText');
+        const aiBorders = window.JEELocalAIBorders;
+        if (!pill || !dot || !txt || !aiBorders) return;
+
+        pill.className = 'm3-ai-status-pill is-checking';
+        dot.className = 'w-2 h-2 rounded-full bg-amber-400 animate-pulse';
+        txt.textContent = 'Checking Termux AI server...';
+
+        const res = await aiBorders.testConnection();
+        if (res.ok) {
+            pill.className = 'm3-ai-status-pill is-online';
+            dot.className = 'w-2 h-2 rounded-full bg-emerald-400';
+            txt.textContent = `Connected: ${res.kind === 'ollama' ? 'Ollama' : 'llama-server'} (${res.modelName})`;
+            if (notify) toast(`Connected to Local AI at ${res.url} (${res.modelName}) ✓`, 'success');
+        } else {
+            pill.className = 'm3-ai-status-pill is-offline';
+            dot.className = 'w-2 h-2 rounded-full bg-rose-400';
+            txt.textContent = 'Offline — Start llama-server in Termux';
+            if (notify) toast(res.error || 'Local AI server offline', 'warn');
+        }
+    },
+    async testLocalAiServerFromSettings() {
+        const aiBorders = window.JEELocalAIBorders;
+        const inp = document.getElementById('localAiServerUrlInput');
+        const info = document.getElementById('settingsLocalAiStatusText');
+        if (!aiBorders) return;
+        if (inp) aiBorders.setServerUrl(inp.value.trim());
+        if (info) info.textContent = 'Testing connection...';
+        const res = await aiBorders.testConnection();
+        if (res.ok) {
+            if (info) info.textContent = `✓ Connected to ${res.kind} (${res.modelName}) at ${res.url}`;
+            toast(`Local AI Connected (${res.modelName}) ✓`, 'success');
+        } else {
+            if (info) info.textContent = `⚠ Offline: ${res.error}`;
+            toast(res.error || 'Could not reach Local AI server', 'warn');
+        }
+    },
+    openMcBulkSubjectMenu(anchorEl) {
+        const opts = [
+            { value: 'Physics', label: 'Physics' },
+            { value: 'Chemistry', label: 'Chemistry' },
+            { value: 'Mathematics', label: 'Mathematics' }
+        ];
+        openCustomDropdown(anchorEl, opts, mcState.defaultSubj, (subj) => {
+            mcState.defaultSubj = subj;
+            mcState.defaultChap = (JEE_CHAPTERS[subj] || JEE_CHAPTERS.Physics)[0];
+            mcSyncBulkDropdownLabels();
+            this.mcApplyBulkChapterToAll();
+        });
+    },
+    openMcBulkChapterMenu(anchorEl) {
+        const list = JEE_CHAPTERS[mcState.defaultSubj] || JEE_CHAPTERS.Physics;
+        const opts = list.map(c => ({ value: c, label: c }));
+        openCustomDropdown(anchorEl, opts, mcState.defaultChap, (chap) => {
+            mcState.defaultChap = chap;
+            mcSyncBulkDropdownLabels();
+            this.mcApplyBulkChapterToAll();
+        });
+    },
+    openMcRegionSubjMenu(key, anchorEl) {
+        const m = mcState.regionMeta[key];
+        if (!m) return;
+        const opts = [
+            { value: 'Physics', label: 'Physics' },
+            { value: 'Chemistry', label: 'Chemistry' },
+            { value: 'Mathematics', label: 'Mathematics' }
+        ];
+        openCustomDropdown(anchorEl, opts, m.subject, (val) => this.mcUpdateRegion(key, 'subject', val));
+    },
+    openMcRegionChapMenu(key, anchorEl) {
+        const m = mcState.regionMeta[key];
+        if (!m) return;
+        const list = JEE_CHAPTERS[m.subject] || JEE_CHAPTERS.Physics;
+        const opts = list.map(c => ({ value: c, label: c }));
+        openCustomDropdown(anchorEl, opts, m.chapter, (val) => this.mcUpdateRegion(key, 'chapter', val));
+    },
+    openBrSubjectMenu(anchorEl) {
+        const q = brState.questions[brState.currentIdx];
+        if (!q) return;
+        const opts = [
+            { value: 'Physics', label: 'Physics' },
+            { value: 'Chemistry', label: 'Chemistry' },
+            { value: 'Mathematics', label: 'Mathematics' }
+        ];
+        openCustomDropdown(anchorEl, opts, q.subject, (val) => this.brUpdateField('subject', val));
+    },
+    openBrChapterMenu(anchorEl) {
+        const q = brState.questions[brState.currentIdx];
+        if (!q) return;
+        const list = JEE_CHAPTERS[q.subject] || JEE_CHAPTERS.Physics;
+        const opts = list.map(c => ({ value: c, label: c }));
+        openCustomDropdown(anchorEl, opts, q.chapter, (val) => this.brUpdateField('chapter', val));
+    },
+    async brReCheckCurrentPageBordersAI() {
+        if (brState.isReCheckingBorders) return;
+        const q = brState.questions[brState.currentIdx];
+        const aiBorders = window.JEELocalAIBorders;
+        if (!q || !aiBorders) return toast('local-ai-borders.js not loaded', 'warn');
+
+        const srcCanvas = brState.pageCanvasMap.get(q.page);
+        if (!srcCanvas) return toast('Original page canvas unavailable for this question', 'warn');
+
+        const btn = document.getElementById('brReCheckAiBorderBtn');
+        brState.isReCheckingBorders = true;
+        if (btn) { btn.disabled = true; btn.innerHTML = '<i class="ph-bold ph-spinner animate-spin"></i><span>Testing Local AI...</span>'; }
+
+        try {
+            const pageBlocks = brState.questions
+                .filter(item => item.page === q.page && Array.isArray(item._sourceSlices) && item._sourceSlices[0])
+                .map(item => ({
+                    ...item._sourceSlices[0],
+                    questionNumber: item.questionNumber
+                }));
+            const res = await aiBorders.verifyPageBorders(srcCanvas, q.page, pageBlocks, { retryAfterFatal: true });
+            if (q._reviewMeta) {
+                q._reviewMeta.aiBorderVerified = Boolean(res.verified);
+                q._reviewMeta.borderNote = `${res.note} (${(res.elapsedMs / 1000).toFixed(1)}s • ${res.modelName || res.backend})`;
+            }
+            brRenderCurrent();
+            toast(`Page ${q.page} Local AI: ${res.note} (${(res.elapsedMs / 1000).toFixed(1)}s)`, res.verified ? 'success' : 'warn');
+        } catch (err) {
+            if (q._reviewMeta) q._reviewMeta.borderNote = `Local AI offline/error: ${err.message}`;
+            brRenderCurrent();
+            toast(`Local AI check failed: ${err.message}`, 'warn');
+        } finally {
+            brState.isReCheckingBorders = false;
+            if (btn) { btn.disabled = false; btn.innerHTML = '<i class="ph-bold ph-bounding-box"></i><span>Test Local AI on This Page</span>'; }
+        }
     },
     mcApplyBulkChapterToAll() {
-        const subj = document.getElementById('mcBulkSubjectSel')?.value || mcState.defaultSubj;
-        const chap = document.getElementById('mcBulkChapterSel')?.value || mcState.defaultChap;
-        mcState.defaultSubj = subj;
-        mcState.defaultChap = chap;
+        const subj = mcState.defaultSubj;
+        const chap = mcState.defaultChap;
         Object.values(mcState.regionMeta).forEach(m => {
             m.subject = subj;
             m.chapter = chap;
@@ -6312,6 +6495,8 @@ window.app = {
         const pads = getVerticalPads();
         document.getElementById('padTopInput').value = pads.padTop;
         document.getElementById('padBottomInput').value = pads.padBottom;
+        const localUrlInp = document.getElementById('localAiServerUrlInput');
+        if (localUrlInp) localUrlInp.value = localStorage.getItem('jee_local_ai_borders_url_v3') || '';
         document.getElementById('githubTokenInput').value = getGithubToken();
         document.getElementById('cloudAutoSyncCheckbox').checked = isCloudAutoSyncEnabled();
         const autoSolveChk = document.getElementById('autoSolveHintsCheckbox');
@@ -7093,6 +7278,8 @@ window.app = {
         localStorage.setItem('jee_gemini_model', model);
         localStorage.setItem('jee_pad_top', String(padTop));
         localStorage.setItem('jee_pad_bottom', String(padBottom));
+        const localUrlVal = document.getElementById('localAiServerUrlInput')?.value.trim() || '';
+        if (window.JEELocalAIBorders?.setServerUrl) window.JEELocalAIBorders.setServerUrl(localUrlVal);
         localStorage.setItem('jee_github_pat', ghToken);
         localStorage.setItem('jee_cloud_autosync', String(autoSync));
         localStorage.setItem('jee_auto_solve_hints', String(autoSolve));
