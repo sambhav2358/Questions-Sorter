@@ -709,15 +709,38 @@ async function resolveActiveBackendEndpointForModel(preferredModelName, apiKey) 
         // 1. Verify latest rate limit counters from GitHub Gist before sending
         await fetchRateLimitFromGist();
 
+        const isAnyProgressDialogOpen = () => {
+            const solverOpen = !document.getElementById('solverModal')?.classList.contains('hidden');
+            const uploadOpen = !document.getElementById('uploadModal')?.classList.contains('hidden');
+            return solverOpen || uploadOpen;
+        };
+
+        const sleepOneSecAbortable = () => new Promise((resolve, reject) => {
+            const t = setTimeout(resolve, 1000);
+            if (abortSignal) {
+                if (abortSignal.aborted) {
+                    clearTimeout(t);
+                    reject(new DOMException('Aborted', 'AbortError'));
+                    return;
+                }
+                abortSignal.addEventListener('abort', () => {
+                    clearTimeout(t);
+                    reject(new DOMException('Aborted', 'AbortError'));
+                }, { once: true });
+            }
+        });
+
         // 2. Enforce 19 requests/day (IST)
         if (state.rateLimit.dailyCount >= MAX_DAILY_REQ_IST) {
             const msg = `Daily limit reached (${state.rateLimit.dailyCount}/${MAX_DAILY_REQ_IST} requests for ${state.rateLimit.dateIST} IST). Paused until midnight IST.`;
             if (onLog) onLog(`⛔ ${msg}`, 'error');
-            toast(msg, 'warn');
+            if (!isAnyProgressDialogOpen()) {
+                toast(msg, 'warn');
+            }
             throw new Error(msg);
         }
 
-        // 3. Enforce 4 requests/minute (Wait until the 60s window clears)
+        // 3. Enforce 4 requests/minute (Wait until the 60s window clears — live 1s dynamic log countdown!)
         const nowMs = Date.now();
         state.rateLimit.recentTimestamps = state.rateLimit.recentTimestamps.filter(ts => nowMs - ts < 60000);
 
@@ -726,17 +749,39 @@ async function resolveActiveBackendEndpointForModel(preferredModelName, apiKey) 
             const waitMs = Math.max(1000, 60500 - (nowMs - oldestInWindow));
             const waitSec = Math.ceil(waitMs / 1000);
             const waitMsg = `Rate limit guard (4 req/min): waiting ${waitSec}s for minute window to clear...`;
-            if (onLog) onLog(`⏳ ${waitMsg}`, 'stitch');
-            toast(waitMsg, 'info');
+            const logLineEl = onLog ? onLog(`⏳ ${waitMsg}`, 'stitch') : null;
+
+            // Suppress toast whenever the Solver or Upload dialog is currently open
+            if (!isAnyProgressDialogOpen()) {
+                toast(waitMsg, 'info');
+            }
 
             for (let rem = waitSec; rem > 0; rem--) {
                 if (abortSignal?.aborted) throw new DOMException('Aborted', 'AbortError');
+                if (logLineEl) {
+                    logLineEl.textContent = `• ⏳ Rate limit guard (4 req/min): waiting ${rem}s for minute window to clear...`;
+                }
                 const subEl = document.getElementById('solverModalSubText');
                 if (subEl && state.isRunningBackgroundSolver) {
                     subEl.textContent = `Cooling down rate limit (4 req/min): resuming in ${rem}s...`;
                 }
-                await new Promise(r => setTimeout(r, 1000));
+                const minTxt = document.getElementById('minSolverStatusText');
+                if (minTxt && state.isRunningBackgroundSolver) {
+                    minTxt.textContent = `Cooling down rate limit: resuming in ${rem}s...`;
+                }
+                const extSubEl = document.getElementById('extractSubText');
+                if (extSubEl && state.isExtracting) {
+                    extSubEl.textContent = `Cooling down rate limit (4 req/min): resuming in ${rem}s...`;
+                }
+                updateQuotaBadgesEverywhere();
+                await sleepOneSecAbortable();
             }
+
+            if (logLineEl) {
+                logLineEl.className = 'font-bold text-emerald-500 dark:text-emerald-400';
+                logLineEl.textContent = '• ✓ Rate limit cooldown complete — resuming...';
+            }
+            updateQuotaBadgesEverywhere();
             continue;
         }
 
@@ -785,18 +830,19 @@ async function resolveActiveBackendEndpointForModel(preferredModelName, apiKey) 
             if (isRetryable && attempt < maxRetries) {
                 attempt++;
                 const backoffSec = Math.min(12, attempt * 3);
-                if (onLog) {
-                    onLog(`⚠️ Gemini busy/failed (${res.status}) — Quota NOT charged. Retrying (${attempt}/${maxRetries}) in ${backoffSec}s...`, 'stitch');
-                }
-                await new Promise((resolve, reject) => {
-                    const t = setTimeout(resolve, backoffSec * 1000);
-                    if (abortSignal) {
-                        abortSignal.addEventListener('abort', () => {
-                            clearTimeout(t);
-                            reject(new DOMException('Aborted', 'AbortError'));
-                        }, { once: true });
+                const retryLogEl = onLog
+                    ? onLog(`⚠️ Gemini busy/failed (${res.status}) — Quota NOT charged. Retrying (${attempt}/${maxRetries}) in ${backoffSec}s...`, 'stitch')
+                    : null;
+                for (let rem = backoffSec; rem > 0; rem--) {
+                    if (abortSignal?.aborted) throw new DOMException('Aborted', 'AbortError');
+                    if (retryLogEl) {
+                        retryLogEl.textContent = `• ⚠️ Gemini busy/failed (${res.status}) — Quota NOT charged. Retrying (${attempt}/${maxRetries}) in ${rem}s...`;
                     }
-                });
+                    await sleepOneSecAbortable();
+                }
+                if (retryLogEl) {
+                    retryLogEl.textContent = `• ↻ Retrying request (${attempt}/${maxRetries}) now...`;
+                }
                 continue;
             }
 
@@ -1424,7 +1470,7 @@ function crop2DSliceFromPage(sourceCanvas, xminNorm, xmaxNorm, yminNorm, ymaxNor
 // ===================================================================
 function appendSolverLog(msg, tone = 'info') {
     const box = document.getElementById('solverLiveLog');
-    if (!box) return;
+    if (!box) return null;
     const d = document.createElement('div');
     if (tone === 'success') d.className = 'font-bold text-emerald-500 dark:text-emerald-400';
     else if (tone === 'stitch') d.className = 'font-extrabold text-amber-500 dark:text-amber-300';
@@ -1433,6 +1479,7 @@ function appendSolverLog(msg, tone = 'info') {
     d.textContent = `• ${msg}`;
     box.appendChild(d);
     box.scrollTop = box.scrollHeight;
+    return d;
 }
 
 function updateSolverProgressEverywhere(pct, countBadgeText, subStatusText) {
@@ -2012,7 +2059,9 @@ async function onUnifiedFileSelected(e) {
             document.getElementById('startExtractBtn').disabled = false;
             document.getElementById('startExtractBtnLbl').textContent = 'Extract Questions';
             toast(`Loaded PDF (${state.pdfDoc.numPages} pages)`, 'success');
-            window.app.refreshLocalAiBorderStatus(false);
+            if (document.getElementById('pdfUseLocalAiBordersChk')?.checked) {
+                window.app.refreshLocalAiBorderStatus(false);
+            }
         } catch (_) {
             toast('Could not read PDF file', 'warn');
         }
@@ -2515,6 +2564,7 @@ async function stitchCanvasesVertically(topDataUrl, botDataUrl) {
 
 function appendExtractLog(msg, tone = 'info') {
     const box = document.getElementById('extractLiveLog');
+    if (!box) return null;
     const d = document.createElement('div');
     if (tone === 'success') d.className = 'font-bold text-emerald-500 dark:text-emerald-400';
     else if (tone === 'stitch') d.className = 'font-extrabold text-amber-500 dark:text-amber-300';
@@ -2523,6 +2573,7 @@ function appendExtractLog(msg, tone = 'info') {
     d.textContent = `• ${msg}`;
     box.appendChild(d);
     box.scrollTop = box.scrollHeight;
+    return d;
 }
 
 function setUploadButtonsLock(isUploading) {
@@ -5848,10 +5899,40 @@ const brState = {
     pageCanvasMap: new Map(),
     aiSummary: null,
     filter: 'ALL',
+    editMode: 'BOUNDS', // 'BOUNDS' | 'SPLIT' | 'TRIM'
     currentIdx: 0,
     isReClassifying: false,
     isReCheckingBorders: false
 };
+
+function initBrSplitLineDragging() {
+    const line = document.getElementById('brSplitDividerLine');
+    const stage = document.getElementById('brImgStage');
+    const slider = document.getElementById('brSplitCutSlider');
+    if (!line || !stage || !slider || line._dragBound) return;
+    line._dragBound = true;
+
+    line.onpointerdown = (e) => {
+        e.preventDefault();
+        line.setPointerCapture(e.pointerId);
+        const rect = stage.getBoundingClientRect();
+        const updateFromY = (clientY) => {
+            if (!rect.height) return;
+            const pct = Math.round(Math.max(10, Math.min(90, ((clientY - rect.top) / rect.height) * 100)));
+            slider.value = pct;
+            window.app.brUpdateSplitTrimPreview();
+        };
+        const onMove = (ev) => updateFromY(ev.clientY);
+        const onUp = () => {
+            window.removeEventListener('pointermove', onMove);
+            window.removeEventListener('pointerup', onUp);
+            window.removeEventListener('pointercancel', onUp);
+        };
+        window.addEventListener('pointermove', onMove);
+        window.addEventListener('pointerup', onUp);
+        window.addEventListener('pointercancel', onUp);
+    };
+}
 
 function brGetVisibleIndices() {
     const out = [];
@@ -5875,9 +5956,11 @@ function openBatchReviewModal(batchQuestions, pageCanvasMap, aiSummary = null) {
         brState.pageCanvasMap = pageCanvasMap || new Map();
         brState.aiSummary = aiSummary;
         brState.filter = 'ALL';
+        brState.editMode = 'BOUNDS';
         brState.currentIdx = 0;
         brState.isReClassifying = false;
         brState.isReCheckingBorders = false;
+        initBrSplitLineDragging();
 
         const subBanner = document.getElementById('brSubBanner');
         if (subBanner && aiSummary) {
@@ -5991,6 +6074,33 @@ function brRenderCurrent() {
     document.getElementById('brBorderNoteText').textContent = meta.borderNote || 'Local v3.0 geometry & stitch engine';
     document.getElementById('brChapterNoteText').textContent = `Local 78-chapter classifier (${confPct}% confidence). Manual chapter edits automatically train local memory.`;
 
+    // Sync Edit Mode toolbars & overlays (Borders / Split / Trim)
+    const mode = brState.editMode || 'BOUNDS';
+    document.getElementById('brModeBoundsBtn')?.classList.toggle('active', mode === 'BOUNDS');
+    document.getElementById('brModeSplitBtn')?.classList.toggle('active', mode === 'SPLIT');
+    document.getElementById('brModeTrimBtn')?.classList.toggle('active', mode === 'TRIM');
+
+    const boundsBar = document.getElementById('brBoundsToolbar');
+    const splitBar = document.getElementById('brSplitToolbar');
+    const trimBar = document.getElementById('brTrimToolbar');
+    if (boundsBar) { boundsBar.classList.toggle('hidden', mode !== 'BOUNDS'); boundsBar.classList.toggle('flex', mode === 'BOUNDS'); }
+    if (splitBar) { splitBar.classList.toggle('hidden', mode !== 'SPLIT'); splitBar.classList.toggle('flex', mode === 'SPLIT'); }
+    if (trimBar) { trimBar.classList.toggle('hidden', mode !== 'TRIM'); trimBar.classList.toggle('flex', mode === 'TRIM'); }
+
+    document.getElementById('brSplitDividerLine')?.classList.toggle('hidden', mode !== 'SPLIT');
+    document.getElementById('brTrimTopMask')?.classList.toggle('hidden', mode !== 'TRIM');
+    document.getElementById('brTrimBotMask')?.classList.toggle('hidden', mode !== 'TRIM');
+
+    // Sync Merge Prev / Merge Next availability
+    const mergePrevBtn = document.getElementById('brMergePrevBtn');
+    const mergeNextBtn = document.getElementById('brMergeNextBtn');
+    if (mergePrevBtn) mergePrevBtn.disabled = brState.currentIdx <= 0;
+    if (mergeNextBtn) mergeNextBtn.disabled = brState.currentIdx >= brState.questions.length - 1;
+
+    if (mode !== 'BOUNDS') {
+        window.app.brUpdateSplitTrimPreview();
+    }
+
     const palette = document.getElementById('brPaletteStrip');
     palette.innerHTML = visible.map((origIdx) => {
         const item = brState.questions[origIdx];
@@ -6010,8 +6120,54 @@ window.app = {
         brState.filter = mode;
         brRenderCurrent();
     },
+    onToggleLocalAiBorderChk(isChecked) {
+        const pill = document.getElementById('localAiBorderStatusPill');
+        const dot = document.getElementById('localAiBorderStatusDot');
+        const txt = document.getElementById('localAiBorderStatusText');
+        if (isChecked) {
+            this.refreshLocalAiBorderStatus(false);
+        } else if (pill && dot && txt) {
+            pill.className = 'm3-ai-status-pill';
+            dot.className = 'w-2 h-2 rounded-full bg-slate-400';
+            txt.textContent = 'Off (Using Local v3.0 Engine)';
+        }
+    },
+    brSetEditMode(mode) {
+        brState.editMode = mode || 'BOUNDS';
+        if (mode === 'SPLIT') {
+            const s = document.getElementById('brSplitCutSlider');
+            if (s) s.value = 50;
+        } else if (mode === 'TRIM') {
+            const t = document.getElementById('brTrimTopSlider');
+            const b = document.getElementById('brTrimBotSlider');
+            if (t) t.value = 0;
+            if (b) b.value = 100;
+        }
+        brRenderCurrent();
+    },
+    brUpdateSplitTrimPreview() {
+        if (brState.editMode === 'SPLIT') {
+            const v = Number(document.getElementById('brSplitCutSlider')?.value || 50);
+            const valEl = document.getElementById('brSplitCutVal');
+            const lineEl = document.getElementById('brSplitDividerLine');
+            if (valEl) valEl.textContent = `${v}%`;
+            if (lineEl) lineEl.style.top = `${v}%`;
+        } else if (brState.editMode === 'TRIM') {
+            const t = Number(document.getElementById('brTrimTopSlider')?.value || 0);
+            const b = Number(document.getElementById('brTrimBotSlider')?.value || 100);
+            const tVal = document.getElementById('brTrimTopVal');
+            const bVal = document.getElementById('brTrimBotVal');
+            const tMask = document.getElementById('brTrimTopMask');
+            const bMask = document.getElementById('brTrimBotMask');
+            if (tVal) tVal.textContent = `${t}%`;
+            if (bVal) bVal.textContent = `${b}%`;
+            if (tMask) tMask.style.height = `${t}%`;
+            if (bMask) bMask.style.height = `${100 - b}%`;
+        }
+    },
     brJumpTo(origIdx) {
         brState.currentIdx = origIdx;
+        brState.editMode = 'BOUNDS';
         brRenderCurrent();
     },
     brNavigate(dir) {
@@ -6020,6 +6176,7 @@ window.app = {
         const nextPos = pos + dir;
         if (nextPos >= 0 && nextPos < visible.length) {
             brState.currentIdx = visible[nextPos];
+            brState.editMode = 'BOUNDS';
             brRenderCurrent();
         }
     },
@@ -6043,16 +6200,230 @@ window.app = {
     },
     async brNudgeBorder(edge, deltaNorm) {
         const q = brState.questions[brState.currentIdx];
-        if (!q || !Array.isArray(q._sourceSlices) || q._sourceSlices.length === 0) return;
+        if (!q || !Array.isArray(q._sourceSlices) || q._sourceSlices.length === 0) {
+            return toast('Original PDF slice bounds unavailable — use Trim mode instead.', 'info');
+        }
         if (edge === 'top') {
             const firstSl = q._sourceSlices[0];
             firstSl.ymin = Math.max(0, Math.min(firstSl.ymax - 24, firstSl.ymin + deltaNorm));
-        } else {
+        } else if (edge === 'bottom') {
             const lastSl = q._sourceSlices[q._sourceSlices.length - 1];
             lastSl.ymax = Math.min(1000, Math.max(lastSl.ymin + 24, lastSl.ymax + deltaNorm));
+        } else if (edge === 'left') {
+            for (const sl of q._sourceSlices) {
+                sl.xmin = Math.max(0, Math.min(sl.xmax - 80, sl.xmin + deltaNorm));
+            }
+        } else if (edge === 'right') {
+            for (const sl of q._sourceSlices) {
+                sl.xmax = Math.min(1000, Math.max(sl.xmin + 80, sl.xmax + deltaNorm));
+            }
         }
         await brRecropQuestionFromSlices(q);
         brRenderCurrent();
+    },
+    async brConfirmSplitCurrent() {
+        const idx = brState.currentIdx;
+        const q = brState.questions[idx];
+        if (!q || !q.imageDataUrl) return;
+
+        const pct = Math.max(10, Math.min(90, Number(document.getElementById('brSplitCutSlider')?.value || 50)));
+        const ratio = pct / 100;
+
+        let topDataUrl, topAspect, botDataUrl, botAspect;
+        let topSlices = null, botSlices = null;
+
+        // If single PDF slice exists & page canvas is available, split directly in PDF coordinates (lossless & still nudgeable!)
+        const canSplitNative = Array.isArray(q._sourceSlices) && q._sourceSlices.length === 1 && brState.pageCanvasMap.has(q._sourceSlices[0].pageNum);
+        if (canSplitNative) {
+            const sl = q._sourceSlices[0];
+            const srcCanvas = brState.pageCanvasMap.get(sl.pageNum);
+            const cutNormY = Math.round(sl.ymin + (sl.ymax - sl.ymin) * ratio);
+            const topSl = { ...sl, ymax: Math.max(sl.ymin + 20, cutNormY) };
+            const botSl = { ...sl, ymin: Math.min(sl.ymax - 20, cutNormY) };
+
+            const topCrop = crop2DSliceFromPage(srcCanvas, topSl.xmin, topSl.xmax, topSl.ymin, topSl.ymax, topSl.padTop ?? 8, 4);
+            const botCrop = crop2DSliceFromPage(srcCanvas, botSl.xmin, botSl.xmax, botSl.ymin, botSl.ymax, 4, botSl.padBottom ?? 8);
+
+            topDataUrl = topCrop.dataUrl; topAspect = topCrop.aspectRatio;
+            botDataUrl = botCrop.dataUrl; botAspect = botCrop.aspectRatio;
+            topSlices = [topSl];
+            botSlices = [botSl];
+        } else {
+            // Direct image split (supports already-stitched multi-page cards too!)
+            const img = new Image();
+            await new Promise((res, rej) => { img.onload = res; img.onerror = rej; img.src = q.imageDataUrl; });
+            const cutY = Math.floor(img.height * ratio);
+
+            const c1Raw = document.createElement('canvas');
+            c1Raw.width = img.width; c1Raw.height = Math.max(20, cutY);
+            c1Raw.getContext('2d').drawImage(img, 0, 0, img.width, c1Raw.height, 0, 0, img.width, c1Raw.height);
+            const c1 = autoTrim2DWhitespace(c1Raw);
+
+            const c2Raw = document.createElement('canvas');
+            c2Raw.width = img.width; c2Raw.height = Math.max(20, img.height - cutY);
+            c2Raw.getContext('2d').drawImage(img, 0, cutY, img.width, c2Raw.height, 0, 0, img.width, c2Raw.height);
+            const c2 = autoTrim2DWhitespace(c2Raw);
+
+            topDataUrl = c1.toDataURL('image/jpeg', 0.89); topAspect = c1.height / (c1.width || 1);
+            botDataUrl = c2.toDataURL('image/jpeg', 0.89); botAspect = c2.height / (c2.width || 1);
+        }
+
+        const baseNum = String(q.questionNumber || '1').replace(/[ab]$/i, '');
+        q.questionNumber = `${baseNum}a`;
+        q.imageDataUrl = topDataUrl;
+        q.aspectRatio = topAspect;
+        q.isStitched = false;
+        if (topSlices) {
+            q._sourceSlices = topSlices;
+            q._origSourceSlices = topSlices.map(s => ({ ...s }));
+        } else {
+            q._sourceSlices = [];
+        }
+        if (q._reviewMeta) {
+            q._reviewMeta.borderNote = `Split manually into Q.${baseNum}a & Q.${baseNum}b`;
+        }
+
+        const newQ2 = {
+            ...q,
+            id: generateUniqueId(),
+            uid: generateQuestionUid(),
+            questionNumber: `${baseNum}b`,
+            imageDataUrl: botDataUrl,
+            aspectRatio: botAspect,
+            ocrText: '',
+            firstLineSnippet: '',
+            lastLineSnippet: '',
+            isStitched: false,
+            createdAt: (q.createdAt || Date.now()) + 1,
+            _skipInReview: false,
+            _origChapter: q.chapter,
+            _sourceSlices: botSlices ? botSlices : [],
+            _origSourceSlices: botSlices ? botSlices.map(s => ({ ...s })) : [],
+            _reviewMeta: {
+                ...(q._reviewMeta || {}),
+                borderNote: `Split manually from Q.${baseNum}`
+            }
+        };
+
+        brState.questions.splice(idx + 1, 0, newQ2);
+        brState.editMode = 'BOUNDS';
+        brRenderCurrent();
+        toast(`Split into Q.${baseNum}a & Q.${baseNum}b!`, 'success');
+
+        // Re-index OCR & local chapter for the newly split halves in background
+        const engine = window.JEELocalVisionEngine;
+        if (engine?.classifyQuestion) {
+            try {
+                const [t1, t2] = await Promise.all([
+                    recognizeImageTextWithTesseract(q.imageDataUrl),
+                    recognizeImageTextWithTesseract(newQ2.imageDataUrl)
+                ]);
+                if (t1) {
+                    q.ocrText = cleanQuestionTextOnly(t1);
+                    const r1 = engine.classifyQuestion(q.ocrText, {
+                        paperName: q.paperName || '',
+                        subjectOverride: q._subjectOverride || q.subject,
+                        documentPrior: q._reviewMeta?.subjectPrior || null
+                    });
+                    q.subject = r1.subject; q.chapter = r1.chapter;
+                    if (q._reviewMeta) { q._reviewMeta.confidence = r1.confidence; q._reviewMeta.needsReview = r1.confidence < 0.75; }
+                }
+                if (t2) {
+                    newQ2.ocrText = cleanQuestionTextOnly(t2);
+                    const r2 = engine.classifyQuestion(newQ2.ocrText, {
+                        paperName: newQ2.paperName || '',
+                        subjectOverride: newQ2._subjectOverride || newQ2.subject,
+                        documentPrior: newQ2._reviewMeta?.subjectPrior || null
+                    });
+                    newQ2.subject = r2.subject; newQ2.chapter = r2.chapter;
+                    if (newQ2._reviewMeta) { newQ2._reviewMeta.confidence = r2.confidence; newQ2._reviewMeta.needsReview = r2.confidence < 0.75; }
+                }
+                brRenderCurrent();
+            } catch (_) {}
+        }
+    },
+    async brConfirmTrimCurrent() {
+        const q = brState.questions[brState.currentIdx];
+        if (!q || !q.imageDataUrl) return;
+
+        const tFrac = Math.max(0, Math.min(0.45, Number(document.getElementById('brTrimTopSlider')?.value || 0) / 100));
+        const bFrac = Math.max(0.55, Math.min(1.0, Number(document.getElementById('brTrimBotSlider')?.value || 100) / 100));
+        if (tFrac <= 0.001 && bFrac >= 0.999) {
+            brState.editMode = 'BOUNDS';
+            brRenderCurrent();
+            return;
+        }
+
+        const canTrimNative = Array.isArray(q._sourceSlices) && q._sourceSlices.length === 1 && brState.pageCanvasMap.has(q._sourceSlices[0].pageNum);
+        if (canTrimNative) {
+            const sl = q._sourceSlices[0];
+            const hSpan = sl.ymax - sl.ymin;
+            const newYMin = Math.round(sl.ymin + hSpan * tFrac);
+            const newYMax = Math.round(sl.ymin + hSpan * bFrac);
+            sl.ymin = Math.max(0, Math.min(newYMax - 20, newYMin));
+            sl.ymax = Math.min(1000, Math.max(sl.ymin + 20, newYMax));
+            await brRecropQuestionFromSlices(q);
+        } else {
+            const img = new Image();
+            await new Promise((res, rej) => { img.onload = res; img.onerror = rej; img.src = q.imageDataUrl; });
+            const sy = Math.floor(img.height * tFrac);
+            const sh = Math.max(30, Math.floor(img.height * (bFrac - tFrac)));
+            const c = document.createElement('canvas');
+            c.width = img.width; c.height = sh;
+            c.getContext('2d').drawImage(img, 0, sy, img.width, sh, 0, 0, img.width, sh);
+            q.imageDataUrl = c.toDataURL('image/jpeg', 0.89);
+            q.aspectRatio = c.height / (c.width || 1);
+            q._sourceSlices = [];
+        }
+
+        if (q._reviewMeta) q._reviewMeta.borderNote = 'Trimmed manually in Review Studio';
+        brState.editMode = 'BOUNDS';
+        brRenderCurrent();
+        toast('Applied vertical trim!', 'success');
+    },
+    async brMergeWithNeighbor(dir) {
+        const currIdx = brState.currentIdx;
+        const targetIdx = currIdx + dir;
+        if (targetIdx < 0 || targetIdx >= brState.questions.length) return;
+
+        const topIdx = dir < 0 ? targetIdx : currIdx;
+        const botIdx = dir < 0 ? currIdx : targetIdx;
+        const topQ = brState.questions[topIdx];
+        const botQ = brState.questions[botIdx];
+        if (!topQ || !botQ) return;
+
+        const stitched = await stitchCanvasesVertically(topQ.imageDataUrl, botQ.imageDataUrl);
+        topQ.imageDataUrl = stitched.dataUrl;
+        topQ.aspectRatio = stitched.aspectRatio;
+        topQ.isStitched = true;
+        topQ.ocrText = cleanQuestionTextOnly(`${topQ.ocrText || ''} ${botQ.ocrText || ''}`);
+        topQ._sourceSlices = [...(topQ._sourceSlices || []), ...(botQ._sourceSlices || [])];
+        topQ._origSourceSlices = [...(topQ._origSourceSlices || []), ...(botQ._origSourceSlices || [])];
+        if (topQ._reviewMeta) {
+            topQ._reviewMeta.borderNote = `Merged Q.${topQ.questionNumber} + Q.${botQ.questionNumber} manually`;
+        }
+
+        // Re-classify merged question locally
+        const engine = window.JEELocalVisionEngine;
+        if (engine?.classifyQuestion && topQ.ocrText) {
+            const r = engine.classifyQuestion(topQ.ocrText, {
+                paperName: topQ.paperName || '',
+                subjectOverride: topQ._subjectOverride || topQ.subject,
+                documentPrior: topQ._reviewMeta?.subjectPrior || null
+            });
+            topQ.subject = r.subject;
+            topQ.chapter = r.chapter;
+            if (topQ._reviewMeta) {
+                topQ._reviewMeta.confidence = r.confidence;
+                topQ._reviewMeta.needsReview = r.confidence < 0.75;
+            }
+        }
+
+        brState.questions.splice(botIdx, 1);
+        brState.currentIdx = Math.min(topIdx, brState.questions.length - 1);
+        brState.editMode = 'BOUNDS';
+        brRenderCurrent();
+        toast(`Merged into Q.${topQ.questionNumber}!`, 'success');
     },
     async brResetCurrentBorder() {
         const q = brState.questions[brState.currentIdx];
