@@ -13,9 +13,9 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
     <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
-    <link rel="stylesheet" href="./styles.css?v=3.0">
+    <link rel="stylesheet" href="./styles.css?v=3.1">
     <script src="./local-vision-engine.js?v=3.0"></script>
-    <script src="./local-ai-borders.js?v=3.0"></script>
+    <script src="./local-ai-borders.js?v=3.1"></script>
 </head>
 <body class="h-[100dvh] w-screen overflow-hidden flex flex-col select-none m3-surface">
 
@@ -222,11 +222,11 @@
                 </div>
                 <label class="p-3.5 m3-group-item flex items-center justify-between cursor-pointer">
                     <span class="text-xs font-bold">Unsolved Questions Only</span>
-                    <input id="mockUnsolvedOnlyChk" type="checkbox" checked class="w-4 h-4 rounded">
+                    <input id="mockUnsolvedOnlyChk" type="checkbox" checked class="m3-switch">
                 </label>
                 <label class="p-3.5 m3-group-item flex items-center justify-between cursor-pointer">
                     <span class="text-xs font-bold">Enable Blind Mode During Test</span>
-                    <input id="mockBlindModeChk" type="checkbox" checked class="w-4 h-4 rounded">
+                    <input id="mockBlindModeChk" type="checkbox" checked class="m3-switch">
                 </label>
             </div>
 
@@ -279,7 +279,7 @@
             </div>
 
             <label class="p-3.5 rounded-2xl m3-surface-high flex items-center gap-3 cursor-pointer select-none">
-                <input type="checkbox" id="clearVaultDoubleCheck" onchange="document.getElementById('finalClearVaultBtn').disabled = !this.checked" class="w-4 h-4 rounded accent-rose-500">
+                <input type="checkbox" id="clearVaultDoubleCheck" onchange="document.getElementById('finalClearVaultBtn').disabled = !this.checked" class="m3-checkbox m3-checkbox-danger">
                 <span class="text-xs font-bold">Yes, I am 100% sure I want to permanently delete all <span id="clearConfirmCount">0</span> questions.</span>
             </label>
 
@@ -538,7 +538,7 @@
                             <div class="flex items-center justify-between">
                                 <span class="text-xs font-extrabold uppercase tracking-wider" style="color: var(--md-primary)">GitHub Cloud Synchronization</span>
                                 <label class="flex items-center gap-2 text-xs font-bold cursor-pointer">
-                                    <input id="cloudAutoSyncCheckbox" type="checkbox" checked onchange="window.app.saveSettings(false)" class="rounded focus:ring-0">
+                                    <input id="cloudAutoSyncCheckbox" type="checkbox" checked onchange="window.app.saveSettings(false)" class="m3-switch m3-switch-sm">
                                     <span>Auto-Sync</span>
                                 </label>
                             </div>
@@ -592,7 +592,7 @@
                             <div class="flex items-center justify-between gap-2">
                                 <span class="text-xs font-extrabold uppercase tracking-wider" style="color: var(--md-primary)">AI Answer Key & 1-Line Hint Console</span>
                                 <label class="flex items-center gap-1.5 text-[11px] font-bold cursor-pointer shrink-0">
-                                    <input id="autoSolveHintsCheckbox" type="checkbox" checked onchange="window.app.saveSettings(false)" class="rounded focus:ring-0">
+                                    <input id="autoSolveHintsCheckbox" type="checkbox" checked onchange="window.app.saveSettings(false)" class="m3-switch m3-switch-sm">
                                     <span>Auto after import</span>
                                 </label>
                             </div>
@@ -617,6 +617,18 @@
                                 <span id="geminiModelDropdownLabel" class="truncate">gemini-3.8-flash (Default • High Precision)</span>
                                 <i class="ph-bold ph-caret-down text-xs m3-text-muted"></i>
                             </button>
+                        </div>
+
+                        <div class="p-4 m3-group-item space-y-2">
+                            <div class="flex items-center justify-between gap-2">
+                                <label class="block text-xs font-bold">Local AI Border Server URL (Termux)</label>
+                                <button type="button" onclick="window.app.testLocalAiServerFromSettings()" class="h-7 px-3 m3-btn-tonal text-[10.5px] flex items-center gap-1">
+                                    <i class="ph-bold ph-plugs-connected text-xs"></i>
+                                    <span>Test Connection</span>
+                                </button>
+                            </div>
+                            <input id="localAiServerUrlInput" type="text" placeholder="Auto (127.0.0.1:8080 / :9931 / :11434)" class="w-full h-9 m3-input m3-surface-low px-3.5 text-xs font-mono">
+                            <p id="settingsLocalAiStatusText" class="text-[11px] m3-text-muted">Leave blank for automatic discovery on ports 8080, 9931, and 11434.</p>
                         </div>
 
                         <div class="p-4 m3-group-item grid grid-cols-2 gap-3">
@@ -654,7 +666,7 @@
                     </div>
                     <div class="min-w-0">
                         <h3 id="unifiedModalTitle" class="font-extrabold text-sm sm:text-base truncate">Add Test Paper PDF or Question Photo</h3>
-                        <p class="text-[11px] m3-text-muted truncate">2-Stage Local Slicer + Gemini 3.8 Flash Border Verification • Auto Deskew</p>
+                        <p class="text-[11px] m3-text-muted truncate">Local v3.0 Geometry & Chapters + Optional Local AI Border & Stitch Verifier</p>
                     </div>
                 </div>
                 <div class="flex items-center gap-1.5 shrink-0">
@@ -675,7 +687,7 @@
                             <i id="unifiedFileIcon" class="ph-duotone ph-cloud-arrow-up text-2xl"></i>
                         </div>
                         <p id="selectedFileLabel" class="text-xs sm:text-sm font-extrabold">Tap to Select Any 1-Column / 2-Column JEE PDF or Photo (or press Ctrl+V)</p>
-                        <p id="selectedFileTypeBadge" class="text-[11px] m3-text-muted mt-0.5">Computes local 2D candidate borders & verifies them with Gemini 3.8 Flash</p>
+                        <p id="selectedFileTypeBadge" class="text-[11px] m3-text-muted mt-0.5">Local v3.0 geometry & chapters + optional Termux AI border & stitch check</p>
                     </label>
 
                     <!-- PDF Options -->
@@ -686,12 +698,10 @@
                         </div>
                         <div>
                             <label class="block text-[11px] font-bold m3-text-muted mb-1">Default Subject</label>
-                            <select id="pdfDefaultSubjectSelect" class="w-full h-9 m3-input m3-surface-low px-3 text-xs font-bold">
-                                <option value="AUTO">Auto-Detect Subject</option>
-                                <option value="Mathematics">Mathematics</option>
-                                <option value="Physics">Physics</option>
-                                <option value="Chemistry">Chemistry</option>
-                            </select>
+                            <button type="button" id="pdfDefaultSubjectBtn" onclick="window.app.openPdfDefaultSubjectMenu(this)" class="w-full h-9 m3-dropdown-field text-xs">
+                                <span id="pdfDefaultSubjectLabel" class="truncate">Auto-Detect Subject</span>
+                                <i class="ph-bold ph-caret-down text-[10px] m3-text-muted shrink-0"></i>
+                            </button>
                         </div>
                         <div>
                             <label class="block text-[11px] font-bold m3-text-muted mb-1">Pages Range</label>
@@ -702,26 +712,39 @@
                             </div>
                         </div>                       
                         <div class="sm:col-span-3 pt-2 space-y-2.5 border-t border-[var(--md-outline-variant)]">
-                            <div class="p-2.5 rounded-2xl m3-surface-low border border-[var(--md-outline-variant)] space-y-1">
-                                <label class="flex items-center gap-2 text-xs font-extrabold cursor-pointer" style="color: var(--md-primary)">
-                                    <input type="checkbox" id="pdfUseLocalAiBordersChk" checked class="rounded">
-                                    <span>Verify Borders &amp; Stitches with Local Native AI (Termux llama-server)</span>
-                                </label>
-                                <p class="text-[10.5px] m3-text-muted pl-6">AI checks borders &amp; cross-page stitching only • Local engine classifies chapters • Gemini handles Answer Keys.</p>
+                            <div class="p-3 rounded-2xl m3-surface-low border border-[var(--md-outline-variant)] space-y-2">
+                                <div class="flex items-center justify-between gap-3">
+                                    <div class="min-w-0">
+                                        <div class="text-xs font-extrabold" style="color: var(--md-primary)">Verify Borders &amp; Stitches with Local Native AI</div>
+                                        <p class="text-[10.5px] m3-text-muted">Checks borders &amp; page-break stitches only • Local v3.0 detects chapters • Gemini handles Answer Keys.</p>
+                                    </div>
+                                    <input type="checkbox" id="pdfUseLocalAiBordersChk" checked class="m3-switch">
+                                </div>
+
+                                <div class="flex items-center justify-between gap-2 pt-1.5 border-t border-[var(--md-outline-variant)] flex-wrap">
+                                    <span id="localAiBorderStatusPill" class="m3-ai-status-pill is-checking">
+                                        <span id="localAiBorderStatusDot" class="w-2 h-2 rounded-full bg-amber-400"></span>
+                                        <span id="localAiBorderStatusText">Checking Termux AI server...</span>
+                                    </span>
+                                    <button type="button" onclick="window.app.refreshLocalAiBorderStatus(true)" class="h-7 px-3 m3-btn-tonal text-[10.5px] flex items-center gap-1 shrink-0">
+                                        <i class="ph-bold ph-arrows-clockwise text-xs"></i>
+                                        <span>Test Server</span>
+                                    </button>
+                                </div>
                             </div>
 
-                            <div class="flex flex-wrap items-center justify-between gap-2">
-                                <label class="flex items-center gap-2 text-xs font-extrabold cursor-pointer text-emerald-400">
-                                    <input type="checkbox" id="pdfReviewAfterExtractChk" checked class="rounded">
-                                    <span>Review Borders &amp; Chapters Before Saving</span>
+                            <div class="m3-group-list">
+                                <label class="px-3.5 py-2.5 m3-group-item flex items-center justify-between gap-3 cursor-pointer">
+                                    <span class="text-xs font-extrabold text-emerald-400">Review Borders &amp; Chapters Before Saving</span>
+                                    <input type="checkbox" id="pdfReviewAfterExtractChk" checked class="m3-switch m3-switch-sm">
                                 </label>
-                                <label class="flex items-center gap-2 text-xs font-bold cursor-pointer">
-                                    <input type="checkbox" id="pdfManualCropModeChk" class="rounded">
-                                    <span>Manual Crop Per Page</span>
+                                <label class="px-3.5 py-2.5 m3-group-item flex items-center justify-between gap-3 cursor-pointer">
+                                    <span class="text-xs font-bold">Manual Crop Per Page (Interactive Separator Lines)</span>
+                                    <input type="checkbox" id="pdfManualCropModeChk" class="m3-switch m3-switch-sm">
                                 </label>
-                                <label class="flex items-center gap-2 text-xs font-bold cursor-pointer m3-text-muted">
-                                    <input type="checkbox" id="pdfGeminiVerifyBordersChk" class="rounded">
-                                    <span>Gemini Border Check (Optional)</span>
+                                <label class="px-3.5 py-2.5 m3-group-item flex items-center justify-between gap-3 cursor-pointer">
+                                    <span class="text-xs font-bold m3-text-muted">Gemini 3.8 Flash Border Check (Optional Cloud Fallback)</span>
+                                    <input type="checkbox" id="pdfGeminiVerifyBordersChk" class="m3-switch m3-switch-sm">
                                 </label>
                             </div>
                         </div>
@@ -738,7 +761,7 @@
                                 <button type="button" onclick="window.app.autoDetectImageAngle()" class="h-7 px-2.5 m3-btn-tonal text-[11px]">Auto-Angle</button>
                             </div>
                             <label class="flex items-center gap-1.5 font-bold cursor-pointer">
-                                <input type="checkbox" id="imageCleanContrastChk" checked onchange="window.app.updateImageDeskewPreview()" class="rounded">
+                                <input type="checkbox" id="imageCleanContrastChk" checked onchange="window.app.updateImageDeskewPreview()" class="m3-switch m3-switch-sm">
                                 <span>Clean Shadows</span>
                             </label>
                         </div>
@@ -758,7 +781,7 @@
                             </div>
                             <div class="col-span-2 sm:col-span-1 flex items-end">
                                 <label class="flex items-center gap-2 text-xs font-bold cursor-pointer h-9 px-2">
-                                    <input type="checkbox" id="imgImportAiClassifyChk" checked class="rounded">
+                                    <input type="checkbox" id="imgImportAiClassifyChk" checked class="m3-switch m3-switch-sm">
                                     <span>Auto-Classify & Solve</span>
                                 </label>
                             </div>
@@ -996,12 +1019,14 @@
                     <div class="p-3 m3-surface-high border-b border-[var(--md-outline-variant)] space-y-2 shrink-0">
                         <div class="text-[10.5px] font-extrabold uppercase tracking-wider m3-text-muted">Set Subject & Chapter for All Questions on Page</div>
                         <div class="grid grid-cols-2 gap-2">
-                            <select id="mcBulkSubjectSel" onchange="window.app.mcOnBulkSubjectChange()" class="h-8.5 m3-input m3-surface-low px-2.5 text-[11px] font-bold">
-                                <option value="Physics">Physics</option>
-                                <option value="Chemistry">Chemistry</option>
-                                <option value="Mathematics">Mathematics</option>
-                            </select>
-                            <select id="mcBulkChapterSel" onchange="window.app.mcApplyBulkChapterToAll()" class="h-8.5 m3-input m3-surface-low px-2.5 text-[11px] font-bold"></select>
+                            <button type="button" id="mcBulkSubjectBtn" onclick="window.app.openMcBulkSubjectMenu(this)" class="h-8.5 m3-dropdown-field text-[11px]">
+                                <span id="mcBulkSubjectLabel" class="truncate">Mathematics</span>
+                                <i class="ph-bold ph-caret-down text-[9px] m3-text-muted shrink-0"></i>
+                            </button>
+                            <button type="button" id="mcBulkChapterBtn" onclick="window.app.openMcBulkChapterMenu(this)" class="h-8.5 m3-dropdown-field text-[11px]">
+                                <span id="mcBulkChapterLabel" class="truncate">Straight Lines</span>
+                                <i class="ph-bold ph-caret-down text-[9px] m3-text-muted shrink-0"></i>
+                            </button>
                         </div>
                     </div>
 
@@ -1017,7 +1042,7 @@
                         Cancel Import
                     </button>
                     <label id="mcSwitchManualAllWrap" class="flex items-center gap-1.5 text-xs font-bold cursor-pointer">
-                        <input type="checkbox" id="mcSwitchManualAllChk" class="rounded">
+                        <input type="checkbox" id="mcSwitchManualAllChk" class="m3-switch m3-switch-sm">
                         <span>Use Manual Mode for remaining pages</span>
                     </label>
                 </div>
@@ -1104,7 +1129,7 @@
                             <span id="brBorderAiBadge" class="hidden px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-sky-500/20 text-sky-300">AI Border Checked ✓</span>
                         </div>
                         <label class="flex items-center gap-1.5 text-xs font-extrabold text-rose-400 cursor-pointer">
-                            <input type="checkbox" id="brSkipChk" onchange="window.app.brToggleSkipCurrent(this.checked)" class="rounded accent-rose-500">
+                            <input type="checkbox" id="brSkipChk" onchange="window.app.brToggleSkipCurrent(this.checked)" class="m3-switch m3-switch-sm m3-switch-danger">
                             <span>Skip / Delete</span>
                         </label>
                     </div>
@@ -1116,15 +1141,17 @@
                         </div>
                         <div class="p-3 m3-group-item flex items-center justify-between gap-3">
                             <label class="text-xs font-bold shrink-0">Subject</label>
-                            <select id="brSubjectSel" onchange="window.app.brUpdateField('subject', this.value)" class="flex-1 max-w-[230px] h-8.5 m3-input m3-surface-low px-3 text-xs font-bold">
-                                <option value="Physics">Physics</option>
-                                <option value="Chemistry">Chemistry</option>
-                                <option value="Mathematics">Mathematics</option>
-                            </select>
+                            <button type="button" id="brSubjectBtn" onclick="window.app.openBrSubjectMenu(this)" class="flex-1 max-w-[230px] h-8.5 m3-dropdown-field text-xs">
+                                <span id="brSubjectLabel" class="truncate">Physics</span>
+                                <i class="ph-bold ph-caret-down text-[10px] m3-text-muted shrink-0"></i>
+                            </button>
                         </div>
                         <div class="p-3 m3-group-item space-y-1.5">
                             <label class="block text-xs font-bold">Primary JEE Chapter (Local Engine)</label>
-                            <select id="brChapterSel" onchange="window.app.brUpdateField('chapter', this.value)" class="w-full h-9 m3-input m3-surface-low px-3 text-xs font-bold"></select>
+                            <button type="button" id="brChapterBtn" onclick="window.app.openBrChapterMenu(this)" class="w-full h-9 m3-dropdown-field text-xs">
+                                <span id="brChapterLabel" class="truncate">Simple Harmonic Motion</span>
+                                <i class="ph-bold ph-caret-down text-[10px] m3-text-muted shrink-0"></i>
+                            </button>
                         </div>
                     </div>
 
@@ -1144,7 +1171,11 @@
                         <div class="pt-1 flex items-center gap-2 flex-wrap">
                             <button type="button" id="brReClassifyLocalBtn" onclick="window.app.brReClassifyLocalCurrent()" class="h-8 px-3 m3-btn-tonal text-[11px] flex items-center gap-1.5">
                                 <i class="ph-bold ph-arrows-clockwise"></i>
-                                <span>Re-Run Local Chapter Match on Crop</span>
+                                <span>Re-Run Local Chapter Match</span>
+                            </button>
+                            <button type="button" id="brReCheckAiBorderBtn" onclick="window.app.brReCheckCurrentPageBordersAI()" class="h-8 px-3 m3-btn-tonal text-[11px] flex items-center gap-1.5">
+                                <i class="ph-bold ph-bounding-box"></i>
+                                <span>Test Local AI on This Page</span>
                             </button>
                         </div>
                     </div>
@@ -1452,6 +1483,6 @@
     <div id="toastBox" class="fixed bottom-24 right-6 z-[110] flex flex-col gap-2 pointer-events-none"></div>
 
 
-    <script src="./app.js?v=3.0"></script>
+    <script src="./app.js?v=3.1"></script>
 </body>
 </html>
