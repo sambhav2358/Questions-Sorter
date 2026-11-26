@@ -446,7 +446,7 @@
     async function callVisionServer(imageDataUrl, systemPrompt, userPrompt, options = {}) {
         const base = runtime.detectedUrl || getServerUrl();
         const maxTokens = Number(options.maxTokens) || 480;
-        const timeoutMs = Number(options.timeoutMs) || 90000;
+        const timeoutMs = Number(options.timeoutMs) || 180000;
         const abortSignal = options.abortSignal || null;
 
         if (runtime.backendKind === 'ollama') {
@@ -601,7 +601,7 @@ Otherwise reply ONLY compact JSON:
 
         const raw = await callVisionServer(annotatedUrl, systemPrompt, userPrompt, {
             maxTokens: 512,
-            timeoutMs: Number(options.timeoutMs) || 90000,
+            timeoutMs: Number(options.timeoutMs) || 180000,
             abortSignal: options.abortSignal
         });
 
@@ -719,7 +719,7 @@ Reply ONLY JSON: {"shouldStitch":true|false,"confidence":0.95,"reason":"short 4-
 
         const raw = await callVisionServer(pairImg, systemPrompt, userPrompt, {
             maxTokens: 80,
-            timeoutMs: Number(options.timeoutMs) || 35000,
+            timeoutMs: Number(options.timeoutMs) || 90000,
             abortSignal: options.abortSignal
         });
 
