@@ -2806,11 +2806,210 @@ function cancelPdfExtraction() {
     document.getElementById('minimizedUploadBar')?.classList.add('hidden');
     document.getElementById('minimizedUploadBar')?.classList.remove('flex');
     setUploadButtonsLock(false);
+    setUploadStudioExpanded(false);
     document.getElementById('uploadModal').classList.add('hidden');
     toast('Upload cancelled & all questions from that PDF were rolled back.', 'warn');
 }
 
         // Full-Document Local Vision Engine Pipeline (Optional Manual Cropper & Optional Gemini Verifier)
+// ===================================================================
+// LIVE EXTRACTION VISUALIZER STUDIO HELPERS (ZERO-SCROLL + REAL-TIME)
+// ===================================================================
+let extractResizeObserver = null;
+
+function setUploadStudioExpanded(expanded) {
+    const dialog = document.getElementById('uploadModalDialog');
+    const body = document.getElementById('uploadModalBody');
+    const delayWrap = document.getElementById('extractVisualDelayHeaderWrap');
+    const setupView = document.getElementById('uploadSetupView');
+    const progView = document.getElementById('uploadProgressView');
+
+    if (dialog) dialog.classList.toggle('upload-studio-expanded', Boolean(expanded));
+    if (body) {
+        if (expanded) {
+            body.className = 'p-0 overflow-hidden flex-1 min-h-0 flex flex-col';
+        } else {
+            body.className = 'p-4 sm:p-5 overflow-y-auto space-y-4 flex-1 min-h-0';
+        }
+    }
+    if (delayWrap) {
+        delayWrap.classList.toggle('hidden', !expanded);
+        delayWrap.classList.toggle('inline-flex', Boolean(expanded));
+    }
+    if (setupView) setupView.classList.toggle('hidden', Boolean(expanded));
+    if (progView) progView.classList.toggle('hidden', !expanded);
+
+    if (expanded) {
+        ensureExtractViewportObserver();
+        requestAnimationFrame(() => {
+            fitExtractPageFrame();
+            if (!waveAnimFrame) waveAnimFrame = requestAnimationFrame(stepAllWavyBars);
+        });
+    }
+}
+
+function fitExtractPageFrame() {
+    const viewport = document.getElementById('extractPdfViewport');
+    const frame = document.getElementById('extractPageFrame');
+    const canvas = document.getElementById('pdfWorkCanvas');
+    if (!viewport || !frame || !canvas) return;
+    if (viewport.offsetParent === null) return;
+
+    const cw = canvas.width || 600;
+    const ch = canvas.height || 840;
+    const availW = Math.max(120, viewport.clientWidth - 24);
+    const availH = Math.max(160, viewport.clientHeight - 24);
+    const scale = Math.min(availW / cw, availH / ch);
+
+    frame.style.width = `${Math.max(100, Math.floor(cw * scale))}px`;
+    frame.style.height = `${Math.max(120, Math.floor(ch * scale))}px`;
+}
+
+function ensureExtractViewportObserver() {
+    const viewport = document.getElementById('extractPdfViewport');
+    if (!viewport || extractResizeObserver || typeof ResizeObserver === 'undefined') return;
+    extractResizeObserver = new ResizeObserver(() => {
+        if (state.isExtracting && !state.isUploadMinimized) {
+            fitExtractPageFrame();
+        }
+    });
+    extractResizeObserver.observe(viewport);
+}
+
+function isExtractVisualPacingEnabled() {
+    const chk = document.getElementById('extractVisualDelayChk');
+    return chk ? Boolean(chk.checked) : true;
+}
+
+function abortablePacingSleep(ms, signal, allowSkipWhenPacingOff = true) {
+    if (ms <= 0) return Promise.resolve();
+    return new Promise((resolve, reject) => {
+        const start = performance.now();
+        const checkTick = () => {
+            if (signal?.aborted || state.cancelExtractionRequested) {
+                reject(new DOMException('Aborted', 'AbortError'));
+                return;
+            }
+            if (allowSkipWhenPacingOff && !isExtractVisualPacingEnabled()) {
+                resolve();
+                return;
+            }
+            const elapsed = performance.now() - start;
+            if (elapsed >= ms) {
+                resolve();
+                return;
+            }
+            setTimeout(checkTick, Math.min(65, ms - elapsed));
+        };
+        checkTick();
+    });
+}
+
+function updateExtractActiveTelemetry({ pageNum = null, stagePill = null, stageTone = 'warn', qBadge = null, phaseText = null, chapterText = null, doneCount = null }) {
+    if (pageNum !== null) {
+        const pEl = document.getElementById('extractPreviewPagePill');
+        if (pEl) pEl.textContent = `Page ${pageNum}`;
+    }
+    if (stagePill !== null) {
+        const stEl = document.getElementById('extractLiveStagePill');
+        if (stEl) {
+            stEl.textContent = stagePill;
+            const toneCls = stageTone === 'success' ? 'm3-badge-success' : (stageTone === 'primary' ? 'm3-primary-pill' : 'm3-badge-warn');
+            stEl.className = `px-2.5 py-0.5 rounded-full ${toneCls} text-[10.5px] font-extrabold truncate`;
+        }
+    }
+    if (qBadge !== null) {
+        const qb = document.getElementById('extractActiveQBadge');
+        if (qb) qb.textContent = qBadge;
+    }
+    if (phaseText !== null) {
+        const pt = document.getElementById('extractActivePhaseText');
+        if (pt) pt.textContent = phaseText;
+    }
+    if (chapterText !== null) {
+        const ct = document.getElementById('extractActiveChapterText');
+        if (ct) ct.textContent = chapterText;
+    }
+    if (doneCount !== null) {
+        const dc = document.getElementById('extractDoneCountPill');
+        if (dc) dc.textContent = `${doneCount} done`;
+    }
+}
+
+function showExtractPageSweepOverlay(message = 'Scanning layout...') {
+    const layer = document.getElementById('extractOverlayLayer');
+    if (!layer) return;
+    layer.innerHTML = `<div class="ex-page-sweep-line"></div>`;
+    updateExtractActiveTelemetry({ stagePill: message, stageTone: 'primary' });
+}
+
+function renderExtractPageBoxes({ doneBoxes = [], pendingBoxes = [], activeBox = null }) {
+    const layer = document.getElementById('extractOverlayLayer');
+    if (!layer) return;
+
+    // Render static ghost & completed boxes cleanly without resetting #exActiveBox if it already exists!
+    const existingActive = layer.querySelector('#exActiveBox');
+    Array.from(layer.children).forEach(ch => {
+        if (ch.id !== 'exActiveBox') ch.remove();
+    });
+
+    for (const pb of pendingBoxes) {
+        const d = document.createElement('div');
+        d.className = 'ex-ghost-box';
+        d.style.left = `${(pb.xmin / 10).toFixed(2)}%`;
+        d.style.top = `${(pb.ymin / 10).toFixed(2)}%`;
+        d.style.width = `${Math.max(2, (pb.xmax - pb.xmin) / 10).toFixed(2)}%`;
+        d.style.height = `${Math.max(1.5, (pb.ymax - pb.ymin) / 10).toFixed(2)}%`;
+        layer.appendChild(d);
+    }
+
+    for (const db of doneBoxes) {
+        const d = document.createElement('div');
+        d.className = 'ex-done-box';
+        d.style.left = `${(db.xmin / 10).toFixed(2)}%`;
+        d.style.top = `${(db.ymin / 10).toFixed(2)}%`;
+        d.style.width = `${Math.max(2, (db.xmax - db.xmin) / 10).toFixed(2)}%`;
+        d.style.height = `${Math.max(1.5, (db.ymax - db.ymin) / 10).toFixed(2)}%`;
+        const tag = db.isStitched ? `🔗 Q.${db.qNum}` : `✓ Q.${db.qNum}${db.chapter ? ' • ' + db.chapter : ''}`;
+        d.innerHTML = `<span class="ex-done-pill">${tag}</span>`;
+        layer.appendChild(d);
+    }
+
+    if (!activeBox) {
+        if (existingActive) existingActive.remove();
+        return;
+    }
+
+    let boxEl = existingActive;
+    if (!boxEl) {
+        boxEl = document.createElement('div');
+        boxEl.id = 'exActiveBox';
+        boxEl.className = 'ex-active-box';
+        boxEl.innerHTML = `
+            <span class="ex-corner tl"></span>
+            <span class="ex-corner tr"></span>
+            <span class="ex-corner bl"></span>
+            <span class="ex-corner br"></span>
+            <div class="ex-scan-beam"></div>
+            <span class="ex-active-badge"></span>
+        `;
+        layer.appendChild(boxEl);
+    }
+
+    boxEl.classList.remove('is-adjusting', 'is-ocr', 'is-locked');
+    if (activeBox.mode === 'adjusting') boxEl.classList.add('is-adjusting');
+    else if (activeBox.mode === 'ocr') boxEl.classList.add('is-ocr');
+    else if (activeBox.mode === 'locked') boxEl.classList.add('is-locked');
+
+    boxEl.style.left = `${(activeBox.xmin / 10).toFixed(2)}%`;
+    boxEl.style.top = `${(activeBox.ymin / 10).toFixed(2)}%`;
+    boxEl.style.width = `${Math.max(2, (activeBox.xmax - activeBox.xmin) / 10).toFixed(2)}%`;
+    boxEl.style.height = `${Math.max(1.5, (activeBox.ymax - activeBox.ymin) / 10).toFixed(2)}%`;
+
+    const badgeEl = boxEl.querySelector('.ex-active-badge');
+    if (badgeEl) badgeEl.textContent = activeBox.label || '';
+}
+
 async function startPdfExtraction() {
     if (!state.pdfDoc || state.isExtracting) return;
 
@@ -2831,10 +3030,19 @@ async function startPdfExtraction() {
     const endP = Math.min(state.pdfDoc.numPages, parseInt(document.getElementById('endPageInput').value, 10) || state.pdfDoc.numPages);
     const { padTop, padBottom } = getVerticalPads();
 
-    document.getElementById('uploadSetupView').classList.add('hidden');
-    document.getElementById('uploadProgressView').classList.remove('hidden');
+    setUploadStudioExpanded(true);
     document.getElementById('extractLiveLog').innerHTML = '';
     updateUploadProgressEverywhere(6, `Page ${startP}/${endP}`, `Initializing Local Vision Engine...`);
+    updateExtractActiveTelemetry({
+        pageNum: `${startP}/${endP}`,
+        stagePill: 'Rendering Pages...',
+        stageTone: 'primary',
+        qBadge: 'PDF',
+        phaseText: 'Analyzing document geometry...',
+        chapterText: `Pages ${startP}–${endP}`,
+        doneCount: 0
+    });
+    showExtractPageSweepOverlay('Scanning Layout...');
 
     const previewCanvas = document.getElementById('pdfWorkCanvas');
     const previewCtx = previewCanvas.getContext('2d');
@@ -2941,6 +3149,13 @@ async function startPdfExtraction() {
             previewCanvas.width = canvas.width;
             previewCanvas.height = canvas.height;
             previewCtx.drawImage(canvas, 0, 0);
+            fitExtractPageFrame();
+            updateExtractActiveTelemetry({
+                pageNum: `${pageNum} / ${endP}`,
+                stagePill: 'Inspecting Page...',
+                stageTone: 'primary'
+            });
+            showExtractPageSweepOverlay(`Page ${pageNum}: Detecting Borders...`);
 
             const localCandidates = (pageInfo.blocks || []).map(b => ({
                 ...b,
@@ -3092,8 +3307,10 @@ async function startPdfExtraction() {
                 }
             }
 
+            const pageDoneBoxes = [];
             for (let i = 0; i < blocks.length; i++) {
                 if (state.cancelExtractionRequested) return;
+                const qVisualStartedAt = performance.now();
                 const b = blocks[i];
                 const slicePct = 52 + Math.round(((pIdx + (i + 1) / Math.max(1, blocks.length)) / countPages) * 46);
 
@@ -3101,26 +3318,114 @@ async function startPdfExtraction() {
                 const xmax = Math.max(xmin + 80, Math.min(1000, Number(b.xmax) ?? 988));
                 const ymin = Math.max(0, Math.min(990, Number(b.ymin) || 0));
                 const ymax = Math.max(ymin + 20, Math.min(1000, Number(b.ymax) || 1000));
+                const pendingBoxes = blocks.slice(i + 1).map(pb => ({
+                    xmin: Math.max(0, Math.min(950, Number(pb.xmin) ?? 12)),
+                    xmax: Math.max(80, Math.min(1000, Number(pb.xmax) ?? 988)),
+                    ymin: Math.max(0, Math.min(990, Number(pb.ymin) || 0)),
+                    ymax: Math.max(20, Math.min(1000, Number(pb.ymax) || 1000))
+                }));
+                const previewQNum = String(b.questionNumber || '').replace(/[^0-9a-zA-Z]/g, '') || `${extractedCount + 1}`;
+                const displayQTag = previewQNum.toUpperCase() === 'CONT' ? 'CONT' : `Q.${previewQNum}`;
 
+                // -------------------------------------------------------------
+                // VISUAL STEP 1: Real-Time Animated Border Detection & Snapping
+                // -------------------------------------------------------------
+                const coarseBox = {
+                    xmin: Math.max(2, xmin - 16),
+                    xmax: Math.min(998, xmax + 16),
+                    ymin: Math.max(2, ymin - 28),
+                    ymax: Math.min(998, ymax + 30)
+                };
+                const midSnappedBox = {
+                    xmin: Math.max(2, xmin - 10),
+                    xmax: Math.min(998, xmax + 10),
+                    ymin,
+                    ymax
+                };
+                const finalBox = { xmin, xmax, ymin, ymax };
+
+                // Remove previous active box so the new question enters cleanly at coarse bounds
+                document.getElementById('exActiveBox')?.remove();
+                renderExtractPageBoxes({
+                    doneBoxes: pageDoneBoxes,
+                    pendingBoxes,
+                    activeBox: { ...coarseBox, mode: 'adjusting', label: `${displayQTag} • Detecting Borders...` }
+                });
+                updateUploadProgressEverywhere(
+                    slicePct,
+                    `Page ${pageNum}/${endP}`,
+                    `${displayQTag}: Detecting & adjusting 2D borders...`
+                );
+                updateExtractActiveTelemetry({
+                    pageNum: `${pageNum} / ${endP}`,
+                    stagePill: '1/3 Adjusting Borders',
+                    stageTone: 'warn',
+                    qBadge: displayQTag,
+                    phaseText: 'Locating ink bounds & diagrams...',
+                    chapterText: 'Snapping top/bottom edges to whitespace',
+                    doneCount: extractedCount
+                });
+                appendExtractLog(`📐 ${displayQTag} (Page ${pageNum}): Detecting & adjusting borders...`, 'info');
+
+                if (isExtractVisualPacingEnabled()) {
+                    await abortablePacingSleep(380, state.extractionAbortController.signal);
+                    // Animate vertical edges snapping cleanly to whitespace valleys
+                    renderExtractPageBoxes({
+                        doneBoxes: pageDoneBoxes,
+                        pendingBoxes,
+                        activeBox: { ...midSnappedBox, mode: 'adjusting', label: `${displayQTag} • Snapping Top & Bottom Edges...` }
+                    });
+                    updateExtractActiveTelemetry({ phaseText: 'Snapping top & bottom whitespace valleys...' });
+                    await abortablePacingSleep(420, state.extractionAbortController.signal);
+                }
+
+                // Animate final tight 2D lock on all 4 sides
+                renderExtractPageBoxes({
+                    doneBoxes: pageDoneBoxes,
+                    pendingBoxes,
+                    activeBox: { ...finalBox, mode: 'adjusting', label: `${displayQTag} • Locking Tight Borders ✓` }
+                });
+                if (isExtractVisualPacingEnabled()) {
+                    await abortablePacingSleep(300, state.extractionAbortController.signal);
+                }
+
+                // -------------------------------------------------------------
+                // VISUAL STEP 2: One-Question-At-A-Time Crop + OCR Laser Scan
+                // -------------------------------------------------------------
                 const cropRes = crop2DSliceFromPage(canvas, xmin, xmax, ymin, ymax, padTop, padBottom);
+                renderExtractPageBoxes({
+                    doneBoxes: pageDoneBoxes,
+                    pendingBoxes,
+                    activeBox: { ...finalBox, mode: 'ocr', label: `${displayQTag} • Running OCR & Reading Text...` }
+                });
+                updateUploadProgressEverywhere(
+                    slicePct,
+                    `Page ${pageNum}/${endP}`,
+                    `${displayQTag}: Running OCR & extracting math text...`
+                );
+                updateExtractActiveTelemetry({
+                    stagePill: '2/3 Running OCR',
+                    stageTone: 'primary',
+                    phaseText: 'Reading text & mathematical symbols...',
+                    chapterText: 'One-by-one OCR & syllabus matching'
+                });
 
+                const ocrStepStart = performance.now();
                 let fullQuestionText = b.ocrText || '';
                 if (fullQuestionText.length < 18) {
-                    updateUploadProgressEverywhere(
-                        slicePct,
-                        `Page ${pageNum}/${endP}`,
-                        `OCR Page ${pageNum} slice ${i + 1}/${blocks.length}...`
-                    );
                     const tessText = await recognizeImageTextWithTesseract(cropRes.canvas);
                     if (tessText.length > fullQuestionText.length) fullQuestionText = tessText;
+                    appendExtractLog(`🔤 ${displayQTag}: Tesseract OCR extracted ${fullQuestionText.length} chars`, 'info');
                 } else {
-                    updateUploadProgressEverywhere(
-                        slicePct,
-                        `Page ${pageNum}/${endP}`,
-                        `Cropping Page ${pageNum} (${i + 1}/${blocks.length})...`
-                    );
+                    appendExtractLog(`🔤 ${displayQTag}: Vector OCR read ${fullQuestionText.length} chars`, 'info');
                 }
                 if (state.cancelExtractionRequested) return;
+
+                if (isExtractVisualPacingEnabled()) {
+                    const ocrSpent = performance.now() - ocrStepStart;
+                    const ocrPad = Math.max(0, 1050 - ocrSpent);
+                    if (ocrPad > 0) await abortablePacingSleep(ocrPad, state.extractionAbortController.signal);
+                }
 
                 const passagePrefix = b.sharedPassage?.text ? `${b.sharedPassage.text} ` : '';
                 const combinedOcrText = cleanQuestionTextOnly(`${passagePrefix}${fullQuestionText} ${b.firstLineSnippet || ''} ${b.lastLineSnippet || ''}`);
@@ -3209,6 +3514,23 @@ async function startPdfExtraction() {
                         prevQuestion._reviewMeta.confidence = postStitchClass.confidence;
                         prevQuestion._reviewMeta.needsReview = postStitchClass.confidence < 0.75;
                     }
+                    renderExtractPageBoxes({
+                        doneBoxes: pageDoneBoxes,
+                        pendingBoxes,
+                        activeBox: { ...finalBox, mode: 'locked', label: `🔗 Stitched into Q.${prevQuestion.questionNumber}` }
+                    });
+                    updateExtractActiveTelemetry({
+                        stagePill: '3/3 Stitched ✓',
+                        stageTone: 'success',
+                        phaseText: `Stitched onto Q.${prevQuestion.questionNumber}`,
+                        chapterText: `${prevQuestion.subject} • ${prevQuestion.chapter}`,
+                        doneCount: extractedCount
+                    });
+                    if (isExtractVisualPacingEnabled()) {
+                        const remMs = Math.max(0, 3000 - (performance.now() - qVisualStartedAt));
+                        if (remMs > 0) await abortablePacingSleep(remMs, state.extractionAbortController.signal);
+                    }
+                    pageDoneBoxes.push({ xmin, xmax, ymin, ymax, qNum: prevQuestion.questionNumber, isStitched: true });
                     continue;
                 }
 
@@ -3255,7 +3577,28 @@ async function startPdfExtraction() {
                 state.currentUploadBatchIds.push(qObj.id);
                 extractedCount++;
                 prevQuestion = qObj;
-                appendExtractLog(`✓ Q.${qObj.questionNumber} (${qObj.subject} • ${qObj.chapter})`, 'success');
+
+                const confPctLog = Math.round((chapterConfidence || 0.78) * 100);
+                renderExtractPageBoxes({
+                    doneBoxes: pageDoneBoxes,
+                    pendingBoxes,
+                    activeBox: { ...finalBox, mode: 'locked', label: `✓ Q.${qObj.questionNumber} • ${qObj.chapter}` }
+                });
+                updateExtractActiveTelemetry({
+                    stagePill: '3/3 Locked ✓',
+                    stageTone: 'success',
+                    qBadge: `Q.${qObj.questionNumber}`,
+                    phaseText: `${qObj.subject} (${confPctLog}% match)`,
+                    chapterText: qObj.chapter,
+                    doneCount: extractedCount
+                });
+                appendExtractLog(`✓ Q.${qObj.questionNumber} (${qObj.subject} • ${qObj.chapter} • ${confPctLog}%)`, 'success');
+
+                if (isExtractVisualPacingEnabled()) {
+                    const remMs = Math.max(0, 3000 - (performance.now() - qVisualStartedAt));
+                    if (remMs > 0) await abortablePacingSleep(remMs, state.extractionAbortController.signal);
+                }
+                pageDoneBoxes.push({ xmin, xmax, ymin, ymax, qNum: qObj.questionNumber, chapter: qObj.chapter, isStitched: false });
             }
         }
 
@@ -6945,8 +7288,7 @@ window.app = {
             return;
         }
         setUploadButtonsLock(false);
-        document.getElementById('uploadSetupView').classList.remove('hidden');
-        document.getElementById('uploadProgressView').classList.add('hidden');
+        setUploadStudioExpanded(false);
 
         if (initialImageBlob) {
             animateModalOpen('uploadModal');
@@ -6989,7 +7331,9 @@ window.app = {
             minBar.classList.add('hidden');
             minBar.classList.remove('flex');
         }
+        setUploadStudioExpanded(true);
         animateModalOpen('uploadModal');
+        requestAnimationFrame(() => fitExtractPageFrame());
         if (!waveAnimFrame) waveAnimFrame = requestAnimationFrame(stepAllWavyBars);
         ensureM3MorphLoopRunning();
     },
@@ -6997,6 +7341,7 @@ window.app = {
         closeCustomDropdown();
         if (!state.isExtracting && !state.isImportingImage) {
             animateModalClose('uploadModal', () => {
+                setUploadStudioExpanded(false);
                 state.importRawImg = null;
             });
         }
@@ -8712,6 +9057,9 @@ window.addEventListener('resize', () => {
     checkWhiteboardOrientationLock();
     if (!document.getElementById('scratchpadModal').classList.contains('hidden')) {
         renderWhiteboardCanvas();
+    }
+    if (state.isExtracting && !state.isUploadMinimized) {
+        fitExtractPageFrame();
     }
     clearTimeout(resizeTimer);
     resizeTimer = setTimeout(() => {
