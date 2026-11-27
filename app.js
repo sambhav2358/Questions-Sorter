@@ -1818,23 +1818,43 @@ function applyMaterialThemeFromSeed(hexSeed, modeOverride = null) {
     localStorage.setItem('jee_m3_seed_color', cleanHex);
 
     if (mode === 'light') {
-        root.style.setProperty('--md-primary', `hsl(${h}, ${Math.min(85, sat)}%, 46%)`);
+        root.style.setProperty('--md-primary', `hsl(${h}, ${Math.min(85, sat)}%, 44%)`);
         root.style.setProperty('--md-on-primary', `#ffffff`);
-        root.style.setProperty('--md-primary-container', `hsl(${h}, 78%, 92%)`);
-        root.style.setProperty('--md-on-primary-container', `hsl(${h}, 85%, 20%)`);
-        root.style.setProperty('--md-secondary-container', `#e2e8f0`);
-        root.style.setProperty('--md-on-secondary-container', `#0f172a`);
-        root.style.setProperty('--md-tertiary-container', `hsl(${hTer}, 75%, 92%)`);
-        root.style.setProperty('--md-on-tertiary-container', `hsl(${hTer}, 80%, 20%)`);
-        root.style.setProperty('--md-surface', `#f1f5f9`);
-        root.style.setProperty('--md-surface-low', `#ffffff`);
+        root.style.setProperty('--md-primary-container', `hsl(${h}, 78%, 91%)`);
+        root.style.setProperty('--md-on-primary-container', `hsl(${h}, 85%, 18%)`);
+        root.style.setProperty('--md-secondary-container', `hsl(${hSec}, 28%, 89%)`);
+        root.style.setProperty('--md-on-secondary-container', `hsl(${hSec}, 40%, 16%)`);
+        root.style.setProperty('--md-tertiary-container', `hsl(${hTer}, 72%, 91%)`);
+        root.style.setProperty('--md-on-tertiary-container', `hsl(${hTer}, 78%, 18%)`);
+        root.style.setProperty('--md-surface', `hsl(${h}, 20%, 95%)`);
+        root.style.setProperty('--md-surface-low', `hsl(${h}, 24%, 98%)`);
         root.style.setProperty('--md-surface-container', `#ffffff`);
-        root.style.setProperty('--md-surface-high', `#f8fafc`);
-        root.style.setProperty('--md-surface-highest', `#e2e8f0`);
-        root.style.setProperty('--md-on-surface', `#0f172a`);
-        root.style.setProperty('--md-on-surface-variant', `#475569`);
-        root.style.setProperty('--md-outline', `#94a3b8`);
-        root.style.setProperty('--md-outline-variant', `#e2e8f0`);
+        root.style.setProperty('--md-surface-high', `hsl(${h}, 18%, 93%)`);
+        root.style.setProperty('--md-surface-highest', `hsl(${h}, 18%, 88%)`);
+        root.style.setProperty('--md-on-surface', `hsl(${h}, 24%, 11%)`);
+        root.style.setProperty('--md-on-surface-variant', `hsl(${h}, 14%, 38%)`);
+        root.style.setProperty('--md-outline', `hsl(${h}, 14%, 56%)`);
+        root.style.setProperty('--md-outline-variant', `hsl(${h}, 16%, 84%)`);
+        // Light semantic + inverse roles
+        root.style.setProperty('--md-error', `hsl(354, 78%, 46%)`);
+        root.style.setProperty('--md-on-error', `#ffffff`);
+        root.style.setProperty('--md-error-container', `hsl(354, 92%, 93%)`);
+        root.style.setProperty('--md-on-error-container', `hsl(354, 78%, 22%)`);
+        root.style.setProperty('--md-success', `hsl(154, 72%, 34%)`);
+        root.style.setProperty('--md-on-success', `#ffffff`);
+        root.style.setProperty('--md-success-container', `hsl(154, 72%, 90%)`);
+        root.style.setProperty('--md-on-success-container', `hsl(154, 78%, 16%)`);
+        root.style.setProperty('--md-warning', `hsl(36, 86%, 40%)`);
+        root.style.setProperty('--md-on-warning', `#ffffff`);
+        root.style.setProperty('--md-warning-container', `hsl(40, 94%, 90%)`);
+        root.style.setProperty('--md-on-warning-container', `hsl(36, 84%, 18%)`);
+        root.style.setProperty('--md-inverse-surface', `hsl(${h}, 22%, 17%)`);
+        root.style.setProperty('--md-inverse-on-surface', `hsl(${h}, 20%, 95%)`);
+        root.style.setProperty('--md-inverse-primary', `hsl(${h}, ${sat}%, 78%)`);
+        root.style.setProperty('--md-scrim', `rgba(12, 10, 24, 0.48)`);
+        root.style.setProperty('--md-elevation-1', `0 1px 3px rgba(15, 23, 42, 0.10), 0 1px 2px rgba(15, 23, 42, 0.06)`);
+        root.style.setProperty('--md-elevation-2', `0 4px 14px -2px rgba(15, 23, 42, 0.14), 0 2px 6px rgba(15, 23, 42, 0.08)`);
+        root.style.setProperty('--md-elevation-3', `0 12px 28px -4px rgba(15, 23, 42, 0.20), 0 4px 10px -2px rgba(15, 23, 42, 0.10)`);
     } else {
         root.style.setProperty('--md-primary', `hsl(${h}, ${sat}%, 78%)`);
         root.style.setProperty('--md-on-primary', `hsl(${h}, 82%, 14%)`);
@@ -1853,13 +1873,44 @@ function applyMaterialThemeFromSeed(hexSeed, modeOverride = null) {
         root.style.setProperty('--md-on-surface-variant', `hsl(${h}, 15%, 72%)`);
         root.style.setProperty('--md-outline', `hsl(${h}, 18%, 36%)`);
         root.style.setProperty('--md-outline-variant', `hsl(${h}, 18%, 20%)`);
+        // Dark semantic + inverse roles
+        root.style.setProperty('--md-error', `hsl(354, 92%, 75%)`);
+        root.style.setProperty('--md-on-error', `hsl(354, 72%, 14%)`);
+        root.style.setProperty('--md-error-container', `hsl(354, 58%, 26%)`);
+        root.style.setProperty('--md-on-error-container', `hsl(354, 100%, 92%)`);
+        root.style.setProperty('--md-success', `hsl(154, 68%, 62%)`);
+        root.style.setProperty('--md-on-success', `hsl(154, 80%, 10%)`);
+        root.style.setProperty('--md-success-container', `hsl(154, 50%, 20%)`);
+        root.style.setProperty('--md-on-success-container', `hsl(154, 90%, 88%)`);
+        root.style.setProperty('--md-warning', `hsl(38, 92%, 68%)`);
+        root.style.setProperty('--md-on-warning', `hsl(38, 82%, 12%)`);
+        root.style.setProperty('--md-warning-container', `hsl(38, 56%, 22%)`);
+        root.style.setProperty('--md-on-warning-container', `hsl(38, 96%, 90%)`);
+        root.style.setProperty('--md-inverse-surface', `hsl(${h}, 22%, 92%)`);
+        root.style.setProperty('--md-inverse-on-surface', `hsl(${h}, 24%, 12%)`);
+        root.style.setProperty('--md-inverse-primary', `hsl(${h}, 74%, 46%)`);
+        root.style.setProperty('--md-scrim', `rgba(6, 5, 14, 0.72)`);
+        root.style.setProperty('--md-elevation-1', `0 1px 3px rgba(0, 0, 0, 0.28), 0 1px 2px rgba(0, 0, 0, 0.18)`);
+        root.style.setProperty('--md-elevation-2', `0 4px 12px -2px rgba(0, 0, 0, 0.36), 0 2px 4px rgba(0, 0, 0, 0.22)`);
+        root.style.setProperty('--md-elevation-3', `0 12px 28px -4px rgba(0, 0, 0, 0.48), 0 4px 10px -2px rgba(0, 0, 0, 0.28)`);
     }
 
     document.getElementById('themeModeDarkBtn')?.classList.toggle('active', mode === 'dark');
     document.getElementById('themeModeLightBtn')?.classList.toggle('active', mode === 'light');
     requestAnimationFrame(() => updateAllSegmentedGliders());
+
     const picker = document.getElementById('customThemeColorPicker');
     if (picker) picker.value = cleanHex;
+    const customPreview = document.getElementById('customColorSwatchPreview');
+    if (customPreview) customPreview.style.background = cleanHex;
+    const customHexLbl = document.getElementById('customColorHexLabel');
+    if (customHexLbl) customHexLbl.textContent = cleanHex.toUpperCase();
+
+    document.querySelectorAll('.m3-swatch-btn[data-seed-hex]').forEach(btn => {
+        const isMatch = (btn.getAttribute('data-seed-hex') || '').toLowerCase() === cleanHex.toLowerCase();
+        btn.classList.toggle('active-swatch', isMatch);
+    });
+
     renderDrawerChapters();
     if (!waveAnimFrame && waveInstances.size > 0) {
         waveAnimFrame = requestAnimationFrame(stepAllWavyBars);
@@ -1895,23 +1946,156 @@ function initSwipeableStatusSegmentedBar() {
 
 function toast(msg, type = 'info') {
     const box = document.getElementById('toastBox');
-    const el = document.createElement('div');
+    if (!box) return;
     const isWarn = type === 'warn';
-    el.className = `px-4 py-3 rounded-2xl shadow-2xl text-xs font-extrabold flex items-center gap-2.5 transition-all duration-300`;
-    if (isWarn) {
-        el.style.background = '#7f1d1d';
-        el.style.color = '#fecdd3';
-    } else {
-        el.style.background = 'var(--md-primary-container)';
-        el.style.color = 'var(--md-on-primary-container)';
-    }
-    el.innerHTML = `<i class="ph-bold ${isWarn ? 'ph-warning-circle' : 'ph-check-circle'} text-base" style="color: ${isWarn ? '#fb7185' : 'var(--md-primary)'}"></i><span>${msg}</span>`;
+    const isSuccess = type === 'success';
+    const el = document.createElement('div');
+    el.className = `m3-snackbar ${isWarn ? 'is-warn' : ''}`;
+    const iconName = isWarn ? 'ph-warning-circle' : (isSuccess ? 'ph-check-circle' : 'ph-info');
+    const iconColor = isWarn ? 'var(--md-error)' : 'var(--md-inverse-primary)';
+    el.innerHTML = `<i class="ph-fill ${iconName} text-base shrink-0" style="color: ${iconColor}"></i><span class="leading-snug">${msg}</span>`;
+
+    const dismiss = () => {
+        if (el._dismissed) return;
+        el._dismissed = true;
+        el.classList.add('is-exiting');
+        setTimeout(() => el.remove(), 210);
+    };
+    el.onclick = dismiss;
     box.appendChild(el);
-    setTimeout(() => {
-        el.style.opacity = '0';
-        el.style.transform = 'translateY(8px) scale(0.95)';
-        setTimeout(() => el.remove(), 250);
-    }, 3000);
+    // Keep snackbar stack tidy (max 3 visible)
+    while (box.children.length > 3) {
+        box.firstElementChild?.remove();
+    }
+    setTimeout(dismiss, isWarn ? 3600 : 2900);
+}
+
+// ===================================================================
+// MATERIAL 3 EXPRESSIVE INTERACTION SYSTEMS (v4.0):
+// 1. Delegated Tactile Ripple Wave
+// 2. Inverse-Surface Rich Tooltip Controller
+// 3. Dynamic Active-Track Slider Synchronizer (Standard & Centered)
+// ===================================================================
+function initM3Ripples() {
+    if (document._m3RippleBound) return;
+    document._m3RippleBound = true;
+    const RIPPLE_SELECTOR = '.m3-btn-filled, .m3-btn-tonal, .m3-btn-error, .m3-btn-error-tonal, .m3-btn-success, .m3-seg-btn, .m3-icon-group-btn, .m3-group-item, .m3-custom-menu-item, .m3-extended-fab, .m3-dropdown-trigger, .m3-dropdown-field, .m3-swatch-btn, .m3-filter-chip, .m3-stepper-btn';
+
+    document.addEventListener('pointerdown', (e) => {
+        const target = e.target?.closest?.(RIPPLE_SELECTOR);
+        if (!target || target.disabled || target.tagName === 'INPUT') return;
+        // Avoid double ripple when clicking an interactive control nested inside an .m3-group-item
+        if (target.classList.contains('m3-group-item') && e.target.closest('button, input, a')) return;
+
+        const rect = target.getBoundingClientRect();
+        if (!rect.width || !rect.height) return;
+        const size = Math.max(rect.width, rect.height);
+        const wave = document.createElement('span');
+        wave.className = 'm3-ripple-wave';
+        wave.style.width = `${size}px`;
+        wave.style.height = `${size}px`;
+        wave.style.left = `${e.clientX - rect.left - size / 2}px`;
+        wave.style.top = `${e.clientY - rect.top - size / 2}px`;
+        target.appendChild(wave);
+        wave.addEventListener('animationend', () => wave.remove(), { once: true });
+    }, { passive: true });
+}
+
+function initM3Tooltips() {
+    if (document._m3TooltipBound) return;
+    document._m3TooltipBound = true;
+    const tipEl = document.getElementById('m3Tooltip');
+    if (!tipEl) return;
+
+    let showTimer = null;
+    let activeTarget = null;
+
+    const hideTip = () => {
+        clearTimeout(showTimer);
+        activeTarget = null;
+        tipEl.classList.remove('visible');
+    };
+
+    const showTipFor = (el) => {
+        const text = el.getAttribute('data-m3-tip') || el.getAttribute('title');
+        if (!text || !text.trim()) return;
+        if (el.hasAttribute('title')) {
+            el.setAttribute('data-m3-tip', text);
+            el.removeAttribute('title');
+        }
+        activeTarget = el;
+        tipEl.textContent = text;
+        tipEl.classList.remove('visible');
+        tipEl.style.left = '-9999px';
+        tipEl.style.top = '-9999px';
+
+        requestAnimationFrame(() => {
+            if (activeTarget !== el || !document.body.contains(el)) return;
+            const r = el.getBoundingClientRect();
+            const tw = tipEl.offsetWidth || 120;
+            const th = tipEl.offsetHeight || 28;
+
+            let left = r.left + (r.width - tw) / 2;
+            left = Math.max(8, Math.min(window.innerWidth - tw - 8, left));
+            let top = r.bottom + 8;
+            if (top + th > window.innerHeight - 10) {
+                top = Math.max(8, r.top - th - 8);
+            }
+            tipEl.style.left = `${Math.round(left)}px`;
+            tipEl.style.top = `${Math.round(top)}px`;
+            tipEl.classList.add('visible');
+        });
+    };
+
+    document.addEventListener('pointerover', (e) => {
+        if (e.pointerType === 'touch') return;
+        const el = e.target?.closest?.('[title], [data-m3-tip]');
+        if (!el) return;
+        if (el === activeTarget) return;
+        clearTimeout(showTimer);
+        showTimer = setTimeout(() => showTipFor(el), 380);
+    });
+
+    document.addEventListener('pointerout', (e) => {
+        if (!activeTarget) { clearTimeout(showTimer); return; }
+        const related = e.relatedTarget;
+        if (!related || !activeTarget.contains(related)) hideTip();
+    });
+
+    document.addEventListener('pointerdown', hideTip, { passive: true });
+    window.addEventListener('scroll', hideTip, true);
+    window.addEventListener('blur', hideTip);
+}
+
+function updateM3SliderTrack(sliderEl) {
+    if (!sliderEl) return;
+    const min = Number(sliderEl.min ?? 0);
+    const max = Number(sliderEl.max ?? 100);
+    const val = Number(sliderEl.value ?? 0);
+    const span = Math.max(0.0001, max - min);
+    const pct = Math.max(0, Math.min(100, ((val - min) / span) * 100));
+
+    // Centered slider detection (e.g. angle slider -15..+15 fills outward from 50%)
+    if (min < 0 && max > 0) {
+        const zeroPct = ((0 - min) / span) * 100;
+        sliderEl.style.setProperty('--slider-start', `${Math.min(zeroPct, pct).toFixed(2)}%`);
+        sliderEl.style.setProperty('--slider-end', `${Math.max(zeroPct, pct).toFixed(2)}%`);
+    } else {
+        sliderEl.style.setProperty('--slider-start', '0%');
+        sliderEl.style.setProperty('--slider-end', `${pct.toFixed(2)}%`);
+    }
+    sliderEl.style.setProperty('--slider-pct', `${pct.toFixed(2)}%`);
+}
+
+function initM3Sliders() {
+    document.querySelectorAll('input[type="range"].split-slider').forEach(updateM3SliderTrack);
+    if (document._m3SliderBound) return;
+    document._m3SliderBound = true;
+    document.addEventListener('input', (e) => {
+        if (e.target && e.target.matches('input[type="range"].split-slider')) {
+            updateM3SliderTrack(e.target);
+        }
+    });
 }
 
 // Image Import & Auto-Deskew
@@ -2027,6 +2211,7 @@ async function loadSingleImageForImport(fileOrBlob, labelName = 'Image') {
         const detectedAngle = estimateImageSkewAngle(img);
         state.importDeskewAngle = detectedAngle;
         document.getElementById('imageDeskewSlider').value = detectedAngle;
+        updateM3SliderTrack(document.getElementById('imageDeskewSlider'));
         document.getElementById('imageDeskewVal').textContent = `${detectedAngle}°`;
         renderDeskewedAndCleanedImage(img, detectedAngle, document.getElementById('imageCleanContrastChk').checked);
     };
@@ -3197,8 +3382,7 @@ function refreshCountsAndDrawerOnly() {
 
     document.querySelectorAll('.drawer-tag-chip').forEach(chip => {
         const t = chip.getAttribute('data-tag-chip');
-        const active = t === state.tagFilter;
-        chip.className = `drawer-tag-chip h-7 px-2.5 rounded-full text-[10px] shrink-0 transition ${active ? 'font-extrabold m3-btn-filled' : 'font-bold m3-surface-high'}`;
+        chip.classList.toggle('selected', t === state.tagFilter);
     });
 
     document.getElementById('activeChapterIndicator').textContent =
@@ -6136,12 +6320,12 @@ window.app = {
         brState.editMode = mode || 'BOUNDS';
         if (mode === 'SPLIT') {
             const s = document.getElementById('brSplitCutSlider');
-            if (s) s.value = 50;
+            if (s) { s.value = 50; updateM3SliderTrack(s); }
         } else if (mode === 'TRIM') {
             const t = document.getElementById('brTrimTopSlider');
             const b = document.getElementById('brTrimBotSlider');
             if (t) t.value = 0;
-            if (b) b.value = 100;
+            if (b) { b.value = 100; updateM3SliderTrack(t); updateM3SliderTrack(b); }
         }
         brRenderCurrent();
     },
@@ -6151,7 +6335,7 @@ window.app = {
             const valEl = document.getElementById('brSplitCutVal');
             const lineEl = document.getElementById('brSplitDividerLine');
             if (valEl) valEl.textContent = `${v}%`;
-            if (lineEl) lineEl.style.top = `${v}%`;
+            if (lineEl) lineEl.style.top = `${v}%`; updateM3SliderTrack(document.getElementById('brSplitCutSlider'));
         } else if (brState.editMode === 'TRIM') {
             const t = Number(document.getElementById('brTrimTopSlider')?.value || 0);
             const b = Number(document.getElementById('brTrimBotSlider')?.value || 100);
@@ -6906,6 +7090,7 @@ window.app = {
         state.activeSplitId = Number(id);
         document.getElementById('splitPreviewImg').src = q.imageDataUrl;
         document.getElementById('splitCutSlider').value = 50;
+        ['splitCutSlider','trimTopSlider','trimBotSlider'].forEach(id => updateM3SliderTrack(document.getElementById(id)));
         document.getElementById('trimTopSlider').value = 0;
         document.getElementById('trimBotSlider').value = 100;
         this.setSplitMode('SPLIT');
@@ -7404,15 +7589,26 @@ window.app = {
         scheduleCloudAutoSync(true);
     },
 
+    stepNumericInput(inputId, delta) {
+        const el = document.getElementById(inputId);
+        if (!el) return;
+        const min = el.min !== '' ? Number(el.min) : -Infinity;
+        const max = el.max !== '' ? Number(el.max) : Infinity;
+        const curr = Number(el.value) || 0;
+        const next = Math.max(min, Math.min(max, curr + Number(delta)));
+        el.value = String(next);
+        el.dispatchEvent(new Event('input', { bubbles: true }));
+        el.dispatchEvent(new Event('change', { bubbles: true }));
+    },
     handleFeedScroll(el) {
         closeCustomDropdown();
         const fab = document.getElementById('extendedAddPdfFab');
         if (!fab || !el) return;
         const st = el.scrollTop;
         if (st > state.lastScrollTop + 10 && st > 45) {
-            fab.classList.add('fab-hidden');
+            fab.classList.add('fab-collapsed');
         } else if (st < state.lastScrollTop - 6 || st < 35) {
-            fab.classList.remove('fab-hidden');
+            fab.classList.remove('fab-collapsed');
         }
         state.lastScrollTop = Math.max(0, st);
     },
@@ -7535,6 +7731,7 @@ window.app = {
         const angle = estimateImageSkewAngle(state.importRawImg);
         state.importDeskewAngle = angle;
         document.getElementById('imageDeskewSlider').value = angle;
+        updateM3SliderTrack(document.getElementById('imageDeskewSlider'));
         document.getElementById('imageDeskewVal').textContent = `${angle}°`;
         renderDeskewedAndCleanedImage(state.importRawImg, angle, document.getElementById('imageCleanContrastChk').checked);
     },
@@ -8524,6 +8721,9 @@ window.addEventListener('resize', () => {
 });
         window.addEventListener('DOMContentLoaded', async () => {
     initM3ExpressiveShapes();
+    initM3Ripples();
+    initM3Tooltips();
+    initM3Sliders();
     initSwipeableStatusSegmentedBar();
     initPopupSwipeNavigation();
     initWhiteboardThreeFingerSwipe();
