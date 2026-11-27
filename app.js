@@ -2842,13 +2842,15 @@ function setUploadStudioExpanded(expanded) {
     if (expanded) {
         ensureExtractViewportObserver();
         requestAnimationFrame(() => {
-            fitExtractPageFrame();
+            fitExtractPageFrame(true);
             if (!waveAnimFrame) waveAnimFrame = requestAnimationFrame(stepAllWavyBars);
         });
     }
 }
 
-function fitExtractPageFrame() {
+let lastFittedExtractSize = { w: 0, h: 0 };
+
+function fitExtractPageFrame(force = false) {
     const viewport = document.getElementById('extractPdfViewport');
     const frame = document.getElementById('extractPageFrame');
     const canvas = document.getElementById('pdfWorkCanvas');
@@ -2861,8 +2863,14 @@ function fitExtractPageFrame() {
     const availH = Math.max(160, viewport.clientHeight - 24);
     const scale = Math.min(availW / cw, availH / ch);
 
-    frame.style.width = `${Math.max(100, Math.floor(cw * scale))}px`;
-    frame.style.height = `${Math.max(120, Math.floor(ch * scale))}px`;
+    const targetW = Math.max(100, Math.floor(cw * scale));
+    const targetH = Math.max(120, Math.floor(ch * scale));
+    if (!force && Math.abs(targetW - lastFittedExtractSize.w) < 2 && Math.abs(targetH - lastFittedExtractSize.h) < 2) {
+        return;
+    }
+    lastFittedExtractSize = { w: targetW, h: targetH };
+    frame.style.width = `${targetW}px`;
+    frame.style.height = `${targetH}px`;
 }
 
 function ensureExtractViewportObserver() {
@@ -2936,77 +2944,133 @@ function updateExtractActiveTelemetry({ pageNum = null, stagePill = null, stageT
     }
 }
 
+let extractStaticSignature = '';
+
 function showExtractPageSweepOverlay(message = 'Scanning layout...') {
     const layer = document.getElementById('extractOverlayLayer');
     if (!layer) return;
-    layer.innerHTML = `<div class="ex-page-sweep-line"></div>`;
+    extractStaticSignature = '';
+    layer.innerHTML = `<div class="ex-page-sweep-track"><div class="ex-page-sweep-line"></div></div>`;
     updateExtractActiveTelemetry({ stagePill: message, stageTone: 'primary' });
 }
 
-function renderExtractPageBoxes({ doneBoxes = [], pendingBoxes = [], activeBox = null }) {
+function ensureExtractPersistentLayers() {
     const layer = document.getElementById('extractOverlayLayer');
-    if (!layer) return;
-
-    // Render static ghost & completed boxes cleanly without resetting #exActiveBox if it already exists!
-    const existingActive = layer.querySelector('#exActiveBox');
-    Array.from(layer.children).forEach(ch => {
-        if (ch.id !== 'exActiveBox') ch.remove();
-    });
-
-    for (const pb of pendingBoxes) {
-        const d = document.createElement('div');
-        d.className = 'ex-ghost-box';
-        d.style.left = `${(pb.xmin / 10).toFixed(2)}%`;
-        d.style.top = `${(pb.ymin / 10).toFixed(2)}%`;
-        d.style.width = `${Math.max(2, (pb.xmax - pb.xmin) / 10).toFixed(2)}%`;
-        d.style.height = `${Math.max(1.5, (pb.ymax - pb.ymin) / 10).toFixed(2)}%`;
-        layer.appendChild(d);
+    if (!layer) return null;
+    if (!layer.querySelector('#exStaticLayer')) {
+        layer.innerHTML = `
+            <div id="exStaticLayer"></div>
+            <div id="exScrimLayer">
+                <div id="exScrimTop" class="ex-scrim-pane"></div>
+                <div id="exScrimBot" class="ex-scrim-pane"></div>
+                <div id="exScrimLeft" class="ex-scrim-pane"></div>
+                <div id="exScrimRight" class="ex-scrim-pane"></div>
+            </div>
+            <div id="exActiveBox" class="ex-active-box">
+                <span class="ex-corner tl"></span>
+                <span class="ex-corner tr"></span>
+                <span class="ex-corner bl"></span>
+                <span class="ex-corner br"></span>
+                <div class="ex-scan-beam-track"><div class="ex-scan-beam"></div></div>
+                <span class="ex-active-badge"></span>
+            </div>
+        `;
     }
+    return {
+        staticLayer: layer.querySelector('#exStaticLayer'),
+        scrimTop: layer.querySelector('#exScrimTop'),
+        scrimBot: layer.querySelector('#exScrimBot'),
+        scrimLeft: layer.querySelector('#exScrimLeft'),
+        scrimRight: layer.querySelector('#exScrimRight'),
+        boxEl: layer.querySelector('#exActiveBox')
+    };
+}
 
-    for (const db of doneBoxes) {
-        const d = document.createElement('div');
-        d.className = 'ex-done-box';
-        d.style.left = `${(db.xmin / 10).toFixed(2)}%`;
-        d.style.top = `${(db.ymin / 10).toFixed(2)}%`;
-        d.style.width = `${Math.max(2, (db.xmax - db.xmin) / 10).toFixed(2)}%`;
-        d.style.height = `${Math.max(1.5, (db.ymax - db.ymin) / 10).toFixed(2)}%`;
-        const tag = db.isStitched ? `🔗 Q.${db.qNum}` : `✓ Q.${db.qNum}${db.chapter ? ' • ' + db.chapter : ''}`;
-        d.innerHTML = `<span class="ex-done-pill">${tag}</span>`;
-        layer.appendChild(d);
+function renderExtractPageBoxes({ doneBoxes = [], pendingBoxes = [], activeBox = null }) {
+    const dom = ensureExtractPersistentLayers();
+    if (!dom) return;
+
+    // Only rebuild static done/ghost boxes when they actually change (prevents 4x/question DOM churn!)
+    const sig = `${doneBoxes.length}|${pendingBoxes.length}|${doneBoxes.map(d => d.qNum).join(',')}`;
+    if (sig !== extractStaticSignature) {
+        extractStaticSignature = sig;
+        const frag = document.createDocumentFragment();
+        for (const pb of pendingBoxes) {
+            const d = document.createElement('div');
+            d.className = 'ex-ghost-box';
+            d.style.left = `${(pb.xmin / 10).toFixed(2)}%`;
+            d.style.top = `${(pb.ymin / 10).toFixed(2)}%`;
+            d.style.width = `${Math.max(2, (pb.xmax - pb.xmin) / 10).toFixed(2)}%`;
+            d.style.height = `${Math.max(1.5, (pb.ymax - pb.ymin) / 10).toFixed(2)}%`;
+            frag.appendChild(d);
+        }
+        for (const db of doneBoxes) {
+            const d = document.createElement('div');
+            d.className = 'ex-done-box';
+            d.style.left = `${(db.xmin / 10).toFixed(2)}%`;
+            d.style.top = `${(db.ymin / 10).toFixed(2)}%`;
+            d.style.width = `${Math.max(2, (db.xmax - db.xmin) / 10).toFixed(2)}%`;
+            d.style.height = `${Math.max(1.5, (db.ymax - db.ymin) / 10).toFixed(2)}%`;
+            const tag = db.isStitched ? `🔗 Q.${db.qNum}` : `✓ Q.${db.qNum}${db.chapter ? ' • ' + db.chapter : ''}`;
+            d.innerHTML = `<span class="ex-done-pill">${tag}</span>`;
+            frag.appendChild(d);
+        }
+        dom.staticLayer.replaceChildren(frag);
     }
 
     if (!activeBox) {
-        if (existingActive) existingActive.remove();
+        dom.boxEl.style.display = 'none';
+        dom.scrimTop.style.opacity = '0';
+        dom.scrimBot.style.opacity = '0';
+        dom.scrimLeft.style.opacity = '0';
+        dom.scrimRight.style.opacity = '0';
         return;
     }
 
-    let boxEl = existingActive;
-    if (!boxEl) {
-        boxEl = document.createElement('div');
-        boxEl.id = 'exActiveBox';
-        boxEl.className = 'ex-active-box';
-        boxEl.innerHTML = `
-            <span class="ex-corner tl"></span>
-            <span class="ex-corner tr"></span>
-            <span class="ex-corner bl"></span>
-            <span class="ex-corner br"></span>
-            <div class="ex-scan-beam"></div>
-            <span class="ex-active-badge"></span>
-        `;
-        layer.appendChild(boxEl);
-    }
+    dom.boxEl.style.display = '';
+    const leftPct = Math.max(0, Math.min(98, activeBox.xmin / 10));
+    const topPct = Math.max(0, Math.min(98.5, activeBox.ymin / 10));
+    const widthPct = Math.max(2, Math.min(100 - leftPct, (activeBox.xmax - activeBox.xmin) / 10));
+    const heightPct = Math.max(1.5, Math.min(100 - topPct, (activeBox.ymax - activeBox.ymin) / 10));
+    const rightStartPct = Math.min(100, leftPct + widthPct);
+    const botStartPct = Math.min(100, topPct + heightPct);
 
-    boxEl.classList.remove('is-adjusting', 'is-ocr', 'is-locked');
-    if (activeBox.mode === 'adjusting') boxEl.classList.add('is-adjusting');
-    else if (activeBox.mode === 'ocr') boxEl.classList.add('is-ocr');
-    else if (activeBox.mode === 'locked') boxEl.classList.add('is-locked');
+    // Update 4 lightweight GPU scrim panes around the active question (ZERO 9999px shadow flicker!)
+    dom.scrimTop.style.opacity = '1';
+    dom.scrimTop.style.left = '0%';
+    dom.scrimTop.style.top = '0%';
+    dom.scrimTop.style.width = '100%';
+    dom.scrimTop.style.height = `${topPct.toFixed(2)}%`;
 
-    boxEl.style.left = `${(activeBox.xmin / 10).toFixed(2)}%`;
-    boxEl.style.top = `${(activeBox.ymin / 10).toFixed(2)}%`;
-    boxEl.style.width = `${Math.max(2, (activeBox.xmax - activeBox.xmin) / 10).toFixed(2)}%`;
-    boxEl.style.height = `${Math.max(1.5, (activeBox.ymax - activeBox.ymin) / 10).toFixed(2)}%`;
+    dom.scrimBot.style.opacity = '1';
+    dom.scrimBot.style.left = '0%';
+    dom.scrimBot.style.top = `${botStartPct.toFixed(2)}%`;
+    dom.scrimBot.style.width = '100%';
+    dom.scrimBot.style.height = `${Math.max(0, 100 - botStartPct).toFixed(2)}%`;
 
-    const badgeEl = boxEl.querySelector('.ex-active-badge');
+    dom.scrimLeft.style.opacity = '1';
+    dom.scrimLeft.style.left = '0%';
+    dom.scrimLeft.style.top = `${topPct.toFixed(2)}%`;
+    dom.scrimLeft.style.width = `${leftPct.toFixed(2)}%`;
+    dom.scrimLeft.style.height = `${heightPct.toFixed(2)}%`;
+
+    dom.scrimRight.style.opacity = '1';
+    dom.scrimRight.style.left = `${rightStartPct.toFixed(2)}%`;
+    dom.scrimRight.style.top = `${topPct.toFixed(2)}%`;
+    dom.scrimRight.style.width = `${Math.max(0, 100 - rightStartPct).toFixed(2)}%`;
+    dom.scrimRight.style.height = `${heightPct.toFixed(2)}%`;
+
+    dom.boxEl.classList.remove('is-adjusting', 'is-ocr', 'is-locked');
+    if (activeBox.mode === 'adjusting') dom.boxEl.classList.add('is-adjusting');
+    else if (activeBox.mode === 'ocr') dom.boxEl.classList.add('is-ocr');
+    else if (activeBox.mode === 'locked') dom.boxEl.classList.add('is-locked');
+
+    dom.boxEl.style.left = `${leftPct.toFixed(2)}%`;
+    dom.boxEl.style.top = `${topPct.toFixed(2)}%`;
+    dom.boxEl.style.width = `${widthPct.toFixed(2)}%`;
+    dom.boxEl.style.height = `${heightPct.toFixed(2)}%`;
+
+    const badgeEl = dom.boxEl.querySelector('.ex-active-badge');
     if (badgeEl) badgeEl.textContent = activeBox.label || '';
 }
 
@@ -3344,8 +3408,7 @@ async function startPdfExtraction() {
                 };
                 const finalBox = { xmin, xmax, ymin, ymax };
 
-                // Remove previous active box so the new question enters cleanly at coarse bounds
-                document.getElementById('exActiveBox')?.remove();
+                // Keep persistent #exActiveBox & 4 scrim curtains mounted so it glides smoothly with zero flash!
                 renderExtractPageBoxes({
                     doneBoxes: pageDoneBoxes,
                     pendingBoxes,
