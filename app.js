@@ -1728,10 +1728,24 @@ function updateTimerUI() {
     });
 }
 
+let activeDropdownAnchorEl = null;
+
 function openCustomDropdown(anchorEl, options, currentVal, onSelectCallback) {
     const menu = document.getElementById('customDropdownMenu');
     const backdrop = document.getElementById('customDropdownBackdrop');
     if (!menu || !backdrop || !anchorEl) return;
+
+    // If tapping the exact same open trigger again, toggle it closed
+    if (activeDropdownAnchorEl === anchorEl && !menu.classList.contains('hidden')) {
+        closeCustomDropdown();
+        return;
+    }
+
+    if (activeDropdownAnchorEl) {
+        activeDropdownAnchorEl.classList.remove('is-dropdown-open');
+    }
+    activeDropdownAnchorEl = anchorEl;
+    anchorEl.classList.add('is-dropdown-open');
 
     menu.innerHTML = options.map((opt, idx) => {
         const isSel = String(opt.value) === String(currentVal);
@@ -1759,19 +1773,29 @@ function openCustomDropdown(anchorEl, options, currentVal, onSelectCallback) {
     menu.classList.remove('hidden');
 
     const rect = anchorEl.getBoundingClientRect();
-    const menuW = Math.max(rect.width, 195);
-    menu.style.width = `${Math.min(320, menuW)}px`;
+    const maxViewportW = Math.max(200, window.innerWidth - 20);
+    const targetW = Math.min(maxViewportW, Math.max(rect.width, 200));
+    menu.style.width = `${Math.round(targetW)}px`;
+
+    const menuW = menu.offsetWidth || targetW;
+    const menuH = menu.offsetHeight || 200;
 
     let left = rect.left;
-    if (left + menu.offsetWidth > window.innerWidth - 10) {
-        left = Math.max(10, window.innerWidth - menu.offsetWidth - 10);
+    if (left + menuW > window.innerWidth - 10) {
+        left = Math.max(10, window.innerWidth - menuW - 10);
     }
+
+    const spaceBelow = window.innerHeight - rect.bottom - 12;
+    const spaceAbove = rect.top - 12;
     let top = rect.bottom + 6;
-    if (top + menu.offsetHeight > window.innerHeight - 12) {
-        top = Math.max(12, rect.top - menu.offsetHeight - 6);
+    if (menuH > spaceBelow && spaceAbove > spaceBelow) {
+        top = Math.max(12, rect.top - menuH - 6);
+    } else if (top + menuH > window.innerHeight - 12) {
+        top = Math.max(12, window.innerHeight - menuH - 12);
     }
-    menu.style.left = `${left}px`;
-    menu.style.top = `${top}px`;
+
+    menu.style.left = `${Math.round(left)}px`;
+    menu.style.top = `${Math.round(top)}px`;
     const selItem = menu.querySelector('.m3-custom-menu-item.selected');
     if (selItem) {
         requestAnimationFrame(() => selItem.scrollIntoView({ block: 'nearest' }));
@@ -1779,6 +1803,10 @@ function openCustomDropdown(anchorEl, options, currentVal, onSelectCallback) {
 }
 
 function closeCustomDropdown() {
+    if (activeDropdownAnchorEl) {
+        activeDropdownAnchorEl.classList.remove('is-dropdown-open');
+        activeDropdownAnchorEl = null;
+    }
     document.getElementById('customDropdownMenu')?.classList.add('hidden');
     document.getElementById('customDropdownBackdrop')?.classList.add('hidden');
 }
@@ -1979,7 +2007,7 @@ function toast(msg, type = 'info') {
 function initM3Ripples() {
     if (document._m3RippleBound) return;
     document._m3RippleBound = true;
-    const RIPPLE_SELECTOR = '.m3-btn-filled, .m3-btn-tonal, .m3-btn-error, .m3-btn-error-tonal, .m3-btn-success, .m3-seg-btn, .m3-icon-group-btn, .m3-group-item, .m3-custom-menu-item, .m3-extended-fab, .m3-dropdown-trigger, .m3-dropdown-field, .m3-swatch-btn, .m3-filter-chip, .m3-stepper-btn';
+    const RIPPLE_SELECTOR = '.m3-btn-filled, .m3-btn-tonal, .m3-btn-error, .m3-btn-error-tonal, .m3-btn-success, .m3-seg-btn, .m3-icon-group-btn, .m3-group-item, .m3-custom-menu-item, .m3-extended-fab, .m3-dropdown-trigger, .m3-dropdown-field, .m3-swatch-btn, .m3-filter-chip, .m3-stepper-btn, .m3-nudge-btn, .br-palette-pill';
 
     document.addEventListener('pointerdown', (e) => {
         const target = e.target?.closest?.(RIPPLE_SELECTOR);
@@ -3869,7 +3897,7 @@ function renderDrawerChapters() {
                         <span class="truncate pr-2">${cName}</span>
                         <div class="flex items-center gap-1 shrink-0 text-[11px]">
                             ${st.starred > 0 ? `<span class="text-amber-400 font-extrabold">★${st.starred}</span>` : ''}
-                            <span class="px-2 py-0.2 rounded-full bg-black/15">${st.solved}/${st.total}</span>
+                            <span class="px-2 py-0.5 rounded-full bg-black/15">${st.solved}/${st.total}</span>
                         </div>
                     </button>
                 `;
@@ -6648,7 +6676,7 @@ function brRenderCurrent() {
     const confBadge = document.getElementById('brConfBadge');
     confBadge.textContent = meta.needsReview ? `Check Chapter • ${confPct}%` : `Local Match • ${confPct}%`;
     confBadge.className = `px-2.5 py-0.5 rounded-full text-[10.5px] font-extrabold ${
-        meta.needsReview ? 'bg-amber-500/20 text-amber-300' : 'bg-emerald-500/20 text-emerald-400'
+        meta.needsReview ? 'm3-badge-warn' : 'm3-badge-success'
     }`;
 
     const aiBorderBadge = document.getElementById('brBorderAiBadge');
@@ -6695,11 +6723,10 @@ function brRenderCurrent() {
     palette.innerHTML = visible.map((origIdx) => {
         const item = brState.questions[origIdx];
         const isCurr = origIdx === brState.currentIdx;
-        let cls = 'bg-emerald-600/80 text-white';
-        if (item._skipInReview) cls = 'bg-rose-600/70 text-white line-through opacity-60';
-        else if (item._reviewMeta?.needsReview) cls = 'bg-amber-500 text-slate-950';
-        const ring = isCurr ? 'ring-2 ring-[var(--md-primary)] scale-110' : '';
-        return `<button type="button" onclick="window.app.brJumpTo(${origIdx})" class="h-6 min-w-[28px] px-1.5 rounded-full text-[10px] font-extrabold shrink-0 transition ${cls} ${ring}">Q.${item.questionNumber}</button>`;
+        let stateCls = 'is-ok';
+        if (item._skipInReview) stateCls = 'is-skipped';
+        else if (item._reviewMeta?.needsReview) stateCls = 'is-review';
+        return `<button type="button" onclick="window.app.brJumpTo(${origIdx})" class="br-palette-pill ${stateCls} ${isCurr ? 'is-current' : ''}">Q.${item.questionNumber}</button>`;
     }).join('');
 }
 
