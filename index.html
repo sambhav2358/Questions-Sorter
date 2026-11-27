@@ -13,7 +13,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
     <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
-    <link rel="stylesheet" href="./styles.css?v=4.2">
+    <link rel="stylesheet" href="./styles.css?v=4.3">
     <script src="./local-vision-engine.js?v=4.0"></script>
     <script src="./local-ai-borders.js?v=3.2"></script>
 </head>
@@ -37,7 +37,7 @@
     <header class="h-12 m3-surface-low border-b border-[var(--md-outline-variant)] px-2 sm:px-3 py-1 flex items-center justify-between gap-1.5 shrink-0 z-30 w-full overflow-hidden">
         <!-- Left Cluster: Chapters + Swipeable Status Pill -->
         <div class="flex items-center gap-1.5 min-w-0 shrink-0">
-            <button onclick="window.app.toggleDrawer()" class="h-8.5 px-2.5 py-1.5 m3-btn-tonal text-[11px] flex items-center gap-1.5 shrink-0">
+            <button onclick="window.app.toggleDrawer()" class="h-[34px] px-2.5 m3-btn-tonal text-[11px] flex items-center gap-1.5 shrink-0">
                 <i class="ph-bold ph-tree-structure text-sm" style="color: var(--md-primary)"></i>
                 <span class="hidden md:inline">Chapters</span>
                 <span id="activeChapterIndicator" class="px-1.5 py-0.5 text-[10px] rounded-full font-extrabold max-w-[70px] truncate" style="background: var(--md-primary); color: var(--md-on-primary);">All</span>
@@ -80,7 +80,7 @@
 
             <div class="relative flex items-center flex-1 min-w-0">
                 <i class="ph-bold ph-magnifying-glass absolute left-2.5 top-1/2 -translate-y-1/2 m3-text-muted text-xs pointer-events-none"></i>
-                <input id="searchBox" oninput="window.app.setSearch(this.value)" type="text" placeholder="Search questions..." class="h-8.5 py-1.5 w-full m3-input pl-7 pr-6 text-[11px]">
+                <input id="searchBox" oninput="window.app.setSearch(this.value)" type="text" placeholder="Search questions..." class="h-[34px] w-full m3-input pl-7 pr-6 text-[11px]">
                 <button id="clearSearchBtn" onclick="window.app.clearSearch()" class="hidden absolute right-2 top-1/2 -translate-y-1/2 m3-text-muted hover:opacity-100 p-0.5" title="Clear search">
                     <i class="ph-bold ph-x text-xs"></i>
                 </button>
@@ -89,12 +89,12 @@
 
         <!-- Right Cluster: Paper Filter, Sort, AI Solver Console, Mock Test, Random, Fullscreen, Sync, Settings -->
         <div class="flex items-center gap-1 shrink-0">
-            <button type="button" id="paperDropdownBtn" onclick="window.app.openPaperMenu(this)" class="h-8.5 px-2.5 py-1.5 m3-dropdown-trigger text-[11px] max-w-[108px] shrink-0" title="Filter by Paper">
+            <button type="button" id="paperDropdownBtn" onclick="window.app.openPaperMenu(this)" class="h-[34px] px-2.5 m3-dropdown-trigger text-[11px] max-w-[116px] shrink-0" title="Filter by Paper">
                 <span id="paperDropdownLabel" class="truncate">All Papers</span>
                 <i class="ph-bold ph-caret-down text-[9px] m3-text-muted shrink-0"></i>
             </button>
 
-            <button type="button" id="sortDropdownBtn" onclick="window.app.openSortMenu(this)" class="h-8.5 px-2 py-1.5 m3-dropdown-trigger text-[11px] shrink-0" title="Sort Questions">
+            <button type="button" id="sortDropdownBtn" onclick="window.app.openSortMenu(this)" class="h-[34px] px-2.5 m3-dropdown-trigger text-[11px] shrink-0" title="Sort Questions">
                 <i class="ph-bold ph-sort-ascending text-xs" style="color: var(--md-primary)"></i>
                 <span id="sortDropdownLabel" class="hidden xl:inline text-[10px]">Q.#</span>
             </button>
@@ -194,7 +194,7 @@
     <!-- =================================================================== -->
     <!-- TIMED MOCK SET GENERATOR MODAL (#5)                                 -->
     <!-- =================================================================== -->
-    <div id="mockTestSetupModal" onclick="if(event.target === this) window.app.closeMockTestSetupModal()" class="fixed inset-0 m3-scrim backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+    <div id="mockTestSetupModal" onclick="if(event.target === this) window.app.closeMockTestSetupModal()" class="fixed inset-0 m3-scrim backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
         <div class="m3-dialog max-w-md w-full p-6 space-y-4">
             <div class="flex items-center justify-between">
                 <div class="flex items-center gap-3">
@@ -251,7 +251,7 @@
     <!-- =================================================================== -->
     <!-- TIMED MOCK SET SUMMARY MODAL (#5)                                   -->
     <!-- =================================================================== -->
-    <div id="mockTestSummaryModal" onclick="if(event.target === this) window.app.closeMockTestSummaryModal()" class="fixed inset-0 m3-scrim backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+    <div id="mockTestSummaryModal" onclick="if(event.target === this) window.app.closeMockTestSummaryModal()" class="fixed inset-0 m3-scrim backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
         <div class="m3-dialog max-w-md w-full p-6 space-y-4">
             <div class="flex items-center gap-3">
                 <div class="w-12 h-12 m3-cookie-12 flex items-center justify-center shrink-0" style="background: var(--md-primary-container); color: var(--md-primary);">
@@ -274,7 +274,7 @@
     <!-- =================================================================== -->
     <!-- DOUBLE CONFIRMATION DIALOG FOR CLEAR ALL QUESTIONS                  -->
     <!-- =================================================================== -->
-    <div id="clearConfirmModal" onclick="if(event.target === this) window.app.closeClearConfirmModal()" class="fixed inset-0 m3-scrim backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+    <div id="clearConfirmModal" onclick="if(event.target === this) window.app.closeClearConfirmModal()" class="fixed inset-0 m3-scrim backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
         <div class="m3-dialog max-w-md w-full p-6 space-y-4">
             <div class="flex items-center gap-3">
                 <div class="w-12 h-12 m3-cookie-12 bg-rose-500/20 text-rose-400 flex items-center justify-center shrink-0">
@@ -303,7 +303,7 @@
     <!-- =================================================================== -->
     <!-- MATERIAL 3 EXPRESSIVE NAVIGATION DRAWER                             -->
     <!-- =================================================================== -->
-    <div id="drawerBackdrop" onclick="window.app.toggleDrawer(false)" class="fixed inset-0 m3-scrim backdrop-blur-xs z-40 hidden"></div>
+    <div id="drawerBackdrop" onclick="window.app.toggleDrawer(false)" class="fixed inset-0 m3-scrim backdrop-blur-sm z-40 hidden"></div>
     <aside id="chaptersDrawer" class="fixed inset-y-0 left-0 w-80 m3-surface-container border-r border-[var(--md-outline-variant)] rounded-r-[32px] z-50 -translate-x-full transition-transform duration-300 ease-out flex flex-col shadow-2xl overflow-hidden">
         <div class="p-4 flex items-center justify-between">
             <div class="flex items-center gap-2.5">
@@ -625,7 +625,7 @@
 
                         <div class="p-4 m3-group-item space-y-1.5">
                             <label class="block text-xs font-bold">Gemini Model (Strictly 3.8 Flash / 3.8 Flash Lite)</label>
-                            <button type="button" id="geminiModelDropdownBtn" onclick="window.app.openGeminiModelMenu(this)" class="w-full h-10 px-4 m3-surface-low rounded-full flex items-center justify-between text-xs font-bold">
+                            <button type="button" id="geminiModelDropdownBtn" onclick="window.app.openGeminiModelMenu(this)" class="w-full h-10 m3-dropdown-field text-xs">
                                 <span id="geminiModelDropdownLabel" class="truncate">gemini-3.8-flash (Default • High Precision)</span>
                                 <i class="ph-bold ph-caret-down text-xs m3-text-muted"></i>
                             </button>
@@ -1082,11 +1082,11 @@
                     <div class="p-3 m3-surface-high border-b border-[var(--md-outline-variant)] space-y-2 shrink-0">
                         <div class="text-[10.5px] font-extrabold uppercase tracking-wider m3-text-muted">Set Subject & Chapter for All Questions on Page</div>
                         <div class="grid grid-cols-2 gap-2">
-                            <button type="button" id="mcBulkSubjectBtn" onclick="window.app.openMcBulkSubjectMenu(this)" class="h-8.5 m3-dropdown-field text-[11px]">
+                            <button type="button" id="mcBulkSubjectBtn" onclick="window.app.openMcBulkSubjectMenu(this)" class="h-9 m3-dropdown-field text-xs">
                                 <span id="mcBulkSubjectLabel" class="truncate">Mathematics</span>
                                 <i class="ph-bold ph-caret-down text-[9px] m3-text-muted shrink-0"></i>
                             </button>
-                            <button type="button" id="mcBulkChapterBtn" onclick="window.app.openMcBulkChapterMenu(this)" class="h-8.5 m3-dropdown-field text-[11px]">
+                            <button type="button" id="mcBulkChapterBtn" onclick="window.app.openMcBulkChapterMenu(this)" class="h-9 m3-dropdown-field text-xs">
                                 <span id="mcBulkChapterLabel" class="truncate">Straight Lines</span>
                                 <i class="ph-bold ph-caret-down text-[9px] m3-text-muted shrink-0"></i>
                             </button>
@@ -1176,38 +1176,45 @@
                         </div>
 
                         <div class="flex items-center gap-1.5 flex-wrap">
-                            <button type="button" id="brMergePrevBtn" onclick="window.app.brMergeWithNeighbor(-1)" class="h-7 px-2.5 rounded-full m3-btn-tonal text-[10.5px] flex items-center gap-1" title="Stitch this question onto the bottom of the previous question">
+                            <button type="button" id="brMergePrevBtn" onclick="window.app.brMergeWithNeighbor(-1)" class="h-8 px-3 m3-btn-tonal text-[11px] flex items-center gap-1 disabled:opacity-40" title="Stitch this question onto the bottom of the previous question">
                                 <i class="ph-bold ph-link text-xs"></i>
                                 <span>Merge ← Prev</span>
                             </button>
-                            <button type="button" id="brMergeNextBtn" onclick="window.app.brMergeWithNeighbor(1)" class="h-7 px-2.5 rounded-full m3-btn-tonal text-[10.5px] flex items-center gap-1" title="Stitch the next question onto the bottom of this question">
+                            <button type="button" id="brMergeNextBtn" onclick="window.app.brMergeWithNeighbor(1)" class="h-8 px-3 m3-btn-tonal text-[11px] flex items-center gap-1 disabled:opacity-40" title="Stitch the next question onto the bottom of this question">
                                 <i class="ph-bold ph-link text-xs"></i>
                                 <span>Merge → Next</span>
                             </button>
-                            <button type="button" onclick="window.app.brResetCurrentBorder()" class="h-7 px-2.5 rounded-full m3-surface-low border border-[var(--md-outline-variant)] hover:brightness-110 text-[10.5px] font-bold" title="Reset crop to original detected bounds">
-                                Reset
+                            <button type="button" onclick="window.app.brResetCurrentBorder()" class="h-8 px-3 m3-btn-tonal text-[11px] flex items-center gap-1" title="Reset crop to original detected bounds">
+                                <i class="ph-bold ph-arrow-counter-clockwise text-xs"></i>
+                                <span>Reset</span>
                             </button>
                         </div>
                     </div>
 
                     <!-- Row 2A: 4-Side PDF Page Border Nudges (BOUNDS Mode) -->
-                    <div id="brBoundsToolbar" class="px-3 py-1.5 m3-surface-low border-b border-[var(--md-outline-variant)] flex flex-wrap items-center justify-between gap-2 shrink-0 text-[10.5px] font-bold">
-                        <div class="flex items-center gap-1">
+                    <div id="brBoundsToolbar" class="px-3 py-2 m3-surface-low border-b border-[var(--md-outline-variant)] flex flex-wrap items-center justify-between gap-2 shrink-0 text-[10.5px] font-bold">
+                        <div class="flex items-center gap-1.5">
                             <span class="m3-text-muted">Top:</span>
-                            <button type="button" onclick="window.app.brNudgeBorder('top', -18)" class="h-6 px-2 rounded-full m3-surface-high hover:brightness-110 text-[10px] font-extrabold" title="Expand top border upward">▲ +Exp</button>
-                            <button type="button" onclick="window.app.brNudgeBorder('top', 14)" class="h-6 px-2 rounded-full m3-surface-high hover:brightness-110 text-[10px] font-extrabold" title="Trim top border downward">▼ Trim</button>
+                            <div class="m3-nudge-group">
+                                <button type="button" onclick="window.app.brNudgeBorder('top', -18)" class="m3-nudge-btn" title="Expand top border upward">▲ +Exp</button>
+                                <button type="button" onclick="window.app.brNudgeBorder('top', 14)" class="m3-nudge-btn" title="Trim top border downward">▼ Trim</button>
+                            </div>
                         </div>
-                        <div class="flex items-center gap-1">
+                        <div class="flex items-center gap-1.5">
                             <span class="m3-text-muted">Bot:</span>
-                            <button type="button" onclick="window.app.brNudgeBorder('bottom', -14)" class="h-6 px-2 rounded-full m3-surface-high hover:brightness-110 text-[10px] font-extrabold" title="Trim bottom border upward">▲ Trim</button>
-                            <button type="button" onclick="window.app.brNudgeBorder('bottom', 18)" class="h-6 px-2 rounded-full m3-surface-high hover:brightness-110 text-[10px] font-extrabold" title="Expand bottom border downward">▼ +Exp</button>
+                            <div class="m3-nudge-group">
+                                <button type="button" onclick="window.app.brNudgeBorder('bottom', -14)" class="m3-nudge-btn" title="Trim bottom border upward">▲ Trim</button>
+                                <button type="button" onclick="window.app.brNudgeBorder('bottom', 18)" class="m3-nudge-btn" title="Expand bottom border downward">▼ +Exp</button>
+                            </div>
                         </div>
-                        <div class="flex items-center gap-1">
+                        <div class="flex items-center gap-1.5">
                             <span class="m3-text-muted">L/R:</span>
-                            <button type="button" onclick="window.app.brNudgeBorder('left', -20)" class="h-6 px-1.5 rounded-full m3-surface-high hover:brightness-110 text-[10px] font-extrabold" title="Expand left border">◀L+</button>
-                            <button type="button" onclick="window.app.brNudgeBorder('left', 16)" class="h-6 px-1.5 rounded-full m3-surface-high hover:brightness-110 text-[10px] font-extrabold" title="Trim left border">L▶</button>
-                            <button type="button" onclick="window.app.brNudgeBorder('right', -16)" class="h-6 px-1.5 rounded-full m3-surface-high hover:brightness-110 text-[10px] font-extrabold" title="Trim right border">◀R</button>
-                            <button type="button" onclick="window.app.brNudgeBorder('right', 20)" class="h-6 px-1.5 rounded-full m3-surface-high hover:brightness-110 text-[10px] font-extrabold" title="Expand right border">R+▶</button>
+                            <div class="m3-nudge-group">
+                                <button type="button" onclick="window.app.brNudgeBorder('left', -20)" class="m3-nudge-btn" title="Expand left border">◀L+</button>
+                                <button type="button" onclick="window.app.brNudgeBorder('left', 16)" class="m3-nudge-btn" title="Trim left border">L▶</button>
+                                <button type="button" onclick="window.app.brNudgeBorder('right', -16)" class="m3-nudge-btn" title="Trim right border">◀R</button>
+                                <button type="button" onclick="window.app.brNudgeBorder('right', 20)" class="m3-nudge-btn" title="Expand right border">R+▶</button>
+                            </div>
                         </div>
                     </div>
 
@@ -1261,29 +1268,29 @@
                 <div class="lg:col-span-5 min-h-0 overflow-y-auto p-4 space-y-3">
                     <div class="flex items-center justify-between gap-2 flex-wrap">
                         <div class="flex items-center gap-1.5 flex-wrap">
-                            <span id="brPagePill" class="px-2.5 py-0.5 rounded-full m3-surface-high text-[10.5px] font-extrabold">Page 1</span>
-                            <span id="brConfBadge" class="px-2.5 py-0.5 rounded-full text-[10.5px] font-extrabold bg-emerald-500/20 text-emerald-400">Local: 90%</span>
-                            <span id="brBorderAiBadge" class="hidden px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-sky-500/20 text-sky-300">AI Border Checked ✓</span>
+                            <span id="brPagePill" class="px-2.5 py-0.5 rounded-full m3-surface-high border border-[var(--md-outline-variant)] text-[10.5px] font-extrabold">Page 1</span>
+                            <span id="brConfBadge" class="px-2.5 py-0.5 rounded-full text-[10.5px] font-extrabold m3-badge-success">Local: 90%</span>
+                            <span id="brBorderAiBadge" class="hidden px-2.5 py-0.5 rounded-full text-[10px] font-extrabold m3-primary-pill">AI Border Checked ✓</span>
                         </div>
-                        <label class="flex items-center gap-1.5 text-xs font-extrabold text-rose-400 cursor-pointer">
+                        <label class="flex items-center gap-2 text-xs font-extrabold cursor-pointer" style="color: var(--md-error);">
                             <input type="checkbox" id="brSkipChk" onchange="window.app.brToggleSkipCurrent(this.checked)" class="m3-switch m3-switch-sm m3-switch-danger">
                             <span>Skip / Delete</span>
                         </label>
                     </div>
 
                     <div class="m3-group-list">
-                        <div class="p-3 m3-group-item flex items-center justify-between gap-3">
+                        <div class="px-3.5 py-2.5 m3-group-item flex items-center justify-between gap-3">
                             <label class="text-xs font-bold shrink-0">Question #</label>
-                            <input id="brQNumInput" type="text" oninput="window.app.brUpdateField('questionNumber', this.value)" class="w-24 h-8 m3-input m3-surface-low px-3 text-xs font-extrabold text-center">
+                            <input id="brQNumInput" type="text" oninput="window.app.brUpdateField('questionNumber', this.value)" class="w-28 h-9 m3-input m3-surface-low px-3 text-xs font-extrabold text-center">
                         </div>
-                        <div class="p-3 m3-group-item flex items-center justify-between gap-3">
+                        <div class="px-3.5 py-2.5 m3-group-item flex items-center justify-between gap-3">
                             <label class="text-xs font-bold shrink-0">Subject</label>
-                            <button type="button" id="brSubjectBtn" onclick="window.app.openBrSubjectMenu(this)" class="flex-1 max-w-[230px] h-8.5 m3-dropdown-field text-xs">
+                            <button type="button" id="brSubjectBtn" onclick="window.app.openBrSubjectMenu(this)" class="w-52 max-w-[65%] h-9 m3-dropdown-field text-xs">
                                 <span id="brSubjectLabel" class="truncate">Physics</span>
                                 <i class="ph-bold ph-caret-down text-[10px] m3-text-muted shrink-0"></i>
                             </button>
                         </div>
-                        <div class="p-3 m3-group-item space-y-1.5">
+                        <div class="px-3.5 py-3 m3-group-item space-y-2">
                             <label class="block text-xs font-bold">Primary JEE Chapter (Local Engine)</label>
                             <button type="button" id="brChapterBtn" onclick="window.app.openBrChapterMenu(this)" class="w-full h-9 m3-dropdown-field text-xs">
                                 <span id="brChapterLabel" class="truncate">Simple Harmonic Motion</span>
@@ -1320,7 +1327,7 @@
             </div>
 
             <!-- Question Palette Strip -->
-            <div id="brPaletteStrip" class="px-4 py-2 m3-surface-high border-t border-[var(--md-outline-variant)] flex items-center gap-1.5 overflow-x-auto no-scrollbar shrink-0"></div>
+            <div id="brPaletteStrip" class="px-4 py-2.5 m3-surface-high border-t border-[var(--md-outline-variant)] flex items-center gap-1.5 overflow-x-auto no-scrollbar shrink-0"></div>
 
             <!-- Footer -->
             <div class="px-4 py-3 m3-surface-low border-t border-[var(--md-outline-variant)] flex items-center justify-between gap-2 shrink-0 flex-wrap">
@@ -1614,7 +1621,7 @@
 
     <!-- GLOBAL CUSTOM DROPDOWN AT VERY END OF BODY WITH Z-[100] -->
     <div id="customDropdownBackdrop" onclick="window.app.closeCustomDropdown()" class="fixed inset-0 z-[95] hidden"></div>
-    <div id="customDropdownMenu" class="fixed z-[100] hidden m3-custom-menu max-h-80 overflow-y-auto min-w-[175px] max-w-[300px]"></div>
+    <div id="customDropdownMenu" class="fixed z-[100] hidden m3-custom-menu max-h-80 overflow-y-auto min-w-[180px] max-w-[calc(100vw-20px)]"></div>
 
     <!-- MATERIAL 3 EXPRESSIVE FLOATING TOOLTIP -->
     <div id="m3Tooltip" role="tooltip" class="m3-tooltip"></div>
@@ -1623,6 +1630,6 @@
     <div id="toastBox" class="fixed bottom-24 right-6 z-[110] flex flex-col items-end gap-2 pointer-events-none"></div>
 
 
-    <script src="./app.js?v=4.2"></script>
+    <script src="./app.js?v=4.3"></script>
 </body>
 </html>
