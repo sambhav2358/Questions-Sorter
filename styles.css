@@ -329,6 +329,7 @@ body {
 }
 
 .m3-group-item {
+    flex-shrink: 0;
     background-color: var(--md-surface-high);
     border-radius: 7px;
     transition: background-color 0.2s var(--m3-smooth), transform 0.15s var(--m3-smooth);
@@ -412,41 +413,45 @@ body {
 .m3-custom-menu {
     background-color: var(--md-surface-high);
     border: 1px solid var(--md-outline-variant);
-    border-radius: 24px;
-    padding: 5px;
-    box-shadow: 0 22px 52px rgba(0, 0, 0, 0.45);
-    animation: m3MenuPop 0.18s var(--m3-smooth);
+    border-radius: 20px;
+    padding: 6px;
+    box-shadow: var(--md-elevation-3);
+    animation: m3MenuPop 220ms var(--m3-spatial-fast);
     display: flex;
     flex-direction: column;
-    gap: 2.5px;
+    gap: 2px;
+    overscroll-behavior: contain;
 }
 
 .m3-custom-menu-item {
     width: 100%;
+    flex-shrink: 0;
+    min-height: 36px;
     text-align: left;
-    padding: 9px 14px;
-    font-size: 11.5px;
+    padding: 8px 13px;
+    font-size: 12px;
     font-weight: 600;
-    border-radius: 6px;
-    background-color: var(--md-surface-container);
+    line-height: 1.3;
+    border-radius: 14px;
+    background-color: transparent;
     color: var(--md-on-surface);
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 8px;
-    transition: background-color 0.15s ease;
+    gap: 10px;
+    cursor: pointer;
+    transition: background-color 140ms var(--m3-effects-fast), color 140ms var(--m3-effects-fast);
 }
 
-.m3-custom-menu-item:first-child { border-radius: 19px 19px 13px 13px; }
-.m3-custom-menu-item:last-child { border-radius: 13px 13px 19px 19px; }
-.m3-custom-menu-item:only-child { border-radius: 19px; }
-.m3-custom-menu-item:hover { background-color: var(--md-surface-highest); }
+.m3-custom-menu-item:hover:not(.selected) {
+    background-color: var(--md-surface-highest);
+}
 
 .m3-custom-menu-item.selected {
     background-color: var(--md-primary);
     color: var(--md-on-primary);
     font-weight: 800;
-    border-radius: 9999px;
+    border-radius: 14px;
 }
 
 /* Fixed 56px Height Extended FAB with Smooth Scroll-Hide */
@@ -2118,4 +2123,94 @@ input[type="range"].split-slider::-moz-range-thumb {
     height: 3px;
     background: linear-gradient(90deg, transparent, var(--md-primary), transparent);
     box-shadow: 0 0 12px 2px var(--md-primary);
+}
+
+/* ========================================================================== */
+/* v4.3 GLOBAL UI CONSISTENCY POLISH (DROPDOWNS, CARETS, PALETTE, NUDGES)     */
+/* ========================================================================== */
+.m3-dropdown-field i.ph-caret-down,
+.m3-dropdown-trigger i.ph-caret-down,
+.m3-card-dropdown-btn i.ph-caret-down {
+    transition: transform 220ms var(--m3-spatial-fast);
+}
+
+.m3-dropdown-field.is-dropdown-open,
+.m3-dropdown-trigger.is-dropdown-open {
+    border-color: var(--md-primary) !important;
+    background-color: var(--md-surface-highest);
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--md-primary) 55%, transparent);
+}
+
+.m3-dropdown-field.is-dropdown-open i.ph-caret-down,
+.m3-dropdown-trigger.is-dropdown-open i.ph-caret-down,
+.m3-card-dropdown-btn.is-dropdown-open i.ph-caret-down {
+    transform: rotate(180deg);
+}
+
+/* Uniform Compact Border Nudge Buttons in Review Studio */
+.m3-nudge-group {
+    display: inline-flex;
+    align-items: center;
+    height: 28px;
+    padding: 2px;
+    gap: 1.5px;
+    border-radius: 9999px;
+    background-color: var(--md-surface-container);
+    border: 1px solid var(--md-outline-variant);
+}
+
+.m3-nudge-btn {
+    height: 22px;
+    padding: 0 8px;
+    border-radius: 5px;
+    background-color: var(--md-surface-high);
+    color: var(--md-on-surface);
+    font-size: 10px;
+    font-weight: 800;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background-color 140ms var(--m3-effects-fast), color 140ms var(--m3-effects-fast), transform 220ms var(--m3-spatial-fast);
+}
+
+.m3-nudge-btn:first-child { border-radius: 9999px 8px 8px 9999px; padding-left: 9px; }
+.m3-nudge-btn:last-child { border-radius: 8px 9999px 9999px 8px; padding-right: 9px; }
+.m3-nudge-btn:hover { background-color: var(--md-primary-container); color: var(--md-on-primary-container); }
+.m3-nudge-btn:active { transform: scale(0.94); }
+
+/* Review Studio Palette Pill (M3 Semantic Roles + Non-Clipping Active Ring) */
+.br-palette-pill {
+    height: 26px;
+    min-width: 34px;
+    padding: 0 8px;
+    border-radius: 9999px;
+    font-size: 10.5px;
+    font-weight: 800;
+    flex-shrink: 0;
+    border: 1px solid transparent;
+    transition: background-color 160ms var(--m3-effects-fast), color 160ms var(--m3-effects-fast), box-shadow 180ms var(--m3-effects-fast), transform 260ms var(--m3-spatial-fast);
+}
+.br-palette-pill.is-ok {
+    background-color: var(--md-success-container);
+    color: var(--md-on-success-container);
+    border-color: color-mix(in srgb, var(--md-success) 35%, transparent);
+}
+.br-palette-pill.is-review {
+    background-color: var(--md-warning-container);
+    color: var(--md-on-warning-container);
+    border-color: color-mix(in srgb, var(--md-warning) 42%, transparent);
+}
+.br-palette-pill.is-skipped {
+    background-color: var(--md-error-container);
+    color: var(--md-on-error-container);
+    text-decoration: line-through;
+    opacity: 0.65;
+}
+.br-palette-pill.is-current {
+    background-color: var(--md-primary) !important;
+    color: var(--md-on-primary) !important;
+    border-color: var(--md-primary) !important;
+    box-shadow: 0 0 0 2px var(--md-surface-high), 0 0 0 3.5px var(--md-primary);
 }
