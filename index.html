@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Material 3 Expressive Question Vault</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
@@ -13,8 +13,8 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
     <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
-    <link rel="stylesheet" href="./styles.css?v=3.1">
-    <script src="./local-vision-engine.js?v=3.0"></script>
+    <link rel="stylesheet" href="./styles.css?v=4.0">
+    <script src="./local-vision-engine.js?v=4.0"></script>
     <script src="./local-ai-borders.js?v=3.2"></script>
 </head>
 <body class="h-[100dvh] w-screen overflow-hidden flex flex-col select-none m3-surface">
@@ -80,7 +80,7 @@
 
             <div class="relative flex items-center flex-1 min-w-0">
                 <i class="ph-bold ph-magnifying-glass absolute left-2.5 top-1/2 -translate-y-1/2 m3-text-muted text-xs pointer-events-none"></i>
-                <input id="searchBox" oninput="window.app.setSearch(this.value)" type="text" placeholder="Search questions..." class="h-8.5 py-1.5 w-full m3-input pl-7 pr-6 text-[11px] placeholder-slate-400">
+                <input id="searchBox" oninput="window.app.setSearch(this.value)" type="text" placeholder="Search questions..." class="h-8.5 py-1.5 w-full m3-input pl-7 pr-6 text-[11px]">
                 <button id="clearSearchBtn" onclick="window.app.clearSearch()" class="hidden absolute right-2 top-1/2 -translate-y-1/2 m3-text-muted hover:opacity-100 p-0.5" title="Clear search">
                     <i class="ph-bold ph-x text-xs"></i>
                 </button>
@@ -141,7 +141,7 @@
         <div id="mockTestPaletteStrip" class="flex items-center gap-1 overflow-x-auto no-scrollbar py-0.5"></div>
 
         <div class="flex items-center gap-1.5 shrink-0">
-            <button type="button" onclick="window.app.finishMockTest(false)" class="h-7 px-3 rounded-full bg-emerald-600 hover:bg-emerald-500 text-white text-[11px] font-extrabold transition">
+            <button type="button" onclick="window.app.finishMockTest(false)" class="h-7 px-3.5 m3-btn-success text-[11px]">
                 Submit Test
             </button>
         </div>
@@ -194,7 +194,7 @@
     <!-- =================================================================== -->
     <!-- TIMED MOCK SET GENERATOR MODAL (#5)                                 -->
     <!-- =================================================================== -->
-    <div id="mockTestSetupModal" onclick="if(event.target === this) window.app.closeMockTestSetupModal()" class="fixed inset-0 bg-black/75 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+    <div id="mockTestSetupModal" onclick="if(event.target === this) window.app.closeMockTestSetupModal()" class="fixed inset-0 m3-scrim backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
         <div class="m3-dialog max-w-md w-full p-6 space-y-4">
             <div class="flex items-center justify-between">
                 <div class="flex items-center gap-3">
@@ -212,13 +212,21 @@
             </div>
 
             <div class="m3-group-list">
-                <div class="p-3.5 m3-group-item flex items-center justify-between">
+                <div class="p-3.5 m3-group-item flex items-center justify-between gap-2">
                     <span class="text-xs font-bold">Number of Questions</span>
-                    <input id="mockQCountInput" type="number" min="1" max="60" value="10" class="w-20 h-8 m3-input m3-surface-low text-center text-xs font-extrabold">
+                    <div class="m3-stepper">
+                        <button type="button" onclick="window.app.stepNumericInput('mockQCountInput', -1)" class="m3-stepper-btn" aria-label="Decrease questions"><i class="ph-bold ph-minus"></i></button>
+                        <input id="mockQCountInput" type="number" min="1" max="60" value="10" class="m3-stepper-input">
+                        <button type="button" onclick="window.app.stepNumericInput('mockQCountInput', 1)" class="m3-stepper-btn" aria-label="Increase questions"><i class="ph-bold ph-plus"></i></button>
+                    </div>
                 </div>
-                <div class="p-3.5 m3-group-item flex items-center justify-between">
+                <div class="p-3.5 m3-group-item flex items-center justify-between gap-2">
                     <span class="text-xs font-bold">Time Limit (Minutes)</span>
-                    <input id="mockTimeMinsInput" type="number" min="5" max="180" value="30" class="w-20 h-8 m3-input m3-surface-low text-center text-xs font-extrabold">
+                    <div class="m3-stepper">
+                        <button type="button" onclick="window.app.stepNumericInput('mockTimeMinsInput', -5)" class="m3-stepper-btn" aria-label="Decrease minutes"><i class="ph-bold ph-minus"></i></button>
+                        <input id="mockTimeMinsInput" type="number" min="5" max="180" value="30" class="m3-stepper-input">
+                        <button type="button" onclick="window.app.stepNumericInput('mockTimeMinsInput', 5)" class="m3-stepper-btn" aria-label="Increase minutes"><i class="ph-bold ph-plus"></i></button>
+                    </div>
                 </div>
                 <label class="p-3.5 m3-group-item flex items-center justify-between cursor-pointer">
                     <span class="text-xs font-bold">Unsolved Questions Only</span>
@@ -243,7 +251,7 @@
     <!-- =================================================================== -->
     <!-- TIMED MOCK SET SUMMARY MODAL (#5)                                   -->
     <!-- =================================================================== -->
-    <div id="mockTestSummaryModal" onclick="if(event.target === this) window.app.closeMockTestSummaryModal()" class="fixed inset-0 bg-black/75 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+    <div id="mockTestSummaryModal" onclick="if(event.target === this) window.app.closeMockTestSummaryModal()" class="fixed inset-0 m3-scrim backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
         <div class="m3-dialog max-w-md w-full p-6 space-y-4">
             <div class="flex items-center gap-3">
                 <div class="w-12 h-12 m3-cookie-12 flex items-center justify-center shrink-0" style="background: var(--md-primary-container); color: var(--md-primary);">
@@ -266,7 +274,7 @@
     <!-- =================================================================== -->
     <!-- DOUBLE CONFIRMATION DIALOG FOR CLEAR ALL QUESTIONS                  -->
     <!-- =================================================================== -->
-    <div id="clearConfirmModal" onclick="if(event.target === this) window.app.closeClearConfirmModal()" class="fixed inset-0 bg-black/75 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+    <div id="clearConfirmModal" onclick="if(event.target === this) window.app.closeClearConfirmModal()" class="fixed inset-0 m3-scrim backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
         <div class="m3-dialog max-w-md w-full p-6 space-y-4">
             <div class="flex items-center gap-3">
                 <div class="w-12 h-12 m3-cookie-12 bg-rose-500/20 text-rose-400 flex items-center justify-center shrink-0">
@@ -285,7 +293,7 @@
 
             <div class="flex items-center justify-end gap-2 pt-1">
                 <button type="button" onclick="window.app.closeClearConfirmModal()" class="h-9 px-4 m3-btn-tonal text-xs">Cancel</button>
-                <button type="button" id="finalClearVaultBtn" disabled onclick="window.app.executeClearVault()" class="h-9 px-5 rounded-full bg-rose-600 hover:bg-rose-500 disabled:opacity-35 disabled:pointer-events-none text-white text-xs font-extrabold transition">
+                <button type="button" id="finalClearVaultBtn" disabled onclick="window.app.executeClearVault()" class="h-9 px-5 m3-btn-error disabled:opacity-35 disabled:pointer-events-none text-xs">
                     Permanently Delete All
                 </button>
             </div>
@@ -295,7 +303,7 @@
     <!-- =================================================================== -->
     <!-- MATERIAL 3 EXPRESSIVE NAVIGATION DRAWER                             -->
     <!-- =================================================================== -->
-    <div id="drawerBackdrop" onclick="window.app.toggleDrawer(false)" class="fixed inset-0 bg-black/55 backdrop-blur-xs z-40 hidden"></div>
+    <div id="drawerBackdrop" onclick="window.app.toggleDrawer(false)" class="fixed inset-0 m3-scrim backdrop-blur-xs z-40 hidden"></div>
     <aside id="chaptersDrawer" class="fixed inset-y-0 left-0 w-80 m3-surface-container border-r border-[var(--md-outline-variant)] rounded-r-[32px] z-50 -translate-x-full transition-transform duration-300 ease-out flex flex-col shadow-2xl overflow-hidden">
         <div class="p-4 flex items-center justify-between">
             <div class="flex items-center gap-2.5">
@@ -309,24 +317,24 @@
             </button>
         </div>
 
-        <div class="px-3 pb-2 flex items-center gap-1.5 overflow-x-auto no-scrollbar">
-            <button type="button" onclick="window.app.setTagFilter('ALL')" data-tag-chip="ALL" class="drawer-tag-chip h-7 px-2.5 rounded-full text-[10px] font-extrabold shrink-0 m3-btn-filled">All Tags</button>
-            <button type="button" onclick="window.app.setTagFilter('Concept')" data-tag-chip="Concept" class="drawer-tag-chip h-7 px-2.5 rounded-full text-[10px] font-bold shrink-0 m3-surface-high">Concept</button>
-            <button type="button" onclick="window.app.setTagFilter('Formula')" data-tag-chip="Formula" class="drawer-tag-chip h-7 px-2.5 rounded-full text-[10px] font-bold shrink-0 m3-surface-high">Formula</button>
-            <button type="button" onclick="window.app.setTagFilter('Calc')" data-tag-chip="Calc" class="drawer-tag-chip h-7 px-2.5 rounded-full text-[10px] font-bold shrink-0 m3-surface-high">Calc</button>
-            <button type="button" onclick="window.app.setTagFilter('Trap')" data-tag-chip="Trap" class="drawer-tag-chip h-7 px-2.5 rounded-full text-[10px] font-bold shrink-0 m3-surface-high">Trap</button>
-            <button type="button" onclick="window.app.setTagFilter('Redo')" data-tag-chip="Redo" class="drawer-tag-chip h-7 px-2.5 rounded-full text-[10px] font-bold shrink-0 m3-surface-high">Redo</button>
+        <div class="px-3 pb-2.5 flex items-center gap-1.5 overflow-x-auto no-scrollbar">
+            <button type="button" onclick="window.app.setTagFilter('ALL')" data-tag-chip="ALL" class="drawer-tag-chip m3-filter-chip selected"><i class="chip-check ph-bold ph-check"></i><span>All Tags</span></button>
+            <button type="button" onclick="window.app.setTagFilter('Concept')" data-tag-chip="Concept" class="drawer-tag-chip m3-filter-chip"><i class="chip-check ph-bold ph-check"></i><span>Concept</span></button>
+            <button type="button" onclick="window.app.setTagFilter('Formula')" data-tag-chip="Formula" class="drawer-tag-chip m3-filter-chip"><i class="chip-check ph-bold ph-check"></i><span>Formula</span></button>
+            <button type="button" onclick="window.app.setTagFilter('Calc')" data-tag-chip="Calc" class="drawer-tag-chip m3-filter-chip"><i class="chip-check ph-bold ph-check"></i><span>Calc</span></button>
+            <button type="button" onclick="window.app.setTagFilter('Trap')" data-tag-chip="Trap" class="drawer-tag-chip m3-filter-chip"><i class="chip-check ph-bold ph-check"></i><span>Trap</span></button>
+            <button type="button" onclick="window.app.setTagFilter('Redo')" data-tag-chip="Redo" class="drawer-tag-chip m3-filter-chip"><i class="chip-check ph-bold ph-check"></i><span>Redo</span></button>
         </div>
 
         <div class="px-3 pb-2">
-            <input id="drawerChapterSearch" oninput="window.app.renderDrawerChapters()" type="text" placeholder="Filter chapters..." class="w-full h-9 m3-input px-3.5 text-xs placeholder-slate-400">
+            <input id="drawerChapterSearch" oninput="window.app.renderDrawerChapters()" type="text" placeholder="Filter chapters..." class="w-full h-9 m3-input px-3.5 text-xs">
         </div>
 
         <div id="drawerChapterList" class="flex-1 overflow-y-auto p-3 space-y-3"></div>
 
         <div class="p-3.5 m3-surface-low border-t border-[var(--md-outline-variant)] flex items-center justify-between text-xs">
             <span id="drawerProgressText" class="px-3 py-1 rounded-full m3-primary-pill font-extrabold text-[11px]">Solved: 0 / 0</span>
-            <button onclick="window.app.confirmClearVault()" class="px-3 py-1 rounded-full bg-rose-500/15 text-rose-500 hover:bg-rose-500/25 font-bold flex items-center gap-1 transition">
+            <button onclick="window.app.confirmClearVault()" class="px-3 py-1 m3-btn-error-tonal text-xs flex items-center gap-1">
                 <i class="ph-bold ph-trash"></i> Clear All
             </button>
         </div>
@@ -340,15 +348,15 @@
     <!-- =================================================================== -->
     <!-- SCROLL-REACTIVE MATERIAL 3 EXTENDED FAB (Fixed 56px Height!)        -->
     <!-- =================================================================== -->
-    <button id="extendedAddPdfFab" onclick="window.app.openUploadModal()" class="fixed bottom-6 right-6 z-30 m3-extended-fab flex items-center gap-2.5 font-extrabold text-sm">
-        <i class="ph-bold ph-plus text-lg"></i>
-        <span>Add Questions</span>
+    <button id="extendedAddPdfFab" onclick="window.app.openUploadModal()" class="fixed bottom-6 right-6 z-30 m3-extended-fab flex items-center justify-center font-extrabold text-sm" title="Add PDF Test Paper or Question Photo">
+        <i class="ph-bold ph-plus text-xl"></i>
+        <span class="m3-fab-label">Add Questions</span>
     </button>
 
     <!-- =================================================================== -->
     <!-- FULL-CARD 3-PANEL CAROUSEL IMAGE POPUP LIGHTBOX                     -->
     <!-- =================================================================== -->
-    <div id="imagePopupModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden overflow-hidden">
+    <div id="imagePopupModal" class="fixed inset-0 m3-scrim backdrop-blur-sm z-50 hidden overflow-hidden">
         <div id="popupCarouselViewport" class="w-screen h-[100dvh] overflow-hidden relative flex items-center">
             <div id="popupCarouselTrack" class="flex items-center h-full will-change-transform" style="width: 300vw; transform: translate3d(-100vw, 0, 0);">
                 <div id="popupSlidePrev" onclick="if(event.target === this) window.app.closeImagePopup()" class="w-screen h-full flex items-center justify-center p-3 sm:p-5 shrink-0"></div>
@@ -361,7 +369,7 @@
     <!-- =================================================================== -->
     <!-- MODAL 1: PHONE-STYLE M3 EXPRESSIVE SETTINGS                         -->
     <!-- =================================================================== -->
-    <div id="settingsModal" onclick="if(event.target === this) window.app.closeSettingsModal()" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-3 sm:p-5">
+    <div id="settingsModal" onclick="if(event.target === this) window.app.closeSettingsModal()" class="fixed inset-0 m3-scrim backdrop-blur-sm z-50 hidden flex items-center justify-center p-3 sm:p-5">
         <div class="m3-dialog max-w-lg w-full max-h-[90vh] flex flex-col overflow-hidden">
             <div class="px-5 py-3.5 m3-surface-low border-b border-[var(--md-outline-variant)] flex items-center justify-between gap-2 shrink-0">
                 <div class="flex items-center gap-2.5 min-w-0">
@@ -494,28 +502,28 @@
                             </div>
 
                             <div class="grid grid-cols-3 sm:grid-cols-6 gap-2.5 pt-1">
-                                <button type="button" onclick="window.app.setMaterialTheme('#7c3aed')" class="p-2.5 rounded-2xl m3-surface-low hover:scale-105 transition flex flex-col items-center gap-1.5">
-                                    <span class="w-8 h-8 m3-cookie-12 bg-[#7c3aed] block"></span>
+                                <button type="button" data-seed-hex="#7c3aed" onclick="window.app.setMaterialTheme('#7c3aed')" class="m3-swatch-btn p-2.5 rounded-2xl m3-surface-low flex flex-col items-center gap-1.5">
+                                    <span class="w-9 h-9 m3-cookie-12 bg-[#7c3aed] flex items-center justify-center text-white"><i class="swatch-check ph-bold ph-check text-sm"></i></span>
                                     <span class="text-[10px] font-bold">Violet</span>
                                 </button>
-                                <button type="button" onclick="window.app.setMaterialTheme('#0284c7')" class="p-2.5 rounded-2xl m3-surface-low hover:scale-105 transition flex flex-col items-center gap-1.5">
-                                    <span class="w-8 h-8 m3-cookie-12 bg-[#0284c7] block"></span>
+                                <button type="button" data-seed-hex="#0284c7" onclick="window.app.setMaterialTheme('#0284c7')" class="m3-swatch-btn p-2.5 rounded-2xl m3-surface-low flex flex-col items-center gap-1.5">
+                                    <span class="w-9 h-9 m3-cookie-12 bg-[#0284c7] flex items-center justify-center text-white"><i class="swatch-check ph-bold ph-check text-sm"></i></span>
                                     <span class="text-[10px] font-bold">Ocean</span>
                                 </button>
-                                <button type="button" onclick="window.app.setMaterialTheme('#059669')" class="p-2.5 rounded-2xl m3-surface-low hover:scale-105 transition flex flex-col items-center gap-1.5">
-                                    <span class="w-8 h-8 m3-cookie-12 bg-[#059669] block"></span>
+                                <button type="button" data-seed-hex="#059669" onclick="window.app.setMaterialTheme('#059669')" class="m3-swatch-btn p-2.5 rounded-2xl m3-surface-low flex flex-col items-center gap-1.5">
+                                    <span class="w-9 h-9 m3-cookie-12 bg-[#059669] flex items-center justify-center text-white"><i class="swatch-check ph-bold ph-check text-sm"></i></span>
                                     <span class="text-[10px] font-bold">Emerald</span>
                                 </button>
-                                <button type="button" onclick="window.app.setMaterialTheme('#e11d48')" class="p-2.5 rounded-2xl m3-surface-low hover:scale-105 transition flex flex-col items-center gap-1.5">
-                                    <span class="w-8 h-8 m3-cookie-12 bg-[#e11d48] block"></span>
+                                <button type="button" data-seed-hex="#e11d48" onclick="window.app.setMaterialTheme('#e11d48')" class="m3-swatch-btn p-2.5 rounded-2xl m3-surface-low flex flex-col items-center gap-1.5">
+                                    <span class="w-9 h-9 m3-cookie-12 bg-[#e11d48] flex items-center justify-center text-white"><i class="swatch-check ph-bold ph-check text-sm"></i></span>
                                     <span class="text-[10px] font-bold">Sakura</span>
                                 </button>
-                                <button type="button" onclick="window.app.setMaterialTheme('#d97706')" class="p-2.5 rounded-2xl m3-surface-low hover:scale-105 transition flex flex-col items-center gap-1.5">
-                                    <span class="w-8 h-8 m3-cookie-12 bg-[#d97706] block"></span>
+                                <button type="button" data-seed-hex="#d97706" onclick="window.app.setMaterialTheme('#d97706')" class="m3-swatch-btn p-2.5 rounded-2xl m3-surface-low flex flex-col items-center gap-1.5">
+                                    <span class="w-9 h-9 m3-cookie-12 bg-[#d97706] flex items-center justify-center text-white"><i class="swatch-check ph-bold ph-check text-sm"></i></span>
                                     <span class="text-[10px] font-bold">Amber</span>
                                 </button>
-                                <button type="button" onclick="window.app.setMaterialTheme('#0d9488')" class="p-2.5 rounded-2xl m3-surface-low hover:scale-105 transition flex flex-col items-center gap-1.5">
-                                    <span class="w-8 h-8 m3-cookie-12 bg-[#0d9488] block"></span>
+                                <button type="button" data-seed-hex="#0d9488" onclick="window.app.setMaterialTheme('#0d9488')" class="m3-swatch-btn p-2.5 rounded-2xl m3-surface-low flex flex-col items-center gap-1.5">
+                                    <span class="w-9 h-9 m3-cookie-12 bg-[#0d9488] flex items-center justify-center text-white"><i class="swatch-check ph-bold ph-check text-sm"></i></span>
                                     <span class="text-[10px] font-bold">Mint</span>
                                 </button>
                             </div>
@@ -526,7 +534,11 @@
                                 <div class="text-xs font-bold">Custom Primary Seed Color</div>
                                 <div class="text-[11px] m3-text-muted">Generate a bold Material 3 Expressive palette from any hex color</div>
                             </div>
-                            <input id="customThemeColorPicker" type="color" value="#7c3aed" oninput="window.app.setMaterialTheme(this.value)" class="w-12 h-10 rounded-xl cursor-pointer bg-transparent border-0">
+                            <label class="m3-custom-color-trigger shrink-0" title="Pick any custom Material You seed color">
+                                <span id="customColorSwatchPreview" class="w-7 h-7 m3-clover-8 block shrink-0" style="background: #7c3aed;"></span>
+                                <span id="customColorHexLabel" class="font-mono text-[11px] font-extrabold uppercase">#7C3AED</span>
+                                <input id="customThemeColorPicker" type="color" value="#7c3aed" oninput="window.app.setMaterialTheme(this.value)" class="sr-only">
+                            </label>
                         </div>
                     </div>
                 </div>
@@ -632,13 +644,21 @@
                         </div>
 
                         <div class="p-4 m3-group-item grid grid-cols-2 gap-3">
-                            <div>
-                                <label class="block text-[11px] font-bold m3-text-muted mb-1">Top Safe Margin (0-40)</label>
-                                <input id="padTopInput" type="number" min="0" max="40" value="10" class="w-full h-10 m3-input m3-surface-low px-3.5 text-xs">
+                            <div class="flex flex-col gap-1.5">
+                                <label class="block text-[11px] font-bold m3-text-muted">Top Safe Margin (0–40)</label>
+                                <div class="m3-stepper w-fit">
+                                    <button type="button" onclick="window.app.stepNumericInput('padTopInput', -2)" class="m3-stepper-btn"><i class="ph-bold ph-minus"></i></button>
+                                    <input id="padTopInput" type="number" min="0" max="40" value="10" class="m3-stepper-input">
+                                    <button type="button" onclick="window.app.stepNumericInput('padTopInput', 2)" class="m3-stepper-btn"><i class="ph-bold ph-plus"></i></button>
+                                </div>
                             </div>
-                            <div>
-                                <label class="block text-[11px] font-bold m3-text-muted mb-1">Bottom Safe Margin (0-40)</label>
-                                <input id="padBottomInput" type="number" min="0" max="40" value="10" class="w-full h-10 m3-input m3-surface-low px-3.5 text-xs">
+                            <div class="flex flex-col gap-1.5">
+                                <label class="block text-[11px] font-bold m3-text-muted">Bottom Safe Margin (0–40)</label>
+                                <div class="m3-stepper w-fit">
+                                    <button type="button" onclick="window.app.stepNumericInput('padBottomInput', -2)" class="m3-stepper-btn"><i class="ph-bold ph-minus"></i></button>
+                                    <input id="padBottomInput" type="number" min="0" max="40" value="10" class="m3-stepper-input">
+                                    <button type="button" onclick="window.app.stepNumericInput('padBottomInput', 2)" class="m3-stepper-btn"><i class="ph-bold ph-plus"></i></button>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -657,7 +677,7 @@
     <!-- =================================================================== -->
     <!-- MODAL 2: UNIFIED IMPORT DIALOG (LOCAL + GEMINI BORDER VERIFICATION) -->
     <!-- =================================================================== -->
-    <div id="uploadModal" onclick="if(event.target === this && !window.app.isExtracting()) window.app.closeUploadModal()" class="fixed inset-0 bg-black/75 backdrop-blur-sm z-50 hidden flex items-center justify-center p-3 sm:p-6">
+    <div id="uploadModal" onclick="if(event.target === this && !window.app.isExtracting()) window.app.closeUploadModal()" class="fixed inset-0 m3-scrim backdrop-blur-sm z-50 hidden flex items-center justify-center p-3 sm:p-6">
         <div class="m3-dialog max-w-2xl w-full max-h-[92vh] flex flex-col overflow-hidden">
             <div class="px-5 py-3.5 m3-surface-low border-b border-[var(--md-outline-variant)] flex items-center justify-between gap-2 shrink-0">
                 <div class="flex items-center gap-2.5 min-w-0">
@@ -818,7 +838,7 @@
 
             <div class="px-5 py-3 m3-surface-low border-t border-[var(--md-outline-variant)] flex items-center justify-between shrink-0">
                 <div>
-                    <button type="button" id="cancelExtractBtn" onclick="window.app.cancelPdfExtraction()" class="hidden h-9 px-4 rounded-full bg-rose-500/20 hover:bg-rose-600 text-rose-500 hover:text-white text-xs font-extrabold items-center gap-1.5 transition">
+                    <button type="button" id="cancelExtractBtn" onclick="window.app.cancelPdfExtraction()" class="hidden h-9 px-4 m3-btn-error-tonal text-xs items-center gap-1.5">
                         <i class="ph-bold ph-stop-circle"></i>
                         <span>Cancel & Rollback</span>
                     </button>
@@ -835,7 +855,7 @@
     <!-- =================================================================== -->
     <!-- NEW MODAL 2B: LIVE AI ANSWER KEY & HINT SOLVER CONSOLE WITH LOGS    -->
     <!-- =================================================================== -->
-    <div id="solverModal" onclick="if(event.target === this) window.app.minimizeSolverModal()" class="fixed inset-0 bg-black/75 backdrop-blur-sm z-50 hidden flex items-center justify-center p-3 sm:p-6">
+    <div id="solverModal" onclick="if(event.target === this) window.app.minimizeSolverModal()" class="fixed inset-0 m3-scrim backdrop-blur-sm z-50 hidden flex items-center justify-center p-3 sm:p-6">
         <div class="m3-dialog max-w-2xl w-full max-h-[92vh] flex flex-col overflow-hidden">
             <div class="px-5 py-3.5 m3-surface-low border-b border-[var(--md-outline-variant)] flex items-center justify-between gap-2 shrink-0">
                 <div class="flex items-center gap-2.5 min-w-0">
@@ -890,7 +910,7 @@
 
             <div class="px-5 py-3 m3-surface-low border-t border-[var(--md-outline-variant)] flex items-center justify-between gap-2 shrink-0 flex-wrap">
                 <div>
-                    <button type="button" id="stopSolverBtn" onclick="window.app.stopBackgroundSolver()" class="hidden h-9 px-4 rounded-full bg-rose-500/20 hover:bg-rose-600 text-rose-500 hover:text-white text-xs font-extrabold items-center gap-1.5 transition">
+                    <button type="button" id="stopSolverBtn" onclick="window.app.stopBackgroundSolver()" class="hidden h-9 px-4 m3-btn-error-tonal text-xs items-center gap-1.5">
                         <i class="ph-bold ph-stop-circle"></i>
                         <span>Stop Solver</span>
                     </button>
@@ -912,7 +932,7 @@
     <!-- =================================================================== -->
     <!-- MODAL 3: SPLIT / TRIM                                               -->
     <!-- =================================================================== -->
-    <div id="splitModal" onclick="if(event.target === this) window.app.closeSplitModal()" class="fixed inset-0 bg-black/75 backdrop-blur-sm z-50 hidden flex items-center justify-center p-3 sm:p-6">
+    <div id="splitModal" onclick="if(event.target === this) window.app.closeSplitModal()" class="fixed inset-0 m3-scrim backdrop-blur-sm z-50 hidden flex items-center justify-center p-3 sm:p-6">
         <div class="m3-dialog max-w-4xl w-full max-h-[92vh] flex flex-col overflow-hidden">
             <div class="px-5 py-3.5 m3-surface-low border-b border-[var(--md-outline-variant)] flex items-center justify-between gap-2">
                 <div>
@@ -969,7 +989,7 @@
         <!-- =================================================================== -->
     <!-- MODAL 3B: INTERACTIVE MANUAL PDF CROP, SEPARATOR LINES & STITCHER   -->
     <!-- =================================================================== -->
-    <div id="manualCropModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[65] hidden flex items-center justify-center p-2 sm:p-4">
+    <div id="manualCropModal" class="fixed inset-0 m3-scrim backdrop-blur-sm z-[65] hidden flex items-center justify-center p-2 sm:p-4">
         <div class="m3-dialog max-w-6xl w-full max-h-[94dvh] flex flex-col overflow-hidden">
             <!-- Header -->
             <div class="px-4 py-3 m3-surface-low border-b border-[var(--md-outline-variant)] flex items-center justify-between gap-2 shrink-0 flex-wrap">
@@ -1038,7 +1058,7 @@
             <!-- Footer -->
             <div class="px-4 py-3 m3-surface-low border-t border-[var(--md-outline-variant)] flex items-center justify-between gap-2 shrink-0 flex-wrap">
                 <div class="flex items-center gap-3 flex-wrap">
-                    <button type="button" onclick="window.app.mcResolve('CANCEL')" class="h-9 px-4 rounded-full bg-rose-500/20 hover:bg-rose-600 text-rose-400 hover:text-white text-xs font-extrabold transition">
+                    <button type="button" onclick="window.app.mcResolve('CANCEL')" class="h-9 px-4 m3-btn-error-tonal text-xs">
                         Cancel Import
                     </button>
                     <label id="mcSwitchManualAllWrap" class="flex items-center gap-1.5 text-xs font-bold cursor-pointer">
@@ -1060,7 +1080,7 @@
     <!-- =================================================================== -->
     <!-- MODAL 3C: POST-EXTRACTION BORDER & CHAPTER REVIEW STUDIO            -->
     <!-- =================================================================== -->
-    <div id="batchReviewModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[66] hidden flex items-center justify-center p-2 sm:p-4">
+    <div id="batchReviewModal" class="fixed inset-0 m3-scrim backdrop-blur-sm z-[66] hidden flex items-center justify-center p-2 sm:p-4">
         <div class="m3-dialog max-w-6xl w-full max-h-[94dvh] flex flex-col overflow-hidden">
             <!-- Header -->
             <div class="px-4 py-3 m3-surface-low border-b border-[var(--md-outline-variant)] flex items-center justify-between gap-2 shrink-0 flex-wrap">
@@ -1261,7 +1281,7 @@
 
             <!-- Footer -->
             <div class="px-4 py-3 m3-surface-low border-t border-[var(--md-outline-variant)] flex items-center justify-between gap-2 shrink-0 flex-wrap">
-                <button type="button" onclick="window.app.brResolve('CANCEL')" class="h-9 px-4 rounded-full bg-rose-500/20 hover:bg-rose-600 text-rose-400 hover:text-white text-xs font-extrabold transition">
+                <button type="button" onclick="window.app.brResolve('CANCEL')" class="h-9 px-4 m3-btn-error-tonal text-xs">
                     Discard Import
                 </button>
                 <button type="button" onclick="window.app.brResolve('CONFIRM')" class="h-10 px-6 m3-btn-filled text-xs sm:text-sm flex items-center gap-1.5 shadow-lg ml-auto">
@@ -1553,10 +1573,13 @@
     <div id="customDropdownBackdrop" onclick="window.app.closeCustomDropdown()" class="fixed inset-0 z-[95] hidden"></div>
     <div id="customDropdownMenu" class="fixed z-[100] hidden m3-custom-menu max-h-80 overflow-y-auto min-w-[175px] max-w-[300px]"></div>
 
-    <!-- TOAST NOTIFICATIONS -->
-    <div id="toastBox" class="fixed bottom-24 right-6 z-[110] flex flex-col gap-2 pointer-events-none"></div>
+    <!-- MATERIAL 3 EXPRESSIVE FLOATING TOOLTIP -->
+    <div id="m3Tooltip" role="tooltip" class="m3-tooltip"></div>
+
+    <!-- MATERIAL 3 INVERSE-SURFACE SNACKBAR HOST -->
+    <div id="toastBox" class="fixed bottom-24 right-6 z-[110] flex flex-col items-end gap-2 pointer-events-none"></div>
 
 
-    <script src="./app.js?v=3.3"></script>
+    <script src="./app.js?v=4.0"></script>
 </body>
 </html>
