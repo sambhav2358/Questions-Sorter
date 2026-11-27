@@ -20,8 +20,43 @@
     --md-on-surface-variant: hsl(252, 15%, 72%);
     --md-outline: hsl(252, 18%, 36%);
     --md-outline-variant: hsl(252, 18%, 20%);
-    --m3-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
-    --m3-smooth: cubic-bezier(0.2, 0, 0, 1);
+
+    /* Semantic Material You Roles */
+    --md-error: hsl(354, 92%, 75%);
+    --md-on-error: hsl(354, 72%, 14%);
+    --md-error-container: hsl(354, 58%, 26%);
+    --md-on-error-container: hsl(354, 100%, 92%);
+    --md-success: hsl(154, 68%, 62%);
+    --md-on-success: hsl(154, 80%, 10%);
+    --md-success-container: hsl(154, 50%, 20%);
+    --md-on-success-container: hsl(154, 90%, 88%);
+    --md-warning: hsl(38, 92%, 68%);
+    --md-on-warning: hsl(38, 82%, 12%);
+    --md-warning-container: hsl(38, 56%, 22%);
+    --md-on-warning-container: hsl(38, 96%, 90%);
+
+    /* Inverse Surface (Snackbars & Tooltips) + Scrim */
+    --md-inverse-surface: hsl(252, 22%, 92%);
+    --md-inverse-on-surface: hsl(252, 24%, 12%);
+    --md-inverse-primary: hsl(252, 74%, 46%);
+    --md-scrim: rgba(6, 5, 14, 0.72);
+
+    /* Material 3 Tonal Elevation Shadows */
+    --md-elevation-1: 0 1px 3px rgba(0, 0, 0, 0.28), 0 1px 2px rgba(0, 0, 0, 0.18);
+    --md-elevation-2: 0 4px 12px -2px rgba(0, 0, 0, 0.36), 0 2px 4px rgba(0, 0, 0, 0.22);
+    --md-elevation-3: 0 12px 28px -4px rgba(0, 0, 0, 0.48), 0 4px 10px -2px rgba(0, 0, 0, 0.28);
+
+    /* Official Material 3 Expressive Motion Physics Tokens (Web Spring Conversions) */
+    --m3-spatial-fast: cubic-bezier(0.42, 1.67, 0.21, 0.90);
+    --m3-spatial-default: cubic-bezier(0.38, 1.21, 0.22, 1.00);
+    --m3-spatial-slow: cubic-bezier(0.39, 1.29, 0.35, 0.98);
+    --m3-effects-fast: cubic-bezier(0.31, 0.94, 0.34, 1.00);
+    --m3-effects-default: cubic-bezier(0.34, 0.80, 0.34, 1.00);
+    --m3-effects-slow: cubic-bezier(0.34, 0.88, 0.34, 1.00);
+
+    /* Legacy aliases mapped to Expressive tokens */
+    --m3-spring: var(--m3-spatial-fast);
+    --m3-smooth: var(--m3-effects-default);
 }
 
 * {
@@ -1155,4 +1190,686 @@ input[type="checkbox"].m3-checkbox:active {
 
 #customDropdownMenu {
     overscroll-behavior: contain;
+}
+
+/* ========================================================================== */
+/* MATERIAL 3 EXPRESSIVE v4.0 COMPLETE DESIGN LANGUAGE POLISH                 */
+/* ========================================================================== */
+
+/* 1. Expressive Typography Hierarchy + Tabular Numbers */
+.m3-dialog h3,
+.m3-dialog h2,
+#chaptersDrawer h2,
+#mainFeedContainer h2 {
+    font-family: 'Outfit', 'Plus Jakarta Sans', system-ui, sans-serif;
+    letter-spacing: -0.02em;
+}
+
+.font-mono,
+#padTimerText,
+#mockTestCountdownText,
+#status-count-UNSOLVED,
+#status-count-SOLVED,
+#status-count-STARRED,
+#drawerProgressText,
+#solverQuotaBadge,
+#wbZoomBadge,
+#wbPageIndicator,
+#brCountAll,
+#brCountFlagged {
+    font-variant-numeric: tabular-nums;
+}
+
+/* Themed Input Placeholders & Hidden Ugly Native Number Spinners */
+input::placeholder,
+textarea::placeholder {
+    color: color-mix(in srgb, var(--md-on-surface-variant) 72%, transparent) !important;
+    opacity: 1;
+}
+
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+input[type="number"] {
+    -moz-appearance: textfield;
+    appearance: textfield;
+}
+
+/* 2. Accessible M3 Focus-Visible Rings (Never ugly on tap, crisp on keyboard) */
+button:focus-visible,
+input:focus-visible,
+label:has(> input[type="checkbox"]):focus-visible {
+    outline: 2.5px solid var(--md-primary);
+    outline-offset: 2px;
+}
+
+/* 3. Semantic Material You Buttons, Badges & Scrims */
+.m3-scrim {
+    background-color: var(--md-scrim) !important;
+}
+
+.m3-btn-error {
+    background-color: var(--md-error);
+    color: var(--md-on-error);
+    border-radius: 9999px;
+    font-weight: 800;
+    transition: border-radius 350ms var(--m3-spatial-fast), transform 350ms var(--m3-spatial-fast), filter 150ms var(--m3-effects-fast);
+}
+.m3-btn-error:hover:not(:disabled) {
+    filter: brightness(1.06);
+    border-radius: 14px;
+}
+.m3-btn-error:active:not(:disabled) {
+    transform: scale(0.95);
+    border-radius: 10px;
+}
+
+.m3-btn-error-tonal {
+    background-color: var(--md-error-container);
+    color: var(--md-on-error-container);
+    border-radius: 9999px;
+    font-weight: 800;
+    transition: background-color 150ms var(--m3-effects-fast), color 150ms var(--m3-effects-fast), border-radius 350ms var(--m3-spatial-fast), transform 350ms var(--m3-spatial-fast);
+}
+.m3-btn-error-tonal:hover:not(:disabled) {
+    background-color: var(--md-error);
+    color: var(--md-on-error);
+    border-radius: 14px;
+}
+.m3-btn-error-tonal:active:not(:disabled) {
+    transform: scale(0.95);
+    border-radius: 10px;
+}
+
+.m3-btn-success {
+    background-color: var(--md-success);
+    color: var(--md-on-success);
+    border-radius: 9999px;
+    font-weight: 800;
+    transition: filter 150ms var(--m3-effects-fast), border-radius 350ms var(--m3-spatial-fast), transform 350ms var(--m3-spatial-fast);
+}
+.m3-btn-success:hover:not(:disabled) {
+    filter: brightness(1.06);
+    border-radius: 14px;
+}
+.m3-btn-success:active:not(:disabled) {
+    transform: scale(0.95);
+}
+
+.m3-badge-success {
+    background-color: var(--md-success-container);
+    color: var(--md-on-success-container);
+}
+.m3-badge-warn {
+    background-color: var(--md-warning-container);
+    color: var(--md-on-warning-container);
+}
+.m3-badge-error {
+    background-color: var(--md-error-container);
+    color: var(--md-on-error-container);
+}
+
+/* 4. Tactile Material 3 State Layers & Dynamic Ripple Wave */
+.m3-btn-filled,
+.m3-btn-tonal,
+.m3-btn-error,
+.m3-btn-error-tonal,
+.m3-btn-success,
+.m3-seg-btn,
+.m3-icon-group-btn,
+.m3-group-item,
+.m3-custom-menu-item,
+.m3-extended-fab,
+.m3-dropdown-trigger,
+.m3-dropdown-field,
+.m3-swatch-btn,
+.m3-filter-chip,
+.m3-stepper-btn {
+    position: relative;
+    overflow: hidden;
+}
+
+.m3-ripple-wave {
+    position: absolute;
+    border-radius: 50%;
+    pointer-events: none;
+    transform: scale(0);
+    opacity: 0.32;
+    background-color: currentColor;
+    animation: m3RippleExpand 520ms var(--m3-effects-slow) forwards;
+    z-index: 2;
+}
+
+@keyframes m3RippleExpand {
+    0% {
+        transform: scale(0);
+        opacity: 0.30;
+    }
+    70% {
+        opacity: 0.14;
+    }
+    100% {
+        transform: scale(2.8);
+        opacity: 0;
+    }
+}
+
+/* 5. M3 Expressive Connected Button Group Neighbor-Push & Shape Morph */
+.m3-icon-group-btn {
+    transition:
+        background-color 150ms var(--m3-effects-fast),
+        color 150ms var(--m3-effects-fast),
+        border-radius 350ms var(--m3-spatial-fast),
+        padding 350ms var(--m3-spatial-fast),
+        transform 350ms var(--m3-spatial-fast),
+        opacity 150ms var(--m3-effects-fast);
+}
+
+.m3-icon-group-btn:active:not(:disabled) {
+    transform: scale(0.95);
+    border-radius: 10px !important;
+    padding-left: 9.5px;
+    padding-right: 9.5px;
+}
+
+.m3-seg-btn:active {
+    transform: scale(0.96);
+    border-radius: 12px !important;
+}
+
+/* 6. Authentic M3 Expressive Switches with In-Thumb Checkmark & Press-Squish */
+input[type="checkbox"].m3-switch {
+    width: 46px;
+    height: 26px;
+    transition:
+        background-color 200ms var(--m3-effects-default),
+        border-color 200ms var(--m3-effects-default),
+        box-shadow 180ms var(--m3-effects-fast);
+}
+
+input[type="checkbox"].m3-switch:hover {
+    box-shadow: 0 0 0 5px color-mix(in srgb, var(--md-primary) 16%, transparent);
+}
+
+input[type="checkbox"].m3-switch::after {
+    width: 14px;
+    height: 14px;
+    left: 4px;
+    background-color: var(--md-on-surface-variant);
+    transition:
+        transform 350ms var(--m3-spatial-fast),
+        width 350ms var(--m3-spatial-fast),
+        height 350ms var(--m3-spatial-fast),
+        background-color 150ms var(--m3-effects-fast);
+}
+
+input[type="checkbox"].m3-switch::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 4px;
+    width: 20px;
+    height: 20px;
+    z-index: 2;
+    pointer-events: none;
+    opacity: 0;
+    transform: translate3d(18px, -50%, 0) scale(0.35);
+    background-color: var(--md-primary);
+    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='black' d='M9.55 17.65L4.3 12.4l1.75-1.75 3.5 3.5 8.4-8.4 1.75 1.75z'/%3E%3C/svg%3E") center / 13px 13px no-repeat;
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='black' d='M9.55 17.65L4.3 12.4l1.75-1.75 3.5 3.5 8.4-8.4 1.75 1.75z'/%3E%3C/svg%3E") center / 13px 13px no-repeat;
+    transition: opacity 150ms var(--m3-effects-fast), transform 350ms var(--m3-spatial-fast);
+}
+
+input[type="checkbox"].m3-switch:checked::after {
+    width: 20px;
+    height: 20px;
+    background-color: var(--md-on-primary);
+    transform: translate3d(18px, -50%, 0);
+}
+
+input[type="checkbox"].m3-switch:checked::before {
+    opacity: 1;
+    transform: translate3d(18px, -50%, 0) scale(1);
+}
+
+/* Tactile horizontal squish on press (Android 16 / M3 Expressive signature) */
+input[type="checkbox"].m3-switch:active::after {
+    width: 22px;
+}
+input[type="checkbox"].m3-switch:checked:active::after {
+    width: 23px;
+    transform: translate3d(15px, -50%, 0);
+}
+
+/* Small Switch Variant */
+input[type="checkbox"].m3-switch.m3-switch-sm {
+    width: 38px;
+    height: 22px;
+}
+input[type="checkbox"].m3-switch.m3-switch-sm::after {
+    width: 11px;
+    height: 11px;
+    left: 3.5px;
+}
+input[type="checkbox"].m3-switch.m3-switch-sm::before {
+    width: 16px;
+    height: 16px;
+    left: 3.5px;
+    transform: translate3d(14.5px, -50%, 0) scale(0.35);
+    -webkit-mask-size: 11px 11px;
+    mask-size: 11px 11px;
+}
+input[type="checkbox"].m3-switch.m3-switch-sm:checked::after {
+    width: 16px;
+    height: 16px;
+    transform: translate3d(14.5px, -50%, 0);
+}
+input[type="checkbox"].m3-switch.m3-switch-sm:checked::before {
+    opacity: 1;
+    transform: translate3d(14.5px, -50%, 0) scale(1);
+}
+input[type="checkbox"].m3-switch.m3-switch-sm:active::after {
+    width: 18px;
+}
+input[type="checkbox"].m3-switch.m3-switch-sm:checked:active::after {
+    width: 18px;
+    transform: translate3d(12.5px, -50%, 0);
+}
+
+input[type="checkbox"].m3-switch.m3-switch-danger:checked {
+    background-color: var(--md-error);
+    border-color: var(--md-error);
+}
+input[type="checkbox"].m3-switch.m3-switch-danger:checked::after {
+    background-color: var(--md-on-error);
+}
+input[type="checkbox"].m3-switch.m3-switch-danger:checked::before {
+    background-color: var(--md-error);
+}
+
+input[type="checkbox"].m3-switch.m3-switch-warn:checked {
+    background-color: var(--md-warning);
+    border-color: var(--md-warning);
+}
+input[type="checkbox"].m3-switch.m3-switch-warn:checked::after {
+    background-color: var(--md-on-warning);
+}
+input[type="checkbox"].m3-switch.m3-switch-warn:checked::before {
+    background-color: var(--md-warning);
+}
+
+/* 7. Authentic Material 3 Expressive Sliders (Active Track + Stop Dot + Narrowing Vertical Bar Handle) */
+input[type="range"].split-slider {
+    -webkit-appearance: none;
+    appearance: none;
+    height: 30px;
+    background: transparent;
+    cursor: pointer;
+    --slider-pct: 50%;
+    --slider-start: 0%;
+    --slider-end: 50%;
+}
+
+input[type="range"].split-slider::-webkit-slider-runnable-track {
+    height: 12px;
+    border-radius: 9999px;
+    background:
+        radial-gradient(circle at calc(100% - 6px) 50%, var(--md-primary) 2px, transparent 2.5px),
+        linear-gradient(
+            to right,
+            var(--md-secondary-container) 0%,
+            var(--md-secondary-container) var(--slider-start),
+            var(--md-primary) var(--slider-start),
+            var(--md-primary) var(--slider-end),
+            var(--md-secondary-container) var(--slider-end),
+            var(--md-secondary-container) 100%
+        );
+    border: 1px solid color-mix(in srgb, var(--md-outline-variant) 75%, transparent);
+    transition: filter 150ms var(--m3-effects-fast);
+}
+
+input[type="range"].split-slider::-moz-range-track {
+    height: 12px;
+    border-radius: 9999px;
+    background: var(--md-secondary-container);
+    border: 1px solid color-mix(in srgb, var(--md-outline-variant) 75%, transparent);
+}
+
+input[type="range"].split-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 6px;
+    height: 28px;
+    margin-top: -9px;
+    border-radius: 9999px;
+    background: var(--md-primary);
+    border: none;
+    box-shadow: 0 0 0 3.5px var(--md-surface-container), 0 2px 6px rgba(0, 0, 0, 0.35);
+    transition: width 350ms var(--m3-spatial-fast), height 350ms var(--m3-spatial-fast), margin-top 350ms var(--m3-spatial-fast), box-shadow 150ms var(--m3-effects-fast);
+}
+
+input[type="range"].split-slider:hover::-webkit-slider-thumb {
+    box-shadow: 0 0 0 3.5px var(--md-surface-container), 0 0 0 8px color-mix(in srgb, var(--md-primary) 18%, transparent);
+}
+
+input[type="range"].split-slider:active::-webkit-slider-thumb {
+    width: 4px;
+    height: 30px;
+    margin-top: -10px;
+    border-radius: 9999px;
+    transform: none;
+}
+
+input[type="range"].split-slider::-moz-range-thumb {
+    width: 6px;
+    height: 28px;
+    border-radius: 9999px;
+    background: var(--md-primary);
+    border: none;
+    box-shadow: 0 0 0 3.5px var(--md-surface-container);
+}
+
+/* 8. Scroll-Reactive Morphing Extended FAB (Collapses to 56x56 Icon FAB instead of vanishing!) */
+.m3-extended-fab {
+    height: 56px !important;
+    min-width: 56px;
+    max-width: 220px;
+    padding: 0 22px !important;
+    background-color: var(--md-primary);
+    color: var(--md-on-primary);
+    border-radius: 18px;
+    box-shadow: var(--md-elevation-3);
+    white-space: nowrap;
+    gap: 10px;
+    transition:
+        max-width 420ms var(--m3-spatial-default),
+        padding 420ms var(--m3-spatial-default),
+        gap 320ms var(--m3-spatial-fast),
+        border-radius 350ms var(--m3-spatial-fast),
+        transform 350ms var(--m3-spatial-fast),
+        box-shadow 200ms var(--m3-effects-default);
+}
+
+.m3-extended-fab i {
+    transition: transform 380ms var(--m3-spatial-fast);
+    flex-shrink: 0;
+}
+
+.m3-extended-fab:hover i {
+    transform: rotate(90deg);
+}
+
+.m3-extended-fab .m3-fab-label {
+    display: inline-block;
+    max-width: 140px;
+    overflow: hidden;
+    opacity: 1;
+    transition: max-width 360ms var(--m3-spatial-default), opacity 180ms var(--m3-effects-fast);
+}
+
+.m3-extended-fab.fab-collapsed {
+    max-width: 56px !important;
+    padding: 0 !important;
+    gap: 0 !important;
+    justify-content: center;
+    border-radius: 18px;
+}
+
+.m3-extended-fab.fab-collapsed .m3-fab-label {
+    max-width: 0 !important;
+    opacity: 0 !important;
+}
+
+/* 9. Material 3 Inverse-Surface Snackbars (Replaces old hardcoded toasts) */
+@keyframes m3SnackbarIn {
+    0% {
+        opacity: 0;
+        transform: translate3d(0, 18px, 0) scale(0.92);
+    }
+    100% {
+        opacity: 1;
+        transform: translate3d(0, 0, 0) scale(1);
+    }
+}
+
+@keyframes m3SnackbarOut {
+    0% {
+        opacity: 1;
+        transform: translate3d(0, 0, 0) scale(1);
+    }
+    100% {
+        opacity: 0;
+        transform: translate3d(0, 10px, 0) scale(0.95);
+    }
+}
+
+.m3-snackbar {
+    pointer-events: auto;
+    max-width: min(92vw, 390px);
+    padding: 12px 16px;
+    border-radius: 16px;
+    background-color: var(--md-inverse-surface);
+    color: var(--md-inverse-on-surface);
+    box-shadow: var(--md-elevation-3);
+    font-size: 12px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    animation: m3SnackbarIn 360ms var(--m3-spatial-fast) forwards;
+    will-change: transform, opacity;
+}
+
+.m3-snackbar.is-warn {
+    background-color: var(--md-error-container);
+    color: var(--md-on-error-container);
+    border: 1px solid color-mix(in srgb, var(--md-error) 35%, transparent);
+}
+
+.m3-snackbar.is-exiting {
+    animation: m3SnackbarOut 200ms var(--m3-effects-default) forwards;
+}
+
+/* 10. Custom Material 3 Expressive Rich Tooltip */
+.m3-tooltip {
+    position: fixed;
+    z-index: 130;
+    pointer-events: none;
+    padding: 6px 11px;
+    border-radius: 10px;
+    background-color: var(--md-inverse-surface);
+    color: var(--md-inverse-on-surface);
+    font-size: 11px;
+    font-weight: 700;
+    line-height: 1.3;
+    max-width: 240px;
+    box-shadow: var(--md-elevation-2);
+    opacity: 0;
+    transform: translate3d(0, 4px, 0) scale(0.92);
+    transition: opacity 150ms var(--m3-effects-fast), transform 280ms var(--m3-spatial-fast);
+    will-change: transform, opacity;
+}
+
+.m3-tooltip.visible {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+}
+
+/* 11. Material 3 Navigation Drawer Expressive Glide + Filter Chips */
+#chaptersDrawer {
+    transition: transform 500ms var(--m3-spatial-default) !important;
+}
+
+#drawerBackdrop {
+    background-color: var(--md-scrim) !important;
+    transition: opacity 240ms var(--m3-effects-default);
+}
+
+.m3-filter-chip {
+    height: 30px;
+    padding: 0 11px;
+    border-radius: 10px;
+    font-size: 11px;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    flex-shrink: 0;
+    border: 1px solid var(--md-outline-variant);
+    background-color: var(--md-surface-low);
+    color: var(--md-on-surface-variant);
+    transition:
+        background-color 150ms var(--m3-effects-fast),
+        color 150ms var(--m3-effects-fast),
+        border-color 150ms var(--m3-effects-fast),
+        border-radius 350ms var(--m3-spatial-fast),
+        transform 350ms var(--m3-spatial-fast);
+}
+
+.m3-filter-chip:hover {
+    background-color: var(--md-surface-high);
+    color: var(--md-on-surface);
+}
+
+.m3-filter-chip.selected {
+    background-color: var(--md-secondary-container);
+    color: var(--md-on-secondary-container);
+    border-color: transparent;
+    border-radius: 9999px;
+    font-weight: 800;
+}
+
+.m3-filter-chip .chip-check {
+    display: none;
+    font-size: 11px;
+    color: var(--md-primary);
+}
+.m3-filter-chip.selected .chip-check {
+    display: inline-flex;
+}
+
+/* 12. Sculpted Theme Swatch Active Ring & Custom Color Seed Pill */
+.m3-swatch-btn {
+    border: 1.5px solid transparent;
+    transition:
+        transform 350ms var(--m3-spatial-fast),
+        border-color 180ms var(--m3-effects-fast),
+        background-color 180ms var(--m3-effects-fast);
+}
+
+.m3-swatch-btn:hover {
+    transform: translateY(-2px) scale(1.04);
+    background-color: var(--md-surface-highest);
+}
+
+.m3-swatch-btn.active-swatch {
+    border-color: var(--md-primary);
+    background-color: color-mix(in srgb, var(--md-primary-container) 55%, var(--md-surface-low));
+}
+
+.m3-swatch-btn .swatch-check {
+    opacity: 0;
+    transform: scale(0.4);
+    transition: opacity 150ms var(--m3-effects-fast), transform 350ms var(--m3-spatial-fast);
+}
+
+.m3-swatch-btn.active-swatch .swatch-check {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.m3-custom-color-trigger {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    height: 38px;
+    padding: 4px 12px 4px 5px;
+    border-radius: 9999px;
+    background-color: var(--md-surface-low);
+    border: 1.5px solid var(--md-outline-variant);
+    cursor: pointer;
+    transition: border-color 150ms var(--m3-effects-fast), background-color 150ms var(--m3-effects-fast), transform 350ms var(--m3-spatial-fast);
+}
+
+.m3-custom-color-trigger:hover {
+    border-color: var(--md-primary);
+    background-color: var(--md-surface-highest);
+}
+
+.m3-custom-color-trigger:active {
+    transform: scale(0.96);
+}
+
+/* 13. Material 3 Connected Numeric Stepper Pills */
+.m3-stepper {
+    display: inline-flex;
+    align-items: center;
+    height: 34px;
+    padding: 2.5px;
+    gap: 2px;
+    border-radius: 9999px;
+    background-color: var(--md-surface-low);
+    border: 1px solid var(--md-outline-variant);
+}
+
+.m3-stepper-btn {
+    width: 28px;
+    height: 27px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--md-surface-high);
+    color: var(--md-on-surface);
+    font-size: 12px;
+    font-weight: 800;
+    cursor: pointer;
+    transition: background-color 150ms var(--m3-effects-fast), color 150ms var(--m3-effects-fast), transform 300ms var(--m3-spatial-fast);
+}
+
+.m3-stepper-btn:first-child {
+    border-radius: 9999px 8px 8px 9999px;
+}
+
+.m3-stepper-btn:last-child {
+    border-radius: 8px 9999px 9999px 8px;
+}
+
+.m3-stepper-btn:hover {
+    background-color: var(--md-primary-container);
+    color: var(--md-on-primary-container);
+}
+
+.m3-stepper-btn:active {
+    transform: scale(0.92);
+}
+
+.m3-stepper-input {
+    width: 44px;
+    height: 27px;
+    background: transparent;
+    color: var(--md-on-surface);
+    text-align: center;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    font-weight: 800;
+    border: none;
+    outline: none;
+}
+
+/* Refined M3 Custom Dropdown Elevation & Scrollbar */
+.m3-custom-menu {
+    box-shadow: var(--md-elevation-3);
+    animation: m3MenuPop 260ms var(--m3-spatial-fast);
+}
+
+/* Refined Scrollbars adapting smoothly to Light/Dark M3 tokens */
+::-webkit-scrollbar-thumb {
+    background: color-mix(in srgb, var(--md-outline) 65%, transparent);
+    border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: var(--md-primary);
 }
