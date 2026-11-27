@@ -1873,3 +1873,207 @@ input[type="range"].split-slider::-moz-range-thumb {
 ::-webkit-scrollbar-thumb:hover {
     background: var(--md-primary);
 }
+
+/* ========================================================================== */
+/* LIVE PDF EXTRACTION VISUALIZER STUDIO (v4.1 — ZERO-SCROLL FULL-HEIGHT)     */
+/* ========================================================================== */
+#uploadModalDialog {
+    transition: max-width 420ms var(--m3-spatial-default), height 420ms var(--m3-spatial-default);
+}
+
+#uploadModalDialog.upload-studio-expanded {
+    max-width: 74rem !important;
+    width: calc(100vw - 24px) !important;
+    height: 92dvh !important;
+    max-height: 92dvh !important;
+}
+
+#extractPageFrame {
+    position: relative;
+    background-color: #ffffff;
+    border-radius: 18px;
+    overflow: hidden;
+    box-shadow: var(--md-elevation-3);
+    border: 1.5px solid var(--md-outline-variant);
+    flex-shrink: 0;
+    user-select: none;
+    pointer-events: none;
+}
+
+#extractOverlayLayer {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+}
+
+/* Pending (not yet extracted) question ghost box */
+.ex-ghost-box {
+    position: absolute;
+    border: 1.5px dashed rgba(148, 163, 184, 0.55);
+    background: rgba(148, 163, 184, 0.05);
+    border-radius: 6px;
+    z-index: 4;
+}
+
+/* Completed question box */
+.ex-done-box {
+    position: absolute;
+    border: 1.5px solid color-mix(in srgb, var(--md-success) 75%, transparent);
+    background: color-mix(in srgb, var(--md-success) 10%, transparent);
+    border-radius: 6px;
+    z-index: 6;
+    transition: opacity 220ms var(--m3-effects-fast);
+}
+
+.ex-done-pill {
+    position: absolute;
+    top: 3px;
+    right: 4px;
+    font-size: 9px;
+    font-weight: 800;
+    padding: 1px 6px;
+    border-radius: 9999px;
+    background: var(--md-success-container);
+    color: var(--md-on-success-container);
+    border: 1px solid color-mix(in srgb, var(--md-success) 40%, transparent);
+    white-space: nowrap;
+    max-width: 92%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Active Question Highlight Box with Real-Time Spring Border Adjustment & Spotlight Dim */
+.ex-active-box {
+    position: absolute;
+    border-radius: 8px;
+    border: 2.5px solid var(--md-primary);
+    background: color-mix(in srgb, var(--md-primary) 9%, transparent);
+    box-shadow:
+        0 0 0 9999px rgba(6, 7, 16, 0.48),
+        0 0 0 2px color-mix(in srgb, var(--md-primary) 45%, transparent),
+        0 0 22px color-mix(in srgb, var(--md-primary) 50%, transparent);
+    z-index: 15;
+    transition:
+        top 380ms var(--m3-spatial-default),
+        left 380ms var(--m3-spatial-default),
+        width 380ms var(--m3-spatial-default),
+        height 380ms var(--m3-spatial-default),
+        border-color 200ms var(--m3-effects-fast),
+        background-color 200ms var(--m3-effects-fast),
+        box-shadow 220ms var(--m3-effects-default);
+    will-change: top, left, width, height;
+}
+
+.ex-active-box.is-adjusting {
+    border-color: var(--md-warning);
+    border-style: dashed;
+    background: color-mix(in srgb, var(--md-warning) 10%, transparent);
+    box-shadow:
+        0 0 0 9999px rgba(6, 7, 16, 0.48),
+        0 0 0 2px color-mix(in srgb, var(--md-warning) 45%, transparent),
+        0 0 22px color-mix(in srgb, var(--md-warning) 50%, transparent);
+}
+
+.ex-active-box.is-ocr {
+    border-color: var(--md-primary);
+    border-style: solid;
+    background: color-mix(in srgb, var(--md-primary) 11%, transparent);
+}
+
+.ex-active-box.is-locked {
+    border-color: var(--md-success);
+    border-style: solid;
+    background: color-mix(in srgb, var(--md-success) 13%, transparent);
+    box-shadow:
+        0 0 0 9999px rgba(6, 7, 16, 0.42),
+        0 0 0 2px color-mix(in srgb, var(--md-success) 50%, transparent),
+        0 0 24px color-mix(in srgb, var(--md-success) 55%, transparent);
+}
+
+/* Corner Brackets on Active Box */
+.ex-corner {
+    position: absolute;
+    width: 11px;
+    height: 11px;
+    border-color: inherit;
+    border-style: solid;
+    pointer-events: none;
+}
+.ex-corner.tl { top: -2px; left: -2px; border-width: 3px 0 0 3px; border-top-left-radius: 6px; }
+.ex-corner.tr { top: -2px; right: -2px; border-width: 3px 3px 0 0; border-top-right-radius: 6px; }
+.ex-corner.bl { bottom: -2px; left: -2px; border-width: 0 0 3px 3px; border-bottom-left-radius: 6px; }
+.ex-corner.br { bottom: -2px; right: -2px; border-width: 0 3px 3px 0; border-bottom-right-radius: 6px; }
+
+/* Laser OCR Scan Beam Inside Active Question */
+@keyframes exLaserSweep {
+    0% { top: 4%; opacity: 0.9; }
+    50% { top: 92%; opacity: 1; }
+    100% { top: 4%; opacity: 0.9; }
+}
+
+.ex-scan-beam {
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, transparent 0%, var(--md-primary) 20%, #ffffff 50%, var(--md-primary) 80%, transparent 100%);
+    box-shadow: 0 0 12px 2px var(--md-primary);
+    animation: exLaserSweep 1.15s ease-in-out infinite;
+    z-index: 3;
+}
+
+.ex-active-box.is-adjusting .ex-scan-beam {
+    background: linear-gradient(90deg, transparent 0%, var(--md-warning) 20%, #ffffff 50%, var(--md-warning) 80%, transparent 100%);
+    box-shadow: 0 0 10px 2px var(--md-warning);
+}
+
+.ex-active-box.is-locked .ex-scan-beam {
+    display: none;
+}
+
+/* Floating Active Question Tag */
+.ex-active-badge {
+    position: absolute;
+    left: 6px;
+    top: 4px;
+    font-size: 10px;
+    font-weight: 800;
+    padding: 2px 9px;
+    border-radius: 9999px;
+    background: var(--md-primary);
+    color: var(--md-on-primary);
+    box-shadow: var(--md-elevation-2);
+    white-space: nowrap;
+    max-width: calc(100% - 12px);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    z-index: 5;
+}
+
+.ex-active-box.is-adjusting .ex-active-badge {
+    background: var(--md-warning);
+    color: var(--md-on-warning);
+}
+
+.ex-active-box.is-locked .ex-active-badge {
+    background: var(--md-success);
+    color: var(--md-on-success);
+}
+
+/* Whole-Page Scanning Sweep during Stage 1 initial layout pass */
+@keyframes exPageScanSweep {
+    0% { top: 0%; }
+    100% { top: 98%; }
+}
+
+.ex-page-sweep-line {
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, transparent, var(--md-primary), transparent);
+    box-shadow: 0 0 14px 3px var(--md-primary);
+    animation: exPageScanSweep 1.5s linear infinite;
+    z-index: 12;
+}
