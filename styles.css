@@ -1875,7 +1875,7 @@ input[type="range"].split-slider::-moz-range-thumb {
 }
 
 /* ========================================================================== */
-/* LIVE PDF EXTRACTION VISUALIZER STUDIO (v4.1 — ZERO-SCROLL FULL-HEIGHT)     */
+/* LIVE PDF EXTRACTION VISUALIZER STUDIO (v4.2 — FLICKER-FREE GPU OVERLAY)    */
 /* ========================================================================== */
 #uploadModalDialog {
     transition: max-width 420ms var(--m3-spatial-default), height 420ms var(--m3-spatial-default);
@@ -1898,6 +1898,7 @@ input[type="range"].split-slider::-moz-range-thumb {
     flex-shrink: 0;
     user-select: none;
     pointer-events: none;
+    contain: layout paint;
 }
 
 #extractOverlayLayer {
@@ -1907,13 +1908,35 @@ input[type="range"].split-slider::-moz-range-thumb {
     pointer-events: none;
 }
 
+#exStaticLayer,
+#exScrimLayer {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+}
+
+#exStaticLayer { z-index: 5; }
+#exScrimLayer { z-index: 10; }
+
+/* 4 Lightweight Scrim Curtains (Replaces 9999px box-shadow that flickered on Skia/Vulkan GPU!) */
+.ex-scrim-pane {
+    position: absolute;
+    background-color: rgba(6, 7, 16, 0.46);
+    pointer-events: none;
+    transition:
+        top 340ms var(--m3-spatial-default),
+        left 340ms var(--m3-spatial-default),
+        width 340ms var(--m3-spatial-default),
+        height 340ms var(--m3-spatial-default),
+        opacity 180ms var(--m3-effects-fast);
+}
+
 /* Pending (not yet extracted) question ghost box */
 .ex-ghost-box {
     position: absolute;
     border: 1.5px dashed rgba(148, 163, 184, 0.55);
     background: rgba(148, 163, 184, 0.05);
     border-radius: 6px;
-    z-index: 4;
 }
 
 /* Completed question box */
@@ -1922,8 +1945,6 @@ input[type="range"].split-slider::-moz-range-thumb {
     border: 1.5px solid color-mix(in srgb, var(--md-success) 75%, transparent);
     background: color-mix(in srgb, var(--md-success) 10%, transparent);
     border-radius: 6px;
-    z-index: 6;
-    transition: opacity 220ms var(--m3-effects-fast);
 }
 
 .ex-done-pill {
@@ -1943,36 +1964,29 @@ input[type="range"].split-slider::-moz-range-thumb {
     text-overflow: ellipsis;
 }
 
-/* Active Question Highlight Box with Real-Time Spring Border Adjustment & Spotlight Dim */
+/* Persistent Active Question Highlight Box (Small Crisp Glow Only — Zero GPU Tile Dropout!) */
 .ex-active-box {
     position: absolute;
     border-radius: 8px;
     border: 2.5px solid var(--md-primary);
     background: color-mix(in srgb, var(--md-primary) 9%, transparent);
-    box-shadow:
-        0 0 0 9999px rgba(6, 7, 16, 0.48),
-        0 0 0 2px color-mix(in srgb, var(--md-primary) 45%, transparent),
-        0 0 22px color-mix(in srgb, var(--md-primary) 50%, transparent);
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--md-primary) 40%, transparent), 0 0 14px color-mix(in srgb, var(--md-primary) 42%, transparent);
     z-index: 15;
     transition:
-        top 380ms var(--m3-spatial-default),
-        left 380ms var(--m3-spatial-default),
-        width 380ms var(--m3-spatial-default),
-        height 380ms var(--m3-spatial-default),
-        border-color 200ms var(--m3-effects-fast),
-        background-color 200ms var(--m3-effects-fast),
-        box-shadow 220ms var(--m3-effects-default);
-    will-change: top, left, width, height;
+        top 340ms var(--m3-spatial-default),
+        left 340ms var(--m3-spatial-default),
+        width 340ms var(--m3-spatial-default),
+        height 340ms var(--m3-spatial-default),
+        border-color 180ms var(--m3-effects-fast),
+        background-color 180ms var(--m3-effects-fast),
+        box-shadow 180ms var(--m3-effects-fast);
 }
 
 .ex-active-box.is-adjusting {
     border-color: var(--md-warning);
     border-style: dashed;
     background: color-mix(in srgb, var(--md-warning) 10%, transparent);
-    box-shadow:
-        0 0 0 9999px rgba(6, 7, 16, 0.48),
-        0 0 0 2px color-mix(in srgb, var(--md-warning) 45%, transparent),
-        0 0 22px color-mix(in srgb, var(--md-warning) 50%, transparent);
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--md-warning) 45%, transparent), 0 0 14px color-mix(in srgb, var(--md-warning) 45%, transparent);
 }
 
 .ex-active-box.is-ocr {
@@ -1985,10 +1999,7 @@ input[type="range"].split-slider::-moz-range-thumb {
     border-color: var(--md-success);
     border-style: solid;
     background: color-mix(in srgb, var(--md-success) 13%, transparent);
-    box-shadow:
-        0 0 0 9999px rgba(6, 7, 16, 0.42),
-        0 0 0 2px color-mix(in srgb, var(--md-success) 50%, transparent),
-        0 0 24px color-mix(in srgb, var(--md-success) 55%, transparent);
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--md-success) 50%, transparent), 0 0 16px color-mix(in srgb, var(--md-success) 48%, transparent);
 }
 
 /* Corner Brackets on Active Box */
@@ -2005,31 +2016,47 @@ input[type="range"].split-slider::-moz-range-thumb {
 .ex-corner.bl { bottom: -2px; left: -2px; border-width: 0 0 3px 3px; border-bottom-left-radius: 6px; }
 .ex-corner.br { bottom: -2px; right: -2px; border-width: 0 3px 3px 0; border-bottom-right-radius: 6px; }
 
-/* Laser OCR Scan Beam Inside Active Question */
-@keyframes exLaserSweep {
-    0% { top: 4%; opacity: 0.9; }
-    50% { top: 92%; opacity: 1; }
-    100% { top: 4%; opacity: 0.9; }
+/* 100% GPU-Composited Laser OCR Scan Beam (Zero Layout Thrashing!) */
+@keyframes exLaserSweepGpu {
+    0% { transform: translate3d(0, 3%, 0); opacity: 0.9; }
+    50% { transform: translate3d(0, 95%, 0); opacity: 1; }
+    100% { transform: translate3d(0, 3%, 0); opacity: 0.9; }
+}
+
+.ex-scan-beam-track {
+    position: absolute;
+    inset: 2px 0;
+    overflow: hidden;
+    pointer-events: none;
+    z-index: 3;
 }
 
 .ex-scan-beam {
     position: absolute;
+    inset: 0;
+    will-change: transform;
+    animation: exLaserSweepGpu 1.15s ease-in-out infinite;
+}
+
+.ex-scan-beam::after {
+    content: '';
+    position: absolute;
+    top: 0;
     left: 0;
     right: 0;
     height: 3px;
     background: linear-gradient(90deg, transparent 0%, var(--md-primary) 20%, #ffffff 50%, var(--md-primary) 80%, transparent 100%);
-    box-shadow: 0 0 12px 2px var(--md-primary);
-    animation: exLaserSweep 1.15s ease-in-out infinite;
-    z-index: 3;
+    box-shadow: 0 0 10px 1.5px var(--md-primary);
 }
 
-.ex-active-box.is-adjusting .ex-scan-beam {
+.ex-active-box.is-adjusting .ex-scan-beam::after {
     background: linear-gradient(90deg, transparent 0%, var(--md-warning) 20%, #ffffff 50%, var(--md-warning) 80%, transparent 100%);
-    box-shadow: 0 0 10px 2px var(--md-warning);
+    box-shadow: 0 0 8px 1.5px var(--md-warning);
 }
 
-.ex-active-box.is-locked .ex-scan-beam {
-    display: none;
+.ex-active-box.is-locked .ex-scan-beam-track {
+    opacity: 0;
+    transition: opacity 160ms var(--m3-effects-fast);
 }
 
 /* Floating Active Question Tag */
@@ -2061,19 +2088,34 @@ input[type="range"].split-slider::-moz-range-thumb {
     color: var(--md-on-success);
 }
 
-/* Whole-Page Scanning Sweep during Stage 1 initial layout pass */
-@keyframes exPageScanSweep {
-    0% { top: 0%; }
-    100% { top: 98%; }
+/* Whole-Page Scanning Sweep (GPU Transform) */
+@keyframes exPageScanSweepGpu {
+    0% { transform: translate3d(0, 0%, 0); }
+    100% { transform: translate3d(0, 98%, 0); }
+}
+
+.ex-page-sweep-track {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+    z-index: 12;
 }
 
 .ex-page-sweep-line {
     position: absolute;
+    inset: 0;
+    will-change: transform;
+    animation: exPageScanSweepGpu 1.5s linear infinite;
+}
+
+.ex-page-sweep-line::after {
+    content: '';
+    position: absolute;
+    top: 0;
     left: 0;
     right: 0;
     height: 3px;
     background: linear-gradient(90deg, transparent, var(--md-primary), transparent);
-    box-shadow: 0 0 14px 3px var(--md-primary);
-    animation: exPageScanSweep 1.5s linear infinite;
-    z-index: 12;
+    box-shadow: 0 0 12px 2px var(--md-primary);
 }
