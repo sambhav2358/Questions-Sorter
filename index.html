@@ -13,7 +13,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
     <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
-    <link rel="stylesheet" href="./styles.css?v=4.3">
+    <link rel="stylesheet" href="./styles.css?v=4.4">
     <script src="./local-vision-engine.js?v=4.0"></script>
     <script src="./local-ai-borders.js?v=3.2"></script>
 </head>
@@ -534,11 +534,11 @@
                                 <div class="text-xs font-bold">Custom Primary Seed Color</div>
                                 <div class="text-[11px] m3-text-muted">Generate a bold Material 3 Expressive palette from any hex color</div>
                             </div>
-                            <label class="m3-custom-color-trigger shrink-0" title="Pick any custom Material You seed color">
+                            <button type="button" id="customColorTriggerBtn" onclick="window.app.openCustomColorPicker()" class="m3-custom-color-trigger shrink-0" title="Open Custom Material You Color Palette">
                                 <span id="customColorSwatchPreview" class="w-7 h-7 m3-clover-8 block shrink-0" style="background: #7c3aed;"></span>
                                 <span id="customColorHexLabel" class="font-mono text-[11px] font-extrabold uppercase">#7C3AED</span>
-                                <input id="customThemeColorPicker" type="color" value="#7c3aed" oninput="window.app.setMaterialTheme(this.value)" class="sr-only">
-                            </label>
+                                <i class="ph-bold ph-sliders-horizontal text-xs m3-text-muted"></i>
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -1619,6 +1619,73 @@
         </div>
     </div>
 
+    <!-- =================================================================== -->
+    <!-- MODAL 5: 100% LOCAL MATERIAL 3 EXPRESSIVE COLOR SEED PICKER         -->
+    <!-- =================================================================== -->
+    <div id="customColorPickerModal" onclick="if(event.target === this) window.app.closeCustomColorPicker(false)" class="fixed inset-0 m3-scrim backdrop-blur-sm z-[80] hidden flex items-center justify-center p-3 sm:p-5">
+        <div class="m3-dialog max-w-sm w-full overflow-hidden flex flex-col">
+            <div class="px-5 py-3.5 m3-surface-low border-b border-[var(--md-outline-variant)] flex items-center justify-between gap-2 shrink-0">
+                <div class="flex items-center gap-2.5 min-w-0">
+                    <div class="w-9 h-9 m3-cookie-12 flex items-center justify-center shrink-0" style="background: var(--md-primary-container); color: var(--md-primary);">
+                        <i class="ph-bold ph-eyedropper text-base"></i>
+                    </div>
+                    <div class="min-w-0">
+                        <h3 class="font-extrabold text-sm truncate">Custom Theme Color</h3>
+                        <p class="text-[10.5px] m3-text-muted truncate">Live Material 3 Expressive seed palette</p>
+                    </div>
+                </div>
+                <button type="button" onclick="window.app.closeCustomColorPicker(false)" class="h-8 w-8 m3-btn-tonal flex items-center justify-center shrink-0" title="Cancel">
+                    <i class="ph-bold ph-x text-xs"></i>
+                </button>
+            </div>
+
+            <div class="p-4 space-y-3.5 overflow-y-auto">
+                <!-- Interactive 2D Saturation / Brightness Field -->
+                <div id="cpSvWrap" class="cp-sv-wrap">
+                    <canvas id="cpSvCanvas" class="w-full h-full block"></canvas>
+                    <div id="cpSvThumb" class="cp-sv-thumb" style="left: 75%; top: 20%;"></div>
+                </div>
+
+                <!-- Interactive Rainbow Hue Bar -->
+                <div id="cpHueWrap" class="cp-hue-wrap">
+                    <canvas id="cpHueCanvas" class="w-full h-full block"></canvas>
+                    <div id="cpHueThumb" class="cp-hue-thumb" style="left: 70%;"></div>
+                </div>
+
+                <!-- Live Seed Preview + Hex Input -->
+                <div class="p-3 rounded-2xl m3-surface-high border border-[var(--md-outline-variant)] flex items-center justify-between gap-3">
+                    <div class="flex items-center gap-2.5 min-w-0">
+                        <span id="cpLiveSwatch" class="w-9 h-9 m3-cookie-12 shrink-0 block" style="background: #7c3aed;"></span>
+                        <div class="min-w-0">
+                            <div class="text-[10px] font-bold uppercase tracking-wider m3-text-muted">Seed Hex</div>
+                            <input id="cpHexInput" type="text" maxlength="7" value="#7C3AED" oninput="window.app.cpOnHexInput(this.value)" class="w-24 h-7 m3-input m3-surface-low px-2.5 text-xs font-mono font-extrabold uppercase mt-0.5">
+                        </div>
+                    </div>
+                    <!-- Live M3 Tonal Preview Chips -->
+                    <div class="flex items-center gap-1.5 shrink-0" title="Generated Material You tones">
+                        <span class="w-6 h-6 rounded-full border border-[var(--md-outline-variant)]" style="background: var(--md-primary);"></span>
+                        <span class="w-6 h-6 rounded-full border border-[var(--md-outline-variant)]" style="background: var(--md-primary-container);"></span>
+                        <span class="w-6 h-6 rounded-full border border-[var(--md-outline-variant)]" style="background: var(--md-secondary-container);"></span>
+                    </div>
+                </div>
+
+                <!-- Curated M3 Expressive Swatches -->
+                <div class="space-y-1.5">
+                    <div class="text-[10px] font-extrabold uppercase tracking-wider m3-text-muted px-0.5">Quick Seed Presets</div>
+                    <div id="cpPresetsGrid" class="grid grid-cols-6 gap-2"></div>
+                </div>
+            </div>
+
+            <div class="px-4 py-3 m3-surface-low border-t border-[var(--md-outline-variant)] flex items-center justify-end gap-2 shrink-0">
+                <button type="button" onclick="window.app.closeCustomColorPicker(false)" class="h-9 px-4 m3-btn-tonal text-xs">Cancel</button>
+                <button type="button" onclick="window.app.closeCustomColorPicker(true)" class="h-9 px-5 m3-btn-filled text-xs flex items-center gap-1.5 shadow">
+                    <i class="ph-bold ph-check text-xs"></i>
+                    <span>Apply Color</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- GLOBAL CUSTOM DROPDOWN AT VERY END OF BODY WITH Z-[100] -->
     <div id="customDropdownBackdrop" onclick="window.app.closeCustomDropdown()" class="fixed inset-0 z-[95] hidden"></div>
     <div id="customDropdownMenu" class="fixed z-[100] hidden m3-custom-menu max-h-80 overflow-y-auto min-w-[180px] max-w-[calc(100vw-20px)]"></div>
@@ -1630,6 +1697,6 @@
     <div id="toastBox" class="fixed bottom-24 right-6 z-[110] flex flex-col items-end gap-2 pointer-events-none"></div>
 
 
-    <script src="./app.js?v=4.3"></script>
+    <script src="./app.js?v=4.4"></script>
 </body>
 </html>
