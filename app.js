@@ -1832,7 +1832,7 @@ function hexToHsl(hex) {
     return { h: Math.round(h * 360), s: Math.round(s * 100), l: Math.round(l * 100) };
 }
 
-function applyMaterialThemeFromSeed(hexSeed, modeOverride = null) {
+function applyMaterialThemeFromSeed(hexSeed, modeOverride = null, persist = true) {
     const cleanHex = /^#[0-9A-Fa-f]{6}$/.test(hexSeed) ? hexSeed : (localStorage.getItem('jee_m3_seed_color') || '#7c3aed');
     const mode = modeOverride || getThemeMode();
     const { h, s } = hexToHsl(cleanHex);
@@ -1842,8 +1842,10 @@ function applyMaterialThemeFromSeed(hexSeed, modeOverride = null) {
     const hTer = (h + 55) % 360;
 
     root.classList.toggle('dark', mode === 'dark');
-    localStorage.setItem('jee_m3_theme_mode', mode);
-    localStorage.setItem('jee_m3_seed_color', cleanHex);
+    if (persist) {
+        localStorage.setItem('jee_m3_theme_mode', mode);
+        localStorage.setItem('jee_m3_seed_color', cleanHex);
+    }
 
     if (mode === 'light') {
         root.style.setProperty('--md-primary', `hsl(${h}, ${Math.min(85, sat)}%, 44%)`);
@@ -1945,6 +1947,210 @@ function applyMaterialThemeFromSeed(hexSeed, modeOverride = null) {
     }
 }
 
+// ===================================================================
+// 100% LOCAL MATERIAL 3 EXPRESSIVE COLOR SEED PICKER ENGINE (v4.4)
+// ===================================================================
+const CP_PRESET_SEEDS = [
+    '#7c3aed', '#4f46e5', '#2563eb', '#0284c7', '#0891b2', '#0d9488',
+    '#059669', '#65a30d', '#d97706', '#ea580c', '#e11d48', '#db2777'
+];
+
+const cpState = {
+    origHex: '#7c3aed',
+    h: 263,
+    s: 0.76,
+    v: 0.93,
+    hex: '#7c3aed',
+    bound: false
+};
+
+function hexToRgbObj(hex) {
+    const clean = String(hex || '#7c3aed').replace('#', '');
+    const full = clean.length === 3 ? clean.split('').map(c => c + c).join('') : clean.padEnd(6, '0');
+    return {
+        r: parseInt(full.slice(0, 2), 16) || 0,
+        g: parseInt(full.slice(2, 4), 16) || 0,
+        b: parseInt(full.slice(4, 6), 16) || 0
+    };
+}
+
+function rgbToHexStr(r, g, b) {
+    const to2 = (n) => Math.max(0, Math.min(255, Math.round(n))).toString(16).padStart(2, '0');
+    return `#${to2(r)}${to2(g)}${to2(b)}`;
+}
+
+function rgbToHsv(r, g, b) {
+    r /= 255; g /= 255; b /= 255;
+    const max = Math.max(r, g, b), min = Math.min(r, g, b);
+    const d = max - min;
+    let h = 0;
+    if (d !== 0) {
+        if (max === r) h = ((g - b) / d) % 6;
+        else if (max === g) h = (b - r) / d + 2;
+        else h = (r - g) / d + 4;
+        h = Math.round(h * 60);
+        if (h < 0) h += 360;
+    }
+    const s = max === 0 ? 0 : d / max;
+    return { h, s, v: max };
+}
+
+function hsvToRgb(h, s, v) {
+    const c = v * s;
+    const x = c * (1 - Math.abs(((h / 60) % 2) - 1));
+    const m = v - c;
+    let r = 0, g = 0, b = 0;
+    if (h < 60) { r = c; g = x; }
+    else if (h < 120) { r = x; g = c; }
+    else if (h < 180) { g = c; b = x; }
+    else if (h < 240) { g = x; b = c; }
+    else if (h < 300) { r = x; b = c; }
+    else { r = c; b = x; }
+    return {
+        r: Math.round((r + m) * 255),
+        g: Math.round((g + m) * 255),
+        b: Math.round((b + m) * 255)
+    };
+}
+
+function cpDrawCanvasesAndUI(liveApply = true) {
+    const svCanvas = document.getElementById('cpSvCanvas');
+    const hueCanvas = document.getElementById('cpHueCanvas');
+    const svThumb = document.getElementById('cpSvThumb');
+    const hueThumb = document.getElementById('cpHueThumb');
+    if (!svCanvas || !hueCanvas) return;
+
+    // Draw Hue Bar
+    const hw = Math.max(200, hueCanvas.clientWidth || 300);
+    const hh = Math.max(16, hueCanvas.clientHeight || 20);
+    if (hueCanvas.width !== hw || hueCanvas.height !== hh) {
+        hueCanvas.width = hw; hueCanvas.height = hh;
+    }
+    const hCtx = hueCanvas.getContext('2d');
+    const hGrad = hCtx.createLinearGradient(0, 0, hw, 0);
+    [0, 60, 120, 180, 240, 300, 360].forEach(deg => {
+        hGrad.addColorStop(deg / 360, `hsl(${deg}, 100%, 50%)`);
+    });
+    hCtx.fillStyle = hGrad;
+    hCtx.fillRect(0, 0, hw, hh);
+
+    // Draw 2D Saturation x Value Canvas
+    const sw = Math.max(200, svCanvas.clientWidth || 300);
+    const sh = Math.max(120, svCanvas.clientHeight || 176);
+    if (svCanvas.width !== sw || svCanvas.height !== sh) {
+        svCanvas.width = sw; svCanvas.height = sh;
+    }
+    const sCtx = svCanvas.getContext('2d');
+    sCtx.fillStyle = `hsl(${cpState.h}, 100%, 50%)`;
+    sCtx.fillRect(0, 0, sw, sh);
+
+    const whiteGrad = sCtx.createLinearGradient(0, 0, sw, 0);
+    whiteGrad.addColorStop(0, '#ffffff');
+    whiteGrad.addColorStop(1, 'rgba(255,255,255,0)');
+    sCtx.fillStyle = whiteGrad;
+    sCtx.fillRect(0, 0, sw, sh);
+
+    const blackGrad = sCtx.createLinearGradient(0, 0, 0, sh);
+    blackGrad.addColorStop(0, 'rgba(0,0,0,0)');
+    blackGrad.addColorStop(1, '#000000');
+    sCtx.fillStyle = blackGrad;
+    sCtx.fillRect(0, 0, sw, sh);
+
+    const rgb = hsvToRgb(cpState.h, cpState.s, cpState.v);
+    cpState.hex = rgbToHexStr(rgb.r, rgb.g, rgb.b);
+
+    if (svThumb) {
+        svThumb.style.left = `${(cpState.s * 100).toFixed(2)}%`;
+        svThumb.style.top = `${((1 - cpState.v) * 100).toFixed(2)}%`;
+        svThumb.style.background = cpState.hex;
+    }
+    if (hueThumb) {
+        hueThumb.style.left = `${((cpState.h / 360) * 100).toFixed(2)}%`;
+        hueThumb.style.background = `hsl(${cpState.h}, 100%, 50%)`;
+    }
+
+    const liveSwatch = document.getElementById('cpLiveSwatch');
+    if (liveSwatch) liveSwatch.style.background = cpState.hex;
+    const hexInp = document.getElementById('cpHexInput');
+    if (hexInp && document.activeElement !== hexInp) {
+        hexInp.value = cpState.hex.toUpperCase();
+    }
+
+    document.querySelectorAll('#cpPresetsGrid .cp-preset-dot').forEach(btn => {
+        const isMatch = (btn.getAttribute('data-cp-hex') || '').toLowerCase() === cpState.hex.toLowerCase();
+        btn.classList.toggle('is-active', isMatch);
+        const ic = btn.querySelector('i');
+        if (ic) ic.classList.toggle('opacity-0', !isMatch);
+    });
+
+    if (liveApply) {
+        applyMaterialThemeFromSeed(cpState.hex, getThemeMode(), false);
+    }
+}
+
+function initCustomColorPickerEvents() {
+    if (cpState.bound) return;
+    cpState.bound = true;
+
+    const svWrap = document.getElementById('cpSvWrap');
+    const hueWrap = document.getElementById('cpHueWrap');
+    const presetsGrid = document.getElementById('cpPresetsGrid');
+
+    if (presetsGrid) {
+        presetsGrid.innerHTML = CP_PRESET_SEEDS.map(hex => `
+            <button type="button" data-cp-hex="${hex}" onclick="window.app.cpPickPreset('${hex}')" class="cp-preset-dot" style="background: ${hex};" title="${hex.toUpperCase()}">
+                <i class="ph-bold ph-check text-white text-xs opacity-0 drop-shadow"></i>
+            </button>
+        `).join('');
+    }
+
+    if (svWrap) {
+        const updateSV = (clientX, clientY) => {
+            const r = svWrap.getBoundingClientRect();
+            cpState.s = Math.max(0, Math.min(1, (clientX - r.left) / Math.max(1, r.width)));
+            cpState.v = Math.max(0.08, Math.min(1, 1 - (clientY - r.top) / Math.max(1, r.height)));
+            cpDrawCanvasesAndUI(true);
+        };
+        svWrap.onpointerdown = (e) => {
+            e.preventDefault();
+            svWrap.setPointerCapture(e.pointerId);
+            updateSV(e.clientX, e.clientY);
+            const onMove = (ev) => updateSV(ev.clientX, ev.clientY);
+            const onUp = () => {
+                window.removeEventListener('pointermove', onMove);
+                window.removeEventListener('pointerup', onUp);
+                window.removeEventListener('pointercancel', onUp);
+            };
+            window.addEventListener('pointermove', onMove);
+            window.addEventListener('pointerup', onUp);
+            window.addEventListener('pointercancel', onUp);
+        };
+    }
+
+    if (hueWrap) {
+        const updateHue = (clientX) => {
+            const r = hueWrap.getBoundingClientRect();
+            const frac = Math.max(0, Math.min(0.999, (clientX - r.left) / Math.max(1, r.width)));
+            cpState.h = Math.round(frac * 360);
+            cpDrawCanvasesAndUI(true);
+        };
+        hueWrap.onpointerdown = (e) => {
+            e.preventDefault();
+            hueWrap.setPointerCapture(e.pointerId);
+            updateHue(e.clientX);
+            const onMove = (ev) => updateHue(ev.clientX);
+            const onUp = () => {
+                window.removeEventListener('pointermove', onMove);
+                window.removeEventListener('pointerup', onUp);
+                window.removeEventListener('pointercancel', onUp);
+            };
+            window.addEventListener('pointermove', onMove);
+            window.addEventListener('pointerup', onUp);
+            window.addEventListener('pointercancel', onUp);
+        };
+    }
+}
+
 function initSwipeableStatusSegmentedBar() {
     const bar = document.getElementById('statusSegmentedBar');
     if (!bar) return;
@@ -2007,7 +2213,7 @@ function toast(msg, type = 'info') {
 function initM3Ripples() {
     if (document._m3RippleBound) return;
     document._m3RippleBound = true;
-    const RIPPLE_SELECTOR = '.m3-btn-filled, .m3-btn-tonal, .m3-btn-error, .m3-btn-error-tonal, .m3-btn-success, .m3-seg-btn, .m3-icon-group-btn, .m3-group-item, .m3-custom-menu-item, .m3-extended-fab, .m3-dropdown-trigger, .m3-dropdown-field, .m3-swatch-btn, .m3-filter-chip, .m3-stepper-btn, .m3-nudge-btn, .br-palette-pill';
+    const RIPPLE_SELECTOR = '.m3-btn-filled, .m3-btn-tonal, .m3-btn-error, .m3-btn-error-tonal, .m3-btn-success, .m3-seg-btn, .m3-icon-group-btn, .m3-group-item, .m3-custom-menu-item, .m3-extended-fab, .m3-dropdown-trigger, .m3-dropdown-field, .m3-swatch-btn, .m3-filter-chip, .m3-stepper-btn, .m3-nudge-btn, .br-palette-pill, .m3-custom-color-trigger';
 
     document.addEventListener('pointerdown', (e) => {
         const target = e.target?.closest?.(RIPPLE_SELECTOR);
@@ -2873,6 +3079,9 @@ function setUploadStudioExpanded(expanded) {
             fitExtractPageFrame(true);
             if (!waveAnimFrame) waveAnimFrame = requestAnimationFrame(stepAllWavyBars);
         });
+        setTimeout(() => {
+            if (state.isExtracting && !state.isUploadMinimized) fitExtractPageFrame(true);
+        }, 390);
     }
 }
 
@@ -2995,10 +3204,6 @@ function ensureExtractPersistentLayers() {
                 <div id="exScrimRight" class="ex-scrim-pane"></div>
             </div>
             <div id="exActiveBox" class="ex-active-box">
-                <span class="ex-corner tl"></span>
-                <span class="ex-corner tr"></span>
-                <span class="ex-corner bl"></span>
-                <span class="ex-corner br"></span>
                 <div class="ex-scan-beam-track"><div class="ex-scan-beam"></div></div>
                 <span class="ex-active-badge"></span>
             </div>
@@ -3018,7 +3223,7 @@ function renderExtractPageBoxes({ doneBoxes = [], pendingBoxes = [], activeBox =
     const dom = ensureExtractPersistentLayers();
     if (!dom) return;
 
-    // Only rebuild static done/ghost boxes when they actually change (prevents 4x/question DOM churn!)
+    // Only rebuild static done/ghost boxes when they actually change
     const sig = `${doneBoxes.length}|${pendingBoxes.length}|${doneBoxes.map(d => d.qNum).join(',')}`;
     if (sig !== extractStaticSignature) {
         extractStaticSignature = sig;
@@ -3039,7 +3244,7 @@ function renderExtractPageBoxes({ doneBoxes = [], pendingBoxes = [], activeBox =
             d.style.top = `${(db.ymin / 10).toFixed(2)}%`;
             d.style.width = `${Math.max(2, (db.xmax - db.xmin) / 10).toFixed(2)}%`;
             d.style.height = `${Math.max(1.5, (db.ymax - db.ymin) / 10).toFixed(2)}%`;
-            const tag = db.isStitched ? `🔗 Q.${db.qNum}` : `✓ Q.${db.qNum}${db.chapter ? ' • ' + db.chapter : ''}`;
+            const tag = db.isStitched ? `🔗 Q.${db.qNum}` : `✓ Q.${db.qNum}`;
             d.innerHTML = `<span class="ex-done-pill">${tag}</span>`;
             frag.appendChild(d);
         }
@@ -3056,14 +3261,14 @@ function renderExtractPageBoxes({ doneBoxes = [], pendingBoxes = [], activeBox =
     }
 
     dom.boxEl.style.display = '';
-    const leftPct = Math.max(0, Math.min(98, activeBox.xmin / 10));
-    const topPct = Math.max(0, Math.min(98.5, activeBox.ymin / 10));
-    const widthPct = Math.max(2, Math.min(100 - leftPct, (activeBox.xmax - activeBox.xmin) / 10));
-    const heightPct = Math.max(1.5, Math.min(100 - topPct, (activeBox.ymax - activeBox.ymin) / 10));
+    const leftPct = Math.max(0.4, Math.min(97.5, activeBox.xmin / 10));
+    const topPct = Math.max(0.4, Math.min(98, activeBox.ymin / 10));
+    const widthPct = Math.max(2, Math.min(99.6 - leftPct, (activeBox.xmax - activeBox.xmin) / 10));
+    const heightPct = Math.max(1.5, Math.min(99.6 - topPct, (activeBox.ymax - activeBox.ymin) / 10));
     const rightStartPct = Math.min(100, leftPct + widthPct);
     const botStartPct = Math.min(100, topPct + heightPct);
 
-    // Update 4 lightweight GPU scrim panes around the active question (ZERO 9999px shadow flicker!)
+    // 4 lightweight GPU scrim panes framing the active question cleanly
     dom.scrimTop.style.opacity = '1';
     dom.scrimTop.style.left = '0%';
     dom.scrimTop.style.top = '0%';
@@ -3088,10 +3293,12 @@ function renderExtractPageBoxes({ doneBoxes = [], pendingBoxes = [], activeBox =
     dom.scrimRight.style.width = `${Math.max(0, 100 - rightStartPct).toFixed(2)}%`;
     dom.scrimRight.style.height = `${heightPct.toFixed(2)}%`;
 
-    dom.boxEl.classList.remove('is-adjusting', 'is-ocr', 'is-locked');
+    dom.boxEl.classList.remove('is-adjusting', 'is-ocr', 'is-locked', 'badge-below');
     if (activeBox.mode === 'adjusting') dom.boxEl.classList.add('is-adjusting');
     else if (activeBox.mode === 'ocr') dom.boxEl.classList.add('is-ocr');
     else if (activeBox.mode === 'locked') dom.boxEl.classList.add('is-locked');
+    // Flip badge cleanly below the box when active box is near the very top of the page
+    if (topPct < 7.5) dom.boxEl.classList.add('badge-below');
 
     dom.boxEl.style.left = `${leftPct.toFixed(2)}%`;
     dom.boxEl.style.top = `${topPct.toFixed(2)}%`;
@@ -3100,6 +3307,19 @@ function renderExtractPageBoxes({ doneBoxes = [], pendingBoxes = [], activeBox =
 
     const badgeEl = dom.boxEl.querySelector('.ex-active-badge');
     if (badgeEl) badgeEl.textContent = activeBox.label || '';
+}
+
+async function renderQuickLivePreviewPage(pdfDoc, pageNum, previewCanvas, previewCtx) {
+    try {
+        const pdfPage = await pdfDoc.getPage(pageNum);
+        const vp = pdfPage.getViewport({ scale: 1.5 });
+        previewCanvas.width = Math.max(100, Math.round(vp.width));
+        previewCanvas.height = Math.max(100, Math.round(vp.height));
+        previewCtx.fillStyle = '#FFFFFF';
+        previewCtx.fillRect(0, 0, previewCanvas.width, previewCanvas.height);
+        await pdfPage.render({ canvasContext: previewCtx, viewport: vp }).promise;
+        fitExtractPageFrame(true);
+    } catch (_) {}
 }
 
 async function startPdfExtraction() {
@@ -3124,17 +3344,16 @@ async function startPdfExtraction() {
 
     setUploadStudioExpanded(true);
     document.getElementById('extractLiveLog').innerHTML = '';
-    updateUploadProgressEverywhere(6, `Page ${startP}/${endP}`, `Initializing Local Vision Engine...`);
+    updateUploadProgressEverywhere(4, `Page ${startP}/${endP}`, `Opening Page ${startP} live...`);
     updateExtractActiveTelemetry({
-        pageNum: `${startP}/${endP}`,
-        stagePill: 'Rendering Pages...',
+        pageNum: `${startP} / ${endP}`,
+        stagePill: 'Loading Page...',
         stageTone: 'primary',
-        qBadge: 'PDF',
-        phaseText: 'Analyzing document geometry...',
-        chapterText: `Pages ${startP}–${endP}`,
+        qBadge: `P.${startP}`,
+        phaseText: `Rendering Page ${startP} live...`,
+        chapterText: `Live page-by-page extraction (Pages ${startP}–${endP})`,
         doneCount: 0
     });
-    showExtractPageSweepOverlay('Scanning Layout...');
 
     const previewCanvas = document.getElementById('pdfWorkCanvas');
     const previewCtx = previewCanvas.getContext('2d');
@@ -3144,6 +3363,10 @@ async function startPdfExtraction() {
     let prevQuestion = null;
     let extractedCount = 0;
 
+    // Live cross-page priors accumulated as pages are processed one by one
+    let liveWorksheetPrior = null;
+    const liveSubjectPriors = {};
+
     try {
         const countPages = Math.max(1, endP - startP + 1);
         const engine = window.JEELocalVisionEngine;
@@ -3152,41 +3375,12 @@ async function startPdfExtraction() {
             throw new Error('local-vision-engine.js failed to load. Check that local-vision-engine.js is in the same folder as index.html.');
         }
 
-        // =============================================================
-        // STAGE 1: Whole-Document Offline Analysis (Borders, Stitching,
-        // Answer Key Page Skipping & Local 78-Chapter Classifier)
-        // =============================================================
-        appendExtractLog(`Running Local Vision Engine v${engine.version} across Pages ${startP}–${endP}...`, 'info');
-        const docAnalysis = await engine.analyzeDocument(state.pdfDoc, {
-            paperName,
-            defaultSubject: defaultSubj,
-            startPage: startP,
-            endPage: endP,
-            renderScale: 2.2,
-            enableAnswerKeyCutoff: true,
-            enableAnswerKeyParsing: false,
-            abortSignal: state.extractionAbortController.signal,
-            onProgress: (info) => {
-                const mappedPct = Math.max(6, Math.min(48, Math.round((info.percent || 0) * 0.48)));
-                updateUploadProgressEverywhere(
-                    mappedPct,
-                    `Page ${info.pageNum || startP}/${endP}`,
-                    info.message || 'Analyzing layout locally...'
-                );
-            }
-        });
+        // Immediately display Page 1 so the user sees the PDF live within milliseconds!
+        await renderQuickLivePreviewPage(state.pdfDoc, startP, previewCanvas, previewCtx);
+        showExtractPageSweepOverlay(`Page ${startP}: Preparing Live Scan...`);
+        appendExtractLog(`⚡ Starting Live Page-by-Page Extraction (Local Engine v${engine.version}, Pages ${startP}–${endP})...`, 'info');
 
-        if (state.cancelExtractionRequested) return;
-
-        if (docAnalysis.detectedWorksheetPrior) {
-            const wp = docAnalysis.detectedWorksheetPrior;
-            appendExtractLog(`📘 Detected single-chapter worksheet prior: ${wp.subject} • ${wp.chapter}`, 'success');
-        }
-
-        // =============================================================
-        // OPTIONAL PRE-CHECK: Connect to Native Local AI for Borders &
-        // Stitching ONLY (Fails fast in ~2.5s if Termux isn't running)
-        // =============================================================
+        // Optional Native Local AI Border Server Connection (checked once up front while Page 1 is visible)
         let localAiBordersReady = false;
         const aiBatchSummary = {
             requested: Boolean(useLocalAiBorders && !manualModeForRemaining),
@@ -3206,7 +3400,7 @@ async function startPdfExtraction() {
                     waitForBootMs: 9000,
                     abortSignal: state.extractionAbortController.signal,
                     onProgress: (info) => {
-                        updateUploadProgressEverywhere(50, 'Local AI', info.message || 'Connecting to Termux AI...');
+                        updateUploadProgressEverywhere(5, 'Local AI', info.message || 'Connecting to Termux AI...');
                     }
                 });
                 localAiBordersReady = Boolean(conn && conn.ok);
@@ -3223,31 +3417,89 @@ async function startPdfExtraction() {
         }
 
         // =============================================================
-        // STAGE 2: Per-Page Border/Stitch Verification + High-Res Crop
-        // + Cross-Page Stitching + Local Chapter Assignment
+        // TRUE LIVE PAGE-BY-PAGE PIPELINE:
+        // Render Page N → Scan Page N Live → Detect & Verify Borders →
+        // Extract & OCR Each Question Live → Flip to Page N+1!
         // =============================================================
-        for (let pIdx = 0; pIdx < docAnalysis.pages.length; pIdx++) {
+        for (let pageNum = startP; pageNum <= endP; pageNum++) {
             if (state.cancelExtractionRequested) return;
-            const pageInfo = docAnalysis.pages[pIdx];
-            const pageNum = pageInfo.pageNum;
-            const canvas = pageInfo.canvas;
+            const pIdx = pageNum - startP;
+            const pageBasePct = Math.round((pIdx / countPages) * 96);
+            const pageSpanPct = 96 / countPages;
 
-            if (pageInfo.isAnswerKeyPage || !canvas) {
+            // 1. Immediately render this page live onto the preview viewport!
+            if (pageNum !== startP) {
+                await renderQuickLivePreviewPage(state.pdfDoc, pageNum, previewCanvas, previewCtx);
+            }
+            updateUploadProgressEverywhere(
+                Math.max(5, pageBasePct),
+                `Page ${pageNum}/${endP}`,
+                `Scanning Page ${pageNum} layout & ink bounds live...`
+            );
+            updateExtractActiveTelemetry({
+                pageNum: `${pageNum} / ${endP}`,
+                stagePill: 'Scanning Page...',
+                stageTone: 'primary',
+                qBadge: `P.${pageNum}`,
+                phaseText: `Analyzing Page ${pageNum} geometry...`,
+                chapterText: 'Detecting columns, headers & question anchors',
+                doneCount: extractedCount
+            });
+            showExtractPageSweepOverlay(`Page ${pageNum}: Scanning Layout...`);
+
+            // 2. Analyze ONLY this single page live right now!
+            const pageAnalysis = await engine.analyzeDocument(state.pdfDoc, {
+                paperName,
+                defaultSubject: defaultSubj,
+                startPage: pageNum,
+                endPage: pageNum,
+                renderScale: 2.2,
+                enableAnswerKeyCutoff: true,
+                enableAnswerKeyParsing: false,
+                abortSignal: state.extractionAbortController.signal,
+                onProgress: (info) => {
+                    const subPct = Math.max(5, Math.min(98, Math.round(pageBasePct + ((info.percent || 0) / 100) * (pageSpanPct * 0.25))));
+                    updateUploadProgressEverywhere(
+                        subPct,
+                        `Page ${pageNum}/${endP}`,
+                        info.message || `Analyzing Page ${pageNum} locally...`
+                    );
+                }
+            });
+
+            if (state.cancelExtractionRequested) return;
+
+            if (pageAnalysis.detectedWorksheetPrior && !liveWorksheetPrior) {
+                liveWorksheetPrior = pageAnalysis.detectedWorksheetPrior;
+                appendExtractLog(`📘 Detected worksheet prior: ${liveWorksheetPrior.subject} • ${liveWorksheetPrior.chapter}`, 'success');
+            }
+            if (pageAnalysis.subjectPriors) {
+                Object.assign(liveSubjectPriors, pageAnalysis.subjectPriors);
+            }
+
+            const pageInfo = (pageAnalysis.pages || [])[0];
+            if (!pageInfo || pageInfo.isAnswerKeyPage || !pageInfo.canvas) {
                 appendExtractLog(`Page ${pageNum}: Skipped Answer Key / Solutions page`, 'stitch');
+                updateExtractActiveTelemetry({
+                    pageNum: `${pageNum} / ${endP}`,
+                    stagePill: 'Answer Key • Skipped',
+                    stageTone: 'warn',
+                    phaseText: `Skipped Answer Key / Solutions page`,
+                    chapterText: `Advancing to next page...`,
+                    doneCount: extractedCount
+                });
+                if (isExtractVisualPacingEnabled()) {
+                    await abortablePacingSleep(450, state.extractionAbortController.signal);
+                }
                 continue;
             }
 
+            const canvas = pageInfo.canvas;
             pageCanvasMap.set(pageNum, canvas);
             previewCanvas.width = canvas.width;
             previewCanvas.height = canvas.height;
             previewCtx.drawImage(canvas, 0, 0);
-            fitExtractPageFrame();
-            updateExtractActiveTelemetry({
-                pageNum: `${pageNum} / ${endP}`,
-                stagePill: 'Inspecting Page...',
-                stageTone: 'primary'
-            });
-            showExtractPageSweepOverlay(`Page ${pageNum}: Detecting Borders...`);
+            fitExtractPageFrame(true);
 
             const localCandidates = (pageInfo.blocks || []).map(b => ({
                 ...b,
@@ -3257,7 +3509,7 @@ async function startPdfExtraction() {
 
             const isTwoCol = localCandidates.some(b => b.xmin > 400);
             const skewNote = pageInfo.skewAngle ? ` (auto-deskewed ${pageInfo.skewAngle}°)` : '';
-            appendExtractLog(`Page ${pageNum}: Local Engine found ${localCandidates.length} ${isTwoCol ? '2-Col' : '1-Col'} regions${skewNote}`, 'info');
+            appendExtractLog(`Page ${pageNum}: Found ${localCandidates.length} ${isTwoCol ? '2-Col' : '1-Col'} question regions${skewNote}`, 'info');
 
             let blocks = localCandidates;
             let usedManualThisPage = false;
@@ -3292,12 +3544,17 @@ async function startPdfExtraction() {
                     pageDone = true;
                 } else if (localAiBordersReady && aiBorders && localCandidates.length > 0) {
                     try {
-                        const verifyPct = 52 + Math.round((pIdx / countPages) * 44);
+                        const verifyPct = Math.round(pageBasePct + pageSpanPct * 0.30);
                         updateUploadProgressEverywhere(
                             verifyPct,
                             `AI P.${pageNum}/${endP}`,
                             `Local AI (${aiBatchSummary.modelName}) inspecting Page ${pageNum} borders...`
                         );
+                        updateExtractActiveTelemetry({
+                            stagePill: 'Local AI Check...',
+                            stageTone: 'primary',
+                            phaseText: `Verifying Page ${pageNum} borders with ${aiBatchSummary.modelName}...`
+                        });
                         const vRes = await aiBorders.verifyPageBorders(
                             canvas,
                             pageNum,
@@ -3329,6 +3586,11 @@ async function startPdfExtraction() {
                     try {
                         const base64Jpeg = canvas.toDataURL('image/jpeg', 0.84).split(',')[1];
                         appendExtractLog(`Page ${pageNum}: Verifying ${localCandidates.length} borders with ${getSelectedModel()}...`, 'info');
+                        updateExtractActiveTelemetry({
+                            stagePill: 'Gemini Check...',
+                            stageTone: 'primary',
+                            phaseText: `Verifying Page ${pageNum} borders with ${getSelectedModel()}...`
+                        });
                         const verified = await verifyAndRefineBordersWithGemini(
                             base64Jpeg,
                             pageNum,
@@ -3399,12 +3661,13 @@ async function startPdfExtraction() {
                 }
             }
 
+            // 3. Extract each question on THIS page live, one at a time!
             const pageDoneBoxes = [];
             for (let i = 0; i < blocks.length; i++) {
                 if (state.cancelExtractionRequested) return;
                 const qVisualStartedAt = performance.now();
                 const b = blocks[i];
-                const slicePct = 52 + Math.round(((pIdx + (i + 1) / Math.max(1, blocks.length)) / countPages) * 46);
+                const slicePct = Math.max(6, Math.min(99, Math.round(pageBasePct + pageSpanPct * (0.28 + 0.72 * ((i + 1) / Math.max(1, blocks.length))))));
 
                 const xmin = Math.max(0, Math.min(950, Number(b.xmin) ?? 12));
                 const xmax = Math.max(xmin + 80, Math.min(1000, Number(b.xmax) ?? 988));
@@ -3419,86 +3682,66 @@ async function startPdfExtraction() {
                 const previewQNum = String(b.questionNumber || '').replace(/[^0-9a-zA-Z]/g, '') || `${extractedCount + 1}`;
                 const displayQTag = previewQNum.toUpperCase() === 'CONT' ? 'CONT' : `Q.${previewQNum}`;
 
-                // -------------------------------------------------------------
-                // VISUAL STEP 1: Real-Time Animated Border Detection & Snapping
-                // -------------------------------------------------------------
+                // LIVE STEP 1: Smooth Border Detection & Tight Whitespace Snap
                 const coarseBox = {
-                    xmin: Math.max(2, xmin - 16),
-                    xmax: Math.min(998, xmax + 16),
-                    ymin: Math.max(2, ymin - 28),
-                    ymax: Math.min(998, ymax + 30)
-                };
-                const midSnappedBox = {
-                    xmin: Math.max(2, xmin - 10),
-                    xmax: Math.min(998, xmax + 10),
-                    ymin,
-                    ymax
+                    xmin: Math.max(4, xmin - 12),
+                    xmax: Math.min(996, xmax + 12),
+                    ymin: Math.max(4, ymin - 20),
+                    ymax: Math.min(996, ymax + 22)
                 };
                 const finalBox = { xmin, xmax, ymin, ymax };
 
-                // Keep persistent #exActiveBox & 4 scrim curtains mounted so it glides smoothly with zero flash!
                 renderExtractPageBoxes({
                     doneBoxes: pageDoneBoxes,
                     pendingBoxes,
-                    activeBox: { ...coarseBox, mode: 'adjusting', label: `${displayQTag} • Detecting Borders...` }
+                    activeBox: { ...coarseBox, mode: 'adjusting', label: `${displayQTag} • Aligning Borders` }
                 });
                 updateUploadProgressEverywhere(
                     slicePct,
                     `Page ${pageNum}/${endP}`,
-                    `${displayQTag}: Detecting & adjusting 2D borders...`
+                    `${displayQTag}: Detecting & snapping borders...`
                 );
                 updateExtractActiveTelemetry({
                     pageNum: `${pageNum} / ${endP}`,
-                    stagePill: '1/3 Adjusting Borders',
+                    stagePill: '1/3 Aligning Borders',
                     stageTone: 'warn',
                     qBadge: displayQTag,
                     phaseText: 'Locating ink bounds & diagrams...',
                     chapterText: 'Snapping top/bottom edges to whitespace',
                     doneCount: extractedCount
                 });
-                appendExtractLog(`📐 ${displayQTag} (Page ${pageNum}): Detecting & adjusting borders...`, 'info');
+                appendExtractLog(`📐 ${displayQTag} (Page ${pageNum}): Aligning borders...`, 'info');
 
                 if (isExtractVisualPacingEnabled()) {
-                    await abortablePacingSleep(380, state.extractionAbortController.signal);
-                    // Animate vertical edges snapping cleanly to whitespace valleys
-                    renderExtractPageBoxes({
-                        doneBoxes: pageDoneBoxes,
-                        pendingBoxes,
-                        activeBox: { ...midSnappedBox, mode: 'adjusting', label: `${displayQTag} • Snapping Top & Bottom Edges...` }
-                    });
-                    updateExtractActiveTelemetry({ phaseText: 'Snapping top & bottom whitespace valleys...' });
                     await abortablePacingSleep(420, state.extractionAbortController.signal);
                 }
 
-                // Animate final tight 2D lock on all 4 sides
                 renderExtractPageBoxes({
                     doneBoxes: pageDoneBoxes,
                     pendingBoxes,
-                    activeBox: { ...finalBox, mode: 'adjusting', label: `${displayQTag} • Locking Tight Borders ✓` }
+                    activeBox: { ...finalBox, mode: 'adjusting', label: `${displayQTag} • Borders Locked` }
                 });
                 if (isExtractVisualPacingEnabled()) {
-                    await abortablePacingSleep(300, state.extractionAbortController.signal);
+                    await abortablePacingSleep(360, state.extractionAbortController.signal);
                 }
 
-                // -------------------------------------------------------------
-                // VISUAL STEP 2: One-Question-At-A-Time Crop + OCR Laser Scan
-                // -------------------------------------------------------------
+                // LIVE STEP 2: Crop + Real-Time OCR Scan
                 const cropRes = crop2DSliceFromPage(canvas, xmin, xmax, ymin, ymax, padTop, padBottom);
                 renderExtractPageBoxes({
                     doneBoxes: pageDoneBoxes,
                     pendingBoxes,
-                    activeBox: { ...finalBox, mode: 'ocr', label: `${displayQTag} • Running OCR & Reading Text...` }
+                    activeBox: { ...finalBox, mode: 'ocr', label: `${displayQTag} • Reading OCR` }
                 });
                 updateUploadProgressEverywhere(
                     slicePct,
                     `Page ${pageNum}/${endP}`,
-                    `${displayQTag}: Running OCR & extracting math text...`
+                    `${displayQTag}: Running OCR & matching chapter...`
                 );
                 updateExtractActiveTelemetry({
-                    stagePill: '2/3 Running OCR',
+                    stagePill: '2/3 Reading OCR',
                     stageTone: 'primary',
-                    phaseText: 'Reading text & mathematical symbols...',
-                    chapterText: 'One-by-one OCR & syllabus matching'
+                    phaseText: 'Extracting question text & math symbols...',
+                    chapterText: 'Matching against 78 JEE chapters'
                 });
 
                 const ocrStepStart = performance.now();
@@ -3506,7 +3749,7 @@ async function startPdfExtraction() {
                 if (fullQuestionText.length < 18) {
                     const tessText = await recognizeImageTextWithTesseract(cropRes.canvas);
                     if (tessText.length > fullQuestionText.length) fullQuestionText = tessText;
-                    appendExtractLog(`🔤 ${displayQTag}: Tesseract OCR extracted ${fullQuestionText.length} chars`, 'info');
+                    appendExtractLog(`🔤 ${displayQTag}: Tesseract OCR read ${fullQuestionText.length} chars`, 'info');
                 } else {
                     appendExtractLog(`🔤 ${displayQTag}: Vector OCR read ${fullQuestionText.length} chars`, 'info');
                 }
@@ -3514,21 +3757,21 @@ async function startPdfExtraction() {
 
                 if (isExtractVisualPacingEnabled()) {
                     const ocrSpent = performance.now() - ocrStepStart;
-                    const ocrPad = Math.max(0, 1050 - ocrSpent);
+                    const ocrPad = Math.max(0, 920 - ocrSpent);
                     if (ocrPad > 0) await abortablePacingSleep(ocrPad, state.extractionAbortController.signal);
                 }
 
                 const passagePrefix = b.sharedPassage?.text ? `${b.sharedPassage.text} ` : '';
                 const combinedOcrText = cleanQuestionTextOnly(`${passagePrefix}${fullQuestionText} ${b.firstLineSnippet || ''} ${b.lastLineSnippet || ''}`);
 
-                // 100% LOCAL CHAPTER CLASSIFICATION (never overridden by VLM!)
+                // 100% LOCAL CHAPTER CLASSIFICATION
                 let finalSubject = ['Physics', 'Chemistry', 'Mathematics'].includes(b.subject) ? b.subject : null;
                 let finalChapter = b.chapter || null;
                 let chapterConfidence = typeof b.chapterConfidence === 'number' ? b.chapterConfidence : 0.78;
                 const lockedSubj = b.subjectOverride || finalSubject || (defaultSubj !== 'AUTO' ? defaultSubj : null);
-                const subjectPrior = (lockedSubj && docAnalysis.subjectPriors?.[lockedSubj])
-                    ? docAnalysis.subjectPriors[lockedSubj]
-                    : (docAnalysis.detectedWorksheetPrior || null);
+                const subjectPrior = (lockedSubj && liveSubjectPriors[lockedSubj])
+                    ? liveSubjectPriors[lockedSubj]
+                    : (liveWorksheetPrior || null);
 
                 if (!usedManualThisPage && (!finalSubject || !finalChapter || usedAiBorderAdjustment || (chapterConfidence < 0.58 && fullQuestionText.length >= 22))) {
                     const reClass = engine.classifyQuestion(combinedOcrText, {
@@ -3548,16 +3791,19 @@ async function startPdfExtraction() {
                     finalChapter = finalChapter || inferred.chapter;
                 }
 
+                // Cross-page stitch check (works live across consecutive single-page analyses!)
                 const rawQNum = String(b.questionNumber || '').replace(/[^0-9a-zA-Z]/g, '') || `${extractedCount + 1}`;
                 const isEngineStitch = Boolean(b.stitchWithPrev || b.isContinuationFromPrev);
                 const isExplicitCont = rawQNum.toUpperCase() === 'CONT' || b.isContinuationFromPrevPage === true;
-                const startsWithNewNum = /^\s*(?:Q\.?\s*)?\d+/i.test(String(b.firstLineSnippet || '')) && !isExplicitCont && !isEngineStitch;
+                const leadText = String(b.firstLineSnippet || combinedOcrText || '').trim();
+                const startsWithNewNum = /^\s*(?:Q(?:uestion)?\.?\s*|Prob(?:lem)?\.?\s*)?\d{1,3}\s*[\.\)\:\-\[]/i.test(leadText) && !isExplicitCont && !isEngineStitch;
+                const looksLikeOptionOrCont = /^\s*(?:\([A-Da-d1-4]\)|[A-D]\)|where\b|hence\b|find\b|then\b)/i.test(leadText);
 
                 let isStitch = prevQuestion && (
                     b.manualStitchWithPrev === true ||
                     isEngineStitch ||
                     (i === 0 && prevQuestion.page === pageNum - 1 && !startsWithNewNum &&
-                        (isExplicitCont || prevQuestion.continuesToNextPage === true))
+                        (isExplicitCont || prevQuestion.continuesToNextPage === true || looksLikeOptionOrCont))
                 );
 
                 // Optional Native Local AI visual stitch verification for ambiguous top-of-page slices
@@ -3591,7 +3837,6 @@ async function startPdfExtraction() {
                     if (prevQuestion._reviewMeta) {
                         prevQuestion._reviewMeta.borderNote = `Stitched Pages ${prevQuestion.page}→${pageNum}${reasonTag}`;
                     }
-                    // Re-classify locally now that full stitched question text is available!
                     const postStitchClass = engine.classifyQuestion(prevQuestion.ocrText, {
                         paperName,
                         pageHeader: b.pageHeader || '',
@@ -3608,7 +3853,7 @@ async function startPdfExtraction() {
                     renderExtractPageBoxes({
                         doneBoxes: pageDoneBoxes,
                         pendingBoxes,
-                        activeBox: { ...finalBox, mode: 'locked', label: `🔗 Stitched into Q.${prevQuestion.questionNumber}` }
+                        activeBox: { ...finalBox, mode: 'locked', label: `🔗 Stitched → Q.${prevQuestion.questionNumber}` }
                     });
                     updateExtractActiveTelemetry({
                         stagePill: '3/3 Stitched ✓',
@@ -3618,7 +3863,7 @@ async function startPdfExtraction() {
                         doneCount: extractedCount
                     });
                     if (isExtractVisualPacingEnabled()) {
-                        const remMs = Math.max(0, 3000 - (performance.now() - qVisualStartedAt));
+                        const remMs = Math.max(0, 2600 - (performance.now() - qVisualStartedAt));
                         if (remMs > 0) await abortablePacingSleep(remMs, state.extractionAbortController.signal);
                     }
                     pageDoneBoxes.push({ xmin, xmax, ymin, ymax, qNum: prevQuestion.questionNumber, isStitched: true });
@@ -3676,7 +3921,7 @@ async function startPdfExtraction() {
                     activeBox: { ...finalBox, mode: 'locked', label: `✓ Q.${qObj.questionNumber} • ${qObj.chapter}` }
                 });
                 updateExtractActiveTelemetry({
-                    stagePill: '3/3 Locked ✓',
+                    stagePill: '3/3 Saved ✓',
                     stageTone: 'success',
                     qBadge: `Q.${qObj.questionNumber}`,
                     phaseText: `${qObj.subject} (${confPctLog}% match)`,
@@ -3686,7 +3931,7 @@ async function startPdfExtraction() {
                 appendExtractLog(`✓ Q.${qObj.questionNumber} (${qObj.subject} • ${qObj.chapter} • ${confPctLog}%)`, 'success');
 
                 if (isExtractVisualPacingEnabled()) {
-                    const remMs = Math.max(0, 3000 - (performance.now() - qVisualStartedAt));
+                    const remMs = Math.max(0, 2600 - (performance.now() - qVisualStartedAt));
                     if (remMs > 0) await abortablePacingSleep(remMs, state.extractionAbortController.signal);
                 }
                 pageDoneBoxes.push({ xmin, xmax, ymin, ymax, qNum: qObj.questionNumber, chapter: qObj.chapter, isStitched: false });
@@ -3696,7 +3941,7 @@ async function startPdfExtraction() {
         if (state.cancelExtractionRequested) return;
 
         // =============================================================
-        // STAGE 3: Optional Post-Extraction Border & Chapter Review Studio
+        // POST-EXTRACTION REVIEW STUDIO (Optional)
         // =============================================================
         let finalBatchToSave = batchQuestions;
         if (reviewBeforeSaving && batchQuestions.length > 0) {
@@ -3743,7 +3988,6 @@ async function startPdfExtraction() {
         toast('Extraction error: ' + err.message, 'warn');
     }
 }
-
 const normalizeForSearch = (str) => String(str || '').toLowerCase().replace(/[^\w\s.]/g, ' ').replace(/\s+/g, ' ').trim();
 
 function getFiltered() {
@@ -8103,8 +8347,53 @@ window.app = {
     runBackgroundAnswerAndHintGenerator,
 
     setMaterialTheme(hexColor) {
-        applyMaterialThemeFromSeed(hexColor, getThemeMode());
-        toast(`Applied Material 3 Expressive Theme (${hexColor})`, 'success');
+        applyMaterialThemeFromSeed(hexColor, getThemeMode(), true);
+        toast(`Applied Material 3 Expressive Theme (${hexColor.toUpperCase()})`, 'success');
+    },
+    openCustomColorPicker() {
+        closeCustomDropdown();
+        initCustomColorPickerEvents();
+        const currHex = localStorage.getItem('jee_m3_seed_color') || '#7c3aed';
+        cpState.origHex = currHex;
+        cpState.hex = currHex;
+        const rgb = hexToRgbObj(currHex);
+        const hsv = rgbToHsv(rgb.r, rgb.g, rgb.b);
+        cpState.h = hsv.h;
+        cpState.s = hsv.s;
+        cpState.v = Math.max(0.15, hsv.v);
+        animateModalOpen('customColorPickerModal');
+        requestAnimationFrame(() => cpDrawCanvasesAndUI(false));
+    },
+    cpPickPreset(hex) {
+        const rgb = hexToRgbObj(hex);
+        const hsv = rgbToHsv(rgb.r, rgb.g, rgb.b);
+        cpState.h = hsv.h;
+        cpState.s = hsv.s;
+        cpState.v = hsv.v;
+        cpDrawCanvasesAndUI(true);
+    },
+    cpOnHexInput(rawVal) {
+        let v = String(rawVal || '').trim();
+        if (v && !v.startsWith('#')) v = '#' + v;
+        if (/^#[0-9A-Fa-f]{6}$/.test(v)) {
+            const rgb = hexToRgbObj(v);
+            const hsv = rgbToHsv(rgb.r, rgb.g, rgb.b);
+            cpState.h = hsv.h;
+            cpState.s = hsv.s;
+            cpState.v = hsv.v;
+            cpDrawCanvasesAndUI(true);
+        }
+    },
+    closeCustomColorPicker(apply = false) {
+        const modal = document.getElementById('customColorPickerModal');
+        if (!modal || modal.classList.contains('hidden')) return;
+        if (apply) {
+            applyMaterialThemeFromSeed(cpState.hex, getThemeMode(), true);
+            toast(`Applied Custom Theme (${cpState.hex.toUpperCase()})`, 'success');
+        } else {
+            applyMaterialThemeFromSeed(cpState.origHex, getThemeMode(), false);
+        }
+        animateModalClose('customColorPickerModal');
     },
     setThemeMode(mode) {
         applyMaterialThemeFromSeed(localStorage.getItem('jee_m3_seed_color') || '#7c3aed', mode);
@@ -9047,6 +9336,7 @@ window.addEventListener('keydown', (e) => {
 
     if (e.key === 'Escape') {
         window.app.closeCustomDropdown();
+        window.app.closeCustomColorPicker(false);
         window.app.closeClearConfirmModal();
         window.app.closeMockTestSetupModal();
         window.app.closeMockTestSummaryModal();
